@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# perform comparisons of columns 2-4 of tloss_1d.nm
+for i in 2 3 4 ; do
+	badcols=$(./coldiff Modess/tloss_1d.nm results/Modess/tloss_1d.nm $i 0.999 | wc -l)
+	if [ $badcols -ne 0 ] ; then
+		echo "Column $i of Modess test FAILED"
+		exit 1
+	else
+		echo "Column $i of Modess test OK"
+	fi
+done
+

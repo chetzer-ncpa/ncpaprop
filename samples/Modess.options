@@ -1,0 +1,6 @@
+skiplines    : 0
+atmosfile : NCPA_canonical_profile_zuvwtdp.dat
+atmosfileorder : zuvwtdp
+azimuth : 90
+freq : 0.1
+

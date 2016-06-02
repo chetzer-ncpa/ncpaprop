@@ -1,0 +1,13 @@
+skiplines    : 0
+maxheight_km : 150
+Nz_grid : 20000
+maxrange_km : 1000
+Nrng_steps 	: 1000
+sourceheight_km : 0.0
+ground_impedance_model : rigid
+Lamb_wave_BC : 0
+
+
+
+
+

@@ -1,0 +1,117 @@
+
+# a script running ModessRD
+
+>> ../bin/ModessRD --atmosfile g2sgcp2011012606L.jordan.env --atmosfileorder zuvwtdp --azimuth 90 --freq 0.1 --Nz_grid 20000 --maxheight_km 160 --write_2D_TLoss --use_profiles_at_steps_km 100 --maxrange_km 1000
+
+
+if 
+    test $1 = plot_1d_TL
+then
+  ## plot from script
+  #gnuplot -persist "gnuplot_Modess_output.p" -e "set title '1D TL'; replot"
+  
+  gnuplot -persist \
+    -e "plot './tloss_rd_1d.nm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 1 title 'lossy';" \
+    -e "replot './tloss_rd_1d.lossless.nm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 7 title 'lossless';" \
+    -e "set grid; show grid; set xlabel 'Range [km]'; set ylabel 'Height [km]';" \
+    -e "set title '1D transmission loss; freq = $2 Hz'; replot"
+  
+  echo $1 $2
+fi
+
+
+if 
+    test $1 = plot_phasespeeds
+then
+
+  gnuplot -persist \
+    -e "plot './phasespeeds.dat' using 1:2 with lines lt 1 title 'phase speeds';" \
+    -e "set grid; show grid; set xlabel 'Mode #'; set ylabel 'm/s';" \
+    -e "set title 'Phase speeds; freq = $2 Hz'; replot"
+  
+  echo $1 $2
+fi
+
+if 
+    test $1 = plot_winds
+then
+
+  gnuplot -persist \
+    -e "plot './atm_profile.dat' using (1000*(\$2)):1 with lines lt 1 title 'u';" \
+    -e "replot './atm_profile.dat' using (1000*(\$3)):1 with lines lt 3 title 'v';" \
+    -e "set grid; show grid; set xlabel 'm/s'; set ylabel 'Height [km]';" \
+    -e "set title 'Winds'; replot"
+  
+  echo $1 $2
+fi
+
+if 
+    test $1 = plot_T
+then
+
+  gnuplot -persist \
+    -e "plot './atm_profile.dat' using 5:1 with lines lt 1 title 'T';" \
+    -e "set grid; show grid; set xlabel 'degrees K'; set ylabel 'Height [km]';" \
+    -e "set title 'Temperature'; replot"
+  
+  echo $1 $2
+fi
+
+if 
+    test $1 = plot_density
+then
+
+  gnuplot -persist \
+    -e "plot './atm_profile.dat' using 6:1 with lines lt 1 title 'rho';" \
+    -e "set grid; show grid; set xlabel 'g/cm^3'; set ylabel 'Height [km]';" \
+    -e "set title 'Density'; replot"
+  
+  echo $1 $2
+fi
+
+if 
+    test $1 = plot_P
+then
+
+  gnuplot -persist \
+    -e "plot './atm_profile.dat' using 7:1 with lines lt 1 title 'p';" \
+    -e "set grid; show grid; set xlabel 'hPa'; set ylabel 'Height [km]';" \
+    -e "set title 'Atmospheric Pressure'; replot"
+  
+  echo $1 $2
+fi
+
+if 
+  test $1 = plot_ceff
+then
+  if test $2
+  then    
+    gnuplot -persist \
+      -e "Pi = 3.141592653589793;" \
+      -e "filename = './atm_profile.dat';" \
+      -e "plot './atm_profile.dat' using (\$8):1 with lines lt 3 title 'c';" \
+      -e "replot filename using ((\$8) + (1000*((\$2)*(sin($2*Pi/180))+ (\$3)*cos($2*Pi/180)))):1 with lines lt 1 title 'c_eff calculated from u,v';" \
+      -e "replot filename using (\$9):1 with lines lt 2 title 'c_eff from file atm_profile.dat';" \
+      -e "set grid; show grid; set xlabel 'm/s'; set ylabel 'Height [km]';" \
+      -e "set title 'Sound speed and Effective sound speed; azimuth = $2 deg'; replot"
+  else
+    echo azimuth must be specified as the second argument - in degrees
+  fi
+fi
+
+if 
+  test $1 = plot_modes
+then
+  if test $2
+  then    
+    gnuplot -persist \
+      -e "max(a,b) = (a<b) ? a : b" \
+      -e "filename = './mode_$2.dat';" \
+      -e "plot filename using (\$2):1 with lines lt 3 title 'mode $2';" \
+      -e "set grid; show grid; set xlabel 'Mode amplitude'; set ylabel 'Height [km]';" \
+      -e "set title 'Mode # $2'; replot"
+  else
+    echo azimuth must be specified as the second argument - in degrees
+  fi
+fi
+

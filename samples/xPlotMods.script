@@ -1,0 +1,579 @@
+
+# a script to run Modess and various gnuplot plotting commands
+
+## note that there should not be any blank spaces after '\' in the '-e ..' command or gnuplot will fail
+
+#../bin/Modess --atmosfile NCPA_canonical_profile_G2S_units.dat --atmosfileorder zuvwtdp --azimuth 90 --freq 0.1 
+
+#../bin/Modess --atmosfile model_profile_Claus_G2S_units_kmpersec_7_cols.dat --atmosfileorder zuvwtdp --azimuth 90 --freq 0.1 --write_2D_TLoss --sourceheight_km 1
+
+#../bin/Modess --atmosfile profileJordan_winds_kmps.dat --atmosfileorder zuvwtdp --azimuth 90 --freq 0.5
+
+#../bin/Modess --atmosfile NCPA_canonical_profile_G2S_units.dat --atmosfileorder zuvwtdp --azimuth 90 --freq 0.5 --receiverheight_km 0
+
+
+
+# plot 1D TL to the screen
+if 
+    test $1 = plot1dtl2
+then
+  ## plot from script
+  #gnuplot -persist "gnuplot_Modess_output.p" -e "set title '1D TL'; replot"
+  gnuplot -persist \
+    -e "set grid; show grid; set xlabel 'Range [km]'; set ylabel 'TL [dB]';" \
+    -e "set title 'ModessRD1WCM: 1D transmission loss; freq = $2 Hz';" \
+    -e "plot './tloss_rd_1d.lossless.nm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 3 title 'lossless', './tloss_rd_1d.nm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 1 title 'lossy';"
+   
+  echo $1 $2
+fi
+
+
+# plot 1D TL to .png
+## use this to save to ps; then you can convert with: convert output.ps output.png
+#      -e "set term post enh color solid 16;" \
+#      -e "set output 'output.ps';" \
+     
+if 
+    test $1 = plot1dtl_png
+then
+  gnuplot -persist \
+    -e "set term png size 900,500;" \
+    -e "set output 'TL1D_RD2WCMcan0p1Hz.png';" \
+    -e "set grid; show grid; set xlabel 'Range [km]'; set ylabel 'TL [dB]';" \
+    -e "set title 'ModessRD2WCM: 1D transmission loss; freq = $2 Hz';" \
+    -e "plot './tloss_rd2wcm_1d.lossless.nm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 3 title 'lossless', './tloss_rd2wcm_1d.nm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 1 title 'lossy';"
+   
+  echo $1 $2
+fi
+
+
+# plot 2D TL to .png
+if 
+    test $1 = plot2dtl_png
+then 
+  gnuplot -persist \
+    -e "set term png size 900,500;" \
+    -e "set output 'TL2D_RD2WCMcan0p1Hz.png';" \
+    -e "set pm3d map;" \
+    -e "set cbrange [-140:-100];" \
+    -e "set xlabel 'Range [km]'; set ylabel 'Height [km]';" \
+    -e "set title 'ModessRD2WCM: 2D transmission loss [dB] (no attenuation case); freq = $2 Hz';" \
+    -e "set yrange [0:150];" \
+    -e "splot './tloss_rd2wcm_2d.lossless.nm' using 1:2:(20*log10(sqrt(\$3**2 + \$4**2)));"
+  echo $1 $2
+fi
+            
+
+# plot 2D TL to the screen
+if 
+    test $1 = plot2dtl
+then 
+  gnuplot -persist \
+    -e "set pm3d map;" \
+    -e "set cbrange [-140:-100];" \
+    -e "set xlabel 'Range [km]'; set ylabel 'Height [km]';" \
+    -e "set title 'ModessRD1WCM: 2D transmission loss [dB]; freq = $2 Hz';" \
+    -e "splot './tloss_rd_2d.nm' using 1:2:(20*log10(sqrt(\$3**2 + \$4**2)));"
+  echo $1 $2
+fi
+
+
+
+
+if 
+    test $1 = Nby2D
+then 
+  gnuplot -persist \
+    -e "set pm3d map;" \
+    -e "set cbrange [-140:-100];" \
+    -e "set palette rgb  7, 5,15;" \
+    -e "set size square;" \
+    -e "splot './Nby2D_tloss_1d.nm' using (\$1*(sin(\$2*pi/180))):(\$1*(cos(\$2*pi/180))):(10*log10(\$3**2 + \$4**2)) title '';" \
+    -e "set xlabel 'km'; set ylabel 'km';" \
+    -e "set title 'Transmission loss'; replot;"
+  echo $1 $2
+fi
+
+if 
+    test $1 = WNby2D
+then 
+  gnuplot -persist \
+    -e "set pm3d map;" \
+    -e "set cbrange [-140:-100];" \
+    -e "set palette rgb  7, 5,15;" \
+    -e "set size square;" \
+    -e "splot './Nby2D_wtloss_1d.nm' using (\$1*(sin(\$2*pi/180))):(\$1*(cos(\$2*pi/180))):(10*log10(\$3**2 + \$4**2)) title '';" \
+    -e "set xlabel 'km'; set ylabel 'km';" \
+    -e "set title 'Transmission loss'; replot;"
+  echo $1 $2
+fi
+
+
+if 
+    test $1 = plot_phasespeeds
+then
+  gnuplot -persist \
+    -e "set grid; show grid; set xlabel 'Mode #'; set ylabel 'm/s';" \
+    -e "set title 'Phase speeds; freq = $2 Hz';" \
+    -e "plot './phasespeeds.nm' using 1:2 with lines lt 1 title 'phase speeds';"
+  echo $1 $2
+fi
+
+if 
+    test $1 = plot_phspatt
+then
+  gnuplot -persist \
+    -e "set style data dots;" \
+    -e "unset grid;" \
+    -e "unset key;" \
+    -e "set logscale y;" \
+    -e "set format y '10^{%T}';" \
+    -e "set grid; show grid; set xlabel 'Phase speed [m/s]'; set ylabel 'Att. Coeff. [1/m]';" \
+    -e "set title 'Horizontal Wave Numbers';" \
+    -e "plot './phasespeeds.nm' using 2:3 with points pointtype 6 pointsize 1 lw 4 title 'phase speeds';" \
+    -e "unset logscale;"
+  echo $1 $2
+fi
+
+if 
+    test $1 = plot_winds
+then
+
+  gnuplot -persist \
+    -e "plot './atm_profile.nm' using (1*(\$2)):1 with lines lt 1 title 'u';" \
+    -e "replot './atm_profile.nm' using (1*(\$3)):1 with lines lt 3 title 'v';" \
+    -e "set grid; show grid; set xlabel 'm/s'; set ylabel 'Height [km]';" \
+    -e "set title 'Winds'; replot"
+  
+  echo $1 $2
+fi
+
+if 
+    test $1 = plot_T
+then
+
+  gnuplot -persist \
+    -e "plot './atm_profile.dat' using 5:1 with lines lt 1 title 'T';" \
+    -e "set grid; show grid; set xlabel 'degrees K'; set ylabel 'Height [km]';" \
+    -e "set title 'Temperature'; replot"
+  
+  echo $1 $2
+fi
+
+if 
+    test $1 = plot_density
+then
+
+  gnuplot -persist \
+    -e "plot './atm_profile.dat' using 6:1 with lines lt 1 title 'rho';" \
+    -e "set grid; show grid; set xlabel 'g/cm^3'; set ylabel 'Height [km]';" \
+    -e "set title 'Density'; replot"
+  
+  echo $1 $2
+fi
+
+if 
+    test $1 = plot_P
+then
+
+  gnuplot -persist \
+    -e "plot './atm_profile.dat' using 7:1 with lines lt 1 title 'p';" \
+    -e "set grid; show grid; set xlabel 'hPa'; set ylabel 'Height [km]';" \
+    -e "set title 'Atmospheric Pressure'; replot"
+  
+  echo $1 $2
+fi
+
+# plot effective sound speed in a certain aximuth direction
+if 
+  test $1 = plot_ceff
+then
+  if test $2
+  then    
+    gnuplot -persist \
+      -e "Pi = 3.141592653589793;" \
+      -e "filename = './atm_profile.nm';" \
+      -e "set grid; show grid; set xlabel 'm/s'; set ylabel 'Height [km]';" \
+      -e "set title 'Sound speed and Effective sound speed; azimuth = $2 deg'" \
+      -e "plot './atm_profile.nm' using (\$8):1 with lines lt 3 title 'c';" \
+      -e "replot filename using ((\$8) + (1*((\$2)*(sin($2*Pi/180))+ (\$3)*cos($2*Pi/180)))):1 with lines lt 1 title 'c_eff calculated from u,v';" \
+      -e "replot filename using (\$9):1 with lines lt 2 title 'c_eff from file atm_profile.nm';"
+  else
+    echo azimuth must be specified as the second argument - in degrees
+  fi
+fi
+
+
+# plot ceff saved in atm_profile.bbnm (from broadband code)
+if 
+  test $1 = pceffbb
+then
+  if test $2
+  then    
+    gnuplot -persist \
+      -e "Pi = 3.141592653589793;" \
+      -e "filename = './atm_profile.bbnm';" \
+      -e "set grid; show grid; set xlabel 'm/s'; set ylabel 'Height [km]';" \
+      -e "set title 'Sound speed and Effective sound speed; azimuth = $2 deg'" \
+      -e "plot './atm_profile.nm' using (\$8):1 with lines lt 3 title 'c';" \
+      -e "replot filename using ((\$8) + (1*((\$2)*(sin($2*Pi/180))+ (\$3)*cos($2*Pi/180)))):1 with lines lt 1 title 'c_eff calculated from u,v';" \
+      -e "replot filename using (\$9):1 with lines lt 2 title 'c_eff from file atm_profile.bbnm';"
+  else
+    echo azimuth must be specified as the second argument - in degrees
+  fi
+fi
+
+
+
+if 
+  test $1 = plot_mode
+then   
+    gnuplot -persist \
+      -e "max(a,b) = (a<b) ? a : b" \
+      -e "filename = './mode_$2.nm';" \
+      -e "set title 'Mode # $2';" \
+      -e "set grid; show grid; set xlabel 'Mode amplitude'; set ylabel 'Height [km]';" \
+      -e "plot filename using (\$2):1 with lines lt 3 title 'mode $2';"
+fi
+
+if 
+  test $1 = pc
+then
+  if test $2
+  then    
+    gnuplot -persist \
+      -e "set multiplot layout 1,2" \
+      -e "plot './atm_profile.nm' using (\$8):1 with lines lt 3 title 'c';" \
+      -e "Pi = 3.141592653589793;" \
+      -e "filename = './atm_profile.nm';" \
+      -e "plot './atm_profile.nm' using (\$8):1 with lines lt 3 title 'c';" \
+      -e "replot filename using ((\$8) + (1*((\$2)*(sin($2*Pi/180))+ (\$3)*cos($2*Pi/180)))):1 with lines lt 1 title 'c_eff calculated from u,v';" \
+      -e "replot filename using (\$9):1 with lines lt 2 title 'c_eff from file atm_profile.nm';" \
+      -e "set grid; show grid; set xlabel 'm/s'; set ylabel 'Height [km]';" \
+      -e "set title 'Sound speed and Effective sound speed; azimuth = $2 deg'; replot"
+  else
+    echo azimuth must be specified as the second argument - in degrees
+  fi
+fi
+
+
+# plot both 2D TL and ceff in the same .png figure
+# example: ./xrunMods.script cefftl2d_png 90 0.1
+if 
+  test $1 = cefftl2d_png
+then
+  if test $2
+  then 
+  if test $3 
+  then  
+    gnuplot -persist \
+      -e "Pi = 3.141592653589793;" \
+      -e "set term png size 900,500;" \
+      -e "set output 'TL2dModesscan0p1Hzsrc20km.png';" \
+      -e "unset multiplot;" \
+      -e "set multiplot" \
+      -e "set size 0.25, 1;" \
+      -e "set xtics 200 offset 0, 0.3 textcolor lt 3 font 'arial,11';" \
+      -e "set ytics 30 offset 0.5,0 textcolor lt 3 font 'arial,11'" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set grid;" \
+      -e "set title 'c_eff';" \
+      -e "set xlabel '[m/s]';" \
+      -e "set ylabel offset 3,0 'Altitude [km MSL]';" \
+      -e "show xlabel;" \
+      -e "filename = './atm_profile.nm';" \
+      -e "set yrange [0:150];" \
+      -e "plot filename using ((\$8) + (1*((\$2)*(sin($2*Pi/180))+ (\$3)*cos($2*Pi/180)))):1 with lines lt 3 title '';" \
+      -e "set size 0.9, 1.0;" \
+      -e "set origin 0.1,0;" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set pm3d map;" \
+      -e "set cbrange [-140:-90];" \
+      -e "set xtics 100 textcolor lt -1 font 'arial,11';" \
+      -e "set xtics offset 0, 0.1;" \
+      -e "unset ytics;" \
+      -e "unset grid;" \
+      -e "unset ylabel;" \
+      -e "set title '2D transmission loss [dB]; freq = $3 Hz';" \
+      -e "set xlabel 'Range [km]';" \
+      -e "splot './tloss_2d.nm' using 1:2:(20*log10(sqrt(\$3**2 + \$4**2))) title 'TL';" \
+      -e "unset multiplot;"
+  else
+    echo frequency must be specified as the third argument
+  fi
+  else
+    echo azimuth must be specified as the second argument - in degrees
+  fi
+fi
+
+# plot both 2D TL and ceff to the screen
+# example: ./xrunMods.script cefftl2d 90 0.1
+if 
+  test $1 = cefftl2d
+then
+  if test $2
+  then 
+  if test $3 
+  then  
+    gnuplot -persist \
+      -e "Pi = 3.141592653589793;" \
+      -e "unset multiplot;" \
+      -e "set multiplot" \
+      -e "set size 0.25, 1;" \
+      -e "set xtics 200 offset 0, 0.3 textcolor lt 3 font 'arial,11';" \
+      -e "set ytics 30 offset 0.5,0 textcolor lt 3 font 'arial,11'" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set grid;" \
+      -e "set title 'c_eff';" \
+      -e "set xlabel '[m/s]';" \
+      -e "set ylabel offset 3,0 'Altitude [km MSL]';" \
+      -e "show xlabel;" \
+      -e "filename = './atm_profile.nm';" \
+      -e "set yrange [0:150];" \
+      -e "plot filename using ((\$8) + (1*((\$2)*(sin($2*Pi/180))+ (\$3)*cos($2*Pi/180)))):1 with lines lt 3 title '';" \
+      -e "set size 0.9, 1.0;" \
+      -e "set origin 0.1,0;" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set pm3d map;" \
+      -e "set cbrange [-140:-90];" \
+      -e "set xtics 100 textcolor lt -1 font 'arial,11';" \
+      -e "set xtics offset 0, 0.1;" \
+      -e "unset ytics;" \
+      -e "unset grid;" \
+      -e "unset ylabel;" \
+      -e "set title '2D transmission loss [dB]; freq = $3 Hz';" \
+      -e "set xlabel 'Range [km]';" \
+      -e "splot './tloss_2d.nm' using 1:2:(20*log10(sqrt(\$3**2 + \$4**2))) title 'TL';" \
+      -e "unset multiplot;"
+  else
+    echo frequency must be specified as the third argument
+  fi
+  else
+    echo azimuth must be specified as the second argument - in degrees
+  fi
+fi
+
+
+#      -e "set term png size 900,500;" \
+#      -e "set output 'plot1.png';" \
+#      -e "set xtics 200 textcolor  lt 3" \
+#       -e "plot filename using ((\$8) + (1*((\$2)*(sin($2*Pi/180))+ (\$3)*cos($2*Pi/180)))):1 with lines lt 3 title '1';" \
+
+
+# plot both 1D TL and ceff in the same figure on screen
+# example: ./xrunMods.script cefftl 90 0.5
+if 
+  test $1 = cefftl
+then
+  if test $2
+  then 
+  if test $3 
+  then  
+    gnuplot -persist \
+      -e "Pi = 3.141592653589793;" \
+      -e "unset multiplot;" \
+      -e "set multiplot" \
+      -e "set size 0.25, 1;" \
+      -e "set xtics 200" \
+      -e "set ytics 20" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set grid;" \
+      -e "set title 'c_eff';" \
+      -e "set xlabel '[m/s]';" \
+      -e "set yrange [0:150];" \
+      -e "filename = './atm_profile.nm';" \
+      -e "plot filename using (\$9):1 with lines lt 3 title '';" \
+      -e "set size 0.9, 1.0;" \
+      -e "set origin 0.15,0;" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set lmargin at screen 0.3;" \
+      -e "set rmargin at screen 0.95;" \
+      -e "set xtics 100 textcolor lt 7" \
+      -e "unset grid;" \
+      -e "set grid; show grid; set xlabel 'Range [km]';" \
+      -e "set ylabel 'TL [dB]' offset 1.5 ;" \
+      -e "set yrange [-160:-80];" \
+      -e "set title '1D transmission loss [dB]; freq = $3 Hz';" \
+      -e "plot './tloss_1d.lossless.nm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 3 title 'lossless', './tloss_1d.nm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 1 title 'lossy';" \
+      -e "unset multiplot;"
+  else
+    echo frequency must be specified as the third argument
+  fi
+  else
+    echo azimuth must be specified as the second argument - in degrees
+  fi
+fi
+
+
+# plot both 1D TL and ceff to .png
+# example: ./xrunMods.script cefftl_png 90 0.5
+if 
+  test $1 = cefftl_png
+then
+  if test $2
+  then 
+  if test $3 
+  then  
+    gnuplot -persist \
+      -e "set term png size 900,500;" \
+      -e "set output 'TL1dModesscan0p1Hzsrc20km.png';" \
+      -e "Pi = 3.141592653589793;" \
+      -e "unset multiplot;" \
+      -e "set multiplot" \
+      -e "set size 0.25, 1;" \
+      -e "set xtics 200" \
+      -e "set ytics 20" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set grid;" \
+      -e "set title 'c_eff';" \
+      -e "set xlabel '[m/s]';" \
+      -e "set yrange [0:150];" \
+      -e "filename = './atm_profile.nm';" \
+      -e "plot filename using (\$9):1 with lines lt 3 title '';" \
+      -e "set size 0.9, 1.0;" \
+      -e "set origin 0.15,0;" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set lmargin at screen 0.3;" \
+      -e "set rmargin at screen 0.95;" \
+      -e "set xtics 100 textcolor lt -1" \
+      -e "unset grid;" \
+      -e "set grid; show grid; set xlabel 'Range [km]';" \
+      -e "set ylabel 'TL [dB]' offset 1.5 ;" \
+      -e "set yrange [-160:-80];" \
+      -e "set title '1D transmission loss [dB]; freq = $3 Hz';" \
+      -e "plot './tloss_1d.lossless.nm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 3 title 'lossless', './tloss_1d.nm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 1 title 'lossy';" \
+      -e "unset multiplot;"
+  else
+    echo frequency must be specified as the third argument
+  fi
+  else
+    echo azimuth must be specified as the second argument - in degrees
+  fi
+fi
+
+
+
+
+if 
+  test $1 = pc3
+then
+  if test $2
+  then    
+    gnuplot -persist \
+      -e "unset multiplot;" \
+      -e "set multiplot;" \
+      -e "set size 0.25, 1;" \     
+      -e "plot './atm_profile.nm' using (\$8):1 with lines lt 3 title 'c';" \
+      -e "set xtics 50;" \
+      -e "set ytics 20;" \
+      -e "Pi = 3.141592653589793;" \
+      -e "filename = './atm_profile.nm';" \
+      -e "set size 0.7, 1;" \
+      -e "set origin 0.2,0;" \
+      -e "plot './atm_profile.nm' using (\$8):1 with lines lt 3 title 'c';" \
+      -e "unset multiplot;"
+  else
+    echo azimuth must be specified as the second argument - in degrees
+  fi
+fi
+
+if 
+  test $1 = pc4
+then
+  if test $2
+  then    
+    gnuplot -persist \
+      -e "unset multiplot;" \
+      -e "set multiplot" \
+      -e "set size 0.25, 1;" \
+      -e "set xtics 200;" \
+      -e "set ytics 10;" \
+      -e "set title 'ceff';" \
+      -e "plot './atm_profile.nm' using (\$8):1 with lines lt 3 title 'c';" \
+      -e "unset ytics;" \
+      -e "Pi = 3.141592653589793;" \
+      -e "filename = './atm_profile.nm';" \
+      -e "set size 0.7, 1;" \
+      -e "set origin 0.2,0;" \
+      -e "plot './atm_profile.nm' using (\$8):1 with lines lt 3 title 'c';" \
+      -e "unset multiplot;"
+  else
+    echo azimuth must be specified as the second argument - in degrees
+  fi
+fi
+
+
+# plot attenuation coefficient
+if 
+    test $1 = plot_attn
+then
+  gnuplot -persist \
+    -e "set grid; show grid; set xlabel 'np/m'; set ylabel 'Height [km AGL]';" \
+    -e "set title 'Attenuation coefficient';" \
+    -e "plot './attn.pe' using 2:1 with lines lt 1 title 'attn';"
+  echo $1
+fi
+
+
+# ModBB output: plot initial pulse to the screen
+if 
+    test $1 = plotinipulse
+then
+  ## plot from script
+  #gnuplot -persist "gnuplot_Modess_output.p" -e "set title '1D TL'; replot"
+  gnuplot -persist \
+    -e "set grid; show grid; set xlabel 'Time [s]'; set ylabel 'Amplitude';" \
+    -e "set title 'Initial pulse; center frequency = $2 Hz';" \
+    -e "plot './source_waveform.dat' using 1:2 with lines lt 3 title 'initial pulse';"
+   
+  echo $1 $2
+fi
+
+
+# ModBB output: save initial pulse to .png
+if 
+    test $1 = plotinipulsepng
+then
+  gnuplot -persist \
+    -e "set term png size 900,500;" \
+    -e "set output 'initial_pulse.png';" \
+    -e "set grid; show grid; set xlabel 'Time [s]'; set ylabel 'Amplitude';" \
+    -e "set title 'Initial pulse; center frequency = $2 Hz';" \
+    -e "plot './source_waveform.dat' using 1:2 with lines lt 3 title 'initial pulse';"
+   
+  echo $1 $2
+fi
+
+# ModBB output: plot propagated pulse to the screen
+if 
+    test $1 = plotpulse
+then
+  gnuplot -persist \
+    -e "set grid; show grid; set xlabel 'Time [s]'; set ylabel 'Amplitude';" \
+    -e "set title 'Propagated pulse to 240 km';" \
+    -e "plot './mywavf.dat' using 1:2 with lines lt 1 title '';"
+   
+  echo $1 $2
+fi
+
+# ModBB output: plot propagated pulse to .png
+if 
+    test $1 = plotpulsepng
+then
+  gnuplot -persist \
+    -e "set term png size 900,500;" \
+    -e "set output 'proppulse240km.png';" \
+    -e "set grid; show grid; set xlabel 'Time [s]'; set ylabel 'Amplitude';" \
+    -e "set title 'Propagated pulse to 240 km';" \
+    -e "plot './mywavf.dat' using 1:2 with lines lt 1 title '';"
+   
+  echo $1 $2
+fi

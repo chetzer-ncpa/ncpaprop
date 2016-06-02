@@ -1,0 +1,47 @@
+#!/usr/bin/perl
+
+use POSIX;
+
+## run ModBB in batch mode to obtain the dispersion files
+## trying to use equal time on requested processors ##
+
+my $time_window = 384;
+my $ftop   = 0.5;
+my $df     = (2*$ftop)/$time_window;
+my $f_min = $df;
+
+my $nproc = 7;
+#my $Nfreq = int($time_window*$ftop);
+my $Nfreq = int( $ftop/$df);
+if ($Nfreq<$nproc) {
+    $nproc = 1;
+}
+my $mm = $nproc*($nproc+1)/2;
+my $n = ceil ($Nfreq/$mm);
+
+printf "df = %15.12f\n", $df;
+printf "Nfreq = %d\n", $Nfreq;
+printf "mm = %d\n", $mm;
+printf "n = %d\n", $n;
+
+my $f_max = 0;
+my $i = 0;
+for ($i=0; $i<$nproc; $i++) {
+    $f_min = $f_max + $df;
+    $f_max = $f_max + $df*($nproc-$i)*$n;
+    if ($f_max>$ftop) {
+        $f_max = $ftop;
+    }
+
+    printf "f_min = %15.12f\n", $f_min;
+    printf "f_max = %15.12f\n", $f_max;
+    printf "($nproc-$i)*$n = %15.12f\n", ($nproc-$i)*$n;
+    if ($f_min<=$f_max) {
+        my $str1 = sprintf "../bin/ModBB --out_disp_src2rcv_file myDispersionFile%d.dat --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --azimuth 90 --f_min %15.12f --f_step %15.12f --f_max %15.12f &\n", $i, $f_min, $df, $f_max;
+        printf $str1;
+        my $ModBB1 = system($str1);
+    }
+}
+
+
+

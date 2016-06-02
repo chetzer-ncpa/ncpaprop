@@ -1,0 +1,23 @@
+.PHONY: clean tidy install raytrace
+
+all: raytrace
+
+raytrace: raytrace.2d raytrace.3d
+
+raytrace.2d: Acoustic2DEquationSet.o AcousticEquationSet.o AtmosphericBreakConditions.o GeneralBreakConditions.o ODESystemBreakCondition.o ODESystem.o ReflectionCondition2D.o raytrace.2d.o
+	@CXX@ -o $@ $^ @LDFLAGS@ @STATICLIBS@ @LIBS@
+	cp $@ ../../bin
+
+raytrace.3d: Acoustic3DEquationSet.o AcousticEquationSet.o AtmosphericBreakConditions.o GeneralBreakConditions.o ODESystemBreakCondition.o ODESystem.o ReflectionCondition3D.o raytrace.3d.o
+	@CXX@ -o $@ $^ @LDFLAGS@ @STATICLIBS@ @LIBS@
+	cp $@ ../../bin
+
+
+%.o: %.cpp
+	@CXX@ @CXXFLAGS@ @INCLUDEFLAGS@ -o $@ $<
+
+clean:
+	rm -rf raytrace.2d raytrace.3d Acoustic2DEquationSet.o AcousticEquationSet.o AtmosphericBreakConditions.o GeneralBreakConditions.o ODESystemBreakCondition.o ODESystem.o ReflectionCondition2D.o raytrace.2d.o Acoustic3DEquationSet.o ReflectionCondition3D.o raytrace.2d.o raytrace.3d.o
+
+tidy:
+	rm -rf Acoustic2DEquationSet.o AcousticEquationSet.o AtmosphericBreakConditions.o GeneralBreakConditions.o ODESystemBreakCondition.o ODESystem.o ReflectionCondition2D.o raytrace.2d.o Acoustic3DEquationSet.o ReflectionCondition3D.o raytrace.2d.o raytrace.3d.o

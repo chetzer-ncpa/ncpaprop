@@ -1,0 +1,161 @@
+# Variable check
+# CXXFLAGS = @CXXFLAGS@
+# LIBS = @LIBS@
+# LDFLAGS = @LDFLAGS@
+# FC = @FC@
+# PETSC_VERSION = @PETSC_VERSION@
+# SLEPC_VERSION = @SLEPC_VERSION@
+# PETSC_DIR = @abs_top_builddir@/src/extern/petsc-@PETSC_VERSION@
+# SLEPC_DIR = @abs_top_builddir@/src/extern/slepc-@SLEPC_VERSION@
+# PETSC_OS = @PETSC_OS@
+# PETSC_ARCH_REAL = @PETSC_ARCH_REAL@
+# PETSC_ARCH_COMPLEX = @PETSC_ARCH_COMPLEX@
+# PACKAGE_NAME = @PACKAGE_NAME@
+# PACKAGE_TARNAME = @PACKAGE_TARNAME@
+# PACKAGE_VERSION = @PACKAGE_VERSION@
+distdir=@PACKAGE_TARNAME@-@PACKAGE_VERSION@
+tarball=@PACKAGE_TARNAME@-@PACKAGE_VERSION@.tar.gz
+package-parts=common atmosphere raytrace modess modbb modess_rd_1wcm pade_pe wmod cmodess cmodbb wnlrt tdpape
+
+
+# Build everything
+all: extern $(package-parts)
+
+dist: $(tarball)
+
+# Build the distribution tarball
+$(tarball): $(distdir)
+	tar cvzhf $(tarball) $(distdir)
+	rm -rf $(distdir)
+
+$(distdir): FORCE
+	mkdir -p $(distdir)/bin $(distdir)/lib $(distdir)/src $(distdir)/samples $(distdir)/test/results  $(distdir)/test/CModBB $(distdir)/test/ModBB $(distdir)/test/pape $(distdir)/docs
+	cp configure Makefile.in config.guess config.sub install-sh changelog.txt $(distdir)/
+	cp docs/*.pdf $(distdir)/docs/
+	rsync -auv samples/* $(distdir)/samples/
+	rsync -auv test/CModess test/col* test/compare_* test/Makefile.in test/Modess test/ModessRD1WCM test/raytrace.?d test/WMod test/run_*.bash $(distdir)/test/
+#	rsync -auv test/CModBB test/ModBB test/pape $(distdir)/test/
+
+	mkdir -p $(distdir)/src/extern
+	cp src/extern/Makefile.in src/extern/petsc-@PETSC_VERSION@.tar.gz src/extern/slepc-@SLEPC_VERSION@.tar.gz $(distdir)/src/extern/
+
+	mkdir -p $(distdir)/src/atmosphere
+	cp src/atmosphere/*.h src/atmosphere/*.cpp src/atmosphere/Makefile.in $(distdir)/src/atmosphere/
+
+	mkdir -p $(distdir)/src/cmodbb
+	cp src/cmodbb/*.h src/cmodbb/*.cpp src/cmodbb/Makefile.in $(distdir)/src/cmodbb/
+
+	mkdir -p $(distdir)/src/cmodess
+	cp src/cmodess/*.h src/cmodess/*.cpp src/cmodess/Makefile.in $(distdir)/src/cmodess/
+
+	mkdir -p $(distdir)/src/common
+	cp src/common/*.h src/common/*.cpp src/common/Makefile.in $(distdir)/src/common/
+
+
+	mkdir -p $(distdir)/src/modbb
+	cp src/modbb/*.h src/modbb/*.cpp src/modbb/Makefile.in $(distdir)/src/modbb/
+
+	mkdir -p $(distdir)/src/modess
+	cp src/modess/*.h src/modess/*.cpp src/modess/Makefile.in $(distdir)/src/modess/
+
+	mkdir -p $(distdir)/src/modess_rd_1wcm
+	cp src/modess_rd_1wcm/*.h src/modess_rd_1wcm/*.cpp src/modess_rd_1wcm/Makefile.in $(distdir)/src/modess_rd_1wcm/
+
+	mkdir -p $(distdir)/src/pade_pe
+	cp src/pade_pe/*.h src/pade_pe/*.cpp src/pade_pe/Makefile.in $(distdir)/src/pade_pe/
+
+	mkdir -p $(distdir)/src/raytrace
+	cp src/raytrace/*.h src/raytrace/*.cpp src/raytrace/Makefile.in $(distdir)/src/raytrace/
+
+	mkdir -p $(distdir)/src/wmod
+	cp src/wmod/*.h src/wmod/*.cpp src/wmod/Makefile.in $(distdir)/src/wmod/
+
+	mkdir -p $(distdir)/src/wnlrt
+	cp src/wnlrt/*.h src/wnlrt/*.cpp src/wnlrt/Makefile.in $(distdir)/src/wnlrt
+
+	mkdir -p $(distdir)/src/tdpape
+	cp src/tdpape/*.h src/tdpape/*.cpp src/tdpape/Makefile.in $(distdir)/src/tdpape
+
+
+FORCE:
+	-rm $(tarball)
+	-rm -rf $(distdir)
+
+# build external libraries (PETSc, SLEPc)
+extern:
+	$(MAKE) -C src/extern extern
+
+# build general utility libraries
+common:
+	$(MAKE) -C src/common common
+
+# build atmospheric utility libraries
+atmosphere:
+	$(MAKE) -C src/atmosphere atmosphere
+
+# ray tracing routines
+raytrace:
+	$(MAKE) -C src/raytrace raytrace
+
+# Normal modes, single frequency, effective sound speed approximation
+modess:
+	$(MAKE) -C src/modess Modess
+
+# Normal modes, broadband
+modbb:
+	$(MAKE) -C src/modbb ModBB
+
+# Normal modes, range-dependent, one-way coupled modes
+modess_rd_1wcm:
+	$(MAKE) -C src/modess_rd_1wcm ModessRD1WCM
+
+# High-angle high-mach parabolic equation
+pade_pe:
+	$(MAKE) -C src/pade_pe pape
+
+# Wide-angle high-mach number normal modes, single frequency
+wmod:
+	$(MAKE) -C src/wmod WMod
+	
+# Complex normal modes, single frequency, effective sound speed
+cmodess:
+	$(MAKE) -C src/cmodess CModess
+
+# Complex normal modes, broadband
+cmodbb:
+	$(MAKE) -C src/cmodbb CModBB
+
+wnlrt:
+	$(MAKE) -C src/wnlrt wnlrt
+
+tdpape:
+	$(MAKE) -C src/tdpape tdpape
+	
+#modess_rd_2wcm:
+#	$(MAKE) -C src/modess_rd_2wcm ModessRD2WCM PETSC_ARCH=@PETSC_ARCH_COMPLEX@
+
+# clean everything up, including external libraries
+clean:
+	-$(MAKE) -C src/common clean  PETSC_ARCH=@PETSC_ARCH_REAL@
+	-$(MAKE) -C src/atmosphere clean  PETSC_ARCH=@PETSC_ARCH_REAL@
+	-$(MAKE) -C src/raytrace clean  PETSC_ARCH=@PETSC_ARCH_REAL@
+	-$(MAKE) -C src/modess clean  PETSC_ARCH=@PETSC_ARCH_REAL@
+	-$(MAKE) -C src/modbb clean  PETSC_ARCH=@PETSC_ARCH_REAL@
+	-$(MAKE) -C src/modess_rd_1wcm clean  PETSC_ARCH=@PETSC_ARCH_REAL@
+	-$(MAKE) -C src/pade_pe clean  PETSC_ARCH=@PETSC_ARCH_REAL@
+	-$(MAKE) -C src/wmod clean  PETSC_ARCH=@PETSC_ARCH_REAL@
+	-$(MAKE) -C src/cmodess clean  PETSC_ARCH=@PETSC_ARCH_COMPLEX@
+	-$(MAKE) -C src/cmodbb clean  PETSC_ARCH=@PETSC_ARCH_COMPLEX@
+#	-$(MAKE) -C src/modess_rd_2wcm clean  PETSC_ARCH=@PETSC_ARCH_COMPLEX@
+	-$(MAKE) -C src/extern clean  PETSC_ARCH=@PETSC_ARCH_REAL@
+	-rm bin/CModBB  bin/CModess  bin/ModBB  bin/Modess  bin/ModessRD1WCM  bin/pape  bin/raytrace.2d  bin/raytrace.3d  bin/WMod lib/libatmosphere.a lib/libcommon.a
+
+# Test all executables to make sure their output matches the dev machine output
+test:
+	$(MAKE) -C test test
+
+# Run the tests that take forever
+testlong:
+	$(MAKE) -C test testlong
+
+.PHONY: extern common atmosphere raytrace modess modbb modess_rd_1wcm pade_pe wmod cmodess cmodbb modess_rd_2wcm clean FORCE dist test

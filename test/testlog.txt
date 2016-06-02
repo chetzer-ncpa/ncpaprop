@@ -1,0 +1,1288 @@
+<<raytrace.2d>>
+Ray Trace Parameters:
+Atmospheric File Name: NCPA_canonical_profile_zuvwtdp.dat
+Maximum Height: 140 km
+Launch Azimuth: 90
+Launch Elevation: [1,1,45]
+
+Starting calculation...
+
+
+Calculating theta = 1 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 1 completed.
+Max Turning Height: 44.138 km
+Skips: 1
+Range: 255.283 km
+Travel Time: 864.46 seconds (14.4077 minutes)
+Celerity: 0.29531 km/s
+Transmission Loss re ~1km: -29.4208 dB
+
+
+Calculating theta = 2 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 2 completed.
+Max Turning Height: 44.1749 km
+Skips: 1
+Range: 251.889 km
+Travel Time: 854.501 seconds (14.2417 minutes)
+Celerity: 0.294779 km/s
+Transmission Loss re ~1km: -32.2603 dB
+
+
+Calculating theta = 3 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 3 completed.
+Max Turning Height: 44.2365 km
+Skips: 1
+Range: 248.585 km
+Travel Time: 844.786 seconds (14.0798 minutes)
+Celerity: 0.294258 km/s
+Transmission Loss re ~1km: -33.8371 dB
+
+
+Calculating theta = 4 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 4 completed.
+Max Turning Height: 44.3228 km
+Skips: 1
+Range: 245.367 km
+Travel Time: 835.351 seconds (13.9225 minutes)
+Celerity: 0.293729 km/s
+Transmission Loss re ~1km: -34.9218 dB
+
+
+Calculating theta = 5 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 5 completed.
+Max Turning Height: 44.4337 km
+Skips: 1
+Range: 242.228 km
+Travel Time: 826.141 seconds (13.769 minutes)
+Celerity: 0.293204 km/s
+Transmission Loss re ~1km: -35.7108 dB
+
+
+Calculating theta = 6 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 6 completed.
+Max Turning Height: 44.5692 km
+Skips: 1
+Range: 239.193 km
+Travel Time: 817.278 seconds (13.6213 minutes)
+Celerity: 0.292671 km/s
+Transmission Loss re ~1km: -36.1784 dB
+
+
+Calculating theta = 7 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 7 completed.
+Max Turning Height: 44.7299 km
+Skips: 1
+Range: 236.259 km
+Travel Time: 808.707 seconds (13.4784 minutes)
+Celerity: 0.292144 km/s
+Transmission Loss re ~1km: -36.7413 dB
+
+
+Calculating theta = 8 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 8 completed.
+Max Turning Height: 44.9154 km
+Skips: 1
+Range: 233.446 km
+Travel Time: 800.518 seconds (13.342 minutes)
+Celerity: 0.291618 km/s
+Transmission Loss re ~1km: -37.0303 dB
+
+
+Calculating theta = 9 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 9 completed.
+Max Turning Height: 45.1261 km
+Skips: 1
+Range: 230.721 km
+Travel Time: 792.599 seconds (13.21 minutes)
+Celerity: 0.291094 km/s
+Transmission Loss re ~1km: -37.2688 dB
+
+
+Calculating theta = 10 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 10 completed.
+Max Turning Height: 45.3622 km
+Skips: 1
+Range: 228.122 km
+Travel Time: 785.066 seconds (13.0844 minutes)
+Celerity: 0.290577 km/s
+Transmission Loss re ~1km: -37.3799 dB
+
+
+Calculating theta = 11 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 11 completed.
+Max Turning Height: 45.6245 km
+Skips: 1
+Range: 225.664 km
+Travel Time: 777.95 seconds (12.9658 minutes)
+Celerity: 0.290076 km/s
+Transmission Loss re ~1km: -37.4983 dB
+
+
+Calculating theta = 12 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 12 completed.
+Max Turning Height: 45.913 km
+Skips: 1
+Range: 223.33 km
+Travel Time: 771.222 seconds (12.8537 minutes)
+Celerity: 0.289579 km/s
+Transmission Loss re ~1km: -37.7171 dB
+
+
+Calculating theta = 13 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 13 completed.
+Max Turning Height: 46.2287 km
+Skips: 1
+Range: 221.152 km
+Travel Time: 764.999 seconds (12.75 minutes)
+Celerity: 0.289088 km/s
+Transmission Loss re ~1km: -37.6281 dB
+
+
+Calculating theta = 14 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 14 completed.
+Max Turning Height: 46.5723 km
+Skips: 1
+Range: 219.143 km
+Travel Time: 759.248 seconds (12.6541 minutes)
+Celerity: 0.288632 km/s
+Transmission Loss re ~1km: -37.4607 dB
+
+
+Calculating theta = 15 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 15 completed.
+Max Turning Height: 46.9451 km
+Skips: 1
+Range: 217.306 km
+Travel Time: 754.024 seconds (12.5671 minutes)
+Celerity: 0.288195 km/s
+Transmission Loss re ~1km: -37.173 dB
+
+
+Calculating theta = 16 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 16 completed.
+Max Turning Height: 47.3487 km
+Skips: 1
+Range: 215.661 km
+Travel Time: 749.352 seconds (12.4892 minutes)
+Celerity: 0.287796 km/s
+Transmission Loss re ~1km: -36.8603 dB
+
+
+Calculating theta = 17 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 17 completed.
+Max Turning Height: 47.7852 km
+Skips: 1
+Range: 214.259 km
+Travel Time: 745.396 seconds (12.4233 minutes)
+Celerity: 0.287443 km/s
+Transmission Loss re ~1km: -36.3138 dB
+
+
+Calculating theta = 18 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 18 completed.
+Max Turning Height: 48.2569 km
+Skips: 1
+Range: 213.095 km
+Travel Time: 742.149 seconds (12.3692 minutes)
+Celerity: 0.287133 km/s
+Transmission Loss re ~1km: -35.3812 dB
+
+
+Calculating theta = 19 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 19 completed.
+Max Turning Height: 48.7677 km
+Skips: 1
+Range: 212.249 km
+Travel Time: 739.797 seconds (12.3299 minutes)
+Celerity: 0.286902 km/s
+Transmission Loss re ~1km: -33.6134 dB
+
+
+Calculating theta = 20 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 20 completed.
+Max Turning Height: 49.3221 km
+Skips: 1
+Range: 211.76 km
+Travel Time: 738.435 seconds (12.3073 minutes)
+Celerity: 0.286769 km/s
+Transmission Loss re ~1km: -30.2276 dB
+
+
+Calculating theta = 21 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 21 completed.
+Max Turning Height: 49.9266 km
+Skips: 1
+Range: 211.724 km
+Travel Time: 738.324 seconds (12.3054 minutes)
+Celerity: 0.286762 km/s
+Transmission Loss re ~1km: -31.4198 dB
+
+
+Calculating theta = 22 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 22 completed.
+Max Turning Height: 50.5906 km
+Skips: 1
+Range: 212.29 km
+Travel Time: 739.881 seconds (12.3313 minutes)
+Celerity: 0.286924 km/s
+Transmission Loss re ~1km: -35.886 dB
+
+
+Calculating theta = 23 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 23 completed.
+Max Turning Height: 51.3275 km
+Skips: 1
+Range: 213.635 km
+Travel Time: 743.531 seconds (12.3922 minutes)
+Celerity: 0.287325 km/s
+Transmission Loss re ~1km: -39.1724 dB
+
+
+Calculating theta = 24 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 24 completed.
+Max Turning Height: 52.1594 km
+Skips: 1
+Range: 216.176 km
+Travel Time: 750.362 seconds (12.506 minutes)
+Celerity: 0.288095 km/s
+Transmission Loss re ~1km: -41.7943 dB
+
+
+Calculating theta = 25 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 25 completed.
+Max Turning Height: 53.1249 km
+Skips: 1
+Range: 220.625 km
+Travel Time: 762.256 seconds (12.7043 minutes)
+Celerity: 0.289436 km/s
+Transmission Loss re ~1km: -44.2981 dB
+
+
+Calculating theta = 26 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 26 completed.
+Max Turning Height: 54.3044 km
+Skips: 1
+Range: 228.817 km
+Travel Time: 783.998 seconds (13.0666 minutes)
+Celerity: 0.29186 km/s
+Transmission Loss re ~1km: -47.1678 dB
+
+
+Calculating theta = 27 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 27 completed.
+Max Turning Height: 55.9409 km
+Skips: 1
+Range: 247.873 km
+Travel Time: 834.057 seconds (13.901 minutes)
+Celerity: 0.29719 km/s
+Transmission Loss re ~1km: -52.3478 dB
+
+
+Calculating theta = 28 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 28 completed.
+Max Turning Height: 126.347 km
+Skips: 1
+Range: 543.36 km
+Travel Time: 1909.24 seconds (31.8207 minutes)
+Celerity: 0.284595 km/s
+Transmission Loss re ~1km: -62.8848 dB
+
+
+Calculating theta = 29 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 29 completed.
+Max Turning Height: 127.006 km
+Skips: 1
+Range: 469.09 km
+Travel Time: 1717.22 seconds (28.6203 minutes)
+Celerity: 0.273169 km/s
+Transmission Loss re ~1km: -56.384 dB
+
+
+Calculating theta = 30 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 30 completed.
+Max Turning Height: 127.71 km
+Skips: 1
+Range: 438.431 km
+Travel Time: 1638.76 seconds (27.3127 minutes)
+Celerity: 0.267538 km/s
+Transmission Loss re ~1km: -53.8444 dB
+
+
+Calculating theta = 31 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 31 completed.
+Max Turning Height: 128.464 km
+Skips: 1
+Range: 418.576 km
+Travel Time: 1588.47 seconds (26.4745 minutes)
+Celerity: 0.263509 km/s
+Transmission Loss re ~1km: -52.2225 dB
+
+
+Calculating theta = 32 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 32 completed.
+Max Turning Height: 129.273 km
+Skips: 1
+Range: 403.948 km
+Travel Time: 1551.81 seconds (25.8635 minutes)
+Celerity: 0.260308 km/s
+Transmission Loss re ~1km: -51.0102 dB
+
+
+Calculating theta = 33 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 33 completed.
+Max Turning Height: 130.14 km
+Skips: 1
+Range: 392.504 km
+Travel Time: 1523.44 seconds (25.3906 minutes)
+Celerity: 0.257643 km/s
+Transmission Loss re ~1km: -49.854 dB
+
+
+Calculating theta = 34 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 34 completed.
+Max Turning Height: 131.074 km
+Skips: 1
+Range: 383.298 km
+Travel Time: 1500.88 seconds (25.0146 minutes)
+Celerity: 0.255382 km/s
+Transmission Loss re ~1km: -49.0035 dB
+
+
+Calculating theta = 35 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 35 completed.
+Max Turning Height: 132.079 km
+Skips: 1
+Range: 375.837 km
+Travel Time: 1482.8 seconds (24.7133 minutes)
+Celerity: 0.253465 km/s
+Transmission Loss re ~1km: -48.0113 dB
+
+
+Calculating theta = 36 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 36 completed.
+Max Turning Height: 133.164 km
+Skips: 1
+Range: 369.785 km
+Travel Time: 1468.31 seconds (24.4719 minutes)
+Celerity: 0.251844 km/s
+Transmission Loss re ~1km: -47.0804 dB
+
+
+Calculating theta = 37 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 37 completed.
+Max Turning Height: 134.339 km
+Skips: 1
+Range: 365.003 km
+Travel Time: 1457.02 seconds (24.2837 minutes)
+Celerity: 0.250513 km/s
+Transmission Loss re ~1km: -45.9088 dB
+
+
+Calculating theta = 38 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 38 completed.
+Max Turning Height: 135.613 km
+Skips: 1
+Range: 361.369 km
+Travel Time: 1448.54 seconds (24.1424 minutes)
+Celerity: 0.249471 km/s
+Transmission Loss re ~1km: -44.7301 dB
+
+
+Calculating theta = 39 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 39 completed.
+Max Turning Height: 137.001 km
+Skips: 1
+Range: 358.875 km
+Travel Time: 1442.79 seconds (24.0465 minutes)
+Celerity: 0.248736 km/s
+Transmission Loss re ~1km: -41.7904 dB
+
+
+Calculating theta = 40 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 40 completed.
+Max Turning Height: 138.516 km
+Skips: 1
+Range: 357.511 km
+Travel Time: 1439.7 seconds (23.995 minutes)
+Celerity: 0.248323 km/s
+Transmission Loss re ~1km: -39.2372 dB
+
+
+Calculating theta = 41 degrees...
+Ray entering thermosphere...stopping solver.
+Ray trace for angle theta = 41 completed.
+Max Turning Height: 140 km
+Skips: 0
+<<raytrace.3d>>
+Ray Trace Parameters:
+Atmospheric File Name: NCPA_canonical_profile_zuvwtdp.dat
+Maximum Height: 140 km
+Launch Azimuth: 90
+Launch Elevation: [1,1,45]
+
+Starting calculation...
+
+
+Calculating theta = 1 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 1 completed.
+Max Turning Height: 44.138 km
+Skips: 0
+Range: 258.032 km
+Travel Time: 873.189 seconds (14.5532 minutes)
+Celerity: 0.295505 km/s
+Skips: 0
+Transmission Loss re ~1km: -29.3672 dB
+Caustics passed through: 2
+
+
+Calculating theta = 2 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 2 completed.
+Max Turning Height: 44.1749 km
+Skips: 0
+Range: 254.649 km
+Travel Time: 863.261 seconds (14.3877 minutes)
+Celerity: 0.294985 km/s
+Skips: 0
+Transmission Loss re ~1km: -32.1965 dB
+Caustics passed through: 2
+
+
+Calculating theta = 3 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 3 completed.
+Max Turning Height: 44.2365 km
+Skips: 0
+Range: 251.364 km
+Travel Time: 853.609 seconds (14.2268 minutes)
+Celerity: 0.294472 km/s
+Skips: 0
+Transmission Loss re ~1km: -33.7602 dB
+Caustics passed through: 2
+
+
+Calculating theta = 4 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 4 completed.
+Max Turning Height: 44.3228 km
+Skips: 0
+Range: 248.173 km
+Travel Time: 844.236 seconds (14.0706 minutes)
+Celerity: 0.293962 km/s
+Skips: 0
+Transmission Loss re ~1km: -34.8326 dB
+Caustics passed through: 2
+
+
+Calculating theta = 5 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 5 completed.
+Max Turning Height: 44.4336 km
+Skips: 0
+Range: 245.069 km
+Travel Time: 835.149 seconds (13.9192 minutes)
+Celerity: 0.293444 km/s
+Skips: 0
+Transmission Loss re ~1km: -35.608 dB
+Caustics passed through: 2
+
+
+Calculating theta = 6 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 6 completed.
+Max Turning Height: 44.5692 km
+Skips: 0
+Range: 242.078 km
+Travel Time: 826.41 seconds (13.7735 minutes)
+Celerity: 0.292928 km/s
+Skips: 0
+Transmission Loss re ~1km: -36.0576 dB
+Caustics passed through: 2
+
+
+Calculating theta = 7 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 7 completed.
+Max Turning Height: 44.7299 km
+Skips: 0
+Range: 239.197 km
+Travel Time: 817.994 seconds (13.6332 minutes)
+Celerity: 0.292419 km/s
+Skips: 0
+Transmission Loss re ~1km: -36.6089 dB
+Caustics passed through: 2
+
+
+Calculating theta = 8 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 8 completed.
+Max Turning Height: 44.9154 km
+Skips: 0
+Range: 236.445 km
+Travel Time: 809.96 seconds (13.4993 minutes)
+Celerity: 0.291922 km/s
+Skips: 0
+Transmission Loss re ~1km: -36.8733 dB
+Caustics passed through: 2
+
+
+Calculating theta = 9 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 9 completed.
+Max Turning Height: 45.1261 km
+Skips: 0
+Range: 233.791 km
+Travel Time: 802.255 seconds (13.3709 minutes)
+Celerity: 0.291417 km/s
+Skips: 0
+Transmission Loss re ~1km: -37.0859 dB
+Caustics passed through: 2
+
+
+Calculating theta = 10 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 10 completed.
+Max Turning Height: 45.3622 km
+Skips: 0
+Range: 231.274 km
+Travel Time: 794.968 seconds (13.2495 minutes)
+Celerity: 0.290923 km/s
+Skips: 0
+Transmission Loss re ~1km: -37.169 dB
+Caustics passed through: 2
+
+
+Calculating theta = 11 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 11 completed.
+Max Turning Height: 45.6244 km
+Skips: 0
+Range: 228.909 km
+Travel Time: 788.126 seconds (13.1354 minutes)
+Celerity: 0.290447 km/s
+Skips: 0
+Transmission Loss re ~1km: -37.2528 dB
+Caustics passed through: 2
+
+
+Calculating theta = 12 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 12 completed.
+Max Turning Height: 45.913 km
+Skips: 0
+Range: 226.679 km
+Travel Time: 781.704 seconds (13.0284 minutes)
+Celerity: 0.289981 km/s
+Skips: 0
+Transmission Loss re ~1km: -37.4468 dB
+Caustics passed through: 2
+
+
+Calculating theta = 13 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 13 completed.
+Max Turning Height: 46.2286 km
+Skips: 0
+Range: 224.62 km
+Travel Time: 775.785 seconds (12.9298 minutes)
+Celerity: 0.289538 km/s
+Skips: 0
+Transmission Loss re ~1km: -37.309 dB
+Caustics passed through: 2
+
+
+Calculating theta = 14 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 14 completed.
+Max Turning Height: 46.5722 km
+Skips: 0
+Range: 222.744 km
+Travel Time: 770.426 seconds (12.8404 minutes)
+Celerity: 0.289117 km/s
+Skips: 0
+Transmission Loss re ~1km: -37.0669 dB
+Caustics passed through: 2
+
+
+Calculating theta = 15 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 15 completed.
+Max Turning Height: 46.9451 km
+Skips: 0
+Range: 221.055 km
+Travel Time: 765.624 seconds (12.7604 minutes)
+Celerity: 0.288725 km/s
+Skips: 0
+Transmission Loss re ~1km: -36.6875 dB
+Caustics passed through: 2
+
+
+Calculating theta = 16 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 16 completed.
+Max Turning Height: 47.3487 km
+Skips: 0
+Range: 219.577 km
+Travel Time: 761.431 seconds (12.6905 minutes)
+Celerity: 0.288374 km/s
+Skips: 0
+Transmission Loss re ~1km: -36.2464 dB
+Caustics passed through: 2
+
+
+Calculating theta = 17 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 17 completed.
+Max Turning Height: 47.7852 km
+Skips: 0
+Range: 218.365 km
+Travel Time: 758.041 seconds (12.634 minutes)
+Celerity: 0.288065 km/s
+Skips: 0
+Transmission Loss re ~1km: -35.5052 dB
+Caustics passed through: 2
+
+
+Calculating theta = 18 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 18 completed.
+Max Turning Height: 48.2569 km
+Skips: 0
+Range: 217.415 km
+Travel Time: 755.357 seconds (12.5893 minutes)
+Celerity: 0.28783 km/s
+Skips: 0
+Transmission Loss re ~1km: -34.1562 dB
+Caustics passed through: 2
+
+
+Calculating theta = 19 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 19 completed.
+Max Turning Height: 48.7677 km
+Skips: 0
+Range: 216.811 km
+Travel Time: 753.68 seconds (12.5613 minutes)
+Celerity: 0.28767 km/s
+Skips: 0
+Transmission Loss re ~1km: -31.2187 dB
+Caustics passed through: 2
+
+
+Calculating theta = 20 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 20 completed.
+Max Turning Height: 49.3221 km
+Skips: 0
+Range: 216.602 km
+Travel Time: 753.107 seconds (12.5518 minutes)
+Celerity: 0.287611 km/s
+Skips: 0
+Transmission Loss re ~1km: -17.8033 dB
+Caustics passed through: 1
+
+
+Calculating theta = 21 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 21 completed.
+Max Turning Height: 49.9266 km
+Skips: 0
+Range: 216.888 km
+Travel Time: 753.894 seconds (12.5649 minutes)
+Celerity: 0.28769 km/s
+Skips: 0
+Transmission Loss re ~1km: -34.3586 dB
+Caustics passed through: 1
+
+
+Calculating theta = 22 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 22 completed.
+Max Turning Height: 50.5906 km
+Skips: 0
+Range: 217.836 km
+Travel Time: 756.483 seconds (12.608 minutes)
+Celerity: 0.287959 km/s
+Skips: 0
+Transmission Loss re ~1km: -37.3621 dB
+Caustics passed through: 1
+
+
+Calculating theta = 23 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 23 completed.
+Max Turning Height: 51.3275 km
+Skips: 0
+Range: 219.641 km
+Travel Time: 761.383 seconds (12.6897 minutes)
+Celerity: 0.288476 km/s
+Skips: 0
+Transmission Loss re ~1km: -40.0733 dB
+Caustics passed through: 1
+
+
+Calculating theta = 24 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 24 completed.
+Max Turning Height: 52.1594 km
+Skips: 0
+Range: 222.755 km
+Travel Time: 769.759 seconds (12.8293 minutes)
+Celerity: 0.289384 km/s
+Skips: 0
+Transmission Loss re ~1km: -42.4318 dB
+Caustics passed through: 1
+
+
+Calculating theta = 25 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 25 completed.
+Max Turning Height: 53.1249 km
+Skips: 0
+Range: 227.961 km
+Travel Time: 783.676 seconds (13.0613 minutes)
+Celerity: 0.290887 km/s
+Skips: 0
+Transmission Loss re ~1km: -44.7796 dB
+Caustics passed through: 1
+
+
+Calculating theta = 26 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 26 completed.
+Max Turning Height: 54.3044 km
+Skips: 0
+Range: 237.261 km
+Travel Time: 808.337 seconds (13.4723 minutes)
+Celerity: 0.293517 km/s
+Skips: 0
+Transmission Loss re ~1km: -47.5369 dB
+Caustics passed through: 1
+
+
+Calculating theta = 27 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 27 completed.
+Max Turning Height: 55.9409 km
+Skips: 0
+Range: 258.416 km
+Travel Time: 863.943 seconds (14.399 minutes)
+Celerity: 0.299113 km/s
+Skips: 0
+Transmission Loss re ~1km: -52.6021 dB
+Caustics passed through: 1
+
+
+Calculating theta = 28 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 28 completed.
+Max Turning Height: 126.347 km
+Skips: 0
+Range: 569.153 km
+Travel Time: 1983.65 seconds (33.0609 minutes)
+Celerity: 0.286921 km/s
+Skips: 0
+Transmission Loss re ~1km: -63.0706 dB
+Caustics passed through: 2
+
+
+Calculating theta = 29 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 29 completed.
+Max Turning Height: 127.006 km
+Skips: 0
+Range: 488.824 km
+Travel Time: 1775.96 seconds (29.5993 minutes)
+Celerity: 0.275245 km/s
+Skips: 0
+Transmission Loss re ~1km: -56.546 dB
+Caustics passed through: 2
+
+
+Calculating theta = 30 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 30 completed.
+Max Turning Height: 127.71 km
+Skips: 0
+Range: 455.845 km
+Travel Time: 1691.56 seconds (28.1927 minutes)
+Celerity: 0.269481 km/s
+Skips: 0
+Transmission Loss re ~1km: -54.0041 dB
+Caustics passed through: 2
+
+
+Calculating theta = 31 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 31 completed.
+Max Turning Height: 128.464 km
+Skips: 0
+Range: 434.56 km
+Travel Time: 1637.66 seconds (27.2943 minutes)
+Celerity: 0.265355 km/s
+Skips: 0
+Transmission Loss re ~1km: -52.3785 dB
+Caustics passed through: 2
+
+
+Calculating theta = 32 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 32 completed.
+Max Turning Height: 129.273 km
+Skips: 0
+Range: 418.913 km
+Travel Time: 1598.45 seconds (26.6408 minutes)
+Celerity: 0.262075 km/s
+Skips: 0
+Transmission Loss re ~1km: -51.1656 dB
+Caustics passed through: 2
+
+
+Calculating theta = 33 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 33 completed.
+Max Turning Height: 130.14 km
+Skips: 0
+Range: 406.685 km
+Travel Time: 1568.11 seconds (26.1352 minutes)
+Celerity: 0.259346 km/s
+Skips: 0
+Transmission Loss re ~1km: -50.0155 dB
+Caustics passed through: 2
+
+
+Calculating theta = 34 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 34 completed.
+Max Turning Height: 131.074 km
+Skips: 0
+Range: 396.849 km
+Travel Time: 1544.01 seconds (25.7335 minutes)
+Celerity: 0.257025 km/s
+Skips: 0
+Transmission Loss re ~1km: -49.1658 dB
+Caustics passed through: 2
+
+
+Calculating theta = 35 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 35 completed.
+Max Turning Height: 132.079 km
+Skips: 0
+Range: 388.866 km
+Travel Time: 1524.67 seconds (25.4111 minutes)
+Celerity: 0.25505 km/s
+Skips: 0
+Transmission Loss re ~1km: -48.1876 dB
+Caustics passed through: 2
+
+
+Calculating theta = 36 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 36 completed.
+Max Turning Height: 133.164 km
+Skips: 0
+Range: 382.372 km
+Travel Time: 1509.13 seconds (25.1522 minutes)
+Celerity: 0.253372 km/s
+Skips: 0
+Transmission Loss re ~1km: -47.2794 dB
+Caustics passed through: 2
+
+
+Calculating theta = 37 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 37 completed.
+Max Turning Height: 134.339 km
+Skips: 0
+Range: 377.211 km
+Travel Time: 1496.94 seconds (24.9491 minutes)
+Celerity: 0.251987 km/s
+Skips: 0
+Transmission Loss re ~1km: -46.1464 dB
+Caustics passed through: 2
+
+
+Calculating theta = 38 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 38 completed.
+Max Turning Height: 135.613 km
+Skips: 0
+Range: 373.246 km
+Travel Time: 1487.7 seconds (24.7951 minutes)
+Celerity: 0.250888 km/s
+Skips: 0
+Transmission Loss re ~1km: -45.0236 dB
+Caustics passed through: 2
+
+
+Calculating theta = 39 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 39 completed.
+Max Turning Height: 137.001 km
+Skips: 0
+Range: 370.462 km
+Travel Time: 1481.29 seconds (24.6882 minutes)
+Celerity: 0.250094 km/s
+Skips: 0
+Transmission Loss re ~1km: -42.3441 dB
+Caustics passed through: 2
+
+
+Calculating theta = 40 degrees...
+Maximum number of skips reached.
+Ray trace for angle theta = 40 completed.
+Max Turning Height: 138.516 km
+Skips: 0
+Range: 368.842 km
+Travel Time: 1477.62 seconds (24.627 minutes)
+Celerity: 0.249619 km/s
+Skips: 0
+Transmission Loss re ~1km: -40.1564 dB
+Caustics passed through: 2
+
+
+Calculating theta = 41 degrees...
+Ray entering thermosphere...stopping solver.
+Ray trace for angle theta = 41 completed.
+Max Turning Height: 140 km
+Skips: 0
+<<Modess>>
+
+Now processing azimuth = 90 (1 of 1)
+Using Sutherland-Bass absorption tweaked by a factor of 1
+
+WKB fix: new phasevelocity minimum= 297.64 m/s (was 206.86 m/s)
+ceff saved in ceff.nm
+______________________________________________________________________
+
+ -> Normal mode solution at 0.100 Hz and 90.00 deg (43 modes)...
+ -> Discrete spectrum: 297.64 m/s to 429.13 m/s
+Writing to file: 1D transmission loss at the ground...
+           file tloss_1d.nm created
+           file tloss_1d.lossless.nm created
+ Normal Modes Eff. Sound Speed run info:
+                   freq : 0.1
+                azimuth : 90
+                Nz_grid : 20000
+      z_min (meters MSL): 0
+      maxheight_km (MSL): 150
+   sourceheight_km (AGL): 0
+ receiverheight_km (AGL): 0
+             Nrng_steps : 1000
+            maxrange_km : 1000
+          gnd_imp_model : rigid
+Lamb wave boundary cond : 0
+  SLEPc tolerance param : 1e-08
+    write_2D_TLoss flag : 0
+write_phase_speeds flag : 0
+      write_speeds flag : 0
+  write_dispersion flag : 0
+       write_modes flag : 0
+         Nby2Dprop flag : 0
+       turnoff_WKB flag : 0
+             wind_units : mpersec
+    atmospheric profile : NCPA_canonical_profile_zuvwtdp.dat
+ write_atm_profile flag : 0
+
+ ... main() is done.
+Run duration: 2 seconds.
+<<CModess>>
+Processing azimuth = 90
+Using absorption times a factor of 1
+
+WKB fix: new phasevelocity minimum= 297.64 m/s (was 206.86 m/s)
+______________________________________________________________________
+
+ -> Complex Normal Mode solution at 0.100 Hz and 90.00 deg (43 modes)...
+ -> Discrete spectrum: 297.64 m/s to 429.13 m/s
+ Number of iterations of the method: 2
+ Solution method: krylovschur
+
+ Number of converged eigenpairs: 50
+
+        k           ||Ax-kx||/||kx||
+-------------------------------------
+000  3.178015e-06     3.274693e-12
+001  3.225559e-06     4.554066e-12
+002  3.123654e-06     4.741759e-12
+003  3.303352e-06     5.546693e-12
+004  3.324313e-06     5.843349e-12
+005  3.060217e-06     8.060409e-12
+006  3.020892e-06     7.559397e-12
+007  3.417035e-06     6.574744e-12
+008  3.436242e-06     4.727098e-12
+009  2.950084e-06     7.394691e-12
+010  2.919156e-06     6.060174e-12
+011  3.503374e-06     6.323257e-12
+012  2.848037e-06     1.027047e-11
+013  2.820561e-06     8.399683e-12
+014  3.576774e-06     7.609208e-12
+015  3.590043e-06     4.449316e-12
+016  2.755403e-06     6.320609e-12
+017  2.728689e-06     9.569556e-12
+018  3.682150e-06     7.629546e-12
+019  2.676412e-06     1.154621e-11
+020  3.725092e-06     4.585719e-12
+021  2.645643e-06     8.703604e-12
+022  3.778678e-06     4.707648e-12
+023  2.600633e-06     8.371626e-12
+024  2.557442e-06     8.639514e-12
+025  3.878086e-06     6.842633e-12
+026  2.510776e-06     9.848520e-12
+027  3.881362e-06     6.286343e-12
+028  2.462870e-06     9.570370e-12
+029  2.413958e-06     8.920693e-12
+030  3.979770e-06     5.064360e-12
+031  2.364196e-06     1.061074e-11
+032  4.045784e-06     5.870328e-12
+033  2.313899e-06     5.511291e-11
+034  4.083552e-06     1.021105e-11
+035  2.263196e-06     1.844604e-09
+036  2.212269e-06     1.219836e-09
+037  4.189362e-06     4.681201e-12
+038  4.218564e-06     7.669404e-12
+039  2.161255e-06     6.466851e-10
+040  2.110291e-06     3.607057e-10
+041  4.297145e-06     8.319850e-12
+042  2.059501e-06     2.097103e-10
+043  2.009005e-06     1.263079e-10
+044  4.399930e-06     6.246070e-12
+045  4.406853e-06     4.668034e-12
+046  1.958915e-06     7.677479e-11
+047  1.909346e-06     3.512867e-10
+048  4.518431e-06     1.200781e-11
+049  1.860442e-06     7.612215e-09
+Writing to file: 1D transmission loss at the ground...
+           file tloss_1d.cnm created
+           file tloss_1d.lossless.cnm created
+ Complex Normal Modes run info:
+                   freq : 0.1
+                azimuth : 90
+                Nz_grid : 20000
+      z_min (meters MSL): 0
+      maxheight_km (MSL): 150
+   sourceheight_km (AGL): 0
+ receiverheight_km (AGL): 0
+             Nrng_steps : 1000
+            maxrange_km : 1000
+          gnd_imp_model : rigid
+Lamb wave boundary cond : 0
+  SLEPc tolerance param : 1e-08
+    write_2D_TLoss flag : 0
+write_phase_speeds flag : 0
+  write_dispersion flag : 0
+       write_modes flag : 0
+         Nby2Dprop flag : 0
+       turnoff_WKB flag : 0
+             wind_units : mpersec
+    atmospheric profile : NCPA_canonical_profile_zuvwtdp.dat
+ write_atm_profile flag : 0
+
+ ... main() is done.
+Run duration: 15 seconds.
+<<ModessRD1WCM>>
+Rv size   = 4
+Rv[0] = 100000
+Rv[1] = 100000
+Rv[2] = 200000
+Rv[3] = 1e+06
+Sorted file list from directory: profiles
+profile0000.dat
+profile0089.dat
+profile0179.dat
+profile0269.dat
+profile0359.dat
+
+Making SampledProfile object from profiles/profile0000.dat
+
+Region 1 (0 to 100 km)
+ Range Dependent One-Way Couple Modes run info:
+                   freq : 0.1
+                azimuth : 90
+                Nz_grid : 20000
+      z_min (meters MSL): 0
+      maxheight_km (MSL): 150
+   sourceheight_km (AGL): 0
+ receiverheight_km (AGL): 0
+             Nrng_steps : 1000
+            maxrange_km : 1000
+          gnd_imp_model : rigid
+Lamb wave boundary cond : 0
+  SLEPc tolerance param : 1e-08
+    write_2D_TLoss flag : 0
+       turnoff_WKB flag : 0
+             wind_units : mpersec
+atmospheric profile dir : profiles
+
+WKB fix: new phasevelocity minimum= 325.23 m/s (was 254.60 m/s)
+ -> Normal mode solution at 0.100 Hz and 90.00 deg (40 modes)...
+ -> Discrete spectrum: 325.23 m/s to 448.50 m/s
+ -> Number of converged eigenpairs: 40
+
+Writing 1D TL to file: tloss_rd_1d.lossless.nm
+Writing 1D TL to file: tloss_rd_1d.nm
+
+Region 2 (100 to 200 km)
+Sorted file list from directory: profiles
+profile0000.dat
+profile0089.dat
+profile0179.dat
+profile0269.dat
+profile0359.dat
+
+Making SampledProfile object from profiles/profile0089.dat
+
+WKB fix: new phasevelocity minimum= 323.94 m/s (was 256.18 m/s)
+ -> Normal mode solution at 0.100 Hz and 90.00 deg (40 modes)...
+ -> Discrete spectrum: 323.94 m/s to 446.20 m/s
+ -> Number of converged eigenpairs: 40
+
+
+Region 3 (200 to 1000 km)
+Sorted file list from directory: profiles
+profile0000.dat
+profile0089.dat
+profile0179.dat
+profile0269.dat
+profile0359.dat
+
+Making SampledProfile object from profiles/profile0179.dat
+
+WKB fix: new phasevelocity minimum= 321.81 m/s (was 257.68 m/s)
+ -> Normal mode solution at 0.100 Hz and 90.00 deg (40 modes)...
+ -> Discrete spectrum: 321.81 m/s to 443.94 m/s
+ -> Number of converged eigenpairs: 40
+
+ Range Dependent One-Way Couple Modes run info:
+                   freq : 0.1
+                azimuth : 90
+                Nz_grid : 20000
+      z_min (meters MSL): 0
+      maxheight_km (MSL): 150
+   sourceheight_km (AGL): 0
+ receiverheight_km (AGL): 0
+             Nrng_steps : 1000
+            maxrange_km : 1000
+          gnd_imp_model : rigid
+Lamb wave boundary cond : 0
+  SLEPc tolerance param : 1e-08
+    write_2D_TLoss flag : 0
+       turnoff_WKB flag : 0
+             wind_units : mpersec
+atmospheric profile dir : profiles
+File tloss_rd_1d.lossless.nm written.
+File tloss_rd_1d.nm written.
+Maximum number of modes used: 40
+Number of atm. profiles used in this run: 3
+
+ ... main() is done.
+Run duration: 27 seconds.
+<<WMod>>
+ Wide Angle - High Mach - Normal Modes run info:
+                   freq : 0.1
+                azimuth : 90
+                Nz_grid : 20000
+      z_min (meters MSL): 0
+      maxheight_km (MSL): 150
+   sourceheight_km (AGL): 0
+ receiverheight_km (AGL): 0
+             Nrng_steps : 1000
+            maxrange_km : 1000
+          gnd_imp_model : rigid
+Lamb wave boundary cond : 0
+  SLEPc tolerance param : 1e-08
+    write_2D_TLoss flag : 0
+write_phase_speeds flag : 0
+  write_dispersion flag : 0
+       write_modes flag : 0
+         Nby2Dprop flag : 0
+       turnoff_WKB flag : 0
+             wind_units : mpersec
+    atmospheric profile : NCPA_canonical_profile_zuvwtdp.dat
+
+Now processing azimuth = 90 (1 of 1)
+
+ WKB fix: new phasevelocity minimum: 297.64 m/s (was 206.86 m/s); 
+ WKBIntegral=   10.8786595 at z =  15.82 km
+______________________________________________________________________
+
+ -> Solving wide-angle problem at  0.100 Hz and  90.00 deg (86 modes)...
+ -> Discrete spectrum: 297.64 m/s to 429.13 m/s
+ -> Quadratic eigenvalue problem  - double dimensionality.
+ Number of iterations of the method: 1
+ Solution method: krylovschur
+
+ Number of requested eigenvalues: 86
+ Stopping condition: tol=1e-08, maxit=465
+ Number of converged eigenpairs: 98
+
+Writing to file: 1D transmission loss at the ground...
+           file wtloss_1d.nm created
+           file wtloss_1d.lossless.nm created
+ Wide Angle - High Mach - Normal Modes run info:
+                   freq : 0.1
+                azimuth : 90
+                Nz_grid : 20000
+      z_min (meters MSL): 0
+      maxheight_km (MSL): 150
+   sourceheight_km (AGL): 0
+ receiverheight_km (AGL): 0
+             Nrng_steps : 1000
+            maxrange_km : 1000
+          gnd_imp_model : rigid
+Lamb wave boundary cond : 0
+  SLEPc tolerance param : 1e-08
+    write_2D_TLoss flag : 0
+write_phase_speeds flag : 0
+  write_dispersion flag : 0
+       write_modes flag : 0
+         Nby2Dprop flag : 0
+       turnoff_WKB flag : 0
+             wind_units : mpersec
+    atmospheric profile : NCPA_canonical_profile_zuvwtdp.dat
+ write_atm_profile flag : 0
+
+ ... main() is done.
+Run duration: 9 seconds.

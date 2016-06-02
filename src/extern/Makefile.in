@@ -1,0 +1,63 @@
+PETSC_VERSION=@PETSC_VERSION@
+PETSC_OS=@PETSC_OS@
+PETSC_DIR=@abs_top_builddir@/src/extern/petsc-@PETSC_VERSION@/
+SLEPC_DIR=@abs_top_builddir@/src/extern/slepc-@SLEPC_VERSION@/
+
+
+extern: petsc slepc
+
+petsc: .petsc-real .petsc-complex
+
+slepc: .slepc-real .slepc-complex
+
+.petsc-real: .petsc-untar
+	cd petsc-@PETSC_VERSION@ ; \
+	./configure PETSC_ARCH=@PETSC_ARCH_REAL@ --with-cc=@CC@ --with-fc=@FC@ --download-f-blas-lapack @PETSC_USE_SHARED_LIBRARIES@ @PETSC_USE_MPI@ ; \
+	cd ..
+	$(MAKE) -C $(PETSC_DIR) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=@PETSC_ARCH_REAL@ all
+	$(MAKE) -C $(PETSC_DIR) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=@PETSC_ARCH_REAL@ test
+	touch .petsc-real
+
+.petsc-complex: .petsc-untar
+	cd petsc-@PETSC_VERSION@ ; \
+	./configure PETSC_ARCH=@PETSC_ARCH_COMPLEX@ --with-cc=@CC@ --with-fc=@FC@ --download-f-blas-lapack --with-cxx=@CXX@ --with-scalar-type=complex --with-clanguage=cxx --with-fortran-kernels=generic @PETSC_USE_SHARED_LIBRARIES@ @PETSC_USE_MPI@ ; \
+	cd ..
+	$(MAKE) -C $(PETSC_DIR) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=@PETSC_ARCH_COMPLEX@ all
+	$(MAKE) -C $(PETSC_DIR) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=@PETSC_ARCH_COMPLEX@ test
+	touch .petsc-complex
+
+.slepc-real: .slepc-untar
+	cd slepc-@SLEPC_VERSION@ ; \
+	export PETSC_ARCH=@PETSC_ARCH_REAL@ ; \
+	export PETSC_DIR=$(PETSC_DIR) ; \
+	./configure
+	$(MAKE) -C $(SLEPC_DIR) PETSC_ARCH=@PETSC_ARCH_REAL@ SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(PETSC_DIR)
+	$(MAKE) -C $(SLEPC_DIR) PETSC_ARCH=@PETSC_ARCH_REAL@ SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(PETSC_DIR) test
+	touch .slepc-real
+
+.slepc-complex: .slepc-untar
+	cd slepc-@SLEPC_VERSION@ ; \
+	export PETSC_ARCH=@PETSC_ARCH_COMPLEX@ ; \
+	export PETSC_DIR=$(PETSC_DIR) ; \
+	./configure
+	$(MAKE) -C $(SLEPC_DIR) PETSC_ARCH=@PETSC_ARCH_COMPLEX@ SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(PETSC_DIR)
+	$(MAKE) -C $(SLEPC_DIR) PETSC_ARCH=@PETSC_ARCH_COMPLEX@ SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(PETSC_DIR) test
+	touch .slepc-complex
+
+
+
+.petsc-untar: 
+	-rm -rf petsc-@PETSC_VERSION@ ; \
+	tar xvzf petsc-@PETSC_VERSION@.tar.gz ; \
+	touch .petsc-untar
+
+.slepc-untar:
+	-rm -rf slepc-@SLEPC_VERSION@ ; \
+	tar xvzf slepc-@SLEPC_VERSION@.tar.gz ; \
+	touch .slepc-untar
+
+clean:
+	-rm -rf petsc-@PETSC_VERSION@ slepc-@SLEPC_VERSION@ .petsc-untar .slepc-untar .petsc-real .petsc-complex .slepc-real .slepc-complex
+	
+
+.PHONY: petsc slepc clean

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# perform comparisons of columns 2-5 of tloss_1d.cnm
+for i in 2 3 4 5 ; do
+        badcols=$(./coldiff CModess/tloss_1d.cnm results/CModess/tloss_1d.cnm $i 0.999 | wc -l)
+        if [ $badcols -ne 0 ] ; then
+                echo "Column $i of CModess test 1 FAILED"
+                exit 1
+        else
+                echo "Column $i of CModess test 1 OK"
+        fi
+done
+

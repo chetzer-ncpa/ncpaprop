@@ -1,0 +1,29 @@
+#SLEPC_DIR=@abs_top_builddir@/src/extern/slepc-@SLEPC_VERSION@
+export PETSC_VERSION:=@PETSC_VERSION@
+export SLEPC_VERSION:=@SLEPC_VERSION@
+export PETSC_DIR:=@abs_top_builddir@/src/extern/petsc-@PETSC_VERSION@
+export SLEPC_DIR:=@abs_top_builddir@/src/extern/slepc-@SLEPC_VERSION@
+export PETSC_ARCH:=@PETSC_ARCH_REAL@
+
+# the following provides CCPPFLAGS, CLINKER, CC_INCLUDES, SLEPC_INCLUDE, SLEPC_LIB
+include $(SLEPC_DIR)/conf/slepc_common
+
+INCPATHS=@INCLUDEFLAGS@ -I/usr/include ${CCPPFLAGS}
+OBJS=WMod_main.o SolveWMod.o ProcessOptionsNB.o WMod_lib.o
+TARGET=WMod
+
+all: $(TARGET)
+
+.PHONY: clean
+
+# link	
+$(TARGET): $(OBJS)
+	@MPICXX@ -o $@ $^ @LDFLAGS@  @STATICLIBS@ $(SLEPC_LIB) @LIBS@
+	cp $@ ../../bin
+	
+# compile 
+%.o: %.cpp
+	@MPICXX@ @CXXFLAGS@ ${INCPATHS} @DORUFLAGS@ -o $@ $<
+
+clean::
+	-$(RM) -rf $(OBJS) $(TARGET)

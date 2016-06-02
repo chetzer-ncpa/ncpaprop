@@ -1,0 +1,48 @@
+#!/usr/bin/perl -w
+
+use warnings;
+use strict;
+
+die "Usage: coldiff file1 file2 column tolerance [headerlines]\ntolerance is minimum ratio of column values (perfect agreement == 1)\n" unless 4 == @ARGV or 5 == @ARGV;
+
+my $file1 = shift @ARGV;
+my $file2 = shift @ARGV;
+my $col = shift @ARGV;
+my $delta = shift @ARGV;
+my $skiplines = 0;
+$skiplines = shift @ARGV if @ARGV;
+
+die "$file1 does not exist!\n" unless -f $file1;
+die "$file2 does not exist!\n" unless -f $file2;
+
+my ($fh1,$fh2);
+open($fh1,$file1) or die "Can't read $file1!\n";
+open($fh2,$file2) or die "Can't read $file2!\n";
+
+for (my $i = 0; $i < $skiplines; $i++) {
+	my $junk = <$fh1>;
+}
+
+for (my $i = 0; $i < $skiplines; $i++) {
+	my $junk = <$fh2>;
+}
+my $curline = $skiplines + 1;
+while(not eof $fh1 and not eof $fh2) {
+	my $line1 = <$fh1>;
+	chomp $line1;
+	my $line2 = <$fh2>;
+	chomp $line2;
+	my @v1 = split(/\s+/,$line1);
+	my @v2 = split(/\s+/,$line2);
+	die "Not enough columns in $file1 line $curline!\n" unless @v1 >= $col;
+	die "Not enough columns in $file2 line $curline!\n" unless @v2 >= $col;
+	my $ratio = $v1[$col-1] / $v2[$col-1];
+	$ratio = 1/$ratio if $ratio > 1;
+	if ($ratio < $delta) {
+		print "$curline\n";
+	}
+	$curline++;
+}
+close($fh1);
+close($fh2);
+

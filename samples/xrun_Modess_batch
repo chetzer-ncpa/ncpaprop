@@ -1,0 +1,28 @@
+#!/usr/bin/perl
+
+use POSIX;
+
+#my $f_max = 0;
+my $i = 1;
+my $az = 0;
+my $freq = 0.1;
+
+
+
+for ($i=0; $i<181; $i++) {
+    $az = 0+1*$i;
+#    printf "f_min = %15.12f\n", $f_min;
+
+        
+#    my $str1 = sprintf "../bin/Modess --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --azimuth %d --freq %g --write_dispersion \n", $az, $freq;
+    my $str1 = sprintf "../bin/Modess --atmosfile profile0000.dat --atmosfileorder zuvwtdp --azimuth %d --freq %g --write_dispersion \n", $az, $freq;
+    printf $str1;
+#    my $str2 = sprintf "cp phasespeeds.nm temp/phasespeeds_%03d.nm\n", $az;
+    my $str2 = sprintf "cp dispersion*.nm temp/dispersion_%03d.nm\n", $az;
+    printf $str2;
+    my $Modess1 = system($str1);
+    my $copy1 = system($str2);        
+
+}
+
+

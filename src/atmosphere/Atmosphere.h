@@ -1,0 +1,6 @@
+#include "AtmosphericProfile.h"
+#include "AtmosphericSpecification.h"
+#include "ProfileGroup.h"
+#include "SampledProfile.h"
+#include "Sounding.h"
+#include "JetProfile.h"

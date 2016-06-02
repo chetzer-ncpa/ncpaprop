@@ -1,0 +1,28 @@
+#!/usr/bin/perl -w
+
+use warnings;
+use strict;
+
+die "Usage: colcount file1 [headerlines]\n" unless 1 == @ARGV or 2 == @ARGV;
+
+my $file1 = shift @ARGV;
+my $skiplines = 0;
+$skiplines = shift @ARGV if @ARGV;
+
+die "$file1 does not exist!\n" unless -f $file1;
+
+my ($fh1);
+open($fh1,$file1) or die "Can't read $file1!\n";
+
+for (my $i = 0; $i < $skiplines; $i++) {
+	my $junk = <$fh1>;
+}
+if (eof $fh1) {
+	die "Not enough lines in $file1!\n";
+}
+my $line = <$fh1>;
+chomp $line;
+my @v = split(/\s+/,$line);
+print scalar(@v) . "\n";
+close($fh1);
+

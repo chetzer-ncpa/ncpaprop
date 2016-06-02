@@ -1,0 +1,80 @@
+1.2.8: 2015/04/13
+Added --enable-auto-dependencies flag to install dependencies automatically
+
+1.2.9: 2015/04/15
+Corrected library detection to remove cached values
+
+1.2.10: 2015/04/16
+Added recommended compilation flags for MacOS to GSL installation commands
+
+1.2.11: 2015/04/16
+Added error message for no package manager detected
+
+1.2.12: 2015/04/16
+Added support for user-specified package manager
+
+1.2.13: 2015/04/16
+Fixed bug in auto-installation detection
+
+1.2.14: 2015/04/16
+Made fink work smarter
+
+1.2.15: 2015/04/16
+Made fink work dumber but better
+Fixed cd bug in Mac source installations
+
+1.2.17: 2015/04/22
+Added code to parse output from older versions of gfortran -dumpversion
+
+1.2.18: 2015/05/05
+Added make test target to automate test scripts
+
+1.3.0: 2015/05/11
+Added new versions of Modess code files
+
+1.3.1: 2015/05/29
+Made compiler version determination smarter
+Made test comparison archive smaller
+
+1.3.3: 2015/06/04
+Shifted -L flags into LDFLAGS and propagated variable into Makefiles
+
+1.3.4: 2015/06/10
+Made it so that -L<finkdir>/lib/gcc4.8/lib only is added to LDFLAGS if g++-4 is the selected compiler
+
+1.3.5: 2015/06/11
+Only alarms about lack of package manager if it is actually needed
+
+1.3.6: 2015/06/16
+Made Fink path guesses smarter and added flag to disable same
+
+1.3.7: 2015/06/17
+Added improved help text to raytrace files showing example command
+
+1.3.8: 2015/09/23
+Removed superfluous helptext from raytrace for unsupported options
+
+1.3.9: 2015/09/24
+Changed raytrace example atmosphere to canonical
+
+1.3.10: 2015/09/25
+Made default wind units m/s for raytracer to match other routines
+
+1.3.11: 2015/09/25
+Added wnlrt (weakly nonlinear ray trace) to package
+
+1.3.12: 2015/09/25
+Fixed bug of hardcoded param file path to now look in current directory
+
+1.3.13: 2015/09/29
+Added missing wnlrt bits to Makefile
+
+1.3.14: 2015/09/30
+Added logic to guess library path when using MacPorts and gcc48
+
+1.3.15: 2015/10/01
+Folded in various code updates
+Created options files for raytrace.2d and raytrace.3d
+
+1.3.16: 2015/10/09
+Minor tweak to error message in raytrace.2d and raytrace.3d

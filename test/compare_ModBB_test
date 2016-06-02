@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# compare the following files:
+# myDispersionFile.dat
+# various disprs_#####_nm.bin
+
+

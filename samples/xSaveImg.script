@@ -1,0 +1,546 @@
+## use this to save to png;
+#      -e "set term png size 900,500;" \
+#      -e "set output 'plot1.png';" \
+#      -e "set xtics 200 textcolor  lt 3" \
+
+## use this to save to ps; then you can convert with: convert output.ps output.png
+#      -e "set term post enh color solid 16;" \
+#      -e "set output 'output.ps';" \
+
+
+# plot both 2D TL and ceff in the same .png figure
+# example: ./xrunMods.script cefftl2d_png 90 0.1
+if 
+  test $1 = cefftl2d_png
+then
+  if test $2
+  then 
+  if test $3 
+  then  
+    gnuplot -persist \
+      -e "Pi = 3.141592653589793;" \
+      -e "set term png size 900,500;" \
+      -e "set output 'TL2dCModesscan0p1Hz.png';" \
+      -e "unset multiplot;" \
+      -e "set multiplot" \
+      -e "set size 0.25, 1;" \
+      -e "set xtics 200 offset 0, 0.3 textcolor lt 3 font 'arial,11';" \
+      -e "set ytics 30 offset 0.5,0 textcolor lt 3 font 'arial,11'" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set grid;" \
+      -e "set title 'c_eff';" \
+      -e "set xlabel '[m/s]';" \
+      -e "set ylabel offset 3,0 'Altitude [km MSL]';" \
+      -e "show xlabel;" \
+      -e "filename = './atm_profile.nm';" \
+      -e "set yrange [0:150];" \
+      -e "plot filename using ((\$8) + (1*((\$2)*(sin($2*Pi/180))+ (\$3)*cos($2*Pi/180)))):1 with lines lt 3 title '';" \
+      -e "set size 0.9, 1.0;" \
+      -e "set origin 0.1,0;" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set pm3d map;" \
+      -e "set cbrange [-140:-100];" \
+      -e "set xtics 100 textcolor lt -1 font 'arial,11';" \
+      -e "set xtics offset 0, 0.1;" \
+      -e "unset ytics;" \
+      -e "unset grid;" \
+      -e "unset ylabel;" \
+      -e "set title 'CModess - 2D transmission loss [dB]; freq = $3 Hz';" \
+      -e "set xlabel 'Range [km]';" \
+      -e "splot './tloss_2d.cnm' using 1:2:(20*log10(sqrt(\$3**2 + \$4**2))) title 'TL';" \
+      -e "unset multiplot;"
+  else
+    echo frequency must be specified as the third argument
+  fi
+  else
+    echo azimuth must be specified as the second argument - in degrees
+  fi
+fi
+
+
+# plot both 2D PAPE TL and ceff in the same .png figure
+# example: ./xrunMods.script cefftl2dpape_png 90 0.1
+if 
+  test $1 = cefftl2dpape_png
+then
+  if test $2
+  then 
+  if test $3 
+  then  
+    gnuplot -persist \
+      -e "Pi = 3.141592653589793;" \
+      -e "set term png size 900,500;" \
+      -e "set output 'TL2dPapecan0p1Hz.png';" \
+      -e "unset multiplot;" \
+      -e "set multiplot" \
+      -e "set size 0.25, 1;" \
+      -e "set xtics 200 offset 0, 0.3 textcolor lt 3 font 'arial,11';" \
+      -e "set ytics 30 offset 0.5,0 textcolor lt 3 font 'arial,11'" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set grid;" \
+      -e "set title 'c_eff';" \
+      -e "set xlabel '[m/s]';" \
+      -e "set ylabel offset 3,0 'Altitude [km MSL]';" \
+      -e "show xlabel;" \
+      -e "filename = './atm_profile.nm';" \
+      -e "set yrange [0:150];" \
+      -e "plot filename using ((\$8) + (1*((\$2)*(sin($2*Pi/180))+ (\$3)*cos($2*Pi/180)))):1 with lines lt 3 title '';" \
+      -e "set size 0.9, 1.0;" \
+      -e "set origin 0.1,0;" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set pm3d map;" \
+      -e "set cbrange [-140:-100];" \
+      -e "set xtics 100 textcolor lt -1 font 'arial,11';" \
+      -e "set xtics offset 0, 0.1;" \
+      -e "unset ytics;" \
+      -e "unset grid;" \
+      -e "unset ylabel;" \
+      -e "set title 'Wide-Angle PAPE - 2D transmission loss [dB]; freq = $3 Hz';" \
+      -e "set xlabel 'Range [km]';" \
+      -e "splot './tloss_2d.pe' using 1:2:(20*log10(sqrt(\$3**2 + \$4**2))) title 'TL';" \
+      -e "unset multiplot;"
+  else
+    echo frequency must be specified as the third argument
+  fi
+  else
+    echo azimuth must be specified as the second argument - in degrees
+  fi
+fi
+
+
+# plot both 1D TL and ceff to .png
+# example: ./xrunMods.script cefftl_png 90 0.5
+if 
+  test $1 = cefftl_png
+then
+  if test $2
+  then 
+  if test $3 
+  then  
+    gnuplot -persist \
+      -e "set term png size 900,500;" \
+      -e "set output 'TL1dModesscan0p1Hzsrc20km.png';" \
+      -e "Pi = 3.141592653589793;" \
+      -e "unset multiplot;" \
+      -e "set multiplot" \
+      -e "set size 0.25, 1;" \
+      -e "set xtics 200" \
+      -e "set ytics 20" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set grid;" \
+      -e "set title 'c_eff';" \
+      -e "set xlabel '[m/s]';" \
+      -e "set yrange [0:150];" \
+      -e "filename = './atm_profile.nm';" \
+      -e "plot filename using (\$9):1 with lines lt 3 title '';" \
+      -e "set size 0.9, 1.0;" \
+      -e "set origin 0.15,0;" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set lmargin at screen 0.3;" \
+      -e "set rmargin at screen 0.95;" \
+      -e "set xtics 100 textcolor lt -1" \
+      -e "unset grid;" \
+      -e "set grid; show grid; set xlabel 'Range [km]';" \
+      -e "set ylabel 'TL [dB]' offset 1.5 ;" \
+      -e "set yrange [-160:-80];" \
+      -e "set title '1D transmission loss [dB]; freq = $3 Hz';" \
+      -e "plot './tloss_1d.lossless.nm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 3 title 'lossless', './tloss_1d.nm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 1 title 'lossy';" \
+      -e "unset multiplot;"
+  else
+    echo frequency must be specified as the third argument
+  fi
+  else
+    echo azimuth must be specified as the second argument - in degrees
+  fi
+fi
+
+
+# save 1D Tl and c_eff to png format: e.g.  ./xSaveImg.script cefftl5 90 0.1
+if 
+  test $1 = cefftl5
+then
+  if test $2
+  then 
+  if test $3 
+  then  
+    gnuplot -persist \
+      -e "set term png size 900,500;" \
+      -e "set output 'TL1dCModesscan0p1Hz.png';" \
+      -e "set xtics 200 textcolor  lt 3" \
+      -e "set ytics 20 textcolor lt 3" \
+      -e "Pi = 3.141592653589793;" \
+      -e "unset multiplot;" \
+      -e "set multiplot" \
+      -e "set size 0.25, 1;" \
+      -e "set xtics 200" \
+      -e "set ytics 20" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set grid;" \
+      -e "set title 'c_eff';" \
+      -e "set xlabel '[m/s]';" \
+      -e "set ylabel offset 2,0 'Altitude [km MSL]';" \
+      -e "filename = './atm_profile.nm';" \
+      -e "plot filename using (\$9):1 with lines lt 3 title '';" \
+      -e "set size 0.9, 1.0;" \
+      -e "set origin 0.15,0;" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set lmargin at screen 0.3;" \
+      -e "set rmargin at screen 0.95;" \
+      -e "set xtics 100 textcolor lt -1" \
+      -e "set ytics 20 textcolor lt -1" \
+      -e "unset grid;" \
+      -e "set grid; show grid; set xlabel 'Range [km]';" \
+      -e "set ylabel 'TL [dB]' offset 1.5 ;" \
+      -e "set title 'CModess - 1D transmission loss [dB]; freq = $3 Hz';" \
+      -e "plot './tloss_1d.lossless.cnm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 3 title 'lossless', './tloss_1d.cnm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 1 title 'lossy';" \
+      -e "unset multiplot;"
+  else
+    echo frequency must be specified as the third argument
+  fi
+  else
+    echo azimuth must be specified as the second argument - in degrees
+  fi
+fi
+
+
+# save PAPE 1D Tl and c_eff to png format: e.g.  ./xSaveImg.script cefftlpape 90 0.1
+if 
+  test $1 = cefftlpape
+then
+  if test $2
+  then 
+  if test $3 
+  then  
+    gnuplot -persist \
+      -e "set term png size 900,500;" \
+      -e "set output 'TL1dPapecan0p1Hz.png';" \
+      -e "set xtics 200 textcolor  lt 3" \
+      -e "set ytics 20 textcolor lt 3" \
+      -e "Pi = 3.141592653589793;" \
+      -e "unset multiplot;" \
+      -e "set multiplot" \
+      -e "set size 0.25, 1;" \
+      -e "set xtics 200" \
+      -e "set ytics 20" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set grid;" \
+      -e "set title 'c_eff';" \
+      -e "set xlabel '[m/s]';" \
+      -e "set ylabel offset 2,0 'Altitude [km MSL]';" \
+      -e "filename = './atm_profile.nm';" \
+      -e "plot filename using (\$9):1 with lines lt 3 title '';" \
+      -e "set size 0.9, 1.0;" \
+      -e "set origin 0.15,0;" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set lmargin at screen 0.3;" \
+      -e "set rmargin at screen 0.95;" \
+      -e "set xtics 100 textcolor lt -1" \
+      -e "set ytics 20 textcolor lt -1" \
+      -e "unset grid;" \
+      -e "set grid; show grid; set xlabel 'Range [km]';" \
+      -e "set ylabel 'TL [dB]' offset 1.5 ;" \
+      -e "set title 'Wide Angle PAPE - 1D transmission loss [dB]; freq = $3 Hz';" \
+      -e "plot './tloss_1d.pe' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 3 title '';" \
+      -e "unset multiplot;"
+  else
+    echo frequency must be specified as the third argument
+  fi
+  else
+    echo azimuth must be specified as the second argument - in degrees
+  fi
+fi
+
+
+# save Nby2D polar plot to the screen:
+if 
+  test $1 = nby2d_screen
+then
+    if test $2
+    then
+      gnuplot -persist \
+        -e "set pm3d map;" \
+        -e "set cbrange [-140:-100];" \
+        -e "set palette rgb  7,5,15;" \
+        -e "set xlabel 'km'; set ylabel 'km';" \
+        -e "set title 'Transmission loss [dB]; freq = $2 Hz';" \
+        -e "set size square;" \
+        -e "splot './Nby2D_tloss_1d.nm' using (\$1*(sin(\$2*pi/180))):(\$1*(cos(\$2*pi/180))):(10*log10(\$3**2 + \$4**2)) title '';"
+        echo $1 $2
+    else
+      echo frequency must be specified as the second argument
+    fi
+fi
+
+
+# save Nby2D polar plot in png:
+if 
+  test $1 = nby2d_png
+then
+    if test $2
+    then
+      gnuplot -persist \
+        -e "set term png size 900,500;" \
+        -e "set output 'Nby2DModesscan0p1Hz.png';" \
+        -e "set pm3d map;" \
+        -e "set cbrange [-140:-100];" \
+        -e "set palette rgb  7,5,15;" \
+        -e "set xlabel 'km'; set ylabel 'km';" \
+        -e "set title 'Transmission loss [dB]; freq = $2 Hz';" \
+        -e "set size square;" \
+        -e "splot './Nby2D_tloss_1d.nm' using (\$1*(sin(\$2*pi/180))):(\$1*(cos(\$2*pi/180))):(10*log10(\$3**2 + \$4**2)) title '';"
+        echo $1 $2
+    else
+      echo frequency must be specified as the second argument
+    fi
+fi
+
+
+
+
+
+# save in png, eps etc
+if 
+  test $1 = cefftl
+then
+  if test $2
+  then 
+  if test $3 
+  then  
+    gnuplot -persist \
+      -e "set term post enh color solid 16;" \
+      -e "set out 'plot2.eps';" \
+      -e "Pi = 3.141592653589793;" \
+      -e "unset multiplot;" \
+      -e "set multiplot" \
+      -e "set size 0.25, 1;" \
+      -e "set xtics 200" \
+      -e "set ytics 20" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set grid;" \
+      -e "set title 'c_{eff}';" \
+      -e "set xlabel '[m/s]';" \
+      -e "filename = './atm_profile.nm';" \
+      -e "plot filename using (\$9):1 with lines lt 3 title '';" \
+      -e "set size 0.9, 1.0;" \
+      -e "set origin 0.15,0;" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set lmargin at screen 0.3;" \
+      -e "set rmargin at screen 0.95;" \
+      -e "set xtics 100 textcolor lt 7" \
+      -e "set ytics 20 textcolor lt 7" \
+      -e "unset grid;" \
+      -e "set grid; show grid; set xlabel 'Range [km]';" \
+      -e "set ylabel 'TL [dB]' offset 1.5 ;" \
+      -e "set title '1D transmission loss [dB]; freq = $3 Hz';" \
+      -e "plot './tloss_1d.nm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 1 title 'Normal Modes';" \
+      -e "unset multiplot;"
+  else
+    echo frequency must be specified as the third argument
+  fi
+  else
+    echo azimuth must be specified as the second argument - in degrees
+  fi
+fi
+
+
+      
+# save in png, eps etc
+if 
+  test $1 = cefftl2
+then
+  if test $2
+  then 
+  if test $3 
+  then  
+    gnuplot -persist \
+      -e "set term post enh color solid 16;" \
+      -e "set out 'plot2.eps';" \
+      -e "Pi = 3.141592653589793;" \
+      -e "unset multiplot;" \
+      -e "set multiplot" \
+      -e "set size 0.25, 1;" \
+      -e "set xtics 200" \
+      -e "set ytics 20" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set grid;" \
+      -e "set title 'c_eff';" \
+      -e "set xlabel '[m/s]';" \
+      -e "filename = './atm_profile.nm';" \
+      -e "plot filename using (\$9):1 with lines lt 3 title '';" \
+      -e "set size 0.9, 1.0;" \
+      -e "set origin 0.15,0;" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set lmargin at screen 0.3;" \
+      -e "set rmargin at screen 0.95;" \
+      -e "set xtics 100 textcolor lt 7" \
+      -e "set ytics 20 textcolor lt 7" \
+      -e "unset grid;" \
+      -e "set grid; show grid; set xlabel 'Range [km]';" \
+      -e "set ylabel 'TL [dB]' offset 1.5 ;" \
+      -e "set title '1D transmission loss [dB]; freq = $3 Hz';" \
+      -e "plot './RAMPE_TL0p5Hz.txt' using 1:2 with lines lt 3 title 'RAMPE';" \
+      -e "replot './tloss_1d.nm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 1 title 'Normal Modes';" \
+      -e "unset multiplot;"
+  else
+    echo frequency must be specified as the third argument
+  fi
+  else
+    echo azimuth must be specified as the second argument - in degrees
+  fi
+fi
+
+
+# output to screen
+if 
+  test $1 = cefftl3
+then
+  if test $2
+  then 
+  if test $3 
+  then  
+    gnuplot -persist \
+      -e "Pi = 3.141592653589793;" \
+      -e "unset multiplot;" \
+      -e "set multiplot" \
+      -e "set size 0.25, 1;" \
+      -e "set xtics 200" \
+      -e "set ytics 20" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set grid;" \
+      -e "set title 'c_eff';" \
+      -e "set xlabel '[m/s]';" \
+      -e "filename = './atm_profile.nm';" \
+      -e "plot filename using (\$9):1 with lines lt 3 title '';" \
+      -e "set size 0.9, 1.0;" \
+      -e "set origin 0.15,0;" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set lmargin at screen 0.3;" \
+      -e "set rmargin at screen 0.95;" \
+      -e "set xtics 100 textcolor lt 6" \
+      -e "set ytics 20 textcolor lt 6" \
+      -e "unset grid;" \
+      -e "set grid; show grid; set xlabel 'Range [km]';" \
+      -e "set ylabel 'TL [dB]' offset 1.5 ;" \
+      -e "set title '1D transmission loss [dB]; freq = $3 Hz';" \
+      -e "plot './temp.txt' using 1:2 with lines lt 3 title 'RAMPE';" \
+      -e "replot './tloss_1d.nm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 1 title 'Normal Modes';" \
+      -e "unset multiplot;"
+  else
+    echo frequency must be specified as the third argument
+  fi
+  else
+    echo azimuth must be specified as the second argument - in degrees
+  fi
+fi
+
+# output to screen ceff and 1D TL
+if 
+  test $1 = cefftl4
+then
+  if test $2
+  then 
+  if test $3 
+  then  
+    gnuplot -persist \
+      -e "Pi = 3.141592653589793;" \
+      -e "unset multiplot;" \
+      -e "set multiplot" \
+      -e "set size 0.25, 1;" \
+      -e "set xtics 200 textcolor lt 3" \
+      -e "set ytics 20 textcolor lt 3" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set grid;" \
+      -e "set title 'c_eff';" \
+      -e "set xlabel '[m/s]';" \
+      -e "set ylabel offset 2 '[km]';" \
+      -e "filename = './atm_profile.nm';" \
+      -e "plot filename using (\$9):1 with lines lt 3 title '';" \
+      -e "set size 0.9, 1.0;" \
+      -e "set origin 0.15,0;" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set lmargin at screen 0.3;" \
+      -e "set rmargin at screen 0.95;" \
+      -e "set xtics 100 textcolor lt 7" \
+      -e "set ytics 20 textcolor lt 7" \
+      -e "unset grid;" \
+      -e "set grid; show grid; set xlabel 'Range [km]';" \
+      -e "set ylabel 'TL [dB]' offset 1.5 ;" \
+      -e "set title '1D transmission loss [dB]; freq = $3 Hz';" \
+      -e "plot './tloss_1d.lossless.nm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 3 title 'lossless', './tloss_1d.nm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 1 title 'lossy';" \
+      -e "unset multiplot;"   
+  else
+    echo frequency must be specified as the third argument
+  fi
+  else
+    echo azimuth must be specified as the second argument - in degrees
+  fi
+fi
+
+
+# 2D Tloss - output to screen
+if 
+  test $1 = cefftl2d
+then
+  if test $2
+  then 
+  if test $3 
+  then  
+    gnuplot -persist \
+      -e "Pi = 3.141592653589793;" \
+      -e "unset multiplot;" \
+      -e "set multiplot" \
+      -e "set size 0.25, 1;" \
+      -e "set xtics 200 textcolor lt 3" \
+      -e "set ytics 20 textcolor lt 3" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set grid;" \
+      -e "set title 'c_eff';" \
+      -e "set xlabel '[m/s]';" \
+      -e "set ylabel offset 2 'Height [km]';" \
+      -e "filename = './atm_profile.nm';" \
+      -e "plot filename using (\$9):1 with lines lt 3 title '';" \
+      -e "set size 0.9, 1.0;" \
+      -e "set origin 0.15,0;" \
+      -e "set bmargin at screen 0.15;" \
+      -e "set tmargin at screen 0.9;" \
+      -e "set lmargin at screen 0.3;" \
+      -e "set rmargin at screen 0.95;" \
+      -e "set xtics 100 textcolor lt 7" \
+      -e "set ytics 20 textcolor lt 7" \
+      -e "unset grid;" \
+      -e "set pm3d map;" \
+      -e "set cbrange [-140:-100];" \
+      -e "set grid; show grid; set xlabel 'Range [km]';" \
+      -e "set title '2D transmission loss [dB]; freq = $3 Hz';" \
+      -e "splot './tloss_2d.nm' using 1:2:(20*log10(sqrt(\$3**2 + \$4**2)));" \
+      -e "unset multiplot;"   
+  else
+    echo frequency must be specified as the third argument
+  fi
+  else
+    echo azimuth must be specified as the second argument - in degrees
+  fi
+fi
+
+
+
+

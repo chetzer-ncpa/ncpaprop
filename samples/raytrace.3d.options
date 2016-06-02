@@ -1,0 +1,9 @@
+elev : 1
+delev : 1
+maxelev : 45
+skips : 1
+atmosfile : NCPA_canonical_profile_zuvwtdp.dat
+atmosfileorder : zuvwtdp
+maxraylength : 800
+maxheight : 140
+

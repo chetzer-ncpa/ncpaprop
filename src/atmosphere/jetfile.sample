@@ -1,0 +1,17 @@
+# Comments can be indicated by a # in the FIRST COLUMN
+# First, the number of jets in the file
+2
+# now, for each jet we need a height, speed, width and azimuth line
+# all units in kilometers, km/s, and degrees from north
+#
+# stratospheric jet
+speed 0.06
+height 60
+width 17.5
+azimuth 0.0
+# jet stream
+speed 0.01
+height 10
+width 2
+azimuth 0.0
+# nocturnal jet

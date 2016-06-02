@@ -1,0 +1,14 @@
+INCPATHS=-I. -I../common -I../atmosphere -I/usr/local/include -I/usr/include ${CCPPFLAGS}
+
+all: tdpape
+
+.PHONY: clean
+
+tdpape: ProcessOptionsTDPE.o tdpape_main.o
+	g++ -o $@ $^ ../../lib/libcommon.a -lgsl -lgslcblas -lm -lfftw3 -L/usr/lib
+
+%.o: %.cpp
+	g++ -fpic -c -ggdb -Wall ${INCPATHS} -o $@ $<
+
+clean::
+	-$(RM) -rf ProcessOptionsTDPE.o tdpape_main.o tdpape

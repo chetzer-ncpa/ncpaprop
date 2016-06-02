@@ -1,0 +1,61 @@
+ModESSRD1WCM is the range-dependent normal mode code implementing the One-Way Coupled Modes method.
+See for example: Sec. 5.9.2 in Computational Ocean Acoustics by Jensen et. al. (1994) 
+
+The zip file should unzip into these directories:
+
+atmosphere  bin  common  lib  CModess  ModBB  ModESS ModESSRD1WCM_1WCM ModESS_2WCM Pade_PE raytrace samples  WMod
+
+At the command line in this OUTERMOST directory type:
+>> make clean
+>> make
+This makes some of the needed objects in Claus' architecture.
+
+Next go into "ModESSRD1WCM" directory and type:
+
+>> make ModESSRD1WCM
+
+and the executable ModESSRD1WCM should be made and also copied to the "bin" directory.
+
+Run ModESSRD1WCM by going to the "samples" directory and issue:
+
+>> ../bin/ModESSRD1WCM
+
+Without any arguments this should print the instructions on how to run.
+
+The options are a mix: some are from the command line while others that change
+less frequently are loaded from an options file: Modess.options located in "samples".
+---------------------------------------------------------------------------
+Example of ModESSRD1WCM.options file contents (the colon separator is mandatory):
+---------------------------------------------------------------------------
+skiplines    : 0
+maxheight_km : 150
+Nz_grid : 20000
+maxrange_km : 1000
+Nrng_steps 	: 1000
+sourceheight_km : 0.05
+ground_impedance_model : rigid
+Lamb_wave_BC : 0
+---------------------------------------------------------------------------
+
+Examples run in the "samples" directory:
+
+>> ../bin/ModESSRD1WCM --use_1D_profiles_from_dir profiles --atmosfileorder zuvwtdp --skiplines 1 --azimuth 90 --freq 0.1 --use_profile_ranges_km 100_300_500
+
+>> ../bin/ModESSRD1WCM --use_1D_profiles_from_dir profiles --atmosfileorder zuvwtdp --skiplines 1 --azimuth 90 --freq 0.1 --use_profiles_at_steps_km 200
+
+>> ../bin/ModESSRD1WCM --g2senvfile g2sgcp2011012606L.jordan.env --atmosfileorder zuvwtdp --skiplines 1 --azimuth 90 --freq 0.1 --use_profile_ranges_km 50_100_150_200_250_300
+
+>> ../bin/ModESSRD1WCM  --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 1 --azimuth 90 --freq 0.1
+
+This last example is in fact not a range-dependent case since it just loads a single 1D atmospheric profile.
+
+Plotting: 
+  gnuplot -persist \
+    -e "plot './tloss_rd_1d.lossless.nm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 3 title 'lossless';" \
+    -e "set grid; show grid; set xlabel 'Range [km]'; set ylabel 'TL [dB]';" \
+    -e "set title '1D transmission loss (1-way coupled modes)'; replot;"
+
+
+
+
+

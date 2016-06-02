@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# perform comparisons of columns 2-4 of wtloss_1d.nm
+for i in 2 3 4 ; do
+	badcols=$(./coldiff WMod/wtloss_1d.nm results/WMod/wtloss_1d.nm $i 0.99 | wc -l)
+	if [ $badcols -ne 0 ] ; then
+		echo "Column $i of WMod test FAILED"
+		exit 1
+	else
+		echo "Column $i of WMod test OK"
+	fi
+done
+

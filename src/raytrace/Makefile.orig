@@ -1,0 +1,50 @@
+TYPE=exe
+NAME=raytrace
+VERSION=.1.1.0
+LIBNAMES=atmosphere common
+STATICLIBS=$(foreach f,$(LIBNAMES),../../lib/lib$(f).a)
+DEPENDENCIES=gsl gslcblas
+
+EXTENSIONS=cpp c f90 f77 f
+ALL=$(TARGET)
+
+SOURCES=$(wildcard *.cpp) 
+OBJECTS=$(SOURCES:.cpp=.o)
+LIBLIST=$(foreach d,$(DEPENDENCIES),-l$(d))
+
+# Set default values for compiler and flags
+ifeq ($(TYPE),lib)
+ TARGET=lib$(NAME).so$(VERSION)
+ TARGET0=lib$(NAME).so
+ LINKCOMMAND=$(CXX) $(LDFLAGS) $(LIBDIR) -o 
+else ifeq ($(TYPE),static)
+ TARGET=lib$(NAME).a
+ TARGET0=$(TARGET)
+ LINKCOMMAND=ar curv 
+else
+ TARGET=$(NAME)
+ TARGET0=$(TARGET)
+ LINKCOMMAND=$(CXX) $(LDFLAGS) $(LIBDIR) -o
+endif
+
+.PHONY: clean tidy install
+
+all: raytrace.2d raytrace.3d
+
+raytrace.2d: Acoustic2DEquationSet.o AcousticEquationSet.o AtmosphericBreakConditions.o GeneralBreakConditions.o ODESystemBreakCondition.o ODESystem.o ReflectionCondition2D.o raytrace.2d.o
+	$(CXX) $(LDFLAGS) -o $@ $^ $(STATICLIBS) $(LIBLIST) 
+	cp $@ ../../bin
+
+raytrace.3d: Acoustic3DEquationSet.o AcousticEquationSet.o AtmosphericBreakConditions.o GeneralBreakConditions.o ODESystemBreakCondition.o ODESystem.o ReflectionCondition3D.o raytrace.3d.o
+	$(CXX) $(LDFLAGS) -o $@ $^ $(STATICLIBS) $(LIBLIST)
+	cp $@ ../../bin
+
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -o $@ $<
+
+clean:
+	rm -rf $(TARGET) $(OBJECTS) raytrace.2d raytrace.3d
+
+tidy:
+	rm -rf *.o

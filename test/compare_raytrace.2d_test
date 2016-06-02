@@ -1,0 +1,50 @@
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+
+my $tolerance = 0.99;
+my %ranges = ();
+my $in;
+unless (open($in,"raytrace.2d/raypaths.2d.dat")) {
+	print "Can't open original raypaths.2d.dat file for comparison!\n";
+	exit(1);
+}
+my $curelev;
+while(<$in>) {
+	chomp;
+	if (/^# Elevation/) {
+		$curelev = $_;
+	} elsif (/^# Range:\s+([\d\.]+)/) {
+		$ranges{ $curelev } = $1;
+	}
+}
+close($in);
+
+unless (open($in,"results/raytrace.2d/raypaths.2d.dat")) {
+        print "Can't open new raypaths.2d.dat file for comparison!\n";
+        exit(1);
+}
+while(<$in>) {
+        chomp;
+        if (/^# Elevation/) {
+                $curelev = $_;
+        } elsif (/^# Range:\s+([\d\.]+)/) {
+                if (not exists $ranges{ $curelev }) {
+                        $curelev =~ s/^#\s//;
+                        print "No results found for $curelev in raytrace.2d test!\n";
+                        exit(1);
+                }
+
+		my $ratio = $1 / $ranges{ $curelev };
+		$ratio = 1/$ratio if $ratio > 1;
+		if ($ratio < $tolerance) {
+			$curelev =~ s/^#\s//;
+			print "Test failed for $curelev in raytrace.2d test!\n";
+			exit(1);
+		}
+        }
+}
+close($in);
+
+print "raytrace.2d test OK\n";
