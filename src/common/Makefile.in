@@ -13,7 +13,7 @@ common: libcommon.a
 
 libcommon.a: $(OBJECTS)
 	ar curv $@ $^
-	cp $@ ../../lib
+	cp $@ ../../lib/
 
 %.o: %.cpp
 	@CXX@ @CXXFLAGS@ @INCLUDEFLAGS@ -o $@ $<
