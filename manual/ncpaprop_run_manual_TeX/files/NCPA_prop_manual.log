@@ -1,0 +1,663 @@
+This is pdfTeX, Version 3.1415926-1.40.11 (TeX Live 2010/Fink) (format=pdflatex 2011.8.31)  22 JUL 2016 13:54
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**NCPA_prop_manual.tex
+(./NCPA_prop_manual.tex
+LaTeX2e <2009/09/24>
+Babel <v3.8l> and hyphenation patterns for english, dumylang, nohyphenation, ge
+rman-x-2009-06-19, ngerman-x-2009-06-19, ancientgreek, ibycus, arabic, armenian
+, basque, bulgarian, catalan, pinyin, coptic, croatian, czech, danish, dutch, u
+kenglish, usenglishmax, esperanto, estonian, farsi, finnish, french, galician, 
+german, ngerman, swissgerman, monogreek, greek, hungarian, icelandic, assamese,
+ bengali, gujarati, hindi, kannada, malayalam, marathi, oriya, panjabi, tamil, 
+telugu, indonesian, interlingua, irish, italian, kurmanji, lao, latin, latvian,
+ lithuanian, mongolian, mongolianlmc, bokmal, nynorsk, polish, portuguese, roma
+nian, russian, sanskrit, serbian, slovak, slovenian, spanish, swedish, turkish,
+ turkmen, ukrainian, uppersorbian, welsh, loaded.
+(/sw/share/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2007/10/19 v1.4h Standard LaTeX document class
+(/sw/share/texmf-dist/tex/latex/base/size10.clo
+File: size10.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+(/sw/share/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/sw/share/texmf-dist/tex/latex/graphics/keyval.sty
+Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
+\KV@toks@=\toks14
+)
+(/sw/share/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2009/02/05 v1.0o Standard LaTeX Graphics (DPC,SPQR)
+
+(/sw/share/texmf-dist/tex/latex/graphics/trig.sty
+Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
+)
+(/sw/share/texmf-dist/tex/latex/latexconfig/graphics.cfg
+File: graphics.cfg 2010/04/23 v1.9 graphics configuration of TeX Live
+)
+Package graphics Info: Driver file: pdftex.def on input line 91.
+
+(/sw/share/texmf-dist/tex/latex/pdftex-def/pdftex.def
+File: pdftex.def 2010/02/14 v0.04n Graphics/color for pdfTeX
+\Gread@gobject=\count87
+))
+\Gin@req@height=\dimen103
+\Gin@req@width=\dimen104
+)
+(/sw/share/texmf-dist/tex/latex/amsmath/amsmath.sty
+Package: amsmath 2000/07/18 v2.13 AMS math features
+\@mathmargin=\skip43
+
+For additional information on amsmath, use the `?' option.
+(/sw/share/texmf-dist/tex/latex/amsmath/amstext.sty
+Package: amstext 2000/06/29 v2.01
+
+(/sw/share/texmf-dist/tex/latex/amsmath/amsgen.sty
+File: amsgen.sty 1999/11/30 v2.0
+\@emptytoks=\toks15
+\ex@=\dimen105
+))
+(/sw/share/texmf-dist/tex/latex/amsmath/amsbsy.sty
+Package: amsbsy 1999/11/29 v1.2d
+\pmbraise@=\dimen106
+)
+(/sw/share/texmf-dist/tex/latex/amsmath/amsopn.sty
+Package: amsopn 1999/12/14 v2.01 operator names
+)
+\inf@bad=\count88
+LaTeX Info: Redefining \frac on input line 211.
+\uproot@=\count89
+\leftroot@=\count90
+LaTeX Info: Redefining \overline on input line 307.
+\classnum@=\count91
+\DOTSCASE@=\count92
+LaTeX Info: Redefining \ldots on input line 379.
+LaTeX Info: Redefining \dots on input line 382.
+LaTeX Info: Redefining \cdots on input line 467.
+\Mathstrutbox@=\box26
+\strutbox@=\box27
+\big@size=\dimen107
+LaTeX Font Info:    Redeclaring font encoding OML on input line 567.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 568.
+\macc@depth=\count93
+\c@MaxMatrixCols=\count94
+\dotsspace@=\muskip10
+\c@parentequation=\count95
+\dspbrk@lvl=\count96
+\tag@help=\toks16
+\row@=\count97
+\column@=\count98
+\maxfields@=\count99
+\andhelp@=\toks17
+\eqnshift@=\dimen108
+\alignsep@=\dimen109
+\tagshift@=\dimen110
+\tagwidth@=\dimen111
+\totwidth@=\dimen112
+\lineht@=\dimen113
+\@envbody=\toks18
+\multlinegap=\skip44
+\multlinetaggap=\skip45
+\mathdisplay@stack=\toks19
+LaTeX Info: Redefining \[ on input line 2666.
+LaTeX Info: Redefining \] on input line 2667.
+)
+(/sw/share/texmf-dist/tex/latex/sidecap/sidecap.sty
+Package: sidecap 2003/06/06 v1.6f SideCap Package (RN/HjG)
+
+(/sw/share/texmf-dist/tex/latex/base/ifthen.sty
+Package: ifthen 2001/05/26 v1.1c Standard LaTeX ifthen package (DPC)
+)
+\SC@BOXWD=\dimen114
+\SC@CAPWD=\dimen115
+\SC@tempdima=\dimen116
+\SC@tempdimb=\dimen117
+\c@SC@C=\count100
+\SC@BOX=\box28
+)
+(/sw/share/texmf-dist/tex/latex/subfigure/subfigure.sty
+Package: subfigure 2002/03/15 v2.1.5 subfigure package
+\subfigtopskip=\skip46
+\subfigcapskip=\skip47
+\subfigcaptopadj=\dimen118
+\subfigbottomskip=\skip48
+\subfigcapmargin=\dimen119
+\subfiglabelskip=\skip49
+\c@subfigure=\count101
+\c@lofdepth=\count102
+\c@subtable=\count103
+\c@lotdepth=\count104
+
+****************************************
+* Local config file subfigure.cfg used *
+****************************************
+(/sw/share/texmf-dist/tex/latex/subfigure/subfigure.cfg)
+\subfig@top=\skip50
+\subfig@bottom=\skip51
+)
+(/sw/share/texmf-dist/tex/latex/comment/comment.sty
+\CommentStream=\write3
+
+Excluding comment 'comment')
+(/sw/share/texmf-dist/tex/latex/amsfonts/amssymb.sty
+Package: amssymb 2009/06/22 v3.00
+
+(/sw/share/texmf-dist/tex/latex/amsfonts/amsfonts.sty
+Package: amsfonts 2009/06/22 v3.00 Basic AMSFonts support
+\symAMSa=\mathgroup4
+\symAMSb=\mathgroup5
+LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
+(Font)                  U/euf/m/n --> U/euf/b/n on input line 96.
+))
+(/sw/share/texmf-dist/tex/latex/xcolor/xcolor.sty
+Package: xcolor 2007/01/21 v2.11 LaTeX color extensions (UK)
+
+(/sw/share/texmf-dist/tex/latex/latexconfig/color.cfg
+File: color.cfg 2007/01/18 v1.5 color configuration of teTeX/TeXLive
+)
+Package xcolor Info: Driver file: pdftex.def on input line 225.
+
+(/sw/share/texmf-dist/tex/latex/colortbl/colortbl.sty
+Package: colortbl 2001/02/13 v0.1j Color table columns (DPC)
+
+(/sw/share/texmf-dist/tex/latex/tools/array.sty
+Package: array 2008/09/09 v2.4c Tabular extension package (FMi)
+\col@sep=\dimen120
+\extrarowheight=\dimen121
+\NC@list=\toks20
+\extratabsurround=\skip52
+\backup@length=\skip53
+)
+\everycr=\toks21
+\minrowclearance=\skip54
+)
+\rownum=\count105
+Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1337.
+Package xcolor Info: Model `hsb' substituted by `rgb' on input line 1341.
+Package xcolor Info: Model `RGB' extended on input line 1353.
+Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1355.
+Package xcolor Info: Model `Hsb' substituted by `hsb' on input line 1356.
+Package xcolor Info: Model `tHsb' substituted by `hsb' on input line 1357.
+Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1358.
+Package xcolor Info: Model `Gray' substituted by `gray' on input line 1359.
+Package xcolor Info: Model `wave' substituted by `hsb' on input line 1360.
+)
+(/sw/share/texmf-dist/tex/latex/amscls/amsthm.sty
+Package: amsthm 2004/08/06 v2.20
+\thm@style=\toks22
+\thm@bodyfont=\toks23
+\thm@headfont=\toks24
+\thm@notefont=\toks25
+\thm@headpunct=\toks26
+\thm@preskip=\skip55
+\thm@postskip=\skip56
+\thm@headsep=\skip57
+\dth@everypar=\toks27
+)
+(/sw/share/texmf-dist/tex/latex/fancyref/fancyref.sty
+Package: fancyref 1999/02/03 v0.9c Fancy cross-referencing
+
+(/sw/share/texmf-dist/tex/latex/tools/varioref.sty
+Package: varioref 2009/09/13 v1.4w package for extended references (FMi)
+\c@vrcnt=\count106
+))
+(/sw/share/texmf-dist/tex/latex/caption/caption.sty
+Package: caption 2010/01/09 v3.1m Customizing captions (AR)
+
+(/sw/share/texmf-dist/tex/latex/caption/caption3.sty
+Package: caption3 2010/01/14 v3.1m caption3 kernel (AR)
+\captionmargin=\dimen122
+\captionmargin@=\dimen123
+\captionwidth=\dimen124
+\caption@indent=\dimen125
+\caption@parindent=\dimen126
+\caption@hangindent=\dimen127
+)
+\c@ContinuedFloat=\count107
+Package caption Info: sidecap package is loaded.
+Package caption Info: subfigure package is loaded.
+)
+(/sw/share/texmf-dist/tex/latex/geometry/geometry.sty
+Package: geometry 2010/07/13 v5.5 Page Geometry
+
+(/sw/share/texmf-dist/tex/generic/oberdiek/ifpdf.sty
+Package: ifpdf 2010/01/28 v2.1 Provides the ifpdf switch (HO)
+Package ifpdf Info: pdfTeX in pdf mode detected.
+)
+(/sw/share/texmf-dist/tex/generic/oberdiek/ifvtex.sty
+Package: ifvtex 2010/03/01 v1.5 Switches for detecting VTeX and its modes (HO)
+Package ifvtex Info: VTeX not detected.
+)
+\Gm@cnth=\count108
+\Gm@cntv=\count109
+\c@Gm@tempcnt=\count110
+\Gm@bindingoffset=\dimen128
+\Gm@wd@mp=\dimen129
+\Gm@odd@mp=\dimen130
+\Gm@even@mp=\dimen131
+\Gm@layoutwidth=\dimen132
+\Gm@layoutheight=\dimen133
+\Gm@layouthoffset=\dimen134
+\Gm@layoutvoffset=\dimen135
+\Gm@dimlist=\toks28
+)
+(files/NCPA_prop_manual.aux)
+\openout1 = `NCPA_prop_manual.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 32.
+LaTeX Font Info:    ... okay on input line 32.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 32.
+LaTeX Font Info:    ... okay on input line 32.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 32.
+LaTeX Font Info:    ... okay on input line 32.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 32.
+LaTeX Font Info:    ... okay on input line 32.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 32.
+LaTeX Font Info:    ... okay on input line 32.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 32.
+LaTeX Font Info:    ... okay on input line 32.
+
+(/sw/share/texmf-dist/tex/context/base/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count111
+\scratchdimen=\dimen136
+\scratchbox=\box29
+\nofMPsegments=\count112
+\nofMParguments=\count113
+\everyMPshowfont=\toks29
+\MPscratchCnt=\count114
+\MPscratchDim=\dimen137
+\MPnumerator=\count115
+\everyMPtoPDFconversion=\toks30
+) (/sw/share/texmf-dist/tex/generic/oberdiek/pdftexcmds.sty
+Package: pdftexcmds 2010/04/01 v0.9 Utility functions of pdfTeX for LuaTeX (HO)
+
+
+(/sw/share/texmf-dist/tex/generic/oberdiek/infwarerr.sty
+Package: infwarerr 2010/04/08 v1.3 Providing info/warning/message (HO)
+)
+(/sw/share/texmf-dist/tex/generic/oberdiek/ifluatex.sty
+Package: ifluatex 2010/03/01 v1.3 Provides the ifluatex switch (HO)
+Package ifluatex Info: LuaTeX not detected.
+)
+(/sw/share/texmf-dist/tex/generic/oberdiek/ltxcmds.sty
+Package: ltxcmds 2010/04/26 v1.7 LaTeX kernel commands for general use (HO)
+)
+Package pdftexcmds Info: LuaTeX not detected.
+Package pdftexcmds Info: \pdf@primitive is available.
+Package pdftexcmds Info: \pdf@ifprimitive is available.
+)
+(/sw/share/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
+Package: epstopdf-base 2010/02/09 v2.5 Base part for package epstopdf
+
+(/sw/share/texmf-dist/tex/latex/oberdiek/grfext.sty
+Package: grfext 2007/09/30 v1.0 Managing graphics extensions (HO)
+)
+(/sw/share/texmf-dist/tex/latex/oberdiek/kvoptions.sty
+Package: kvoptions 2010/02/22 v3.7 Keyval support for LaTeX options (HO)
+
+(/sw/share/texmf-dist/tex/generic/oberdiek/kvsetkeys.sty
+Package: kvsetkeys 2010/03/01 v1.9 Key value parser (HO)
+
+(/sw/share/texmf-dist/tex/generic/oberdiek/etexcmds.sty
+Package: etexcmds 2010/01/28 v1.3 Prefix for e-TeX command names (HO)
+Package etexcmds Info: Could not find \expanded.
+(etexcmds)             That can mean that you are not using pdfTeX 1.50 or
+(etexcmds)             that some package has redefined \expanded.
+(etexcmds)             In the latter case, load this package earlier.
+)))
+Package grfext Info: Graphics extension search list:
+(grfext)             [.png,.pdf,.jpg,.mps,.jpeg,.jbig2,.jb2,.PNG,.PDF,.JPG,.JPE
+G,.JBIG2,.JB2,.eps]
+(grfext)             \AppendGraphicsExtensions on input line 436.
+
+(/sw/share/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
+File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
+e
+))
+(/sw/share/texmf-dist/tex/latex/ms/ragged2e.sty
+Package: ragged2e 2009/05/21 v2.1 ragged2e Package (MS)
+
+(/sw/share/texmf-dist/tex/latex/ms/everysel.sty
+Package: everysel 2009/05/30 v1.1 EverySelectfont Package (MS)
+LaTeX Info: Redefining \selectfont on input line 117.
+)
+\CenteringLeftskip=\skip58
+\RaggedLeftLeftskip=\skip59
+\RaggedRightLeftskip=\skip60
+\CenteringRightskip=\skip61
+\RaggedLeftRightskip=\skip62
+\RaggedRightRightskip=\skip63
+\CenteringParfillskip=\skip64
+\RaggedLeftParfillskip=\skip65
+\RaggedRightParfillskip=\skip66
+\JustifyingParfillskip=\skip67
+\CenteringParindent=\skip68
+\RaggedLeftParindent=\skip69
+\RaggedRightParindent=\skip70
+\JustifyingParindent=\skip71
+)
+Package caption Info: Begin \AtBeginDocument code.
+Package caption Info: End \AtBeginDocument code.
+
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+*geometry* verbose mode - [ preamble ] result:
+* driver: pdftex
+* paper: <default>
+* layout: <same size as paper>
+* layoutoffset:(h,v)=(0.0pt,0.0pt)
+* modes: 
+* h-part:(L,W,R)=(72.26999pt, 469.75502pt, 72.26999pt)
+* v-part:(T,H,B)=(72.26999pt, 650.43001pt, 72.26999pt)
+* \paperwidth=614.295pt
+* \paperheight=794.96999pt
+* \textwidth=469.75502pt
+* \textheight=650.43001pt
+* \oddsidemargin=0.0pt
+* \evensidemargin=0.0pt
+* \topmargin=-37.0pt
+* \headheight=12.0pt
+* \headsep=25.0pt
+* \topskip=10.0pt
+* \footskip=30.0pt
+* \marginparwidth=65.0pt
+* \marginparsep=11.0pt
+* \columnsep=10.0pt
+* \skip\footins=9.0pt plus 4.0pt minus 2.0pt
+* \hoffset=0.0pt
+* \voffset=0.0pt
+* \mag=1000
+* \@twocolumnfalse
+* \@twosidefalse
+* \@mparswitchfalse
+* \@reversemarginfalse
+* (1in=72.27pt=25.4mm, 1cm=28.453pt)
+
+(./cover_page.tex) [1
+
+{/sw/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
+</Users/rwax/work/logo/infrasound/color_logo_UTTR.pdf, id=10, 289.08pt x 25.093
+75pt>
+File: /Users/rwax/work/logo/infrasound/color_logo_UTTR.pdf Graphic file (type p
+df)
+ <use /Users/rwax/work/logo/infrasound/color_logo_UTTR.pdf>
+</Users/rwax/work/logo/UM/UM_logo.png, id=11, 185.0112pt x 24.5718pt>
+File: /Users/rwax/work/logo/UM/UM_logo.png Graphic file (type png)
+
+<use /Users/rwax/work/logo/UM/UM_logo.png>
+LaTeX Font Info:    Try loading font information for U+msa on input line 47.
+
+(/sw/share/texmf-dist/tex/latex/amsfonts/umsa.fd
+File: umsa.fd 2009/06/22 v3.00 AMS symbols A
+)
+LaTeX Font Info:    Try loading font information for U+msb on input line 47.
+
+(/sw/share/texmf-dist/tex/latex/amsfonts/umsb.fd
+File: umsb.fd 2009/06/22 v3.00 AMS symbols B
+)
+</Users/rwax/work/logo/noct_pulse/noct_logo_2.pdf, id=13, 433.62pt x 100.375pt>
+File: /Users/rwax/work/logo/noct_pulse/noct_logo_2.pdf Graphic file (type pdf)
+<use /Users/rwax/work/logo/noct_pulse/noct_logo_2.pdf>
+</Users/rwax/work/logo/NCPA_logos/NCPA-Logo-Crest.pdf, id=14, 106.72371pt x 106
+.96663pt>
+File: /Users/rwax/work/logo/NCPA_logos/NCPA-Logo-Crest.pdf Graphic file (type p
+df)
+ <use /Users/rwax/work/logo/NCPA_logos/NCPA-Logo-Crest.pdf>
+</Users/rwax/work/logo/leidos.png, id=15, 822.1917pt x 370.5042pt>
+File: /Users/rwax/work/logo/leidos.png Graphic file (type png)
+
+<use /Users/rwax/work/logo/leidos.png> (./legalize.tex
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 9.
+
+(/sw/share/texmf-dist/tex/latex/base/omscmr.fd
+File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <8> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 9.
+Missing character: There is no ‚ in font cmr8!
+Missing character: There is no Ä in font cmr8!
+Missing character: There is no ú in font cmr8!
+Missing character: There is no ‚ in font cmr8!
+Missing character: There is no Ä in font cmr8!
+Missing character: There is no ù in font cmr8!
+Missing character: There is no ‚ in font cmr8!
+Missing character: There is no Ä in font cmr8!
+Missing character: There is no ú in font cmr8!
+Missing character: There is no ‚ in font cmr8!
+Missing character: There is no Ä in font cmr8!
+Missing character: There is no ù in font cmr8!
+Missing character: There is no ‚ in font cmr8!
+Missing character: There is no Ä in font cmr8!
+Missing character: There is no ù in font cmr8!
+) [2 </Users/rwax/work/logo/infrasound/color_logo_UTTR.pdf> </Users/rwax/work/l
+ogo/UM/UM_logo.png> </Users/rwax/work/logo/noct_pulse/noct_logo_2.pdf> </Users/
+rwax/work/logo/NCPA_logos/NCPA-Logo-Crest.pdf> </Users/rwax/work/logo/leidos.pn
+g>] (files/NCPA_prop_manual.toc
+[3])
+\tf@toc=\write4
+\openout4 = `NCPA_prop_manual.toc'.
+
+ [4] (./sections/introduction.tex
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 8.
+) [5] (./sections/installation.tex
+LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <10> not available
+(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 36.
+
+[6]
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[7] [8] [9]) [10] (./sections/running_code_in_general.tex [11]
+<figs/model_atmos_c.pdf, id=105, 234.8775pt x 252.945pt>
+File: figs/model_atmos_c.pdf Graphic file (type pdf)
+
+<use figs/model_atmos_c.pdf>
+<figs/model_atmos_winds_u.pdf, id=106, 180.675pt x 252.945pt>
+File: figs/model_atmos_winds_u.pdf Graphic file (type pdf)
+
+<use figs/model_atmos_winds_u.pdf>) [12 <./figs/model_atmos_c.pdf> <./figs/mode
+l_atmos_winds_u.pdf>] (./sections/modess.tex [13]
+<figs/wvnums_modess.pdf, id=123, 361.35pt x 252.945pt>
+File: figs/wvnums_modess.pdf Graphic file (type pdf)
+
+<use figs/wvnums_modess.pdf> [14] [15 <./figs/wvnums_modess.pdf>] [16] [17]
+<figs/modess_ex1.pdf, id=141, 361.35pt x 252.945pt>
+File: figs/modess_ex1.pdf Graphic file (type pdf)
+ <use figs/modess_ex1.pdf>
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+<figs/modess_ex2.png, id=142, 642.4pt x 481.8pt>
+File: figs/modess_ex2.png Graphic file (type png)
+ <use figs/modess_ex2.png>
+[18] <figs/modess_ex3.png, id=147, 642.4pt x 481.8pt>
+File: figs/modess_ex3.png Graphic file (type png)
+
+<use figs/modess_ex3.png>
+<figs/modess_ex3_inco.png, id=149, 642.4pt x 481.8pt>
+File: figs/modess_ex3_inco.png Graphic file (type png)
+
+<use figs/modess_ex3_inco.png> [19 <./figs/modess_ex2.png (PNG copy)> <./figs/m
+odess_ex1.pdf>] <figs/modess_ex2_20km_source.png, id=162, 642.4pt x 481.8pt>
+File: figs/modess_ex2_20km_source.png Graphic file (type png)
+
+<use figs/modess_ex2_20km_source.png> [20 <./figs/modess_ex3.png (PNG copy)> <.
+/figs/modess_ex3_inco.png (PNG copy)> <./figs/modess_ex2_20km_source.png (PNG c
+opy)>]) [21] (./sections/wmod.tex [22] [23] [24]
+File: figs/modess_ex1.pdf Graphic file (type pdf)
+ <use figs/modess_ex1.pdf>
+<figs/wmod_ex2.png, id=186, 642.4pt x 481.8pt>
+File: figs/wmod_ex2.png Graphic file (type png)
+ <use figs/wmod_ex2.png> [25]
+[26 <./figs/wmod_ex2.png (PNG copy)>]
+<figs/wmod_ex3.png, id=197, 642.4pt x 481.8pt>
+File: figs/wmod_ex3.png Graphic file (type png)
+ <use figs/wmod_ex3.png>
+<figs/wmod_ex3_inco.png, id=199, 642.4pt x 481.8pt>
+File: figs/wmod_ex3_inco.png Graphic file (type png)
+
+<use figs/wmod_ex3_inco.png>) [27 <./figs/wmod_ex3.png (PNG copy)> <./figs/wmod
+_ex3_inco.png (PNG copy)>] (./sections/cmodess.tex [28] [29] [30]
+<figs/cmodess_ex1.pdf, id=218, 361.35pt x 252.945pt>
+File: figs/cmodess_ex1.pdf Graphic file (type pdf)
+
+<use figs/cmodess_ex1.pdf>
+<figs/1D_cmodess_ex_N.pdf, id=219, 361.35pt x 252.945pt>
+File: figs/1D_cmodess_ex_N.pdf Graphic file (type pdf)
+
+<use figs/1D_cmodess_ex_N.pdf>
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[31] <figs/cmodess_ex2.png, id=224, 642.4pt x 481.8pt>
+File: figs/cmodess_ex2.png Graphic file (type png)
+
+<use figs/cmodess_ex2.png>
+<figs/2D_cmodess_ex_N.png, id=226, 642.4pt x 481.8pt>
+File: figs/2D_cmodess_ex_N.png Graphic file (type png)
+
+<use figs/2D_cmodess_ex_N.png>
+<figs/cmodess_ex3.png, id=228, 642.4pt x 481.8pt>
+File: figs/cmodess_ex3.png Graphic file (type png)
+ <use figs/cmodess_ex3.png>
+<figs/cmodess_ex3_inco.png, id=230, 642.4pt x 481.8pt>
+File: figs/cmodess_ex3_inco.png Graphic file (type png)
+
+<use figs/cmodess_ex3_inco.png> [32 <./figs/cmodess_ex2.png (PNG copy)> <./figs
+/2D_cmodess_ex_N.png (PNG copy)> <./figs/cmodess_ex1.pdf> <./figs/1D_cmodess_ex
+_N.pdf>]) [33 <./figs/cmodess_ex3.png (PNG copy)> <./figs/cmodess_ex3_inco.png 
+(PNG copy)>] (./sections/modbb.tex [34] [35]
+<figs/initial_pulse_model.pdf, id=262, 505.89pt x 252.945pt>
+File: figs/initial_pulse_model.pdf Graphic file (type pdf)
+
+<use figs/initial_pulse_model.pdf> [36 <./figs/initial_pulse_model.pdf>]
+[37]
+Overfull \hbox (2.74086pt too wide) in paragraph at lines 263--263
+[] \OT1/cmtt/m/n/10 --Nz_grid                 Number of points on the z-grid fr
+om ground to maxheight [20000][] 
+ []
+
+[38] [39] [40] <figs/modbb_ex_source_model.pdf, id=284, 505.89pt x 252.945pt>
+File: figs/modbb_ex_source_model.pdf Graphic file (type pdf)
+
+<use figs/modbb_ex_source_model.pdf>
+<figs/modbb_ex_prop_pulse.pdf, id=285, 361.35pt x 201.75375pt>
+File: figs/modbb_ex_prop_pulse.pdf Graphic file (type pdf)
+
+<use figs/modbb_ex_prop_pulse.pdf> [41 <./figs/modbb_ex_source_model.pdf>]
+<figs/modbb_ex_prop_pulse_grid.pdf, id=294, 361.35pt x 201.75375pt>
+File: figs/modbb_ex_prop_pulse_grid.pdf Graphic file (type pdf)
+
+<use figs/modbb_ex_prop_pulse_grid.pdf>) [42 <./figs/modbb_ex_prop_pulse.pdf> <
+./figs/modbb_ex_prop_pulse_grid.pdf>] (./sections/rdmodess.tex [43] [44]
+[45] <figs/rdmodess_ex1_1d.pdf, id=319, 361.35pt x 252.945pt>
+File: figs/rdmodess_ex1_1d.pdf Graphic file (type pdf)
+
+<use figs/rdmodess_ex1_1d.pdf>
+<figs/rdmodess_ex1_2d.png, id=320, 642.4pt x 481.8pt>
+File: figs/rdmodess_ex1_2d.png Graphic file (type png)
+
+<use figs/rdmodess_ex1_2d.png>
+<figs/rdmodess_ex2_1d.pdf, id=322, 361.35pt x 252.945pt>
+File: figs/rdmodess_ex2_1d.pdf Graphic file (type pdf)
+
+<use figs/rdmodess_ex2_1d.pdf>
+<figs/rdmodess_ex2_2d.png, id=323, 642.4pt x 481.8pt>
+File: figs/rdmodess_ex2_2d.png Graphic file (type png)
+
+<use figs/rdmodess_ex2_2d.png> [46 <./figs/rdmodess_ex1_2d.png (PNG copy)> <./f
+igs/rdmodess_ex1_1d.pdf>]) [47 <./figs/rdmodess_ex2_2d.png (PNG copy)> <./figs/
+rdmodess_ex2_1d.pdf>] (./sections/pade_pe.tex [48] [49] [50] [51]
+<figs/pade_ex1_1d.pdf, id=358, 361.35pt x 252.945pt>
+File: figs/pade_ex1_1d.pdf Graphic file (type pdf)
+
+<use figs/pade_ex1_1d.pdf> <figs/pade_ex1_2d.png, id=359, 642.4pt x 481.8pt>
+File: figs/pade_ex1_2d.png Graphic file (type png)
+
+<use figs/pade_ex1_2d.png>
+<figs/pade_ex2_1d.pdf, id=361, 361.35pt x 252.945pt>
+File: figs/pade_ex2_1d.pdf Graphic file (type pdf)
+
+<use figs/pade_ex2_1d.pdf> <figs/pade_ex2_2d.png, id=362, 642.4pt x 481.8pt>
+File: figs/pade_ex2_2d.png Graphic file (type png)
+
+<use figs/pade_ex2_2d.png>
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[52 <./figs/pade_ex1_2d.png (PNG copy)> <./figs/pade_ex1_1d.pdf>] [53 <./figs/p
+ade_ex2_2d.png (PNG copy)> <./figs/pade_ex2_1d.pdf>] [54]) [55]
+(./sections/raytrace.tex [56] [57]
+Underfull \hbox (badness 10000) in paragraph at lines 110--111
+
+ []
+
+<figs/raytrace2d.png, id=398, 481.8pt x 361.35pt>
+File: figs/raytrace2d.png Graphic file (type png)
+ <use figs/raytrace2d.png>
+[58 <./figs/raytrace2d.png (PNG copy)>] [59]
+Underfull \hbox (badness 10000) in paragraph at lines 210--211
+
+ []
+
+<figs/raytrace3d.png, id=406, 481.8pt x 361.35pt>
+File: figs/raytrace3d.png Graphic file (type png)
+ <use figs/raytrace3d.png>)
+[60 <./figs/raytrace3d.png (PNG copy)>] (./sections/nl_raytrace.tex [61]
+<figs/fig_wnrt_example.png, id=415, 1047.915pt x 473.77pt>
+File: figs/fig_wnrt_example.png Graphic file (type png)
+
+<use figs/fig_wnrt_example.png>
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[62]) [63 <./figs/fig_wnrt_example.png>] (files/NCPA_prop_manual.bbl) [64]
+(files/NCPA_prop_manual.aux) ) 
+Here is how much of TeX's memory you used:
+ 5292 strings out of 493747
+ 76659 string characters out of 3149386
+ 151526 words of memory out of 3000000
+ 8398 multiletter control sequences out of 15000+200000
+ 18541 words of font info for 71 fonts, out of 3000000 for 9000
+ 714 hyphenation exceptions out of 8191
+ 41i,16n,38p,1868b,309s stack positions out of 5000i,500n,10000p,200000b,50000s
+</sw/share/texmf-dist/fonts/type1/public/amsfonts
+/cm/cmbx10.pfb></sw/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
+</sw/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx7.pfb></sw/share/texmf
+-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb></sw/share/texmf-dist/fonts/ty
+pe1/public/amsfonts/cm/cmex10.pfb></sw/share/texmf-dist/fonts/type1/public/amsf
+onts/cm/cmmi10.pfb></sw/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.p
+fb></sw/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></sw/share/te
+xmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></sw/share/texmf-dist/fonts/t
+ype1/public/amsfonts/cm/cmr12.pfb></sw/share/texmf-dist/fonts/type1/public/amsf
+onts/cm/cmr5.pfb></sw/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb>
+</sw/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></sw/share/texmf-
+dist/fonts/type1/public/amsfonts/cm/cmsl10.pfb></sw/share/texmf-dist/fonts/type
+1/public/amsfonts/cm/cmss9.pfb></sw/share/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmsy10.pfb></sw/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb>
+</sw/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></sw/share/texmf
+-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></sw/share/texmf-dist/fonts/type
+1/public/amsfonts/cm/cmti10.pfb></sw/share/texmf-dist/fonts/type1/public/amsfon
+ts/cm/cmtt10.pfb></sw/share/texmf-dist/fonts/type1/urw/avantgar/uagko8a.pfb>
+Output written on files/NCPA_prop_manual.pdf (64 pages, 1635762 bytes).
+PDF statistics:
+ 498 PDF objects out of 1000 (max. 8388607)
+ 300 compressed objects within 3 object streams
+ 0 named destinations out of 1000 (max. 500000)
+ 282 words of extra memory for PDF output out of 10000 (max. 10000000)
+

@@ -1,0 +1,114 @@
+\documentclass[10pt]{article}
+\usepackage{graphicx,amsmath,sidecap,subfigure,comment,amssymb}    % needed for including graphics e.g. EPS, PS
+%\usepackage[hidelinks]{hyperref}
+\usepackage[table,xcdraw]{xcolor}
+%\hypersetup{colorlinks=true}
+\usepackage{color}
+\usepackage{amsmath,amsthm,amssymb}
+\newcommand{\packagename}{\textbf{ncpaprop}}
+
+\newcommand{\version}{1.3.18}
+
+\usepackage{fancyref}
+
+\usepackage[justification=centering]{caption}
+\topmargin -1.5cm        % read Lamport p.163
+\oddsidemargin -0.04cm   % read Lamport p.163
+\evensidemargin -0.04cm  % same as oddsidemargin but for left-hand pages
+\textwidth 16.59cm
+\textheight 21.94cm 
+%\pagestyle{empty}       % Uncomment if you don't want page numbers
+\parskip 5pt           % sets spacing between paragraphs
+%\renewcommand{\baselinestretch}{1.5} % Uncomment for 1.5 spacing between lines
+%\parindent 40pt		 % sets leading space for paragraphs
+\parindent 0.25 in
+
+%\setlength{\parskip}{1em}
+
+\usepackage[margin=1in]{geometry}
+
+
+
+\begin{document}
+
+\input cover_page.tex\newpage
+
+\vspace*{-50pt}
+\includegraphics[width=230pt]{/Users/rwax/work/logo/infrasound/color_logo_UTTR.pdf}
+\hspace*{65pt}
+\includegraphics[width=150pt]{/Users/rwax/work/logo/UM/UM_logo.png}
+\vspace*{50pt}
+
+
+\vspace*{0.05\textheight}
+
+\begin{center}
+
+\begin{Huge} \underline{\textbf{ncpaprop \version}} \end{Huge} 
+
+\vspace*{0.025\textheight} 
+
+\begin{Large}
+\underline{NCPA Infrasound Propagation Modeling Package}
+\end{Large} 
+
+\vspace*{0.06\textheight}
+
+\textsl{Contributions from: Roger Waxler, Doru Velea, Claus Hetzer, Jelle Assink, Phil Blom, Joel Lonzaga}
+
+\vspace*{0.02\textheight}
+
+\textsl{Technical coordination: Roger Waxler}
+
+\end{center}
+
+\vspace*{0.06\textheight}
+
+\begin{center}
+\raisebox{10pt}{\includegraphics[height=40pt]{/Users/rwax/work/logo/noct_pulse/noct_logo_2.pdf}}
+\includegraphics[height=60pt]{/Users/rwax/work/logo/NCPA_logos/NCPA-Logo-Crest.pdf}
+\raisebox{10pt}{\includegraphics[height=40pt]{/Users/rwax/work/logo/leidos.png}}
+
+%\includegraphics[height=50pt]{/Users/rwax/work/logo/smdc.png}
+%\quad\quad
+%\includegraphics[height=50pt]{/Users/rwax/work/logo/dtra_logo.jpg}
+\end{center}
+
+\vfill
+
+\input legalize.tex
+
+\newpage
+\tableofcontents
+\newpage
+
+\input sections/introduction.tex
+\newpage
+\input sections/installation.tex
+\newpage
+\input sections/running_code_in_general.tex
+\newpage
+\input sections/modess.tex
+\newpage
+\input sections/wmod.tex
+\newpage
+\input sections/cmodess.tex
+\newpage
+\input sections/modbb.tex
+\newpage
+\input sections/rdmodess.tex
+\newpage
+\input sections/pade_pe.tex
+\newpage
+\input sections/raytrace.tex
+\newpage
+\input sections/nl_raytrace.tex
+
+\newpage
+\bibliography{ncpaprop}
+\bibliographystyle{plain}
+
+\end{document}
+
+
+.........................
