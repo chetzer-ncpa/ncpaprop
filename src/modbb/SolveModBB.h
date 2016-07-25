@@ -6,6 +6,7 @@
 #include "Atmosphere.h"
 #include "anyoption.h"
 #include "ModBB_lib.h"
+#include "ProcessOptionsBB.h"
 
 
 namespace NCPA {
@@ -17,7 +18,9 @@ namespace NCPA {
 	        int Nfreq, double f_min, double f_step, double f_max, int Nz_grid, double azi, \
 	        double z_min, double maxheight, double sourceheight, double receiverheight,\
 	        string gnd_imp_model, int Lamb_wave_BC, \
-	        bool out_dispersion, bool out_disp_src2rcv, bool usemodess_flg);
+	        bool out_dispersion, bool out_disp_src2rcv, bool usemodess_flg, bool turnoff_WKB);
+	        
+      SolveModBB(ProcessOptionsBB *oBB, NCPA::SampledProfile *atm_profile); // constructor 2	        
 
       ~SolveModBB(); //destructor
 
@@ -28,7 +31,9 @@ namespace NCPA {
 	        int Nfreq1, double f_min1, double f_step1, double f_max1, int Nz_grid1, double azi1, \
 	        double z_min1, double maxheight1, double sourceheight1, double receiverheight1, \
 	        string gnd_imp_model1, int Lamb_wave_BC1, \
-	        bool out_dispersion1, bool out_disp_src2rcv1, bool usemodess_flg1);						
+	        bool out_dispersion1, bool out_disp_src2rcv1, bool usemodess_flg1, bool turnoff_WKB);
+
+	    void setParams(ProcessOptionsBB *oBB, NCPA::SampledProfile *atm_prof); 				
 		
       void printParams();
 
@@ -38,6 +43,8 @@ namespace NCPA {
       int computeWmodes();
 
       int getAbsorption(int n, double dz, NCPA::SampledProfile *atm_profile, double freq, double *alpha);
+      
+      int getAbsorption(int n, double dz, NCPA::SampledProfile *atm_profile, double freq, string usrattfile, double *alpha);
 								        
       int getModalTraceModESS(int nz, double z_min, \
                     double sourceheight, double receiverheight, \
@@ -90,6 +97,7 @@ namespace NCPA {
       bool   out_dispersion;
       bool   out_disp_src2rcv;
       bool   usemodess_flg;
+      bool   turnoff_WKB;
       
       int    Nfreq;
       int    Nz_grid;  
@@ -114,6 +122,7 @@ namespace NCPA {
       std::string filename;
       std::string gnd_imp_model;
       std::string wind_units;
+      std::string usrattfile;
       std::string subdir;   // directory name using date_time format YYYY_MM_DD_HH_MM_SS
       std::string disp_fn;  // a buffer to store path/filename
 		

@@ -30,11 +30,21 @@ NCPA::SolveModBB::SolveModBB( \
           int Nfreq, double f_min, double f_step, double f_max, int Nz_grid, double azi, \
           double z_min, double maxheight, double sourceheight, double receiverheight, \
           string gnd_imp_model, int Lamb_wave_BC, \
-          bool out_dispersion, bool out_disp_src2rcv, bool usemodess_flg)
+          bool out_dispersion, bool out_disp_src2rcv, bool usemodess_flg, \
+          bool turnoff_WKB)
 {
   setParams(  filename, atmosfile, wind_units, atm_profile, Nfreq, f_min, f_step, f_max, \
               Nz_grid, azi, z_min, maxheight, sourceheight, receiverheight, \
-              gnd_imp_model, Lamb_wave_BC, out_dispersion, out_disp_src2rcv, usemodess_flg);
+              gnd_imp_model, Lamb_wave_BC, out_dispersion, out_disp_src2rcv, \
+              usemodess_flg, turnoff_WKB);
+}
+
+//
+// constructor 2
+//
+NCPA::SolveModBB::SolveModBB(ProcessOptionsBB *oBB, SampledProfile *atm_profile)
+{
+  setParams( oBB, atm_profile );                  
 }
 
 
@@ -57,7 +67,8 @@ void NCPA::SolveModBB::setParams( \
           int Nfreq1, double f_min1, double f_step1, double f_max1, int Nz_grid1, double azi1, \
           double z_min1, double maxheight1, double sourceheight1, double receiverheight1, \
           string gnd_imp_model1, int Lamb_wave_BC1, \
-          bool out_dispersion1, bool out_disp_src2rcv1, bool usemodess_flg1)						
+          bool out_dispersion1, bool out_disp_src2rcv1, bool usemodess_flg1, \
+          bool turnoff_WKB1)						
 {			
   tol               = 1.0E-8; // tolerance for Slepc computations
   filename          = filename1;
@@ -79,6 +90,154 @@ void NCPA::SolveModBB::setParams( \
   out_dispersion    = out_dispersion1;
   out_disp_src2rcv  = out_disp_src2rcv1;
   usemodess_flg     = usemodess_flg1;
+  turnoff_WKB       = turnoff_WKB1;
+  
+  
+  // get Hgt, zw, mw, T, rho, Pr in SI units; deleted in destructor
+  Hgt = new double [Nz_grid];
+  zw  = new double [Nz_grid];
+  mw  = new double [Nz_grid];
+  T   = new double [Nz_grid];
+  rho = new double [Nz_grid];
+  Pr  = new double [Nz_grid];
+  
+  //
+  // !!! ensure maxheight is less than the max height covered by the 
+  // provided atm profile may avoid some errors asociated with 
+  // the code thinking that it goes above the max height when in fact 
+  // the height may only differ from max height by a rounding error. 
+  //
+  if (maxheight/1000.0 >= atm_profile->z(atm_profile->nz()-1)) {
+      maxheight = (atm_profile->z(atm_profile->nz()-1) - 1e-9)*1000.0; // slightly less
+      //cout << "maxheight adjusted to: " << maxheight << " meters" << endl;
+  }  
+  
+  // fill and convert to SI units
+  double dz       = (maxheight - z_min)/Nz_grid;	// the z-grid spacing
+  double z_min_km = z_min/1000.0;
+  double dz_km    = dz/1000.0;
+  double kmps2mps = 1.0;
+  if (!wind_units.compare("kmpersec")) {
+      kmps2mps = 1000.0;
+  }
+
+  // Note: the rho, Pr, T, zw, mw are computed wrt ground level i.e.
+  // the first value is at the ground level e.g. rho[0] = rho(z_min)  
+  for (int i=0; i<Nz_grid; i++) {
+      Hgt[i] = (z_min_km + i*dz_km)*1000.0; // Hgt[0] = zground MSL
+      rho[i] = atm_profile->rho(z_min_km + i*dz_km)*1000.0;
+      Pr[i]  = atm_profile->p(z_min_km + i*dz_km)*100.0;
+      T[i]   = atm_profile->t(z_min_km + i*dz_km);
+      zw[i]  = atm_profile->u(z_min_km + i*dz_km)*kmps2mps;
+      mw[i]  = atm_profile->v(z_min_km + i*dz_km)*kmps2mps;
+  }
+
+  std::time_t tm1 = std::time(NULL);
+  if (0) {
+      // data will be saved in a new directory using date_time format
+      // YYYY_MM_DD_HH_MM_SS
+
+      // form a string containing time in the desired format
+      //std::time_t tm1 = std::time(NULL);
+      char sdir[25];
+      if (std::strftime(sdir, 25, "%F_%H_%M_%S", std::localtime(&tm1))) {
+	        //cout << sdir << endl;
+      }
+      else {
+          throw invalid_argument("time string YYYY_MM_DD_HH_MM_SS needed for dir name could not be formed.");
+      }
+      subdir  = string(sdir);             // subdirectory name
+      disp_fn = subdir + "/" + filename;  // full name for the dispersion file
+  }
+  else { // no special directory for output
+      subdir  = string("");   // blanc
+      disp_fn = filename;     // full name for the dispersion file  
+  }	
+}
+
+
+// setParams() prototype 2
+void NCPA::SolveModBB::setParams(ProcessOptionsBB *oBB, SampledProfile *atm_profile1)						
+{			
+/*
+  tol               = 1.0E-8; // tolerance for Slepc computations
+  filename          = filename1;
+  atm_profile       = atm_profile1;
+  atmosfile         = atmosfile1;
+  wind_units        = wind_units1;
+  Nfreq             = Nfreq1;
+  f_min             = f_min1;
+  f_step            = f_step1;
+  f_max             = f_max1;
+  Nz_grid           = Nz_grid1;
+  z_min             = z_min1;
+  azi               = azi1;
+  maxheight         = maxheight1;
+  sourceheight      = sourceheight1;
+  receiverheight    = receiverheight1;
+  gnd_imp_model     = gnd_imp_model1;
+  Lamb_wave_BC      = Lamb_wave_BC1;
+  out_dispersion    = out_dispersion1;
+  out_disp_src2rcv  = out_disp_src2rcv1;
+  usemodess_flg     = usemodess_flg1;
+  turnoff_WKB       = turnoff_WKB1;
+  
+  
+            string filename1, string atmosfile1, string wind_units1, \
+          NCPA::SampledProfile *atm_profile1, \
+          int Nfreq1, double f_min1, double f_step1, double f_max1, int Nz_grid1, double azi1, \
+          double z_min1, double maxheight1, double sourceheight1, double receiverheight1, \
+          string gnd_imp_model1, int Lamb_wave_BC1, \
+          bool out_dispersion1, bool out_disp_src2rcv1, bool usemodess_flg1, \
+          bool turnoff_WKB1
+          
+          
+  */
+  
+  
+  
+  
+  
+    // obtain the parameter values from the user's options
+    
+   tol               = 1.0E-8; // tolerance for Slepc computations 
+     //tol				   			 = oNB->getSlepcTolerance(); 
+      atmosfile      = oBB->getAtmosfile();
+      atm_profile    = atm_profile1;
+      //atmosfileorder = oBB->getAtmosfileorder();
+      wind_units     = oBB->getWindUnits();
+      gnd_imp_model  = oBB->getGnd_imp_model();      
+      filename       = oBB->getOut_disp_file();
+      usrattfile     = oBB->getUsrAttFile();
+      
+      usemodess_flg  = oBB->getUsemodess_flg();
+          
+      //skiplines      = oBB->getSkiplines();
+      z_min          = oBB->getZ_min();
+      azi            = oBB->getAzimuth();
+      //maxrange       = oBB->getMaxrange();
+      maxheight      = oBB->getMaxheight();
+      sourceheight   = oBB->getSourceheight();
+      receiverheight = oBB->getReceiverheight();   
+      Nz_grid        = oBB->getNz_grid();
+      Nrng_steps     = oBB->getNrng_steps();
+      Nfreq          = oBB->getNfreq();
+      f_min          = oBB->getF_min();
+      f_step         = oBB->getF_step();			
+      f_max          = oBB->getF_max();
+      Lamb_wave_BC   = oBB->getLamb_wave_BC();
+      
+      turnoff_WKB    = oBB->getTurnoff_WKB();
+      //cout << "turnoff_WKB = " << turnoff_WKB << endl; 
+    
+      
+
+  
+  
+  
+  
+  
+  
   
   // get Hgt, zw, mw, T, rho, Pr in SI units; deleted in destructor
   Hgt = new double [Nz_grid];
@@ -160,6 +319,10 @@ void NCPA::SolveModBB::printParams() {
   printf("Lamb wave boundary cond : %d\n", Lamb_wave_BC);
   printf("  SLEPc tolerance param : %g\n", tol);
   printf("    atmospheric profile : %s\n", atmosfile.c_str());
+  printf("       turnoff_WKB flag : %d\n", turnoff_WKB);
+  if (!usrattfile.empty()) {
+  printf("  User attenuation file : %s\n", usrattfile.c_str());
+  }
   if (out_disp_src2rcv) {
   printf("          data saved in : %s\n", disp_fn.c_str());
   } else {
@@ -278,7 +441,8 @@ int NCPA::SolveModBB::computeModESS() {
       ierr = MatSeqAIJSetPreallocation(A, 3, PETSC_NULL);CHKERRQ(ierr);
 
       // compute absorption
-      getAbsorption(Nz_grid, dz, atm_profile, freq, alpha);
+      //getAbsorption(Nz_grid, dz, atm_profile, freq, alpha);
+      getAbsorption(Nz_grid, dz, atm_profile, freq, usrattfile, alpha);
 
       //
       // ground impedance model (to be implemented)
@@ -301,7 +465,8 @@ int NCPA::SolveModBB::computeModESS() {
       }	   
 
       // Get the main diagonal
-      i = getModalTraceModESS(Nz_grid, z_min, sourceheight, receiverheight, dz, atm_profile, admittance, freq, azi, diag, &k_min, &k_max, 1); //WKB trick is turned off
+      cout << "2 atm_profile->getPropagationAzimuth() = " << atm_profile->getPropagationAzimuth() << endl;
+      i = getModalTraceModESS(Nz_grid, z_min, sourceheight, receiverheight, dz, atm_profile, admittance, freq, azi, diag, &k_min, &k_max, turnoff_WKB);
       i = getNumberOfModes(Nz_grid,dz,diag,k_min,k_max,&nev);
       printf ("______________________________________________________________________\n\n");
       printf (" -> Normal mode solution at %6.3f Hz and %6.2f deg (%d modes)...\n", freq, azi, nev);
@@ -569,7 +734,8 @@ int NCPA::SolveModBB::computeWmodes() {
       ierr = MatSeqAIJSetPreallocation(A, 3, PETSC_NULL);CHKERRQ(ierr);
 
       // compute absorption
-      getAbsorption(Nz_grid, dz, atm_profile, freq, alpha);
+      //getAbsorption(Nz_grid, dz, atm_profile, freq, alpha);
+      getAbsorption(Nz_grid, dz, atm_profile, freq, usrattfile, alpha);
      
       
       //
@@ -596,7 +762,7 @@ int NCPA::SolveModBB::computeWmodes() {
     //
     // Get the main diagonal and the number of modes (WMod)
     //		
-    i = getModalTraceWMod(Nz_grid, z_min, sourceheight, receiverheight, dz, atm_profile, admittance, freq, diag, kd, md, cd, &k_min, &k_max, (bool)1);
+    i = getModalTraceWMod(Nz_grid, z_min, sourceheight, receiverheight, dz, atm_profile, admittance, freq, diag, kd, md, cd, &k_min, &k_max, turnoff_WKB);
     i = getNumberOfModes(Nz_grid,dz,diag,k_min,k_max,&nev);
     
     // abort if no modes are found
@@ -861,7 +1027,7 @@ int NCPA::SolveModBB::computeWmodes() {
 
 
 
-
+/*
 // updated getAbsorption function: bug fixed by Joel and Jelle - Jun 2012
 int NCPA::SolveModBB::getAbsorption(int n, double dz, SampledProfile *p, double freq, double *alpha)
 {
@@ -1006,6 +1172,234 @@ int NCPA::SolveModBB::getAbsorption(int n, double dz, SampledProfile *p, double 
   }
   return 0;
 }
+*/
+
+
+
+
+
+// updated getAbsorption function: bug fixed by Joel and Jelle - Jun 2012
+// updated 20160330: will accept attenuation coeff. loaded from a file
+int NCPA::SolveModBB::getAbsorption(int n, double dz, SampledProfile *p, double freq, string usrattfile, double *alpha)
+{
+
+  if (usrattfile.empty()) {
+    // Expressions based on Bass and Sutherland, JASA 2004
+    // Computes alpha(freq) for given G2S output
+    // Subroutine can easily be modified to include dispersion effects
+    // In that case, make alpha a complex array and
+    // use the real part as absorption and the imaginary part for dispersion
+    int    m, ii;
+    double T_o, P_o, S, z;
+    double X[7], X_ON, Z_rot[2], Z_rot_;
+    double sigma, nn, chi, cchi, mu, nu, mu_o;
+    double beta_0, beta_1, beta_2, alpha_1, alpha_2;
+    double a_cl, a_rot, a_diff, a_vib;
+    double T_z, P_z, c_snd_z, gamma;
+    double A1, A2, B, C, D, E, F, G, H, I, J, K, L, ZZ, hu;
+    double f_vib[4], a_vib_c[4], Cp_R[4], Cv_R[4], theta[4], C_R, A_max, Tr;
+   
+    //tweak absorption  - DV 20130905 
+    double tweak_abs = 1; //1; //0.3; // tweak absorption alpha by this factor
+    printf("Using Sutherland-Bass absorption tweaked by a factor of %g\n", tweak_abs);    
+
+    // Atmospheric composition constants
+    mu_o  = 18.192E-6;    // Reference viscosity [kg/(m*s)]
+    T_o   = T[0];         // Reference temperature [K]
+    P_o   = Pr[0];        // Reference pressure [Pa]
+    S     = 117;          // Sutherland constant [K]       
+
+    Cv_R[0] = 5/2;                                    // Heat capacity|volume (O2)
+    Cv_R[1] = 5/2;                                    // Heat capacity|volume (N2)
+    Cv_R[2] = 3;                                      // Heat capacity|volume (CO2)
+    Cv_R[3] = 3;                                      // Heat capacity|volume (O3)
+    Cp_R[0] = 7/2;                                    // Heat capacity|pressure (O2)
+    Cp_R[1] = 7/2;                                    // Heat capacity|pressure (N2)
+    Cp_R[2] = 4;                                      // Heat capacity|pressure (CO2)
+    Cp_R[3] = 4;                                      // Heat capacity|pressure (O3)
+    theta[0]= 2239.1;                                 // Charact. temperature (O2)
+    theta[1]= 3352;                                   // Charact. temperature (N2)
+    theta[2]= 915;                                    // Charact. temperature (CO2)
+    theta[3]= 1037;                                   // Charact. temperature (O3)
+
+	  //gamma   = 1.371 + 2.46E-04*T_z - 6.436E-07*pow(T_z,2) + 5.2E-10*pow(T_z,3) - 1.796E-13*pow(T_z,4) + 2.182E-17*pow(T_z,5);
+	  gamma   = 1.4;
+			   
+    for (ii=0; ii<n; ii++) {
+			  z       = ii*dz/1000.0;	// km	AGL		
+			  T_z     = T[ii];	      // K
+			  P_z     = Pr[ii];	      // Pa;
+			  c_snd_z = sqrt(gamma*P_z/rho[ii]);  // in m/s					 
+			  mu      = mu_o*sqrt(T_z/T_o)*((1+S/T_o)/(1+S/T_z)); // Viscosity [kg/(m*s)]
+			  nu      = (8*Pi*freq*mu)/(3*P_z);                   // Nondimensional frequency
+			   
+			  //-------- Gas fraction polynomial fits -----------------------------------
+			  if (z > 90.)                                         // O2 profile
+				  X[0] = pow(10,49.296-(1.5524*z)+(1.8714E-2*pow(z,2))-(1.1069E-4*pow(z,3))+(3.199E-7*pow(z,4))-(3.6211E-10*pow(z,5)));
+			  else
+				  X[0] = pow(10,-0.67887);
+
+			  if (z > 76.)                                         // N2 profile
+				  X[1] = pow(10,(1.3972E-1)-(5.6269E-3*z)+(3.9407E-5*pow(z,2))-(1.0737E-7*pow(z,3)));
+			  else
+				  X[1] = pow(10,-0.10744);
+
+			  X[2] = pow(10,-3.3979);                              // CO2 profile
+
+			  if (z > 80. )                                        // O3 profile
+				  X[3] = pow(10,-4.234-(3.0975E-2*z));
+			  else
+				  X[3] = pow(10,-19.027+(1.3093*z)-(4.6496E-2*pow(z,2))+(7.8543E-4*pow(z,3))-(6.5169E-6*pow(z,4))+(2.1343E-8*pow(z,5)));
+
+			  if (z > 95. )                                        // O profile
+				  X[4] = pow(10,-3.2456+(4.6642E-2*z)-(2.6894E-4*pow(z,2))+(5.264E-7*pow(z,3)));
+			  else
+				  X[4] = pow(10,-11.195+(1.5408E-1*z)-(1.4348E-3*pow(z,2))+(1.0166E-5*pow(z,3)));
+
+							                                               // N profile 
+			  X[5]  = pow(10,-53.746+(1.5439*z)-(1.8824E-2*pow(z,2))+(1.1587E-4*pow(z,3))-(3.5399E-7*pow(z,4))+(4.2609E-10*pow(z,5)));
+
+			  if (z > 30. )                                         // H2O profile
+				  X[6] = pow(10,-4.2563+(7.6245E-2*z)-(2.1824E-3*pow(z,2))-(2.3010E-6*pow(z,3))+(2.4265E-7*pow(z,4))-(1.2500E-09*pow(z,5)));
+			  else 
+			  {
+				  if (z > 100.)
+				   X[6] = pow(10,-0.62534-(8.3665E-2*z));
+				  else
+				   X[6] = pow(10,-1.7491+(4.4986E-2*z)-(6.8549E-2*pow(z,2))+(5.4639E-3*pow(z,3))-(1.5539E-4*pow(z,4))+(1.5063E-06*pow(z,5)));
+			  }
+			  X_ON = (X[0] + X[1])/0.9903;
+
+			  //-------- Rotational collision number-------------------------------------
+			  Z_rot[0] = 54.1*exp(-17.3*(pow(T_z,-1./3.)));   // O2
+			  Z_rot[1] = 63.3*exp(-16.7*(pow(T_z,-1./3.)));   // N2
+			  Z_rot_   = 1./((X[1]/Z_rot[1])+(X[0]/Z_rot[0]));
+
+			  //-------- Nondimensional atmospheric quantities---------------------------
+			  sigma = 5./sqrt(21.);
+			  nn    = (4./5.)*sqrt(3./7.)*Z_rot_;
+			  chi   = 3.*nn*nu/4.;
+			  cchi  = 2.36*chi;
+
+			  //---------Classical + rotational loss/dispersion--------------------------
+			  beta_0  = 2*Pi*freq/c_snd_z; 
+			  beta_1  = beta_0*sqrt(0.5*(sqrt(1+pow(nu,2))+1)/(1+pow(nu,2)));
+			  beta_2  = beta_0*sqrt((1+pow(chi,2))/(1+pow((sigma*chi),2))); 
+			  alpha_1 = beta_0*sqrt(0.5*(sqrt(1+pow(nu,2))-1)/(1+pow(nu,2)));
+			  alpha_2 = beta_0*(((sigma/2-1/(2*sigma))*chi)/(sqrt((1+pow(chi,2))*(1+pow(sigma*chi,2)))));
+			  //a_cl    = alpha_1*(beta_2/beta_0);
+			  //a_rot = alpha_2*(beta_1/beta_0)*X_ON;
+
+			  a_cl    = (2*Pi*freq/c_snd_z)*sqrt(0.5*(sqrt(1+pow(nu,2))-1)*(1+pow(cchi,2))/((1+pow(nu,2))*(1+pow(sigma*cchi,2))));
+			  a_rot   = (2*Pi*freq/c_snd_z)*X_ON*((pow(sigma,2)-1)*chi/(2*sigma))*sqrt(0.5*(sqrt(1+pow(nu,2))+1)/((1+pow(nu,2))*(1+pow(cchi,2))));
+			  a_diff  = 0.003*a_cl;
+
+			  //---------Vibrational relaxation-------------------------------------------
+			  Tr = pow(T_z/T_o,-1./3.)-1;
+			  A1 = (X[0]+X[1])*24*exp(-9.16*Tr);
+			  A2 = (X[4]+X[5])*2400;
+			  B  = 40400*exp(10*Tr);
+			  C  = 0.02*exp(-11.2*Tr);
+			  D  = 0.391*exp(8.41*Tr);
+			  E  = 9*exp(-19.9*Tr);
+			  F  = 60000;
+			  G  = 28000*exp(-4.17*Tr);
+			  H  = 22000*exp(-7.68*Tr);
+			  I  = 15100*exp(-10.4*Tr);
+			  J  = 11500*exp(-9.17*Tr);
+			  K  = (8.48E08)*exp(9.17*Tr);
+			  L  = exp(-7.72*Tr);
+			  ZZ = H*X[2]+I*(X[0]+0.5*X[4])+J*(X[1]+0.5*X[5])+K*(X[6]+X[3]);
+			  hu = 100*(X[3]+X[6]);
+			  f_vib[0] = (P_z/P_o)*(mu_o/mu)*(A1+A2+B*hu*(C+hu)*(D+hu));
+			  f_vib[1] = (P_z/P_o)*(mu_o/mu)*(E+F*X[3]+G*X[6]);
+			  f_vib[2] = (P_z/P_o)*(mu_o/mu)*ZZ;
+			  f_vib[3] = (P_z/P_o)*(mu_o/mu)*(1.2E5)*L;
+
+			  a_vib = 0.;
+			  for (m=0; m<4; m++)
+			  {
+				  C_R        = ((pow(theta[m]/T_z,2))*exp(-theta[m]/T_z))/(pow(1-exp(-theta[m]/T_z),2));
+				  A_max      = (X[m]*(Pi/2)*C_R)/(Cp_R[m]*(Cv_R[m]+C_R));
+				  a_vib_c[m] = (A_max/c_snd_z)*((2*(pow(freq,2))/f_vib[m])/(1+pow(freq/f_vib[m],2)));
+				  a_vib      = a_vib + a_vib_c[m];
+			  }
+
+			  alpha[ii] = (a_cl + a_rot + a_diff + a_vib)*tweak_abs;
+    }
+	}
+	else { 
+	    // load atten. coeff from a text file with columns: z (km AGL) | attn
+	    cout << "Loading attenuation coefficients from file " << usrattfile << endl;
+	
+	    double d1, d2;
+	    vector<double> zatt, att;
+	    ifstream indata;
+
+	    indata.open(usrattfile.c_str());	
+	    if (!indata) {
+	        cerr << "file " << usrattfile << " could not be opened.\n";
+	        exit(1);
+	    }
+	
+	    indata >> d1 >> d2; // read first line in file
+	    while (!indata.eof()) {
+	        zatt.push_back(d1*1000.0);
+	        att.push_back(d2);
+	        indata >> d1 >> d2;
+	    }
+	    indata.close();
+	    
+	    //// print data
+	    //for (unsigned i=0; i<zatt.size(); i++) {
+	    //    cout << i << "  " << zatt[i] << endl;
+	    //}
+
+	    // do spline interpolation of attenuation coefficient
+	    gsl_interp_accel *acc_;
+	    acc_ = gsl_interp_accel_alloc();
+	    gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, zatt.size());
+	    gsl_spline_init(spline, zatt.data(), att.data(), zatt.size());
+	    
+	    // do spline up to the max height hatt found in the provided atten. file
+	    int it = 0;
+	    while ((it*dz< zatt[zatt.size()-1]) && (it<n)) {
+	        alpha[it] = gsl_spline_eval(spline, it*dz, acc_ );
+	        it++;
+	    }
+	    // if the grid extends above hatt => extend alpha with the last value up to grid height 
+      for (int i=it; i< n; i++) {
+          alpha[i] = alpha[it-1];
+      }
+            
+      gsl_spline_free(spline);
+      gsl_interp_accel_free(acc_);
+  }
+   
+  /*
+  // save alpha?
+  if (1) {
+      FILE *fp = fopen("attn.dat", "w");
+      for (int ii=0; ii<n; ii++) {
+          fprintf(fp, "%9.4f  %14.6e\n", ii*dz/1000.0, alpha[ii]);
+      }
+      printf("Attenuation coeff. saved in 'attn.dat'\n");
+      fclose(fp);
+  }
+  */
+  
+  
+  return 0;
+}
+
+
+
+
+
+
+
+
+
 
 
 // this version has   double sourceheight, double receiverheight, as arguments              	
@@ -1370,7 +1764,7 @@ int NCPA::SolveModBB::doPerturb2(int nz, double z_min, double dz, int n_modes, d
    
   dz_km = dz/1000.0;
   for (j=0; j<n_modes; j++) {
-      absorption = 0.;
+      absorption = 0.0;
       z_km=z_min/1000.0;
       for (i=0; i<nz; i++) {
         c_T = sqrt(gamma*Pr[i]/rho[i]); // in m/s
