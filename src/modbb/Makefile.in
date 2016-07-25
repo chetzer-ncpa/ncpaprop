@@ -18,7 +18,7 @@ all: $(TARGET)
 
 # link	
 $(TARGET): $(OBJS)
-	@MPICXX@ -o $@ $^ @LDFLAGS@ @STATICLIBS@ $(SLEPC_LIB) @LIBS@
+	@MPICXX@ -o $@ $^  @STATICLIBS@ $(SLEPC_LIB) @LIBS@
 	cp $@ ../../bin
 	
 # compile 

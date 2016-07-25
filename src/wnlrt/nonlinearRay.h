@@ -5,6 +5,10 @@
 //  Created by Joel Lonzaga on 5/27/12.
 //  Copyright (c) 2012 University of Mississippi. All rights reserved.
 //
+// Most references are to the article: "Modelling waveforms of infrasound 
+// arrivals from impulsive sources using weakly non-linear ray theory" 
+// by Joel Lonzaga, Roger Waxler, Jelle Assink, Carrick Talmadge
+// in Geophysical Journal International (2015), JGI 200, pg 1347-1361
 
 
 #ifndef _nonlinearRay_h
@@ -17,13 +21,18 @@
 using namespace std;
 
 struct nonray{
-    //vector<double> xx, yy, zz, rh, ps, sb, tt, Ur, Ui, ff, cc, tr;
+    //vector<double> xx, yy, zz, rh, ps, sb, tt, Ur, Ui, ff, cc, tr; // Joel
     vector<double> xx, yy, zz, rh, ps, sb, tt, Ur, Ui, ff, cc, tr, ss;  // DV
-    vector< vector<double> > uu;
+    // note: ps is the scaling factor for acoustic pressure: p = u/ps where p = acoustic pressure
+    vector< vector<double> > uu; // scaled acoustic pressure uu = pp*ps
+    // DV
+    //vector< vector<double> > UUr; // real (spectrum)
+    //vector< vector<double> > UUi; // imag (spectrum)
+    
 };
 
 struct waveform{
-    vector<double> tt, pp;
+    vector<double> tt, pp; // time, pressure
 };
 
 struct blastParam{
@@ -83,9 +92,22 @@ public:
 };
 
 
+// The meaning of these variables:
+// rho0 = ambient density
+// beta = coefficient of non-linearity
+// phi = eikonal
+// grad(phi) = slowness
+// 
+// om = 1 - grad(phi)*v0 = the Doppler effect induced by the wind with velocity v0
+// vr = v0 + c0*nv = magnitude of the ray velocity; 
+// where nv = unit vector pointing along the ray slowness (grad(phi)
+//
+// NN = rho0_i*c0_i*om_i/(Pmax^2*abs(J_i)*Vr_i) // 'i' means initial or reference value
+
+
 class raypathParams
 {
-    double beta, NN, vr, om, ja;
+    double beta, NN, vr, om, ja; // NN is the normalizing factor; set by method normalizingFactor()
     double *spl[9], ptNlp[9];
 	  vector< vector<double> > nlp;
 	  linray LR;

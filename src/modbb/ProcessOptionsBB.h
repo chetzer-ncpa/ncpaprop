@@ -19,7 +19,8 @@ namespace NCPA {
       string getOut_disp_file();
       string getPprop_grid_dirname();
       string getFrame_file_stub();
-      string getSrcfile();         
+      string getSrcfile();
+      string getUsrAttFile();      
             
       bool   getW_disp_src2rcv_flg();
       bool   getW_disp_flg();
@@ -27,7 +28,9 @@ namespace NCPA {
       bool   getPprop_s2r_flg();
       bool   getPprop_s2r_grid_flg();
       bool   getUsemodess_flg();
+      bool   getTurnoff_WKB();
       bool   getPlot_flg();
+      bool   getZeroAttn_flg();
     
       int    getNrng_steps();
       int    getNz_grid();  
@@ -70,7 +73,8 @@ namespace NCPA {
       string atmosfileorder;  // order of column names in atmosfile
       string wind_units;      // default mpersec
       string gnd_imp_model;   // ("rigid");
-      string srcfile;         // file name of the user-provided source spectrum or source waveform       
+      string srcfile;         // file name of the user-provided source spectrum or source waveform
+      string usrattfile;          // user-provided attenuation filename  
       
       bool   w_disp_src2rcv_flg;
       bool   w_disp_flg;
@@ -79,7 +83,9 @@ namespace NCPA {
       bool   pprop_s2r_grid_flg;
       bool   usemodess_flg;   // if ==1 it uses the Eff. Sound Speed approx.
       bool   usewmod_flg;     // if ==1 prompts the use of wmod (mutually exclusive with usemodess_flg)
+      bool   turnoff_WKB;
       bool   plot_flg;
+      bool   zero_attn_flg;   // if ==1 sets attenuation to zero
       
       int    Nz_grid;         // number of points on the z-grid
       int    Nrng_steps;      // number of range steps		
@@ -87,9 +93,9 @@ namespace NCPA {
       int    skiplines;       // number of lines to skip in atmosfile
       int    ntsteps;         // number of time steps
       int    Lamb_wave_BC;    // if ==1 then admittance = -1/2*dln(rho)/dz
-      int    src_flg;         // source flag; 0 for impulse response; 1 for built-in inpulse 
+      int    src_flg;         // source flag; 0 for impulse response; 1 for built-in impulse 
                               // 2 for source spectrum file; 3 for source waveform file provided
-      int    NFFT;            // number of fft points   
+      int    NFFT;            // number of fft points 
    
       double RR;
       double R_start;

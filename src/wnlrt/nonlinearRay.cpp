@@ -18,9 +18,11 @@
 #include "linearRay3DStrat.h"
 #include "nonlinearRay.h"
 
-const double GAMMA = 1.40;
+//#define PI 3.141592653589793;
+
+const double GAMMA    = 1.40;
 const double STEP_MAX = 100.0;   //maximum step size allowed
-const int NUMPTS = pow(2.0,12);  //number of poins in the time/frequency domains to save
+const int NUMPTS      = pow(2.0,12);  // number of poins in the time/frequency domains to save
 
 
 //==============================================================================================
@@ -29,13 +31,13 @@ const int NUMPTS = pow(2.0,12);  //number of poins in the time/frequency domains
 nonray nonlinearRay( int nn, double ssInit, attRed attRed, linray LR, waveform wf )
 {
   nonray NR;
-  int skip, nsc;
+  int    skip, nsc;
   double dop, scbt, ffmx, pmax, umax, ss, ds, ssMem, atfc, dzta;
   double scbc, tt[nn], pp[nn], uu[nn], attn[nn/2+1], ff[nn/2+1];
   vector<double> sc, uhold;
 
   //------------------------------------------------------------------------
-  // Find caustics if exist
+  // Find caustics if they exist
   sc  = zeros( LR.ss, LR.ja );
   nsc = sc.size();
   double ssup[nsc], sslo[nsc], slope[nsc];
@@ -43,19 +45,62 @@ nonray nonlinearRay( int nn, double ssInit, attRed attRed, linray LR, waveform w
 
   //------------------------------------------------------------------------
   //Raypath Parameters, Waveform, and Spectrum at 1 km from the source
-  pmax = wfResize( nn, wf, tt, pp ); // sets interpolated tt, pp from wf.tt and pp
-  ffmx = 1/( 2*(tt[1]-tt[0]) );		   // Nyquist frequency
+  //pmax = wfResize( nn, wf, tt, pp ); // sets interpolated tt, pp from wf.tt and wf.pp
+  //cout << "pmax = " << pmax << endl;
+  
+  if (0) {
+      cout << "in nonlinearRay() after wfResize: saving pp\n";
+      FILE *fid;
+      fid = fopen( "pp.dat", "w");
+      for (int j=0; j<nn; j++) {
+        fprintf(fid, "%15.5E\n", pp[j]);
+      }
+      
+      fclose(fid);
+  }
+  
+  if (1) { // "in nonlinearRay() after undoing wfResize: saving pp\n";
+      //cout << "in nonlinearRay() after undoing wfResize: saving pp\n";
+      //FILE *fid;
+      //fid = fopen( "pp.dat", "w");
+      pmax = wf.pp[0];
+      for (int j=0; j<nn; j++) {      
+          pp[j] = wf.pp[j];
+          tt[j] = wf.tt[j];
+          if (pmax<pp[j]) {
+            pmax=pp[j];
+            //fprintf(fid, "%15.5E\n", pp[j]);
+          }
+      } 
+      //fclose(fid);
+  }
+
+  ffmx = 1/( 2.0*(tt[1]-tt[0]) );		   // Nyquist frequency
   //printf("Nyquist: ffmx=%g\n", ffmx);
   //printf("number of caustics=%d\n", nsc);
 
-  raypathParams RP( LR ); // sets beta, spline accelerators, copies LR.xx,yy, ... to RP
-  RP.normalizingFactor( pmax, ssInit); // interpolates xx, om, vr... at ssInit; 
-                                       // calculates initial NN=rh*om*c0^2/(pmax^2*J*vr)
-                                       // sets ps in RP; below in initFFT the scaled pressure is u = pp*ps
-  RP.psDopScaBeta( ssInit, dop, scbt); // scbt= beta tilde at distance ssinit: see eq 4 in JGI (200) pg 1347
+  // construct an instance RP of class raypathParams
+  raypathParams RP( LR ); // sets beta = 1+(GAMMA-1)/2, spline accelerators, copies LR.xx,yy, ... to RP
+  RP.normalizingFactor( pmax, ssInit); // calls physicalParams(ssinit) and 
+                                       // interpolates xx, om, vr... at ssInit; 
+                                       // calculates initial normalizing factor NN
+                                       // NN=rh0_i*om_i*c0_i^2/(pmax^2*J_i*vr_i)
+                                       // 
+                                       // sets ps in class RP; 
+                                       // below in initFFT the scaled pressure is u = pp*ps
+                                       
+  //cout << "pmax 2= " << pmax << endl;
+                     
+  RP.psDopScaBeta( ssInit, dop, scbt ); // scbt= beta tilde = scaled beta at distance ssinit:
+                                        // scbt = beta*sqrt( pow(om,3)/( NN*rh*cc*cc*fabs(ja)*pow(vr,3) ) );
+                                        // see eq 4 in JGI (200) pg 1347
+                                        // sets ps= sqrt( NN*fabs(ja)*vr/( rh*om*pow(cc,2) ) )
+                                        // i.e. ps is a scaling factor for pressure in class raypathParams
+                                        // computes dop  = cc*om/vr;
 
-  spectralParams SP( nn );     // allocate spectral quatitities U, etc
-  SP.initFFT( RP.ps, pp, uu ); // get initial uu=ps*pp,  + (U1, Usq as spart of class spectralParams)
+  spectralParams SP( nn );     // allocate spectral quantitities U, etc
+  SP.initFFT( RP.ps, pp, uu ); // get initial scaled acoustic pressure uu=ps*pp,  
+                               // and also (U1, Usq as part of class spectralParams)
   SP.frequency( ffmx, ff );    // since df = 2*ffmx/nn ff is the vector of 
                                // (nn/2+1) positive frequencies 0:df:Nyquist
                                // cf and fltr are set here as part of spectralParams class data
@@ -67,9 +112,12 @@ nonray nonlinearRay( int nn, double ssInit, attRed attRed, linray LR, waveform w
   NR.cc.push_back( RP.cc );
   NR.tr.push_back( RP.tr );
   NR.ps.push_back( RP.ps );
-  NR.sb.push_back( scbt*1 );   
+  NR.sb.push_back( scbt*1 ); // initial scaled beta i.e. beta tilde in eq 4 
   NR.ss.push_back( ssInit ); // DV
   
+  //cout << "RP.ps = " << RP.ps << endl;
+  
+  // store every 'skip' point for a total of NUMPTS
   skip = nn/NUMPTS;
   for(int i=0; i < nn; i+=skip) // store subsampled uu and tt in NR.uu, NR.tt
   {	
@@ -80,22 +128,49 @@ nonray nonlinearRay( int nn, double ssInit, attRed attRed, linray LR, waveform w
   
 //------------------------------------------------------------------------
   //Propagate by 1 step, integrate using the first-order Euler method
-  ds = 1/( 2*PI*ffmx*scbt ); // initial ds
+  ds = 1.0/( 2.0*PI*ffmx*scbt ); // initial ds
   if( ds > STEP_MAX )	ds = STEP_MAX;
   ssMem = ss = ssInit;
-  ss = ss + ds;
+  ss    = ss + ds;
   RP.psDopScaBeta( ss, dop, scbt); // scaled beta at new ss
 
   if( RP.zz < attRed.zzRed ) atfc = 1; // setting the attenuation adjusting factor above zzRed height
   else atfc = attRed.atfac;	
   atmAttn( nn/2+1, RP.zz*1e-3, RP.rh, RP.cc, ff, attn );
   SP.integEulerMethod( ds, atfc, scbt, dop, attn ); // U2 = (U1 + ds*cf*Usq)*exp(-a*c0*OM/vr); U3=U2
+  
+  
+  // save U2
+  if (0) {
+      cout << "in nonlinearRay() after integEulerMethod(): saving U1 U2\n";
+      FILE *fid;
+      fid = fopen( "U2.dat", "w");
+      for (int j=0; j<nn/2+1; j++) {
+        fprintf(fid, "%15.5E  %15.5E\n", SP.U2[j][0], SP.U2[j][1]);
+      } 
+      fclose(fid);
+      
+    //U2[i][1] = U1[i][1] + ds*cf[i]*scbt*Usq[i][0];  // imaginary part
+		//attnEf2[i] = atfc * attn[i]*fltr[i]*dop;        // alfa*c0*Omega/v_ray; alfa is altered by a factor atfc
+		//U2[i][0] = U2[i][0]*exp( - attnEf2[i]*ds  );    // apply attenuation; see paper page 1351
+		//U2[i][1] = U2[i][1]*exp( - attnEf2[i]*ds  );
+  }
+  
+  
   SP.FFT( uu, umax );  // obtain uu = ifft(U3) and Usq=fft(u^2); also umax is returned
   //------------------------------------------------------------------------
   //Marching along the ray path
   int j  = 0;
   int it = 1;
-    
+  
+  
+  FILE *fidU2;
+  bool save_U2 = false;
+  if (save_U2) {
+    cout << "in nonlinearRay() after integEulerMethod(): saving  U2a\n";
+    fidU2 = fopen( "U2a.dat", "w");
+  }
+   
   while( ss+ds <= LR.ss.back() )  {	
     // Saving/storing needed parameters every ~0.5 km of ray path		
     if( int(ss)%500 < int(ssMem)%500 )
@@ -112,12 +187,21 @@ nonray nonlinearRay( int nn, double ssInit, attRed attRed, linray LR, waveform w
         for(int i=0; i < nn; i+=skip) 
             uhold.push_back( uu[i] );
         NR.uu.push_back( uhold ); // store entire waveform at this distance
+            
+      if (save_U2) {
+      cout << "in nonlinearRay() after integEulerMethod(): saving  U2\n";
+
+      for (int j=0; j<nn/2+1; j++) {
+        fprintf(fidU2, "%15.5E  ", SP.U1[j][0]);
+      }
+      fprintf(fidU2, "\n");
+      } 
     }
             
     //Nonlinear Integration 
     if( ss < sslo[j] || ss > ssup[j] )      // away from caustic
     {	
-        ds = 1/( 2*PI*ffmx * scbt * umax ); // variable ds size 
+        ds = 1.0/( 2.0*PI*ffmx * scbt * umax ); // variable ds size 
         if( ds > STEP_MAX )	ds = STEP_MAX;
         SP.integLeapfrog( ds, scbt );  // U3 = U1 + i*ds*w_n*scbt*Usq - see eq after eq. 12 in GJI article
     }
@@ -141,7 +225,7 @@ nonray nonlinearRay( int nn, double ssInit, attRed attRed, linray LR, waveform w
 
     //Stepping
     ssMem = ss;
-    ss = ss+ds;
+    ss    = ss+ds;
     if( ss >= LR.ss.back() ) break;
     
     RP.psDopScaBeta( ss, dop, scbt); // update RP.xx, yy... dop and scbt
@@ -150,7 +234,7 @@ nonray nonlinearRay( int nn, double ssInit, attRed attRed, linray LR, waveform w
     if( RP.zz < attRed.zzRed ) atfc = 1;
     else atfc = attRed.atfac;
     atmAttn( nn/2+1, RP.zz*1e-3, RP.rh, RP.cc, ff, attn );
-    SP.applyAttn( ds, atfc, dop, attn );
+    SP.applyAttn( ds, atfc, dop, attn ); // Update U1,U2,U3, and apply fltr
     SP.FFT( uu, umax );  // obtain uu = ifft(U3) and Usq=fft(u^2); also umax is returned
 
     // Displaying status
@@ -162,7 +246,16 @@ nonray nonlinearRay( int nn, double ssInit, attRed attRed, linray LR, waveform w
     it++;
 
   } 	//ending marching along ray
+  
+  
+  
+  if (save_U2) {
+  cout << "closing fidU2\n";
+      fclose(fidU2);
+  }
     
+    
+  
   NR.xx.push_back( RP.xx );
   NR.yy.push_back( RP.yy );
   NR.zz.push_back( RP.zz );
@@ -182,7 +275,7 @@ nonray nonlinearRay( int nn, double ssInit, attRed attRed, linray LR, waveform w
 	{	
 	  uhold.push_back( uu[i] );
   }
-	NR.uu.push_back( uhold );
+	NR.uu.push_back( uhold );  // store this last time step (uhold) into matrix NR.uu
 	
   for( int i=0; i<nn/2+1; i++ )
   {   
@@ -494,6 +587,18 @@ double wfResize( int nn, waveform wf, double *tt, double *pp )
     double pmax, dt;
     double *spl = spline( wf.tt, wf.pp, 1e50, 1e50 );
     
+    
+  if (1) { //DV
+      cout << "in wfResize() saving pp\n";
+      FILE *fid;
+      fid = fopen( "pp1.dat", "w");
+      for (int j=0; j<nn; j++) {
+        fprintf(fid, "%15.5E\n", wf.pp[j]);
+      }
+      
+      fclose(fid);
+  }
+    
     dt    = ( wf.tt.back() - wf.tt.front() )/nn;    
     tt[0] = wf.tt.front();
     pp[0] = wf.pp.front();	
@@ -546,7 +651,7 @@ void causticParams( vector<double> sc, linray LR, double *ssup, double *sslo, do
             zc = 1e-3*splint(LR.ss, LR.zz, spl[1],  sc[j]);
             xc = 1e-3*splint(LR.ss, LR.xx, spl[2], sc[j]);
             yc = 1e-3*splint(LR.ss, LR.yy, spl[3], sc[j]);
-            printf("--> Found caustic near \n\taltitude = %.1f km, \n\t%.1f km due east, and \n\t%.1f km due north.\n",zc,xc,yc);
+            printf("--> Found caustic near \n\taltitude = %.1f km, \n\t%.1f km due East, and \n\t%.1f km due North.\n",zc,xc,yc);
         }
         for( int i=0; i<4; i++ )
             delete [] spl[i];
@@ -617,6 +722,8 @@ spectralParams::~spectralParams()
 // -------------------------------------------------------------------------------
 //Frequency and Such
 // -------------------------------------------------------------------------------
+
+/*
 void spectralParams::frequency( double ffmx, double *ff )	
 {
   // since df = 2*ffmx/nn ff is the vector of positive frequencies 0:df:Nyquist
@@ -629,12 +736,59 @@ void spectralParams::frequency( double ffmx, double *ff )
 		  fltr[i] = 1;
 		}
 		else {
-		  fltr[i] = pow( ff[i]/ff[nn/4], 10 );
+		  fltr[i] = pow( ff[i]/ff[nn/4], 14 ); // 10 was an initial value
 		  //if (i < nn/3) {
 		  //    printf("fltr[%d]=%g\n", i, fltr[i]);
 		  //}
 		}
 	}
+	
+	if (1) {
+      cout << "in nonlinearRay() in spectralParams::frequency: saving fltr in fltr.dat\n";
+      FILE *fid; 
+      fid = fopen( "fltr.dat", "w");
+      for (int j=0; j<nn/2+1; j++) {
+        fprintf(fid, "%15.5E  %15.5E\n", ff[j], fltr[j]);
+      }
+      
+      fclose(fid);
+  }
+	
+}
+*/
+
+
+// DV - 
+void spectralParams::frequency( double ffmx, double *ff )	
+{
+  // since df = 2*ffmx/nn ff is the vector of positive frequencies 0:df:Nyquist
+  // cf and fltr are set here as part of spectralParams class data
+	for( int i=0; i< nn/2+1; i++ )
+	{	
+		ff[i] = ffmx*2*i/nn;    // ffmx=f_Nyquist; positive frequencies 0:df:Nyquist
+		cf[i] = 0.5*2*PI*ff[i];	// sets cf = (ang freq)/2
+		if( i< round(nn/4) ) {
+		  fltr[i] = 1;
+		}
+		else {
+		  fltr[i] = pow( ff[i]/ff[(int) round(nn/4)], 20 ); // 100 was Joe's original value
+		  //if (i < nn/3) {
+		  //    printf("fltr[%d]=%g\n", i, fltr[i]);
+		  //}
+		}
+	}
+	
+	if (0) {
+      cout << "in nonlinearRay() in spectralParams::frequency: saving fltr in fltr.dat\n";
+      FILE *fid; 
+      fid = fopen( "fltr.dat", "w");
+      for (int j=0; j<nn/2+1; j++) {
+        fprintf(fid, "%15.5E  %15.5E\n", ff[j], fltr[j]);
+      }
+      
+      fclose(fid);
+  }
+	
 }
 
 
@@ -658,7 +812,7 @@ void spectralParams::initFFT( double ps, double *pp, double *u )
 }
 
 
-
+/*
 // -------------------------------------------------------------------------------
 //Initial integration using the Euler method
 // -------------------------------------------------------------------------------
@@ -673,12 +827,38 @@ void spectralParams::integEulerMethod( double ds, double atfc, double scbt, doub
 	{	U2[i][0] = U1[i][0] - ds*cf[i]*scbt*Usq[i][1]; 	// real part of the Fourier component  
 		U2[i][1] = U1[i][1] + ds*cf[i]*scbt*Usq[i][0];  // imaginary part
 		attnEf2[i] = atfc * attn[i]*fltr[i]*dop;        // alfa*c0*Omega/v_ray; alfa is altered by a factor atfc
-		U2[i][0] = U2[i][0]*exp( - attnEf2[i]*ds  );    // apply attenuation
+		U2[i][0] = U2[i][0]*exp( - attnEf2[i]*ds  );    // apply attenuation; see paper page 1351
 		U2[i][1] = U2[i][1]*exp( - attnEf2[i]*ds  );
     U3[i][0] = U2[i][0];
 		U3[i][1] = U2[i][1];
 	}
 }
+*/
+
+
+// DV
+// -------------------------------------------------------------------------------
+//Initial integration using the Euler method
+// -------------------------------------------------------------------------------
+void spectralParams::integEulerMethod( double ds, double atfc, double scbt, double dop, double *attn )
+{
+  // See eq. 12 in Non-lin paper GJI 200 pg 1347 (2015)
+  // Note: cf is defined as omega_n/2 (i.e. half the angular frequency - nn/2+1 components
+  // U2 = (U1 + ds*cf*U^2)*exp(-a*c0*OM/vr)
+  // U3 = U2;
+
+	for( int i=0; i< nn/2+1; i++ )
+	{	U2[i][0] = U1[i][0] - ds*cf[i]*scbt*Usq[i][1]; 	// real part of the Fourier component  
+		U2[i][1] = U1[i][1] + ds*cf[i]*scbt*Usq[i][0];  // imaginary part
+		attnEf2[i] = atfc * attn[i]*fltr[i]*dop;        // alfa*c0*Omega/v_ray; alfa is altered by a factor atfc
+		U2[i][0] = U2[i][0]*exp( - attnEf2[i]*ds  );    // apply attenuation; see paper page 1351
+		U2[i][1] = U2[i][1]*exp( - attnEf2[i]*ds  );
+    U3[i][0] = U2[i][0];
+		U3[i][1] = U2[i][1];
+	}
+}
+
+
 
 
 // -------------------------------------------------------------------------------
@@ -694,7 +874,7 @@ void spectralParams::integLeapfrog( double ds, double scbt )
     }            
 }
 
-
+/* // original
 // -------------------------------------------------------------------------------
 //Application of Attenuation
 // -------------------------------------------------------------------------------
@@ -705,6 +885,27 @@ void spectralParams::applyAttn( double ds, double atfc, double dop, double *attn
         attnEf2[i] = atfc * attn[i]*fltr[i]*dop;
         U3[i][0] = U3[i][0]*exp(- (attnEf1[i] + attnEf2[i])*ds/2  );
         U3[i][1] = U3[i][1]*exp(- (attnEf1[i] + attnEf2[i])*ds/2  );
+        U1[i][0] = U2[i][0];
+        U1[i][1] = U2[i][1];
+        U2[i][0] = U3[i][0];				
+        U2[i][1] = U3[i][1];
+    }  
+}
+*/
+
+// DV - add a filter here -such as a sine filter, etc
+// -------------------------------------------------------------------------------
+//Application of Attenuation
+// -------------------------------------------------------------------------------
+void spectralParams::applyAttn( double ds, double atfc, double dop, double *attn )
+{   
+    for( int i=0; i< nn/2+1; i++ )
+    {   attnEf1[i] = attnEf2[i];
+        attnEf2[i] = atfc * attn[i]*fltr[i]*dop;
+        //U3[i][0] = U3[i][0]*exp(- (attnEf1[i] + attnEf2[i])*ds/2  );
+        //U3[i][1] = U3[i][1]*exp(- (attnEf1[i] + attnEf2[i])*ds/2  );
+        U3[i][0] = U3[i][0]*exp(- (attnEf1[i] + attnEf2[i])*ds/2  )*sin(PI*(nn/2-i)/(nn)); // DV
+        U3[i][1] = U3[i][1]*exp(- (attnEf1[i] + attnEf2[i])*ds/2  )*sin(PI*(nn/2-i)/(nn)); // DV       
         U1[i][0] = U2[i][0];
         U1[i][1] = U2[i][1];
         U2[i][0] = U3[i][0];				
@@ -751,7 +952,7 @@ void spectralParams::hilbert()
 {
     // U3 is used to store the Hilbert transform of U1 first then of U2
     // U1, U2 end up storing their own transform 
-    cout << "Passing through a caustic." << endl;
+    cout << "--> Passing through a caustic." << endl;
     for(int i=0; i<nn/2+1; ++i)
     {   U3[i][0] = -U1[i][1];
         U3[i][1] = U1[i][0];
@@ -839,15 +1040,15 @@ void raypathParams::physicalParams( double ss )
   //printf("splin[%d]=%p\n", j, splin[j]);
   //printf("In physicalParams( double ss ) - here 0\n");
   
-  xx = gsl_spline_eval(splin[0], ss, acc_ );
-  yy = gsl_spline_eval(splin[1], ss, acc_ );
-  zz = gsl_spline_eval(splin[2], ss, acc_ );
-  cc = gsl_spline_eval(splin[3], ss, acc_ );
-  vr = gsl_spline_eval(splin[4], ss, acc_ );
-  om = gsl_spline_eval(splin[5], ss, acc_ );
-  rh = gsl_spline_eval(splin[6], ss, acc_ );
-  ja = gsl_spline_eval(splin[7], ss, acc_ );
-  tr = gsl_spline_eval(splin[8], ss, acc_ );
+  xx = gsl_spline_eval(splin[0], ss, acc_ ); // ray's x coord
+  yy = gsl_spline_eval(splin[1], ss, acc_ ); // y
+  zz = gsl_spline_eval(splin[2], ss, acc_ ); // z
+  cc = gsl_spline_eval(splin[3], ss, acc_ ); // c - sound speed
+  vr = gsl_spline_eval(splin[4], ss, acc_ ); // ray velocity 
+  om = gsl_spline_eval(splin[5], ss, acc_ ); // OMEGA = 1-grad(phi)*v_0 - Doppler effect from wind v_0
+  rh = gsl_spline_eval(splin[6], ss, acc_ ); // density
+  ja = gsl_spline_eval(splin[7], ss, acc_ ); // Jacobian
+  tr = gsl_spline_eval(splin[8], ss, acc_ ); // reduced time
 
   //gsl_interp_accel_free(acc_);
        
@@ -972,12 +1173,13 @@ void raypathParams::physicalParams( double ss, int j )
 double raypathParams::pressCorrection( double ssInit )
 {
     double p1k, pch, j1k;
-    physicalParams( 1000 ); // this distance is in meters; ensure the eigenray is longer than 1000 m
+    physicalParams( 1000 ); // this distance is in meters; 
+                            // ensure the eigenray is longer than 1000 m
 
     j1k = ja;
     p1k = rh*om*pow(cc,2)/( vr*pow( ssInit/1000,2 ) );
     
-    physicalParams( ssInit );
+    physicalParams( ssInit ); // set initial ray physical parameters, x,y,z, om, etc
     pch = rh*om*pow(cc,2)/( vr*ja/j1k ); 
     
     //printf("pch=%g\n", pch);
@@ -989,10 +1191,10 @@ double raypathParams::pressCorrection( double ssInit )
     return sqrt( pch/p1k );
 }
 
-
+// set normalizing factor NN - 
 void raypathParams::normalizingFactor( double pmax, double ssInit)
 {
-    physicalParams( ssInit ); // interpolates xx,om, vr... at ssInit
+    physicalParams( ssInit ); // initial physical params: interpolates xx,om, vr... at ssInit
 	  NN = rh*om*pow(cc,2)/( pow(pmax,2)*fabs(ja)*vr ); // calc with initial ray param values
 	  //printf("in normalizingFactor; NN=%g ja=%g; vr=%g om=%g rho=%g, cc=%g\n", NN, ja, vr, om, rh, cc);
 }
