@@ -153,8 +153,10 @@ int main(int argc,char **argv) {
     } 
     else if ( (oNRT->getWftype()).compare("pulse")==0 ) {
       double ampl = oNRT->getWfampl();
-      wf = generateWaveForm(nn, period, ampl ); 
-    }                                                       
+      cout << "--> Initial amplitude = " << ampl << " Pa" << endl;
+      wf = generateWaveForm(nn, period, ampl );
+      //cout << "after generateWaveForm: ampl = " << ampl << endl;
+    }                                      
 
     string init_wavef = "initwf.dat"; 
     savewf( init_wavef.c_str(), wf );
@@ -163,6 +165,7 @@ int main(int argc,char **argv) {
     
     //----------------------------------------------------------
     // Nonlinear ray calculation
+    //
     // printf("Starting the nonlinear ray acoustic calculation for yield=%.0f tonnes, tv=%.0f m/s, and attnReduxn=%.1f.\n", 1e-3*yield[0], ER.tv, attRed.atfac);
     printf("--> Starting the nonlinear ray acoustic calculation\n");
         
@@ -182,7 +185,7 @@ int main(int argc,char **argv) {
     }    
     
     end = clock();
-    cout << "--> Run time = " << (end-start)/CLOCKS_PER_SEC << " s." << endl << endl;
+    cout << "--> ...done. (Run time = " << (end-start)/CLOCKS_PER_SEC << " s.)" << endl << endl;
     
     delete opt;
     delete oNRT;
@@ -227,9 +230,9 @@ void save2disk( const char *fn, double atfac, linray ER, nonray NR )
     //printf("stpsiz=%d\n", stpsiz);
     //printf("vecsiz=%d\n", vecsiz);
    
-   // save ray path and scaled pressure ps?
-   printf("--> Saving ray info and scaled pressure to file %s\n", filename2);
-   printf("    with columns: x, y, z, raypath_length, travel_time, scaled_pressure\n");
+   // save ray path and pressure scaling factor ps?
+   printf("--> Saving ray info and the pressure scaling factor to file %s\n", filename2);
+   printf("    with columns: x, y, z, raypath_length, travel_time, pressure scaling factor\n");
     for(int i = 0; i < stpsiz; i++)  
        fprintf (acoParam, "%15.5E %15.5E %15.5E %15.5E %15.5E %15.5E\n", NR.xx[i], NR.yy[i], NR.zz[i], NR.ss[i], NR.tr[i], NR.ps[i]); 
     
@@ -237,17 +240,20 @@ void save2disk( const char *fn, double atfac, linray ER, nonray NR )
     // Saving waveform along the ray path
     
     printf("--> Saving waveform evolution along the ray path to %s\n", filename1);
-    printf("    with %d columns: [ reduced_time, waveform_at_step1, waveform_at_step2, 3, 4, ...etc.]\n", stpsiz+1);
-    printf("    See time steps in the accompanying file %s.\n", filename2);
+    printf("    with %d columns:\n", stpsiz+1);
+    printf("    [ reduced_time, pressure waveform_at_step1, waveform_at_step2, 3, 4, ...etc.]");   
+    printf("    See the time steps in column 5 in the accompanying file %s.\n", filename2);
     
      for(int i = 0; i < vecsiz; i++ )
      {   
        fprintf( acoPress, "%.5E", NR.tt[i] ); // save reduced time in the first column
-       for( int j = 0; j < stpsiz; j++ )
-         fprintf( acoPress, "%15.5E", NR.uu[j][i] );
+       for( int j = 0; j < stpsiz; j++ ) {
+         //fprintf( acoPress, "%15.5E", NR.uu[j][i] );
+         fprintf( acoPress, "%15.5E", NR.uu[j][i]/NR.ps[j] );
+       }
        fprintf( acoPress, "\n");
      }
-     /*
+    /*
     //---------------------------------------------------------------------
     // Saving waveform and spectrum at the receiver
     for(int i = 0; i < vecsiz; i++ )
@@ -256,90 +262,16 @@ void save2disk( const char *fn, double atfac, linray ER, nonray NR )
     vecsiz = NR.ff.size();
     printf("--> Saving waveform spectrum at receiver to %s\n", filename3);
     printf("    with 3 columns: [frequency, real part, imag part].\n");
-    for(int i = 0; i<vecsiz; i++)
-        fprintf( acoSpect, "%.5E %15.5E %15.5E\n", NR.ff[i], NR.Ur[i], NR.Ui[i] );
-    
-    fclose( acoParam );
-    fclose( acoPress );
-    fclose( acoSpect );
-    //fclose( acoCeffe );
-}
-
-
-// old version of save2disk
-void save2disk( const char *fn, double yield, double atfac, linray ER, nonray NR )
-{
-    char filename1[50], filename2[50], filename3[50], filename4[50], tmp[15];
-    int j = strlen(fn);
-    for(int i=0; i<3; i++)  tmp[i] = fn[i];
-    int m = 3;
-    for(int i=j-12; i<j-4; i++)
-    {   tmp[m] = fn[i];
-        m++;
+    for(int i = 0; i<vecsiz; i++) {
+        //fprintf( acoSpect, "%.5E %15.5E %15.5E\n", NR.ff[i], NR.Ur[i], NR.Ui[i] );
+        fprintf( acoSpect, "%.5E %15.5E %15.5E\n", NR.ff[i], NR.Ur[i]/NR.ps[stpsiz-1], NR.Ui[i]/NR.ps[stpsiz-1] );
     }
-    tmp[m] = '\0';
-    
-    sprintf(filename1, "%s_Prs_%03.0f_%.3f_%.1fEx.txt", tmp, yield, ER.tv, atfac );
-    sprintf(filename2, "%s_Prm_%03.0f_%.3f_%.1fEx.txt", tmp, yield, ER.tv, atfac );
-    sprintf(filename3, "%s_Spc_%03.0f_%.3f_%.1fEx.txt", tmp, yield, ER.tv, atfac );
-    sprintf(filename4, "%s_Cef_%03.0f_%.3f_%.1fEx.txt", tmp, yield, ER.tv, atfac );  
-    
-    FILE *acoPress, *acoParam, *acoSpect, *acoCeffe;
-    acoPress = fopen( filename1, "w");
-    acoParam = fopen( filename2, "w");
-    acoSpect = fopen( filename3, "w");
-    //acoCeffe = fopen( filename4, "w");
-    
-    double cef;
-    double theta = ER.th;
-    double phi   = ER.ph;
-    
-    // save effective sound speed
-    //for(unsigned int i = 0; i<prf.zz.size(); i++)
-    //{   cef = prf.cc[i] + prf.wx[i]*cos(theta)*cos(phi) + prf.wy[i]*cos(theta)*sin(phi);
-    //    fprintf( acoCeffe, "%.5E %15.5E %15.5E %15.5E %15.5E\n", prf.zz[i], prf.cc[i], prf.wx[i], prf.wy[i], cef );
-    //}
-    
-    int vecsiz = NR.tt.size();
-    int stpsiz = NR.uu.size();
-    
-    //printf("stpsiz=%d\n", stpsiz);
-    //printf("vecsiz=%d\n", vecsiz);
-   
-   // save ray path and scaled pressure ps?
-   printf("Saving scaled pressure to file %s\n", filename2);
-   printf("with columns: x, y, z, raypath_length, travel time, scaled_pressure\n");
-    for(int i = 0; i < stpsiz; i++)  
-       fprintf (acoParam, "%15.5E %15.5E %15.5E %15.5E %15.5E %15.5E\n", NR.xx[i], NR.yy[i], NR.zz[i], NR.ss[i], NR.tr[i], NR.ps[i]); 
-    
-    //---------------------------------------------------------------------
-    // Saving waveform along the ray path
-    
-    printf("Saving waveform evolution along the ray path to %s\n", filename1);
-     for(int i = 0; i < vecsiz; i++ )
-     {   
-       fprintf( acoPress, "%.5E", NR.tt[i] ); // save reduced time in the first column
-       for( int j = 0; j < stpsiz; j++ )
-         fprintf( acoPress, "%15.5E", NR.uu[j][i] );
-       fprintf( acoPress, "\n");
-     }
-     /*
-    //---------------------------------------------------------------------
-    // Saving waveform and spectrum at the receiver
-    for(int i = 0; i < vecsiz; i++ )
-        fprintf( acoPress, "%.5E %15.5E\n", NR.tt[i], NR.uu[stpsiz-1][i] );
-    */
-    vecsiz = NR.ff.size();
-    printf("Saving waveform spectrum at receiver to %s\n", filename3);
-    for(int i = 0; i<vecsiz; i++)
-        fprintf( acoSpect, "%.5E %15.5E %15.5E\n", NR.ff[i], NR.Ur[i], NR.Ui[i] );
     
     fclose( acoParam );
     fclose( acoPress );
     fclose( acoSpect );
     //fclose( acoCeffe );
 }
-
 
 
 
@@ -418,7 +350,9 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
   opt->addUsage( "  Source Location (kilometers) : (0, 0, 0)." );  
   opt->addUsage( "  Receiver Location (kilometers) : (350, 0, 0)." );  
   opt->addUsage( "  theta = 18.0303, phi = 90,  c0(zground) = 0.340322 km/s" );  
-  opt->addUsage( "  # x [km]  y [km]  z [km]  Geo. Atten. [dB]  Atmo. Atten. [dB] Travel Time [s]  rho   c [km/s]  u [km/s]  v [km/s]  w [km/s]  Slowness_x [s/km]  Slowness_y [s/km]  Slowness_z [s/km]  Jacobian [km^2/rad^2]" );  
+  opt->addUsage( "  # x [km]  y [km]  z [km]  Geo. Atten. [dB]  Atmo. Atten. [dB] Travel Time [s]" );  
+  opt->addUsage( "    rho [gm/cm^3]  c [km/s]  u [km/s]  v [km/s]  w [km/s]" );  
+  opt->addUsage( "    Slowness_x [s/km]  Slowness_y [s/km]  Slowness_z [s/km]  Jacobian [km^2/rad^2]" );  
   opt->addUsage( "" );
   opt->addUsage( "REQUIRED options:" );
   opt->addUsage( " --eigenrayfile        Provide name of previously obtained eigenray file." );
@@ -430,29 +364,31 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
   opt->addUsage( "OPTIONAL options [defaults]:" );
   opt->addUsage( " --waveform            Provide the type of waveform at the source. " );
   opt->addUsage( "                       Can be ""Nwave"" or ""pulse"" [Nwave]. " );
-  opt->addUsage( " --ampl                Provide the initial waveform amplitude. [1]" ); 
+  opt->addUsage( " --ampl                Provide the initial pressure waveform amplitude. [1 Pa]" ); 
   opt->addUsage( " --duration            Provide the initial waveform duration [0.5 secs]" );
   opt->addUsage( "" );
   
   
   opt->addUsage( "OUTPUT text files:" );
   opt->addUsage( " ray_params.dat" );
-  opt->addUsage( "                       Contains ray info and scaled pressure; 6 columns " );
-  opt->addUsage( "                       [ x, y, z, raypath_length, travel_time, scaled_pressure ]" );
+  opt->addUsage( "                       Contains ray info and acoustic pressure [Pa]; 6 columns " );
+  opt->addUsage( "                       [ x, y, z, raypath_length, travel_time, acoustic pressure ]" );
   opt->addUsage( "" );  
   opt->addUsage( " pressure_wf_evolution.dat" );
-  opt->addUsage( "                       Stores N waveforms at N time steps along the ray." );
-  opt->addUsage( "                       Contains (N+1) columns in the follwoing order: " );  
-  opt->addUsage( "                       [ reduced_time, waveform_at_step_1 ... waveform_at_step_N ]" );
+  opt->addUsage( "                       Stores N pressure waveforms at N time steps along the ray." );
+  opt->addUsage( "                       The pressure units are Pascals." );
+  opt->addUsage( "                       The file contains (N+1) columns in the following order: " );  
+  opt->addUsage( "                       [ reduced_time, pressure waveform_at_step_1 ..." );
+  opt->addUsage( "                       [ pressure waveform_at_step_2 ... waveform_at_step_N ]" );  
   opt->addUsage( "" );
   opt->addUsage( " final_waveform_spectrum.dat" );
   opt->addUsage( "                       Stores waveform spectrum at the ray's end point " );
   opt->addUsage( "                       Contains 3 columns: [ frequency, real part, imag part ]" );
   opt->addUsage( "" );   
 
-  opt->addUsage( "Examples (run from 'samples' directory):" );  
-  opt->addUsage( "../bin/wnlrt --eigenrayfile ToyAtmo_Eigenray-0.dat" );  
-  opt->addUsage( "../bin/wnlrt --eigenrayfile ToyAtmo_Eigenray-0.dat --waveform Nwave --ampl 500 --duration 0.5" ); 
+  opt->addUsage( "QUICK-START EXAMPLES:" );  
+  opt->addUsage( "./wnlrt --eigenrayfile ToyAtmo_Eigenray-0.dat" );  
+  opt->addUsage( "./wnlrt --eigenrayfile ToyAtmo_Eigenray-0.dat --waveform Nwave --ampl 500 --duration 0.5" ); 
   opt->addUsage( "" ); 
 
   // Set up the actual flags, etc.
@@ -482,7 +418,7 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
   opt->setOption( "duration" );
 
   // Process the command-line arguments
-  opt->processFile( "./wnlrt.options" );
+  opt->processFile( "../samples/wnlrt.options" );
   opt->processCommandArgs( argc, argv );
 
   if( ! opt->hasOptions()) { // print usage if no options

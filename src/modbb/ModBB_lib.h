@@ -50,7 +50,9 @@ void fft_pulse_prop(double t0, int n_freqs, int NFFT, double df, double *f_vec, 
                     int *mode_count, double rho_zsrc, double rho_zrcv, \
                     double **re_k, double **im_k, \
                     double **mode_S, double **mode_R);
-// DV 20151017: Added NFFT as argument                    
+
+// DV 20151017: Added NFFT as argument
+/*         
 int pulse_prop_src2rcv_grid2(\
           const char *filename,double max_cel, \
           double R_start,double DR,double R_end, \
@@ -58,7 +60,16 @@ int pulse_prop_src2rcv_grid2(\
 					double scale, int *mode_count, double rho_zsrc, double rho_zrcv, \
 					double **re_k, double **im_k, double **mode_S, double **mode_R, \
 					int src_flg, string srcfile, int pprop_src2rcv_flg);         							
+*/
 
+// DV 20160717: Added no_attenuation flag                  
+int pulse_prop_src2rcv_grid2(\
+          const char *filename,double max_cel, \
+          double R_start,double DR,double R_end, \
+					int n_freqs, int NFFT, double f_step, double *f_vec, \
+					double scale, int *mode_count, double rho_zsrc, double rho_zrcv, \
+					double **re_k, double **im_k, double **mode_S, double **mode_R, \
+					int src_flg, string srcfile, int pprop_src2rcv_flg, bool zero_attn_flg); 
 					
 int pulse_prop_src2rcv_grid2(\
           const char *filename,double max_cel, \
@@ -91,7 +102,7 @@ complex<double> pulse_spec_fit(double scale, double x);
 
 int getFile_list(string dir, list<string> &files, string pattern);	
 
-complex<double> ***getPz1z2 (int I1, int I2, double r1, double r2, double dr, string dirn, list<string> files);
+complex<double> ***getPz1z2 (int I1, int I2, double r1, double r2, double dr, string dirn, list<string> files, bool zero_attn_flg);
 
 complex<double> **cmatrix(long nr, long nc);
 
@@ -104,7 +115,8 @@ bool compare_freq (string first, string second);
 											
 int process2DPressure(double R_start_km, double width_km, double height_km, \
                       double c_ref, double tmstep, int ntsteps, double f_center, \
-                      string framefn, string dirn, int src_flg, string srcfile);											
+                      string framefn, string dirn, int src_flg, string srcfile, \
+                      bool zero_attn_flg);											
 
 int saveMatrix2bin(const char *filename, double **M, int nr, int nc);
 

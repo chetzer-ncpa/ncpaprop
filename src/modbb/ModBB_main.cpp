@@ -6,17 +6,11 @@
 #include "ProcessOptionsBB.h"
 
 
-/**
+/*
  * This is the Normal Modes Broadband code 
  * based on either the Effective Sound Speed Approximation (Modess) or
  * on the Wide-Angle High-Mach modal code (WMod)
- * @version 0
- * @date 2013-06
- * @authors Doru Velea; Jelle Assink; Roger Waxler; Claus Hetzer;
- * 
- * Changelog:
- * 
- * 0:  
+ * @authors Doru Velea; Jelle Assink; Roger Waxler; Claus Hetzer; 
  */
 
 using namespace NCPA;
@@ -48,7 +42,7 @@ int main( int argc, char **argv ) {
   // flags related to writing dispersion file(s)
   bool   w_disp_src2rcv_flg;
   bool   w_disp_flg;
-  bool   usemodess_flg;
+  //bool   usemodess_flg;
 
   // flags related to pulse propagation
   bool   pprop_grid_flg;
@@ -76,68 +70,29 @@ int main( int argc, char **argv ) {
   if (w_disp_src2rcv_flg || w_disp_flg) { //compute and write dispersion
       //
       // declare some variables to use in this bloc; 
-      //
-      double   azi           ;		// degrees
-      double   maxrange      ;		// meters
-      double   maxheight     ;		// meters
-      double   z_min         ;		// meters
-      double   sourceheight  ;		// meters
-      double   receiverheight;    // meters
-      int      Nz_grid       ;		// number of points on the z-grid
-      int      Nrng_steps    ;		// number of range steps		
+      //		
       string   atmosfile     ;		// stores the atmospheric profile name 
       string   atmosfileorder;    // column order in atmosfile
       string   wind_units    ;    // default 'mpersec'
-      int      skiplines     ;		// skiplines in "atmosfile"
       string   out_disp_file ;    // dispersion filename
-
       string gnd_imp_model   ;  	// default is "rigid"; corresponding to admittance = 0;
-      int Lamb_wave_BC       ;  	// if ==1 then admittance = -1/2*dln(rho)/dz
-      int Nfreq              ;  	// number of positive frequencies 
-      double f_min           ;		// minimum frequency
-      double f_step          ;    // frequency step
-      double f_max           ;		// Nyquist frequency
 
       SampledProfile  *atm_profile;  // the atmospheric profile object
-
-      // get parameter values     
-      atmosfile      = oBB->getAtmosfile();
-      atmosfileorder = oBB->getAtmosfileorder();
-      wind_units     = oBB->getWindUnits();
-      gnd_imp_model  = oBB->getGnd_imp_model();      
-      out_disp_file  = oBB->getOut_disp_file();
-      
-      usemodess_flg  = oBB->getUsemodess_flg();
-          
-      skiplines      = oBB->getSkiplines();
-      z_min          = oBB->getZ_min();
-      azi            = oBB->getAzimuth();
-      maxrange       = oBB->getMaxrange();
-      maxheight      = oBB->getMaxheight();
-      sourceheight   = oBB->getSourceheight();
-      receiverheight = oBB->getReceiverheight();   
-      Nz_grid        = oBB->getNz_grid();
-      Nrng_steps     = oBB->getNrng_steps();
-      Nfreq          = oBB->getNfreq();
-      f_min          = oBB->getF_min();
-      f_step         = oBB->getF_step();			
-      f_max          = oBB->getF_max();
-      Lamb_wave_BC   = oBB->getLamb_wave_BC();
-      
   
       // create the atmopsheric profile object and set the azimuth
-      atm_profile = new SampledProfile( atmosfile, atmosfileorder.c_str(), skiplines );
-      atm_profile->setPropagationAzimuth(azi);
-
-      // get broadband solver object
-      SolveModBB *a;
-      a = new SolveModBB( out_disp_file, atmosfile, wind_units, atm_profile, Nfreq, \
-                          f_min, f_step, f_max, Nz_grid, azi, z_min, \
-                          maxheight, sourceheight, receiverheight, gnd_imp_model, \
-									        Lamb_wave_BC, w_disp_flg,  w_disp_src2rcv_flg, usemodess_flg );
+      atmosfileorder = oBB->getAtmosfileorder();
+      //atm_profile = new SampledProfile( atmosfile, atmosfileorder.c_str(), oBB->getSkiplines() );
+      atm_profile = new SampledProfile( oBB->getAtmosfile(), \
+                        oBB->getAtmosfileorder().c_str(), oBB->getSkiplines() );
+      atm_profile->setPropagationAzimuth(oBB->getAzimuth());
+      //cout << "oBB->getAzimuth() = " << oBB->getAzimuth() << endl;
+      cout << "1  atm_profile->getPropagationAzimuth() = " << atm_profile->getPropagationAzimuth() << endl;
+									        
+      SolveModBB *a = new SolveModBB(oBB, atm_profile); 									        
 				         	 					 
       // solve for modes/ loop over frequencies (broadband) - main action happens here					 
-      a->computeModes(usemodess_flg);	
+      //a->computeModes(usemodess_flg);
+      a->computeModes(oBB->getUsemodess_flg());
       a->printParams();
       
       // save atm. profile if requested
@@ -150,6 +105,7 @@ int main( int argc, char **argv ) {
 								
   } // end computing dispersion data
   else if (pprop_s2r_flg || pprop_s2r_grid_flg) { //pulse propagation source-to-receiver
+      bool zero_attn_flg;
       int    Nfreq, NFFT, src_flg, *mode_count;
       double f_center, f_step, max_cel, R_start, R_end, DR;
       double rho_zsrc, rho_zrcv;
@@ -188,24 +144,22 @@ int main( int argc, char **argv ) {
       f_center = oBB->getF_center();
       src_flg  = oBB->getSrc_flg();
       src_file = oBB->getSrcfile();
+      zero_attn_flg = oBB->getZeroAttn_flg();
             	
       pulse_prop_src2rcv_grid2( waveform_out_file.c_str(), max_cel, \
 											          R_start, DR, R_end, Nfreq, NFFT, f_step, f_vec, \
 											          f_center, mode_count, rho_zsrc, rho_zrcv, \
 											          re_k, im_k, mode_S, mode_R, \
-											          src_flg, src_file, pprop_s2r_flg);
-											          
-      //pulse_prop_src2rcv_grid2( waveform_out_file.c_str(), max_cel, \
-											          R_start, DR, R_end, Nfreq, f_step, f_vec, \
-											          f_center, mode_count, rho_zsrc, rho_zrcv, \
-											          re_k, im_k, mode_S, mode_R, \
-											          src_flg, src_file, pprop_s2r_flg);											          
+											          src_flg, src_file, pprop_s2r_flg, zero_attn_flg);
       
       //// temporary plotInitialPulse
       //if (oBB->getPlot_flg())  {
           //printf("plotting initial_pulse.dat\n");
           //plotInitialPulse(oBB->getSrc_flg(), oBB->getF_center(), f_vec[Nfreq-1]);
-      //}						
+      //}
+      if (zero_attn_flg) {
+        printf("The attenuation was set to sero with the option use_zero_attn flag = %d.\n", zero_attn_flg);
+      }				
 																					
       // clean up			
       delete[] f_vec;
@@ -240,7 +194,8 @@ int main( int argc, char **argv ) {
       process2DPressure(R_start_km, width_km, height_km, \
 								        max_cel, tmstep, ntsteps, f_center, \
 								        frame_file_stub, pprop_grid_dirname, \
-								        oBB->getSrc_flg(), oBB->getSrcfile());
+								        oBB->getSrc_flg(), oBB->getSrcfile(), \
+								        oBB->getZeroAttn_flg());
   }
   else {
       cout << "Nothing done! Reserved for future option here" << endl;
@@ -269,7 +224,8 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
   opt->addUsage( "----------------------------------------------------------------------------" );	
   opt->addUsage( "Usage: " );
   opt->addUsage( "" );
-  opt->addUsage( "The options below can be specified in a colon-separated file \"ModBB.options\" or at the command line.  Command-line options override file options." );
+  opt->addUsage( "The options below can be specified in a colon-separated file \"ModBB.options\"");
+  opt->addUsage( "or at the command line.  Command-line options override file options." );
   opt->addUsage( "Be sure to precede all options with two minuses (--)." );
   opt->addUsage( " --help -h                Print this message and exit" );
   opt->addUsage( "" );
@@ -316,9 +272,18 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
 //  opt->addUsage( "   a. Compute dispersion file that will be used to compute the pressure pulse at 1 receiver. Assume that we want to end up with a pulse having a spectrum with a maximum frequency of f_max=0.5 Hz. Also assume that we want the pulse represented on a time record of T=512 seconds. The number of positive frequencies necessary for the calculation is T*f_max = 256 i.e.256 frequencies between 0 and 0.5 Hz. Thus we know f_max=0.5 Hz and f_step=f_max/256=0.001953125 Hz. The corresponding run command is:" );
   opt->addUsage( " Example (run in the 'samples' directory):" );
   opt->addUsage( "" );
-  opt->addUsage( "   Compute dispersion file that will be used to compute the pressure pulse at 1 receiver. Assume that we want to end up with a pulse having a spectrum with a maximum frequency of f_max=0.5 Hz. Also assume that we want the pulse represented on a time record of T=512 seconds. The number of positive frequencies necessary for the calculation is T*f_max = 256 i.e.256 frequencies between 0 and 0.5 Hz. Thus we know f_max=0.5 Hz and f_step=f_max/256=0.001953125 Hz. The corresponding run command is:" );
+  opt->addUsage( "   Compute dispersion file that will be used to compute the pressure pulse at 1 receiver. " );
+  opt->addUsage( "Assume that we want to end up with a pulse having a spectrum" );
+  opt->addUsage( "with a maximum frequency of f_max=0.5 Hz. " );
+  opt->addUsage( "Also assume that we want the pulse represented on a time record of T=512 seconds. " );
+  opt->addUsage( "The number of positive frequencies necessary for the calculation is " );
+  opt->addUsage( "T*f_max = 256 i.e.256 frequencies between 0 and 0.5 Hz. " );
+  opt->addUsage( "Thus we know f_max=0.5 Hz and f_step=f_max/256=0.001953125 Hz. " );
+  opt->addUsage( "The corresponding run command is:" );
   opt->addUsage( "" );
-  opt->addUsage( "    >> ../bin/ModBB --out_disp_src2rcv_file myDispersionFile.dat --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --azimuth 90 --f_step 0.001953125 --f_max 0.5 --use_modess" );
+  opt->addUsage( "    >> ../bin/ModBB --out_disp_src2rcv_file myDispersionFile.dat " );
+  opt->addUsage( "       --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp " );
+  opt->addUsage( "       --skiplines 0 --azimuth 90 --f_step 0.001953125 --f_max 0.5 --use_modess" );
   opt->addUsage( "" );
   opt->addUsage( "     Each line in this dispersion file has (4 + 4*n_modes) entries" );
   opt->addUsage( "     in the following format:" );  
@@ -358,13 +323,33 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
   opt->addUsage( "                           [rigid], TBD" );
   opt->addUsage( " --Lamb_wave_BC            For a rigid ground: if ==1 it sets" );
   opt->addUsage( "                           admittance= = -1/2*dln(rho)/dz; [ 0 ]" );
-	opt->addUsage( " --wind_units              Use it to specify 'kmpersec' if the winds are given in km/s [mpersec]" ); 	
+	opt->addUsage( " --wind_units              Use it to specify 'kmpersec' if the winds are given" );
+	opt->addUsage( "                           in km/s [ mpersec ]" );
+	opt->addUsage( " --use_attn_file          Option to specify a file name containing user-provided" );
+	opt->addUsage( "                           attenuation coefficients to be loaded instead of " );
+	opt->addUsage( "                           the default Sutherland-Bass attenuation. " ); 
+	opt->addUsage( "                           The text file should contain two columns: " );
+	opt->addUsage( "                              height (km AGL) and " );
+	opt->addUsage( "                              attenuation coefficients in np/m." );	
+  opt->addUsage( "" );
+  opt->addUsage( "FLAGS (no value required after the flag itself):" );
+  opt->addUsage( " --turnoff_WKB             Turn off the WKB least phase speed estimation," );
+  opt->addUsage( "                           an approximation that speeds-up ground-to-ground" );
+  opt->addUsage( "                           propagation. If either or both the source and " ); 
+  opt->addUsage( "                           receiver are not on the ground [height=0] " );
+  opt->addUsage( "                           the approximation is turned off by default" ); 
+  opt->addUsage( "                           regardless whether the flag is mentioned" ); 
+  opt->addUsage( "                           in the command line or not." ); 
+  opt->addUsage( " --use_zero_attn            Set attenuation to zero.");
+  opt->addUsage( "                            Reads the dispersion file and sets the");
+  opt->addUsage( "                            imaginary part of the wavenumber to zero.");
+  opt->addUsage( "" );
   opt->addUsage( "" );
   opt->addUsage( "Options for PULSE PROPAGATION:" );
   opt->addUsage( " --pulse_prop_src2rcv <dispersion filename> ");
   opt->addUsage( "                    Propagate pulse from source to 1 receiver");
   opt->addUsage( "                    at a distance specified by option --range_R_km; " );
-  opt->addUsage( " --range_R_km      Propagate pulse to this range [km]" );
+  opt->addUsage( " --range_R_km       Propagate pulse to this range [km]" );
   opt->addUsage( " --waveform_out_file <waveform filename>   Name of the waveform output file" );
   opt->addUsage( "" );
   opt->addUsage( " --pulse_prop_src2rcv_grid <dispersion filename> ");
@@ -383,6 +368,7 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
   opt->addUsage( " --max_celerity     Maximum celerity [300 m/s]." );
   opt->addUsage( " --nfft             Number of points used in the FFT computation. ");
   opt->addUsage( "                    Defaults to [4*f_max/f_step]." );		
+  
   opt->addUsage( "" );	   
   opt->addUsage( "" );
   opt->addUsage( "SOURCE TYPE input options: Use one of the following 4 options" );
@@ -415,17 +401,22 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
   opt->addUsage( " Example: Pulse propagation to a point on the ground at range_R_km" ); 
   opt->addUsage( "          and output the impulse response:" );
   opt->addUsage( "" );
-  opt->addUsage( "    ../bin/ModBB --pulse_prop_src2rcv myDispersionFile.dat --range_R_km 240 --waveform_out_file mywavf.dat --get_impulse_resp" );
+  opt->addUsage( "    ../bin/ModBB --pulse_prop_src2rcv myDispersionFile.dat --range_R_km 240 " );
+  opt->addUsage( "                 --waveform_out_file mywavf.dat --get_impulse_resp" );
   opt->addUsage( "" );
   opt->addUsage( " Example: Pulse propagation to a point on the ground at range_R_km" );
   opt->addUsage( "          and employ the user-provided source spectrum:" );
   opt->addUsage( "" );
-  opt->addUsage( "   ../bin/ModBB --pulse_prop_src2rcv myDispersionFile.dat --range_R_km 240 --waveform_out_file mywavf.dat --max_celerity 300 --src_spectrum_file source_spectrum_example.dat" );    
+  opt->addUsage( "   ../bin/ModBB --pulse_prop_src2rcv myDispersionFile.dat --range_R_km 240 " );
+  opt->addUsage( "                --waveform_out_file mywavf.dat --max_celerity 300 " );
+  opt->addUsage( "                --src_spectrum_file source_spectrum_example.dat" );    
   opt->addUsage( "" );
   opt->addUsage( " Example: Pulse propagation to several points on the ground 20 km apart" );
   opt->addUsage( "          and employ the user-provided source waveform:" );
   opt->addUsage( "" );
-  opt->addUsage( "   ../bin/ModBB --pulse_prop_src2rcv_grid myDispersionFile.dat --R_start_km 240 --DR_km 20 --R_end_km 300 --waveform_out_file mywavf.dat --src_waveform_file source_waveform_input_example.dat" );
+  opt->addUsage( "   ../bin/ModBB --pulse_prop_src2rcv_grid myDispersionFile.dat " );
+  opt->addUsage( "                --R_start_km 240 --DR_km 20 --R_end_km 300 --waveform_out_file mywavf.dat " );
+  opt->addUsage( "                --src_waveform_file source_waveform_input_example.dat" );
   opt->addUsage( "" );
   opt->addUsage( "" );
   
@@ -477,7 +468,9 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
   opt->setFlag( "use_wmod" );
   opt->setFlag( "get_impulse_resp" );
   opt->setFlag( "use_builtin_pulse" );
+  opt->setFlag( "turnoff_WKB");
   opt->setFlag( "plot");
+  opt->setFlag( "use_zero_attn");
   
   opt->setOption( "atmosfile" );
   opt->setOption( "atmosfileorder" );
@@ -519,6 +512,7 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
   opt->setOption( "src_spectrum_file" );
   opt->setOption( "src_waveform_file" );
   opt->setOption( "nfft" );
+  opt->setOption( "use_attn_file" );
 
   // Process the command-line arguments
   opt->processFile( "./ModBB.options" );

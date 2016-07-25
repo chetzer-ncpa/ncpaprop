@@ -1110,7 +1110,123 @@ void fft_pulse_prop(double t0, int n_freqs, int NFFT, double df, double *f_vec, 
 }  // end of debug version of 'fft_pulse_prop'
 //-----------------------------------------------------------------------
 
+// DV 20151017: Added NFFT as argument
+// DV 20160717: Added no_attenuation flag
+int pulse_prop_src2rcv_grid2(\
+          const char *filename,double max_cel, \
+          double R_start,double DR,double R_end, \
+					int n_freqs, int NFFT,  double f_step, double *f_vec, \
+					double f_center, int *mode_count, double rho_zsrc, double rho_zrcv, \
+					double **re_k, double **im_k, double **mode_S, double **mode_R, \
+					int src_flg, string srcfile, int pprop_src2rcv_flg, bool zero_attn_flg) 
+{
+  int i,n;
+  double rr, tskip, fmx, t0;	
+  complex<double> cup,*dft_vec,*pulse_vec,*arg_vec;
+  complex<double> I = complex<double> (0.0, 1.0);
+  FILE *f;
+  
+  // if the option --nfft was not passed to the main program then the 
+  // NFFT default was -1. Otherwise it has the requested positive value. 
+  // Here we make sure that whatever the current value of NFFT is 
+  // it's not less than 4*n_freqs
+  if (NFFT<n_freqs) {
+    NFFT = 4*n_freqs;
+  }
+  
+  
+  // if zero attenuation requested set the imaginary part of the wavenumber = 0
+  if (zero_attn_flg) {
+    for (n=0; n<n_freqs; n++) {
+      for(int m=0;m<mode_count[n];m++){
+          im_k[n][m]  = 0.0;
+      }
+    }
+  }
 
+  dft_vec   = new complex<double> [n_freqs];
+  pulse_vec = new complex<double> [NFFT];
+  arg_vec   = new complex<double> [NFFT];
+
+  fmx = ((double)NFFT)*f_step; // max frequency
+								      
+  get_source_spectrum(n_freqs, NFFT, f_step, f_vec,  f_center, \
+								      dft_vec, pulse_vec, arg_vec, src_flg,  srcfile);								      
+								      
+	
+	if (pprop_src2rcv_flg) { // propagation to one receiver at distance RR from source
+	    cout << "--> Doing pulse propagation source-to-receiver at one range: " 
+	         << R_start/1000.0 << " km" << endl;
+	         
+	    t0 = R_start/max_cel;
+	    //
+	    // fft propagation: note that here 'pulse_vec' is overwritten with the propagated pulse
+	    //							
+//      fft_pulse_prop( t0, n_freqs, f_step, f_vec, R_start, \
+								      dft_vec, pulse_vec, mode_count, rho_zsrc, rho_zrcv, \
+								      re_k, im_k, mode_S, mode_R);
+								      
+      fft_pulse_prop( t0, n_freqs, NFFT, f_step, f_vec, R_start, \
+								      dft_vec, pulse_vec, mode_count, rho_zsrc, rho_zrcv, \
+								      re_k, im_k, mode_S, mode_R);								      
+      
+      // save propagated pulse to file
+	    // DV 20150514 - factor of two necessary because we only used 
+	    // the positive freq. spectrum in the fft														
+      f = fopen(filename,"w");
+      for(i=0; i<NFFT; i++) {
+          //fprintf(f,"%12.6f %15.6e %15.6e\n", 1.0*i/fmx+t0, real(pulse_vec[i]), imag(pulse_vec[i]));
+          fprintf(f,"%12.6f %15.6e %15.6e\n", 1.0*i/fmx+t0, 2.0*real(pulse_vec[i]), 2.0*imag(pulse_vec[i]));
+      }
+      fclose(f);
+
+      cout << "--> Propagated pulse saved in file: '" << filename << "'" << endl
+           << "' with format: | Time (s) | Re(pulse) | Imag(pulse) |" << endl;      
+
+	}
+	else { // propagation to several receivers
+	    cout << "--> Propagating pulse from source-to-receivers on grid ..." << endl;					      
+      printf("----------------------------------------------\n");
+      printf("max_celerity     t0             R\n");
+      printf("    m/s          sec            km\n");
+      printf("----------------------------------------------\n");
+
+      f=fopen(filename,"w");
+      tskip = 0.0;
+      for(n=0; n<=(int)(floor((R_end-R_start)/DR)); n++) {
+          rr= R_start + DR*n;
+          t0=tskip+rr/max_cel;
+          printf("%8.3f     %9.3f      %9.3f\n", max_cel, t0, rr/1000.0);
+
+//          fft_pulse_prop( t0, n_freqs, f_step, f_vec, rr, \
+					            dft_vec, pulse_vec, mode_count, rho_zsrc, rho_zrcv, re_k, im_k, \
+					            mode_S, mode_R);
+					            
+          fft_pulse_prop( t0, n_freqs, NFFT, f_step, f_vec, rr, \
+					            dft_vec, pulse_vec, mode_count, rho_zsrc, rho_zrcv, re_k, im_k, \
+					            mode_S, mode_R);					            
+							              
+          for(i=0;i<NFFT;i++){
+              //fprintf(f,"%10.3f %12.6f %15.6e\n", rr/1000.0, 1.0*i/fmx, real(pulse_vec[i]));
+              fprintf(f,"%10.3f %12.6f %15.6e\n", rr/1000.0, 1.0*i/fmx, 2.0*real(pulse_vec[i])); // factor of 2; DV20150930
+          }
+          fprintf(f,"\n");
+      }
+      fclose(f);
+      printf("f_step = %f   1/f_step = %f\n", f_step, 1.0/f_step);
+      printf("Time array length = %d; delta_t = %g s\n", NFFT, 1.0/fmx);
+      printf("Propagation results saved in file: %s\n", filename);
+      printf("with columns: R (km) | time (s) | pulse(R,t) |\n");
+  }
+
+  delete [] dft_vec;
+  delete [] arg_vec;
+  delete [] pulse_vec;
+
+  return 0;
+}
+
+/*
 // DV 20151017: Added NFFT as argument
 int pulse_prop_src2rcv_grid2(\
           const char *filename,double max_cel, \
@@ -1215,7 +1331,7 @@ int pulse_prop_src2rcv_grid2(\
 
   return 0;
 }
-
+*/
 
 
 // This version uses the #define FFTN; obsolete as of 20151017 when
@@ -1445,7 +1561,7 @@ int getFile_list(string dir, list<string> &files, string pattern)
 }
 
 
-complex<double> ***getPz1z2 (int I1, int I2, double r1, double r2, double dr, string dirn, list<string> files) 
+complex<double> ***getPz1z2 (int I1, int I2, double r1, double r2, double dr, string dirn, list<string> files, bool zero_attn_flg) 
 {
   int lenI, ier;
   int ir, j, jj, iz;
@@ -1528,7 +1644,9 @@ complex<double> ***getPz1z2 (int I1, int I2, double r1, double r2, double dr, st
                   sumM = complex<double> (0.0, 0.0);
                   sqrtrho = sqrt(rho_rcv[iz]);
                   for (j=0; j<nmods; j++) {
-                      kH =  kr[j] + II*ki[j];							
+                      //kH =  kr[j] + II*ki[j];
+                      // 20160717 taking zero_attn_flg into consideration 
+                      kH =  kr[j] + (II*ki[j])*(1.0-(double)zero_attn_flg); // 20160717					
                       sumM += vs[j]*vr[iz][j]*sqrtrho*exp(II*kH*rr)/sqrt(kH);     
                   }
                   Pfzr[jj][ir][iz] = epio8ovr*sumM;
@@ -1641,6 +1759,168 @@ bool compare_freq (string first, string second)
 }
 
 
+// DV 20160717 - added zero_atten flag
+int process2DPressure(double R_start_km, double width_km, double height_km, \
+                      double c_ref, double tmstep, int ntsteps, double f_center, \
+                      string framefn, string dirn, int src_flg, string srcfile, \
+                      bool zero_attn_flg) 
+{
+  // compute the 2D spatial pressure field in (width_km by height_km) window 
+  // starting at R_start_km
+  // cout << "in process2DPressure():\n";
+  
+  char   filename [256]; // holds the frame file name(s)
+  int    i, j, ier, m, n, k, Nx, Nz, NN, zs;
+  int    I1, I2, lenI;
+  int    Nfreq, Nz_grid, Nz_subgrid, nmods, Nfiles;
+  double tmin, tmax, tt;
+  double freq, fr, df, f_max;	
+  double dz, delZ, z_min;
+  double r1, r2, dr, sumP;
+  double *f_vec;
+  double **pp;
+
+  complex<double> *S, *pulse_vec, *arg_vec; //source spectrum
+  complex<double> II = complex<double> (0.0, 1.0);	
+  complex<double> ***Pfzr;
+  string fullname;
+  FILE *fp;
+
+  list<string> files;
+  list<string>::iterator it;
+  string pattern (".bin");
+
+  // get and sort the files (they have the frequency in the name)
+  getFile_list(dirn, files, pattern);
+  files.sort(compare_freq);
+
+  if (0) { //print the sorted file list
+      cout << "sorted list contains:" << endl;
+      for (it=files.begin(); it!=files.end(); ++it) {
+          cout << *it << endl;
+      }
+      cout << endl;
+  }
+  
+  // get necessary info from 1 file
+  fullname = dirn + "/" + (*files.begin());
+  fp = fopen(fullname.c_str(), "r");
+  if (fp==NULL) {
+        std::ostringstream es;
+        es << "file << " << fullname << " could not be opened.";
+        throw invalid_argument(es.str());
+  }
+  ier = fread(&freq,       sizeof(double), 1, fp);
+  ier = fread(&nmods,      sizeof(int),    1, fp);		
+  ier = fread(&Nfreq,      sizeof(int),    1, fp);
+  ier = fread(&df,         sizeof(double), 1, fp);
+  ier = fread(&Nz_grid,    sizeof(int),    1, fp);
+  ier = fread(&dz,         sizeof(double), 1, fp);  
+  ier = fread(&Nz_subgrid, sizeof(int),    1, fp);
+  ier = fread(&delZ,       sizeof(double), 1, fp);
+  ier = fread(&z_min,      sizeof(double), 1, fp);
+  fclose(fp);
+
+  f_max = Nfreq*df; // fmax
+  Nfiles = files.size();
+  
+  cout << "Nfiles    = " << Nfiles << endl;
+  cout << "Nfreq     = " << Nfreq  << endl;
+  cout << "max freq  = " << f_max  << endl;
+  cout << "delta_Z   = " << delZ   << endl;
+  cout << "freq step = " << df     << endl;
+
+  if (Nfreq != Nfiles) {
+      throw invalid_argument("Error: number of frequencies is not equal to the number of files" );
+  }
+
+  // get the source spectrum with function get_source_spectrum
+  // for this we need some intermediary arrays
+  S         = new complex<double> [Nfreq];
+  pulse_vec = new complex<double> [FFTN];
+  arg_vec   = new complex<double> [FFTN];
+  
+  f_vec     = new double [Nfreq];
+  for(i=0; i<Nfreq; i++) {
+      f_vec[i] = (i+1)*df;
+  }
+  
+  get_source_spectrum(Nfreq, df, f_vec, f_center, \
+								      S, pulse_vec, arg_vec, src_flg,  srcfile);
+	
+	// only the source spectrum S is necessary from now on; delete the other arrays							      
+	delete [] pulse_vec;
+	delete [] arg_vec;
+	delete [] f_vec;						      
+
+  // the subgrid (window) parameters
+  r1   = R_start_km*1000;
+  r2   = r1 + width_km*1000;
+  dr   = delZ;          // make horizontal spacing equal to the vertical spacing
+  Nx   = (int)((r2-r1)/dr)+1;
+  Nz   = (int) (height_km*1000.0/delZ)+1;
+  tmin = r1/c_ref;
+  tmax = r2/c_ref;
+
+  // check if enough memory is available; if not, will iterate more than once
+  long maxel = 4000000; // maximum number of elements in the window (matrix)
+  zs = Nz;              // zs = how many z-levels to be processed at a time; 
+  NN = 0;               // NN is number of iterations-1  (see loop below)
+  if (Nx*zs>maxel) {    // zs is adjusted down when not enough memory is available 
+      NN  =(Nx*zs)/maxel + 1;  // integer division (floor)
+      zs = zs/NN;              // integer division    
+  }
+
+  pp = dmatrix(zs,Nx); // allocate 2D pressure field
+  tt = tmin;
+  //cout <<"Computing the 2D pressure field..." << endl;
+  for (j=0; j<NN+1; j++) { // loop to get pressure spectrum at points on the jth subgrid of size [zs, Nx]
+      I1   = j*zs;         // zero-based index to pass to getPz1z2()
+      I2   = min(Nz-1, I1+zs-1);
+      lenI = I2-I1+1;
+      cout << "iteration = " << j+1 << " of " << NN+1 << endl;
+      
+      // get pressure field from height z(I1) to z(I2)
+      // Pfzr = getPz1z2 (I1, I2, r1, r2, dr, dirn, files); //Pfzr = c3Darray(Nfiles, Nrng_steps, lenI);
+      Pfzr = getPz1z2 (I1, I2, r1, r2, dr, dirn, files, zero_attn_flg); //Pfzr = c3Darray(Nfiles, Nrng_steps, lenI);
+			
+      for (k=0; k < ntsteps; k++) { // iterate over time steps
+          tt = tmin + k*tmstep;
+          sprintf(filename, "%s_%d.bin", framefn.c_str(), (int)floor(tt)); // filename
+
+          if (j==0)	{ // info in the file header - appears only once
+              fp = fopen(filename, "a+b");			
+              fwrite(&Nz,   1, sizeof(int),    fp);
+              fwrite(&Nx,   1, sizeof(int),    fp);
+              fwrite(&delZ, 1, sizeof(double), fp);
+              fwrite(&r1,   1, sizeof(double), fp);							
+              fwrite(&tt,   1, sizeof(double), fp);
+              fclose(fp);
+          }
+          for (n=0; n<Nx; n++) {       // for ranges on the x-grid
+              for (m=0; m<lenI; m++) { // for altitudes on z-grid							
+                  fr       = 0.0;
+                  sumP     = 0.0;
+                  pp[m][n] = 0.0;
+                  for (i=0; i<Nfreq; i++) { //integral over all positive frequencies to get pressure at (x,y,tt)
+		                  fr   = fr + df;
+		                  sumP = sumP + real(2.0*df*S[i]*Pfzr[i][n][m]*exp(-II*2.0*Pi*fr*tt));						
+                  }
+                  pp[m][n] = sumP;
+              }
+          }
+          cout << " ... saving 2D field at time " << tt << " secs to file " << filename << endl;
+          saveMatrix2bin(filename, pp, lenI, Nx);
+      }
+      free_c3Darray(Pfzr, Nfiles, Nx);		
+  }
+
+  delete [] S;
+  free_dmatrix(pp, zs, Nx);
+  return 0;
+}
+
+/*
 int process2DPressure(double R_start_km, double width_km, double height_km, \
                       double c_ref, double tmstep, int ntsteps, double f_center, \
                       string framefn, string dirn, int src_flg, string srcfile) 
@@ -1798,7 +2078,7 @@ int process2DPressure(double R_start_km, double width_km, double height_km, \
   free_dmatrix(pp, zs, Nx);
   return 0;
 }
-
+*/
 
 int saveMatrix2bin(const char *filename, double **M, int nr, int nc) {
   int i,j, szd;

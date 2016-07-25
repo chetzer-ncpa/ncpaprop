@@ -29,6 +29,7 @@ NCPA::ProcessOptionsBB::ProcessOptionsBB(AnyOption *opt)
   skiplines      = 0;          // skiplines in "atmosfile"
   gnd_imp_model  = "rigid";    // rigid ground
   wind_units     = "mpersec";  // m/s
+  usrattfile     = "";             // user-provided attenuation filename
   Nfreq          = 1;          // a default number of frequencies
   srcfile        = "";
   f_center       = -1;  // must have negative initialization value; 
@@ -41,8 +42,11 @@ NCPA::ProcessOptionsBB::ProcessOptionsBB(AnyOption *opt)
                         // NFFT will then change to 4*fmax/f_step 
                         // see function 'pulse_prop_src2rcv_grid2()' where this 
                         // change happens         
-
+  turnoff_WKB    = opt->getFlag( "turnoff_WKB" ); // if ==1 turns off te WKB
+                                                  // least phase speed approx
   plot_flg       = opt->getFlag( "plot"); // flag to plot results with gnuplot
+  zero_attn_flg  = opt->getFlag( "use_zero_attn" ); // flag to set attenuation 
+                                                    // to zero
   
   // dispersion: source to receiver (1D)
   w_disp_src2rcv_flg = 0;
@@ -84,6 +88,13 @@ NCPA::ProcessOptionsBB::ProcessOptionsBB(AnyOption *opt)
       wind_units = opt->getValue( "wind_units" );
   }  
 
+
+  if ( opt->getValue( "use_attn_file" ) != NULL ) {
+      usrattfile = opt->getValue( "use_attn_file" );
+      cout << "User-provided attenuation file: " << usrattfile << endl;
+  }
+  
+  
   // handle options for pulse propagation
   pprop_grid_flg = 0;
   if ( opt->getValue( "pulse_prop_grid" ) != NULL ) {
@@ -659,12 +670,25 @@ std::string   NCPA::ProcessOptionsBB::getSrcfile() {
   return srcfile;
 }
 
+std::string   NCPA::ProcessOptionsBB::getUsrAttFile() {
+  return usrattfile;
+}
+
 int    NCPA::ProcessOptionsBB::getSrc_flg() {
   return src_flg;
 }
 
+
+bool   NCPA::ProcessOptionsBB::getTurnoff_WKB() {
+  return turnoff_WKB;
+}
+
 bool   NCPA::ProcessOptionsBB::getPlot_flg() {
   return plot_flg;
+}
+
+bool   NCPA::ProcessOptionsBB::getZeroAttn_flg() {
+  return zero_attn_flg;
 }
 
 int    NCPA::ProcessOptionsBB::getNFFT() {
