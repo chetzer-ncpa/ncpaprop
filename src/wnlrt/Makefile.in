@@ -25,4 +25,4 @@ wnlrt: wnlrt.o ProcessOptionsNRT.o nonlinearRay.o linearRay3DStrat.o
 	@CXX@ @CXXFLAGS@ ${INCPATHS} -o $@ $<
 
 clean::
-	-$(RM) -rf Modess_main.o SolveModNB.o ProcessOptionsNB.o Modess_lib.o Modess
+	-$(RM) -rf linearRay3DStrat.o nonlinearRay.o ProcessOptionsNRT.o wnlrt.o wnlrt

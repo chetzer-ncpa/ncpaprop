@@ -146,9 +146,11 @@ clean:
 	-$(MAKE) -C src/wmod clean  PETSC_ARCH=@PETSC_ARCH_REAL@
 	-$(MAKE) -C src/cmodess clean  PETSC_ARCH=@PETSC_ARCH_COMPLEX@
 	-$(MAKE) -C src/cmodbb clean  PETSC_ARCH=@PETSC_ARCH_COMPLEX@
+	-$(MAKE) -C src/tdpape clean  PETSC_ARCH=@PETSC_ARCH_REAL@
+	-$(MAKE) -C src/wnlrt clean  PETSC_ARCH=@PETSC_ARCH_REAL@
 #	-$(MAKE) -C src/modess_rd_2wcm clean  PETSC_ARCH=@PETSC_ARCH_COMPLEX@
 	-$(MAKE) -C src/extern clean  PETSC_ARCH=@PETSC_ARCH_REAL@
-	-rm bin/CModBB  bin/CModess  bin/ModBB  bin/Modess  bin/ModessRD1WCM  bin/pape  bin/raytrace.2d  bin/raytrace.3d  bin/WMod lib/libatmosphere.a lib/libcommon.a bin/tdpape
+	-rm bin/CModBB  bin/CModess  bin/ModBB  bin/Modess  bin/ModessRD1WCM  bin/pape  bin/raytrace.2d  bin/raytrace.3d  bin/WMod lib/libatmosphere.a lib/libcommon.a bin/tdpape bin/wnlrt
 
 # Test all executables to make sure their output matches the dev machine output
 test:
