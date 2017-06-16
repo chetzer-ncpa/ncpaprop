@@ -200,7 +200,7 @@ void NCPA::SolveModBB::setParams(ProcessOptionsBB *oBB, SampledProfile *atm_prof
   
     // obtain the parameter values from the user's options
     
-   tol               = 1.0E-8; // tolerance for Slepc computations 
+      tol            = 1.0E-8; // tolerance for Slepc computations 
      //tol				   			 = oNB->getSlepcTolerance(); 
       atmosfile      = oBB->getAtmosfile();
       atm_profile    = atm_profile1;
@@ -226,18 +226,13 @@ void NCPA::SolveModBB::setParams(ProcessOptionsBB *oBB, SampledProfile *atm_prof
       f_step         = oBB->getF_step();			
       f_max          = oBB->getF_max();
       Lamb_wave_BC   = oBB->getLamb_wave_BC();
-      
+      out_dispersion = oBB->getW_disp_flg();
+      out_disp_src2rcv = oBB->getW_disp_src2rcv_flg();
+  
       turnoff_WKB    = oBB->getTurnoff_WKB();
       //cout << "turnoff_WKB = " << turnoff_WKB << endl; 
     
-      
 
-  
-  
-  
-  
-  
-  
   
   // get Hgt, zw, mw, T, rho, Pr in SI units; deleted in destructor
   Hgt = new double [Nz_grid];
