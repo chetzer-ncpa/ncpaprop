@@ -20,7 +20,8 @@ namespace NCPA {
       int    getSkiplines();
       int    getNrng_steps();
       int    getNz_grid();
-      int    getLamb_wave_BC();       
+      int    getLamb_wave_BC();
+      
       double getFreq();
       double getAzimuth();
       double getAzimuthStart();
@@ -32,7 +33,10 @@ namespace NCPA {
       double getReceiverheight();
       double getSlepcTolerance();
       double getZ_min(); 
-      double getMax_celerity();           
+      double getMax_celerity();
+      double getC_min();
+      double getC_max();
+         
       bool   getWrite_2D_TLoss();
       bool   getWrite_phase_speeds();
       bool   getWrite_speeds();
@@ -42,6 +46,7 @@ namespace NCPA {
       bool   getWriteAtmProfile();
       bool   getTurnoff_WKB();
       bool   getPlot_flg();
+      bool   getWvnum_filter_flg();
 	
     private:
       string   atmosfile;           // stores the atmospheric profile name 
@@ -50,11 +55,24 @@ namespace NCPA {
       string   wind_units;          // default mpersec
       string   usrattfile;          // user-provided attenuation filename
       string   modal_starter_file;
+
+      bool     write_2D_TLoss;
+      bool     write_phase_speeds;
+      bool     write_speeds;
+      bool     write_modes;
+      bool     write_dispersion;
+      bool     Nby2Dprop;
+      bool     write_atm_profile;
+      bool     turnoff_WKB;
+      bool     plot_flg;
+      bool     wvnum_filter_flg;    // wavenumber filtering flag
+
       int      Nz_grid;             // number of points on the z-grid
       int      Nrng_steps;          // number of range steps		
       int      Nfreq;               // number of positive frequencies 
       int      skiplines;           // number of lines to skip in "atmosfile"
-      int      Lamb_wave_BC;        // for rigid ground: if ==1 then admittance = -1/2*dln(rho)/dz        
+      int      Lamb_wave_BC;        // for rigid ground: if ==1 then admittance = -1/2*dln(rho)/dz
+     
       double   freq;                // Hz	
       double   z_min;               // meters
       double   azi;                 // degrees
@@ -65,16 +83,10 @@ namespace NCPA {
       double   maxheight;           // meters
       double   sourceheight;        // meters
       double   receiverheight;      // meters
-      double	 tol;                 // tolerance for Slepc calculations     
-      bool     write_2D_TLoss;
-      bool     write_phase_speeds;
-      bool     write_speeds;
-      bool     write_modes;
-      bool     write_dispersion;
-      bool     Nby2Dprop;
-      bool     write_atm_profile;
-      bool     turnoff_WKB;
-      bool     plot_flg;
+      double   tol;                 // tolerance for Slepc calculations
+      double   c_min;               // minimum sound speed requested by user to do wavenumber filtering
+      double   c_max;               // maximum sound speed requested by user to do wavenumber filtering
+    
 	}; // mandatory semicolon here
 }
 

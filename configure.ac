@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([NCPA Propagation Modeling Suite], [1.3.19], [claus@olemiss.edu], ncpaprop)
+AC_INIT([NCPA Propagation Modeling Suite], [1.3.20], [claus@olemiss.edu], ncpaprop)
 #AM_INIT_AUTOMAKE
 
 AC_CONFIG_SRCDIR([src/atmosphere/Atmosphere.h])

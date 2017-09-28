@@ -28,6 +28,8 @@ NCPA::ProcessOptionsNB::ProcessOptionsNB(AnyOption *opt) {
   wind_units       = "mpersec";      // m/s
   usrattfile       = "";             // user-provided attenuation filename
   tol              = 1.0E-8;         // tolerance for Slepc calculations
+  c_min            = 0.0;            // minimum sound speed requested by user to do wavenumber filtering
+  c_max            = 0.0;            // maximum sound speed requested by user to do wavenumber filtering
   
   write_2D_TLoss     = opt->getFlag( "write_2D_TLoss");
   write_phase_speeds = opt->getFlag( "write_phase_speeds" );   
@@ -233,7 +235,30 @@ NCPA::ProcessOptionsNB::ProcessOptionsNB(AnyOption *opt) {
   if ( opt->getValue( "use_attn_file" ) != NULL ) {
       usrattfile = opt->getValue( "use_attn_file" );
       cout << "User-provided attenuation file: " << usrattfile << endl;
-  }  
+  }
+
+  // wavenumber filtering option
+  wvnum_filter_flg = 0;
+
+  if ( opt->getValue( "wvnum_filter" ) != NULL ) {
+      wvnum_filter_flg = 1;
+              //cout << "wvnum_filter_flg = " << wvnum_filter_flg << endl;
+      if ( opt->getValue( "c_min" ) != NULL ) {
+          c_min = atof(opt->getValue( "c_min" ));  
+      }
+      else {
+          delete opt;
+          throw invalid_argument( "For wavenumber filtering provide a minimum sound speed c_min.");
+      }
+
+      if ( opt->getValue( "c_max" ) != NULL ) {
+          c_max = atof(opt->getValue( "c_max" ));  
+      }
+      else {
+          delete opt;
+          throw invalid_argument( "For wavenumber filtering provide a maximum sound speed c_max.");
+      }
+  } 
 
 }
 
@@ -303,6 +328,14 @@ double NCPA::ProcessOptionsNB::getSlepcTolerance() {
   return tol;
 }
 
+double NCPA::ProcessOptionsNB::getC_min() {
+  return c_min;
+}
+
+double NCPA::ProcessOptionsNB::getC_max() {
+  return c_max;
+}
+
 int    NCPA::ProcessOptionsNB::getNrng_steps() {
   return Nrng_steps;
 }
@@ -351,6 +384,11 @@ bool   NCPA::ProcessOptionsNB::getTurnoff_WKB() {
 bool   NCPA::ProcessOptionsNB::getPlot_flg() {
   return plot_flg;
 }
+
+bool   NCPA::ProcessOptionsNB::getWvnum_filter_flg() {
+  return wvnum_filter_flg;
+}
+
 
 
 

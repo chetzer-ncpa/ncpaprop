@@ -157,13 +157,21 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
   opt->addUsage( " --ground_impedance_model Name of the ground impedance models to be employed:" );
   opt->addUsage( "                          [rigid], others TBD" );
   opt->addUsage( " --Lamb_wave_BC           If ==1 it sets admittance = -1/2*dln(rho)/dz; [ 0 ]" );
- 	opt->addUsage( " --wind_units             Use it to specify 'kmpersec' if the winds are given in km/s [mpersec]" );
-	opt->addUsage( " --use_attn_file          Use it to specify a file name containing user-provided" );
-	opt->addUsage( "                          attenuation coefficients to be loaded instead of " );
-	opt->addUsage( "                          the default Sutherland-Bass attenuation. " ); 
-	opt->addUsage( "                          The text file should contain two columns: " );
-	opt->addUsage( "                              height (km AGL) and " );
-	opt->addUsage( "                              attenuation coefficients in np/m." ); 	
+  opt->addUsage( " --wind_units             Use it to specify 'kmpersec' if the winds are given in km/s [mpersec]" );
+  opt->addUsage( " --use_attn_file          Use it to specify a file name containing user-provided" );
+  opt->addUsage( "                          attenuation coefficients to be loaded instead of " );
+  opt->addUsage( "                          the default Sutherland-Bass attenuation. " ); 
+  opt->addUsage( "                          The text file should contain two columns: " );
+  opt->addUsage( "                              height (km AGL) and " );
+  opt->addUsage( "                              attenuation coefficients in np/m." );
+
+  opt->addUsage( " --c_min                  Specify the minimum phase speed (in m/sec)." );
+  opt->addUsage( "                          This is used in conjunction with the --wvnum_filter" );
+  opt->addUsage( "                          flag which turns on wavenumber filtering by" );
+  opt->addUsage( "                          phase speed. See also the --wvnum_filter flag" );
+  opt->addUsage( "                          and the --c_max option." );
+  opt->addUsage( " --c_max                  Specify the maximum phase speed (in m/sec)." );
+	
   opt->addUsage( "" );	
   opt->addUsage( "FLAGS (no value required):" );
   opt->addUsage( " --write_2D_TLoss         Outputs the 2D transmission loss to" );
@@ -186,7 +194,12 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
   opt->addUsage( "                          an approx. that speeds-up ground-to-ground propag." ); 
   opt->addUsage( "                          It has the value 1 (true) if any of the flags" );
   opt->addUsage( "                          write_2D_TLoss, write_phase_speeds, write_modes" );
-  opt->addUsage( "                          or write_dispersion are true." );    
+  opt->addUsage( "                          or write_dispersion are true." );
+  opt->addUsage( " --wvnum_filter           Applies wavenumber filtering by phase speed" );
+  opt->addUsage( "                          and should be followed by specification of" ); 
+  opt->addUsage( "                          the parameters:" );
+  opt->addUsage( "                              --c_min   minimum phase speed (in m/sec)." );
+  opt->addUsage( "                              --c_max   maximum phase speed (in m/sec)." ); 
   opt->addUsage( "" ); 
   opt->addUsage( "" );
   opt->addUsage( " OUTPUT Files:  Format description (column order):" );
@@ -224,6 +237,7 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
   opt->setFlag( "write_atm_profile");
   opt->setFlag( "turnoff_WKB");
   opt->setFlag( "plot" );
+  opt->setFlag( "wvnum_filter");
 
   opt->setOption( "atmosfile" );
   opt->setOption( "atmosfileorder" );
@@ -246,6 +260,8 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
   opt->setOption( "ground_impedance_model" );
   opt->setOption( "Lamb_wave_BC" );
   opt->setOption( "use_attn_file" );
+  opt->setOption( "c_min" );
+  opt->setOption( "c_max" );
 
   // Process the command-line arguments
   opt->processFile( "./WMod.options" );

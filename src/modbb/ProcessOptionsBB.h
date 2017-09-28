@@ -31,6 +31,7 @@ namespace NCPA {
       bool   getTurnoff_WKB();
       bool   getPlot_flg();
       bool   getZeroAttn_flg();
+      bool   getWvnum_filter_flg();
     
       int    getNrng_steps();
       int    getNz_grid();  
@@ -60,7 +61,9 @@ namespace NCPA {
       double getWidth_km();
       double getHeight_km();
       double getC_ref();
-      double getTmstep(); 
+      double getTmstep();
+      double getC_min();
+      double getC_max();
 
     private:
       string out_disp_file;
@@ -81,11 +84,12 @@ namespace NCPA {
       bool   pprop_grid_flg;
       bool   pprop_s2r_flg;	
       bool   pprop_s2r_grid_flg;
-      bool   usemodess_flg;   // if ==1 it uses the Eff. Sound Speed approx.
-      bool   usewmod_flg;     // if ==1 prompts the use of wmod (mutually exclusive with usemodess_flg)
+      bool   usemodess_flg;    // if ==1 it uses the Eff. Sound Speed approx.
+      bool   usewmod_flg;      // if ==1 prompts the use of wmod (mutually exclusive with usemodess_flg)
       bool   turnoff_WKB;
       bool   plot_flg;
-      bool   zero_attn_flg;   // if ==1 sets attenuation to zero
+      bool   zero_attn_flg;    // if ==1 sets attenuation to zero
+      bool   wvnum_filter_flg; // wavenumber filtering flag
       
       int    Nz_grid;         // number of points on the z-grid
       int    Nrng_steps;      // number of range steps		
@@ -113,9 +117,11 @@ namespace NCPA {
       double receiverheight;  // meters
       double f_min;           // minimum frequency
       double f_step;          // frequency step
-      double f_max;           // Nyquist frequency
+      double f_max;           // Nyquist frequency 
       double max_cel;         // maximum celerity
       double f_center;        // specifies the center frequency of the pulse
+      double c_min;           // minimum spund speed requested by user to do wavenumber filtering
+      double c_max;           // maximum spund speed requested by user to do wavenumber filtering
 		
   }; // mandatory semicolon here
 }

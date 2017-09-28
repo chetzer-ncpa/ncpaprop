@@ -208,6 +208,18 @@ void NCPA::SolveCModNB::setParams(ProcessOptionsNB *oNB, SampledProfile *atm_pro
   Nby2Dprop          = oNB->getNby2Dprop();
   //write_atm_profile  = oNB->getWriteAtmProfile();
   turnoff_WKB        = oNB->getTurnoff_WKB();
+
+  // default values for c_min, c_max and wvnum_filter_flg
+  c_min = 0.0;
+  c_max = 0.0;
+  wvnum_filter_flg = 0;
+
+  // set c_min, c_max if wavenumber filtering is on
+  wvnum_filter_flg = oNB->getWvnum_filter_flg();     
+  if (wvnum_filter_flg==1) {
+      c_min = oNB->getC_min();
+      c_max = oNB->getC_max();
+  };
   
   if (write_phase_speeds || write_2D_TLoss || write_modes || write_dispersion) {
       turnoff_WKB = 1; // don't use WKB least phase speed estim. when saving any of the above values
@@ -330,6 +342,12 @@ void NCPA::SolveCModNB::printParams() {
   printf("       turnoff_WKB flag : %d\n", turnoff_WKB);
   printf("             wind_units : %s\n", wind_units.c_str());
   printf("    atmospheric profile : %s\n", atmosfile.c_str());
+
+  printf("       wvnum_filter_flg : %d\n", wvnum_filter_flg);
+  if (wvnum_filter_flg==1) {
+  printf("                  c_min : %g m/s\n", c_min);
+  printf("                  c_max : %g m/s\n", c_max);
+  }
 }
 
 
@@ -354,7 +372,8 @@ int NCPA::SolveCModNB::computeModes() {
   PetscMPIInt    rank, size;
 
   int    i, j, select_modes, nev;
-  double dz, dz_km, z_min_km, admittance, h2, rng_step;
+  double dz, z_min_km, admittance, h2, rng_step;
+  //double dz_km
   double k_min, k_max;			
   double *alpha; 
   complex<double> *diag, *k2, *k_s, **v, **v_s;	
@@ -385,10 +404,10 @@ int NCPA::SolveCModNB::computeModes() {
 		       << " meters (max. available in the profile file)" << endl;
   }	
 
-  rng_step = maxrange/Nrng_steps;             // range step [meters]
+  rng_step = maxrange/Nrng_steps;           // range step [meters]
   dz       = (maxheight - z_min)/Nz_grid;	// the z-grid spacing
   h2       = dz*dz;
-  dz_km    = dz/1000.0;
+  //dz_km    = dz/1000.0;
   z_min_km = z_min/1000.0;     
   
   //
@@ -414,7 +433,7 @@ int NCPA::SolveCModNB::computeModes() {
     //  
     admittance = 0.0; // default
     if ((gnd_imp_model.compare("rigid")==0) && Lamb_wave_BC) { //Lamb_wave_BC
-        admittance = -atm_profile->drhodz(z_min/1000.0)/1000.0/atm_profile->rho(z_min/1000.0)/2.0; // SI units
+        admittance = -atm_profile->drhodz(z_min/1000.0)/1000.0/atm_profile->rho(z_min_km)/2.0; // SI units
     }
     else if (gnd_imp_model.compare("rigid")==0) {
         admittance = 0.0; // no Lamb_wave_BC
@@ -429,6 +448,13 @@ int NCPA::SolveCModNB::computeModes() {
     // Get the main diagonal and the number of modes
     //
     i = getCModalTrace(Nz_grid, z_min, sourceheight, receiverheight, dz, atm_profile, admittance, freq, azi, diag, &k_min, &k_max, alpha, turnoff_WKB);
+
+    // if wavenumber filtering is on, redefine k_min, k_max
+    if (wvnum_filter_flg) {
+        k_min = 2*Pi*freq/c_max;
+        k_max = 2*Pi*freq/c_min;
+    }
+
     i = getNumberOfModes(Nz_grid,dz,diag,k_min,k_max,&nev);
     
     sigma = pow((0.5*(k_min + k_max)),2);
@@ -438,11 +464,14 @@ int NCPA::SolveCModNB::computeModes() {
     printf (" -> Discrete spectrum: %5.2f m/s to %5.2f m/s\n", 2*Pi*freq/k_max, 2*Pi*freq/k_min);
     
     // abort if no modes are found
+    // disabled 20170802 DV
+    if (0) {
     if (nev==0) {
         cout << "No modes found! " << endl
              << "Check your input - especially the height and the profile file at the top." 
              << endl << "Aborted." << endl; 
         exit(1);
+    }
     }
 
     // Initialize Slepc
@@ -805,7 +834,7 @@ int NCPA::SolveCModNB::getAbsorption(int n, double dz, SampledProfile *p, double
     double T_o, P_o, S, z;
     double X[7], X_ON, Z_rot[2], Z_rot_;
     double sigma, nn, chi, cchi, mu, nu, mu_o;
-    double beta_0, beta_1, beta_2, alpha_1, alpha_2;
+    //double beta_0, beta_1, beta_2, alpha_1, alpha_2;
     double a_cl, a_rot, a_diff, a_vib;
     double T_z, P_z, c_snd_z, gamma;
     double A1, A2, B, C, D, E, F, G, H, I, J, K, L, ZZ, hu;
@@ -890,11 +919,11 @@ int NCPA::SolveCModNB::getAbsorption(int n, double dz, SampledProfile *p, double
 			  cchi  = 2.36*chi;
 
 			  //---------Classical + rotational loss/dispersion--------------------------
-			  beta_0  = 2*Pi*freq/c_snd_z; 
-			  beta_1  = beta_0*sqrt(0.5*(sqrt(1+pow(nu,2))+1)/(1+pow(nu,2)));
-			  beta_2  = beta_0*sqrt((1+pow(chi,2))/(1+pow((sigma*chi),2))); 
-			  alpha_1 = beta_0*sqrt(0.5*(sqrt(1+pow(nu,2))-1)/(1+pow(nu,2)));
-			  alpha_2 = beta_0*(((sigma/2-1/(2*sigma))*chi)/(sqrt((1+pow(chi,2))*(1+pow(sigma*chi,2)))));
+			  //beta_0  = 2*Pi*freq/c_snd_z; 
+			  //beta_1  = beta_0*sqrt(0.5*(sqrt(1+pow(nu,2))+1)/(1+pow(nu,2)));
+			  //beta_2  = beta_0*sqrt((1+pow(chi,2))/(1+pow((sigma*chi),2))); 
+			  //alpha_1 = beta_0*sqrt(0.5*(sqrt(1+pow(nu,2))-1)/(1+pow(nu,2)));
+			  //alpha_2 = beta_0*(((sigma/2-1/(2*sigma))*chi)/(sqrt((1+pow(chi,2))*(1+pow(sigma*chi,2)))));
 			  //a_cl    = alpha_1*(beta_2/beta_0);
 			  //a_rot = alpha_2*(beta_1/beta_0)*X_ON;
 
@@ -1127,7 +1156,8 @@ int NCPA::SolveCModNB::getCModalTrace(\
   windz    = zw[top+1]*sin(azi_rad) + mw[top+1]*cos(azi_rad);
   cefftop = cz + windz;
   *k_min  = omega/cefftop;
-  
+
+  if (0) { // disabled DV 20170805  
   // check if duct is not formed and modes exist
   if (cefftop<ceff_grnd) {
       printf(" --------------------------------------------------------------\n");
@@ -1139,7 +1169,8 @@ int NCPA::SolveCModNB::getCModalTrace(\
       printf(" Suggest increasing maxheight and checking your profile file.\n");
       printf(" --------------------------------------------------------------\n");
       exit(1);
-  }  
+  }
+  } 
    
   // optional save ceff
   if (0) {

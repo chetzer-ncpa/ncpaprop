@@ -218,7 +218,20 @@ void NCPA::SolveModNB::setParams(ProcessOptionsNB *oNB, SampledProfile *atm_prof
   Nby2Dprop          = oNB->getNby2Dprop();
   //write_atm_profile  = oNB->getWriteAtmProfile();
   turnoff_WKB        = oNB->getTurnoff_WKB();
-  
+
+  // default values for c_min, c_max and wvnum_filter_flg
+  c_min = 0.0;
+  c_max = 0.0;
+  wvnum_filter_flg = 0;
+
+  // set c_min, c_max if wavenumber filtering is on
+  wvnum_filter_flg = oNB->getWvnum_filter_flg();     
+  if (wvnum_filter_flg==1) {
+      c_min = oNB->getC_min();
+      c_max = oNB->getC_max();
+  };
+
+
   if (write_phase_speeds || write_speeds || write_2D_TLoss || write_modes || write_dispersion) {
       turnoff_WKB = 1; // don't use WKB least phase speed estim. when saving any of the above values
   }
@@ -346,7 +359,13 @@ void NCPA::SolveModNB::printParams() {
   }
   if (!modstartfile.empty()) {
   printf(" modal starter saved in : %s\n", modstartfile.c_str());
-  }  
+  }
+
+  printf("       wvnum_filter_flg : %d\n", wvnum_filter_flg);
+  if (wvnum_filter_flg==1) {
+  printf("                  c_min : %g m/s\n", c_min);
+  printf("                  c_max : %g m/s\n", c_max);
+  }
 }
 
 
@@ -370,7 +389,8 @@ int NCPA::SolveModNB::computeModes() {
   PetscMPIInt    rank, size;
 
   int    i, j, select_modes, nev, it;
-  double dz, dz_km, z_min_km, admittance, h2, rng_step;
+  double dz, admittance, h2, rng_step, z_min_km;
+  //double  dz_km;
   double k_min, k_max;			
   double *alpha, *diag, *k2, *k_s, **v, **v_s;	
   complex<double> *k_pert;
@@ -391,7 +411,7 @@ int NCPA::SolveModNB::computeModes() {
   rng_step = maxrange/Nrng_steps;         // range step [meters]
   dz       = (maxheight - z_min)/Nz_grid;	// the z-grid spacing
   h2       = dz*dz;
-  dz_km    = dz/1000.0;
+  //dz_km    = dz/1000.0;
   z_min_km = z_min/1000.0;
   
   //
@@ -432,18 +452,30 @@ int NCPA::SolveModNB::computeModes() {
     //		
     // i = getModalTrace(Nz_grid, z_min, sourceheight, receiverheight, dz, atm_profile, admittance, freq, azi, diag, &k_min, &k_max, turnoff_WKB);    
     i = getModalTrace(Nz_grid, z_min, sourceheight, receiverheight, dz, atm_profile, admittance, freq, azi, diag, &k_min, &k_max, turnoff_WKB, c_eff);
+
+//printf("out of modalTrace(); wavnum_filter = %d\n", wvnum_filter_flg);
+
+    // if wavenumber filtering is on, redefine k_min, k_max
+    if (wvnum_filter_flg) {
+        k_min = 2*Pi*freq/c_max;
+        k_max = 2*Pi*freq/c_min;
+    }
+
     i = getNumberOfModes(Nz_grid,dz,diag,k_min,k_max,&nev);
 
     printf ("______________________________________________________________________\n\n");
     printf (" -> Normal mode solution at %5.3f Hz and %5.2f deg (%d modes)...\n", freq, azi, nev);
     printf (" -> Discrete spectrum: %5.2f m/s to %5.2f m/s\n", 2*Pi*freq/k_max, 2*Pi*freq/k_min);
     
-    // abort if no modes are found; this is also checked in getModalTrace() 
+    // abort if no modes are found; this is also checked in getModalTrace()
+    // disabled 20170802 DV
+    if (0) {
     if (nev<=0) {
         cout << "No modes found! " << endl
              << "Check your input - especially the height and the profile file at the top." 
              << endl << "Aborted." << endl; 
         exit(1);
+    }
     }
 
     // Initialize Slepc
@@ -843,7 +875,7 @@ int NCPA::SolveModNB::getAbsorption(int n, double dz, SampledProfile *p, double 
     double T_o, P_o, S, z;
     double X[7], X_ON, Z_rot[2], Z_rot_;
     double sigma, nn, chi, cchi, mu, nu, mu_o;
-    double beta_0, beta_1, beta_2, alpha_1, alpha_2;
+    //double beta_0, beta_1, beta_2, alpha_1, alpha_2;
     double a_cl, a_rot, a_diff, a_vib;
     double T_z, P_z, c_snd_z, gamma;
     double A1, A2, B, C, D, E, F, G, H, I, J, K, L, ZZ, hu;
@@ -932,11 +964,11 @@ int NCPA::SolveModNB::getAbsorption(int n, double dz, SampledProfile *p, double 
 			  cchi  = 2.36*chi;
 
 			  //---------Classical + rotational loss/dispersion--------------------------
-			  beta_0  = 2*Pi*freq/c_snd_z; 
-			  beta_1  = beta_0*sqrt(0.5*(sqrt(1+pow(nu,2))+1)/(1+pow(nu,2)));
-			  beta_2  = beta_0*sqrt((1+pow(chi,2))/(1+pow((sigma*chi),2))); 
-			  alpha_1 = beta_0*sqrt(0.5*(sqrt(1+pow(nu,2))-1)/(1+pow(nu,2)));
-			  alpha_2 = beta_0*(((sigma/2-1/(2*sigma))*chi)/(sqrt((1+pow(chi,2))*(1+pow(sigma*chi,2)))));
+			  //beta_0  = 2*Pi*freq/c_snd_z; 
+			  //beta_1  = beta_0*sqrt(0.5*(sqrt(1+pow(nu,2))+1)/(1+pow(nu,2)));
+			  //beta_2  = beta_0*sqrt((1+pow(chi,2))/(1+pow((sigma*chi),2))); 
+			  //alpha_1 = beta_0*sqrt(0.5*(sqrt(1+pow(nu,2))-1)/(1+pow(nu,2)));
+			  //alpha_2 = beta_0*(((sigma/2-1/(2*sigma))*chi)/(sqrt((1+pow(chi,2))*(1+pow(sigma*chi,2)))));
 			  //a_cl    = alpha_1*(beta_2/beta_0);
 			  //a_rot = alpha_2*(beta_1/beta_0)*X_ON;
 
@@ -1315,6 +1347,7 @@ int NCPA::SolveModNB::getModalTrace(\
   cefftop = cz + windz;
   *k_min  = omega/cefftop;
 
+  if (0) { // disabled DV 20170729
   // check if duct is not formed and modes exist
   if (cefftop<ceff_grnd) {
       printf(" --------------------------------------------------------------\n");
@@ -1326,6 +1359,7 @@ int NCPA::SolveModNB::getModalTrace(\
       printf(" Suggest to double check the column order in your profile file; the consistency of that file; also increasing maxheight might help.\n");
       printf(" --------------------------------------------------------------\n");
       exit(1);
+  }
   }
    
   // optional save ceff
@@ -1492,14 +1526,15 @@ int NCPA::SolveModNB::getTLoss1D(int select_modes, double dz, int n_r, double dr
   int i, m;
   int n_zsrc = (int) ceil(z_src/dz);
   int n_zrcv = (int) ceil(z_rcv/dz);
-  double r, sqrtrho_ratio, sqrtrhos;
+  double r, sqrtrho_ratio;
+  //double sqrtrhos;
   double modal_sum_i, modal_sum_i_ll; // for incoherent sum if desired
   complex<double> modal_sum_c, modal_sum_c_ll;
   complex<double> I (0.0, 1.0);
   complex<double> expov8pi =  4*Pi*I*exp(-I*Pi*0.25)/sqrt(8.0*Pi); // the 4*Pi factor ensures that the modal sum below ends up being the actual TL
   
   sqrtrho_ratio  = sqrt(rho[n_zrcv]/rho[n_zsrc]);
-  sqrtrhos = sqrt(rho[n_zsrc]);
+  //sqrtrhos = sqrt(rho[n_zsrc]);
   
   FILE *tloss_1d    = fopen("tloss_1d.nm","w");
   FILE *tloss_ll_1d = fopen("tloss_1d.lossless.nm","w");
@@ -1643,7 +1678,8 @@ void NCPA::SolveModNB::getModalStarter(int nz, int select_modes, double dz, doub
 
   int j, m;
   int n_zsrc = (int) ceil(z_src/dz);
-  double z, sqrtrhoj, rhos;
+  double z;
+  //double  rhos, sqrtrhoj;
   complex<double> modal_sum;
   
   double k0 = (2*Pi*freq/340.0); // reference wavenumber
@@ -1652,13 +1688,13 @@ void NCPA::SolveModNB::getModalStarter(int nz, int select_modes, double dz, doub
    
   //sqrtrho  = sqrt(rho[n_zrcv]/rho[n_zsrc]);
   //sqrtrhos = sqrt(rho[n_zsrc]);
-  rhos = rho[n_zsrc];
+  //rhos = rho[n_zsrc];
   
   //double sqrt2Pi  = sqrt(2.0*Pi);
   
-   //double factor = sqrt(1.0/8.0*Pi);
-   //double twoPi = 2.0*Pi;
-   //double sqrtTwo = sqrt(2.0); 
+  //double factor = sqrt(1.0/8.0*Pi);
+  //double twoPi = 2.0*Pi;
+  //double sqrtTwo = sqrt(2.0); 
   
   //FILE *mstfile = fopen("modal_starter1.nm","w");
   FILE *mstfile = fopen(modstartfile.c_str(),"w");
@@ -1667,7 +1703,8 @@ void NCPA::SolveModNB::getModalStarter(int nz, int select_modes, double dz, doub
       z = (j)*dz;
       //cout << "j = " << j << ";  z = " << z << endl;
       modal_sum = 0.0;
-      sqrtrhoj = sqrt(rho[j]/rhos);
+      //sqrtrhoj = sqrt(rho[j]/rhos);
+
       // Use the commented lines if the modes must be scaled by sqrt(rho)
       for (m=0; m<select_modes; m++) {
           modal_sum = modal_sum + v_s[n_zsrc][m]*v_s[j][m]/sqrt(real(k_pert[m]));

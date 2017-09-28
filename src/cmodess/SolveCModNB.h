@@ -71,6 +71,7 @@ namespace NCPA {
       bool   write_modes;        
       bool   Nby2Dprop;
       bool   turnoff_WKB;
+      bool   wvnum_filter_flg;
           
       int    Nz_grid;
       int    Nrng_steps;
@@ -90,6 +91,8 @@ namespace NCPA {
       double receiverheight;
       double tol;
       double *Hgt, *zw, *mw, *T, *rho, *Pr;
+      double c_min; // for wavenumber filtering option
+      double c_max; // for wavenumber filtering option
       
       NCPA::SampledProfile *atm_profile;
       std::string gnd_imp_model;

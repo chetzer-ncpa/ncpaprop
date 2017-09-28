@@ -51,17 +51,6 @@ void fft_pulse_prop(double t0, int n_freqs, int NFFT, double df, double *f_vec, 
                     double **re_k, double **im_k, \
                     double **mode_S, double **mode_R);
 
-// DV 20151017: Added NFFT as argument
-/*         
-int pulse_prop_src2rcv_grid2(\
-          const char *filename,double max_cel, \
-          double R_start,double DR,double R_end, \
-					int n_freqs, int NFFT, double f_step, double *f_vec, \
-					double scale, int *mode_count, double rho_zsrc, double rho_zrcv, \
-					double **re_k, double **im_k, double **mode_S, double **mode_R, \
-					int src_flg, string srcfile, int pprop_src2rcv_flg);         							
-*/
-
 // DV 20160717: Added no_attenuation flag                  
 int pulse_prop_src2rcv_grid2(\
           const char *filename,double max_cel, \
@@ -70,14 +59,7 @@ int pulse_prop_src2rcv_grid2(\
 					double scale, int *mode_count, double rho_zsrc, double rho_zrcv, \
 					double **re_k, double **im_k, double **mode_S, double **mode_R, \
 					int src_flg, string srcfile, int pprop_src2rcv_flg, bool zero_attn_flg); 
-					
-int pulse_prop_src2rcv_grid2(\
-          const char *filename,double max_cel, \
-          double R_start,double DR,double R_end, \
-					int n_freqs, double f_step, double *f_vec, \
-					double scale, int *mode_count, double rho_zsrc, double rho_zrcv, \
-					double **re_k, double **im_k, double **mode_S, double **mode_R, \
-					int src_flg, string srcfile, int pprop_src2rcv_flg);					
+									
 					
 					
 int get_source_spectrum(	\
@@ -94,7 +76,12 @@ int get_source_spectrum(	\
 								int src_flg, string srcfile);
 							
 									
-complex<double> pulse_spec_fit(double scale, double x);		
+complex<double> pulse_spec_fit(double scale, double x);
+
+/* Power law pulse model with exponential decay. */
+double model_pulse_shape(double power,double scale,double x);
+
+void model_pulse_fft(double power, double scale, double dt, int NFFT, complex<double> *dft_vec);	
 
 //int plotXY(double* xData, double* yData, int dataSize, double RR);
 

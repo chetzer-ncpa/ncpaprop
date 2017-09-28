@@ -33,8 +33,10 @@ NCPA::ProcessOptionsBB::ProcessOptionsBB(AnyOption *opt)
   Nfreq          = 1;          // a default number of frequencies
   srcfile        = "";
   f_center       = -1;  // must have negative initialization value; 
-		                    // used later to decide if f_center is reset by input 
-		                    // option used for built-in pulse
+		                // used later to decide if f_center is reset by input 
+		                // option used for built-in pulse
+  c_min          = 0.0; // minimum spund speed requested by user to do wavenumber filtering
+  c_max          = 0.0; // maximum spund speed requested by user to do wavenumber filtering
 		                    
   NFFT           = -1;  // number of fft points; this initial negative value
                         // is necessary to signal the code later that in fact
@@ -59,8 +61,7 @@ NCPA::ProcessOptionsBB::ProcessOptionsBB(AnyOption *opt)
   // full 2D dispersion 
   w_disp_flg = 0;
   if ( opt->getValue( "out_dispersion_files" ) != NULL ) {
-      w_disp_flg = 1;
-      out_disp_file.assign(opt->getValue( "out_dispersion_files" ));
+      w_disp_flg = 1;      out_disp_file.assign(opt->getValue( "out_dispersion_files" ));
       cout << "out_dispersion_files = " << out_disp_file << endl;
   }
   
@@ -82,6 +83,30 @@ NCPA::ProcessOptionsBB::ProcessOptionsBB(AnyOption *opt)
           delete opt;
           throw invalid_argument( "Select one and only option: either: --use_modess or --use_wmod!" );
       }
+
+      // wavenumber filtering option
+      wvnum_filter_flg = 0;
+
+      if ( opt->getValue( "wvnum_filter" ) != NULL ) {
+              wvnum_filter_flg = 1;
+              //cout << "wvnum_filter_flg = " << wvnum_filter_flg << endl;
+          if ( opt->getValue( "c_min" ) != NULL ) {
+              c_min = atof(opt->getValue( "c_min" ));  
+          }
+          else {
+              delete opt;
+              throw invalid_argument( "For wavenumber filtering provide a minimum sound speed c_min.");
+          }
+
+          if ( opt->getValue( "c_max" ) != NULL ) {
+              c_max = atof(opt->getValue( "c_max" ));  
+          }
+          else {
+              delete opt;
+              throw invalid_argument( "For wavenumber filtering provide a maximum sound speed c_max.");
+          }
+      }
+
   }
   
   if ( opt->getValue( "wind_units" ) != NULL ) {
@@ -114,7 +139,7 @@ NCPA::ProcessOptionsBB::ProcessOptionsBB(AnyOption *opt)
   if ( opt->getValue( "pulse_prop_src2rcv_grid" ) != NULL ) {
       pprop_s2r_grid_flg  = 1;
       pprop_s2r_disp_file.assign(opt->getValue( "pulse_prop_src2rcv_grid" ));
-      cout << "--> Source-to-ground dispersion file = " << pprop_s2r_disp_file << endl;
+      cout << "--> Source-to-receiver dispersion file = " << pprop_s2r_disp_file << endl;
   }	
 
   // only one of these options allowed at a time
@@ -138,7 +163,7 @@ NCPA::ProcessOptionsBB::ProcessOptionsBB(AnyOption *opt)
       exit(1);
   }
 
-  max_cel = 300.0; //default celerity
+  max_cel = 340.0; //default celerity
   if ( opt->getValue( "max_celerity" ) != NULL ) {
       max_cel = atof(opt->getValue( "max_celerity" ));
       cout << "max_celerity = " << max_cel << " m/s" << endl;
@@ -146,8 +171,7 @@ NCPA::ProcessOptionsBB::ProcessOptionsBB(AnyOption *opt)
   else {
       cout << "Using default max_celerity = " << max_cel << " m/s" << endl;
   }
-  
-  
+
   // what kind of source?
   src_flg = 0;
   if (pprop_grid_flg || pprop_s2r_flg || pprop_s2r_grid_flg) {
@@ -157,20 +181,25 @@ NCPA::ProcessOptionsBB::ProcessOptionsBB(AnyOption *opt)
                 cout << "impulse response requested ..." << endl;
 		  }  
 
-   		if ( opt->getValue( "use_builtin_pulse" ) != NULL ) {
+   		if ( opt->getValue( "use_builtin_pulse1" ) != NULL ) {
                 src_flg = 1;
-                cout << "Using builtin_pulse ..." << endl;
+                cout << "Using builtin_pulse #1 ..." << endl;
+		  }
+
+   		if ( opt->getValue( "use_builtin_pulse2" ) != NULL ) {
+                src_flg = 2;
+                cout << "Using builtin_pulse #2 ..." << endl;
 		  } 
 		  
    		if ( opt->getValue( "src_spectrum_file" ) != NULL ) {
                 srcfile = opt->getValue( "src_spectrum_file" );
-                src_flg = 2;
+                src_flg = 3;
                 cout << "source spectrum file =  " << srcfile << endl;
 		  } 
 
    		if ( opt->getValue( "src_waveform_file" ) != NULL ) {
                 srcfile = opt->getValue( "src_waveform_file" );
-                src_flg = 3;
+                src_flg = 4;
                 cout << "source waveform file =  " << srcfile << endl;
 		  }  
   }
@@ -232,20 +261,26 @@ NCPA::ProcessOptionsBB::ProcessOptionsBB(AnyOption *opt)
 		  }  				
   }
   
-  // the center frequency for the built-in pulse; handle it here
-  if ( opt->getValue( "f_center" ) != NULL ) {
-            f_center = atof(opt->getValue( "f_center" ));
-            cout << "f_center     = " << f_center << " Hz" << endl;
-            if (f_center < 0.0) {
-                delete opt;
-                throw invalid_argument( "f_center should be strictly positive (and <= f_max/5)!" );
-            }
+  // the center frequency for the built-in pulses; handle it here
+  if (src_flg==1 || src_flg==2) { // for the built-in pulses
+    if ( opt->getValue( "f_center" ) != NULL ) {
+      f_center = atof(opt->getValue( "f_center" ));
+      cout << "f_center   = " << f_center << " Hz" << endl;
+        if (f_center < 0.0) {
+          delete opt;
+          throw invalid_argument( "f_center should be strictly positive (and <= f_max/5)!" );
+        }
+    }
+    else {
+      delete opt;
+      throw invalid_argument( "Option --f_center is required! Use f_center<=1/5 of f_max." );
+    }
   }
   
   // the number of FFT points
   if ( opt->getValue( "nfft" ) != NULL ) {
             NFFT = (int) round(atof(opt->getValue( "nfft" )));
-            cout << "NFFT     = " << NFFT << endl;   
+            cout << "NFFT       = " << NFFT << endl;   
             if (NFFT < 0.0) {
                 delete opt;
                 throw invalid_argument( "NFFT should be strictly a positive integer" );
@@ -658,6 +693,14 @@ double NCPA::ProcessOptionsBB::getTmstep() {
   return tmstep;
 }
 
+double NCPA::ProcessOptionsBB::getC_min() {
+  return c_min;
+}
+
+double NCPA::ProcessOptionsBB::getC_max() {
+  return c_max;
+}
+
 int    NCPA::ProcessOptionsBB::getNtsteps() {
   return ntsteps;
 }
@@ -695,8 +738,9 @@ int    NCPA::ProcessOptionsBB::getNFFT() {
   return NFFT;
 }
 
-	
-			
+bool   NCPA::ProcessOptionsBB::getWvnum_filter_flg() {
+  return wvnum_filter_flg;
+}	
 
 
 

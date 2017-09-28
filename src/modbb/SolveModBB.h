@@ -98,6 +98,7 @@ namespace NCPA {
       bool   out_disp_src2rcv;
       bool   usemodess_flg;
       bool   turnoff_WKB;
+      bool   wvnum_filter_flg;
       
       int    Nfreq;
       int    Nz_grid;  
@@ -115,7 +116,9 @@ namespace NCPA {
       double maxheight;
       double maxrange;
       double tol;
-      double *Hgt, *zw, *mw, *T, *rho, *Pr;     
+      double *Hgt, *zw, *mw, *T, *rho, *Pr;
+      double c_min; // for wavenumber filtering option
+      double c_max; // for wavenumber filtering option  
 
       NCPA::SampledProfile *atm_profile;
       std::string atmosfile; 

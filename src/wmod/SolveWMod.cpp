@@ -171,6 +171,18 @@ void NCPA::SolveWMod::setParams(ProcessOptionsNB *oNB, SampledProfile *atm_prof)
   Nby2Dprop          = oNB->getNby2Dprop();
   //write_atm_profile  = oNB->getWriteAtmProfile();
   turnoff_WKB        = oNB->getTurnoff_WKB();
+
+  // default values for c_min, c_max and wvnum_filter_flg
+  c_min = 0.0;
+  c_max = 0.0;
+  wvnum_filter_flg = 0;
+
+  // set c_min, c_max if wavenumber filtering is on
+  wvnum_filter_flg = oNB->getWvnum_filter_flg();     
+  if (wvnum_filter_flg==1) {
+      c_min = oNB->getC_min();
+      c_max = oNB->getC_max();
+  };
   
   if (write_phase_speeds || write_2D_TLoss || write_modes || write_dispersion) {
       turnoff_WKB = 1; // don't use WKB least phase speed estim. when saving any of the above values
@@ -262,6 +274,12 @@ void NCPA::SolveWMod::printParams() {
   if (!usrattfile.empty()) {
   printf("  User attenuation file : %s\n", usrattfile.c_str());
   }
+
+  printf("       wvnum_filter_flg : %d\n", wvnum_filter_flg);
+  if (wvnum_filter_flg==1) {
+  printf("                  c_min : %g m/s\n", c_min);
+  printf("                  c_max : %g m/s\n", c_max);
+  }
 }
 
 
@@ -285,7 +303,8 @@ int NCPA::SolveWMod::computeModes() {
   VecScatter     ctx;
 
   int    i, j, select_modes, nev, it;
-  double dz, dz_km, z_min_km, admittance, h2, rng_step;
+  double dz, admittance, h2, rng_step;
+  //double dz_km, z_min_km;
   double k_min, k_max, sigma;			
   double *alpha, *diag, *kd, *md, *cd, *kH, *k_s, **v, **v_s;	
   complex<double> *k_pert;
@@ -308,8 +327,8 @@ int NCPA::SolveWMod::computeModes() {
   rng_step = maxrange/Nrng_steps;  						// range step [meters]
   dz       = (maxheight - z_min)/Nz_grid;	// the z-grid spacing
   h2       = dz*dz;
-  dz_km    = dz/1000.0;
-  z_min_km = z_min/1000.0;
+  //dz_km    = dz/1000.0;
+  //z_min_km = z_min/1000.0;
   
   //
   // loop over azimuths (if not (N by 2D) it's only one azimuth
@@ -348,14 +367,24 @@ int NCPA::SolveWMod::computeModes() {
     // Get the main diagonal and the number of modes
     //		
     i = getModalTrace(Nz_grid, z_min, sourceheight, receiverheight, dz, atm_profile, admittance, freq, diag, kd, md, cd, &k_min, &k_max, turnoff_WKB);
+
+    // if wavenumber filtering is on, redefine k_min, k_max
+    if (wvnum_filter_flg) {
+        k_min = 2*Pi*freq/c_max;
+        k_max = 2*Pi*freq/c_min;
+    }
+
     i = getNumberOfModes(Nz_grid,dz,diag,k_min,k_max,&nev);
     
     // abort if no modes are found
+    // disabled 20170802 DV
+    if (0) {
     if (nev==0) {
         cout << "No modes found! " << endl
              << "Check your input - especially the height and the profile file at the top." 
              << endl << "Aborted." << endl; 
         exit(1);
+    }
     }
 
     //
@@ -645,159 +674,6 @@ int NCPA::SolveWMod::computeModes() {
 }
 
 
-/*
-// updated getAbsorption function: bug fixed by Joel and Jelle - Jun 2012
-int NCPA::SolveWMod::getAbsorption(int n, double dz, SampledProfile *p, double freq, double *alpha)
-{
-  // Expressions based on Bass and Sutherland, JASA 2004
-  // Computes alpha(freq) for given G2S output
-  // Subroutine can easily be modified to include dispersion effects
-  // In that case, make alpha a complex array and
-  // use the real part as absorption and the imaginary part for dispersion
-  int    m, ii;
-  double T_o, P_o, S, z;
-  double X[7], X_ON, Z_rot[2], Z_rot_;
-  double sigma, nn, chi, cchi, mu, nu, mu_o;
-  double beta_0, beta_1, beta_2, alpha_1, alpha_2;
-  double a_cl, a_rot, a_diff, a_vib;
-  double T_z, P_z, c_snd_z, gamma;
-  double A1, A2, B, C, D, E, F, G, H, I, J, K, L, ZZ, hu;
-  double f_vib[4], a_vib_c[4], Cp_R[4], Cv_R[4], theta[4], C_R, A_max, Tr;
-  
-  double tweak_abs = 1; //1; // tweak absorption alpha by this factor
-
-  // Atmospheric composition constants
-  mu_o  = 18.192E-6;             // Reference viscosity [kg/(m*s)]
-  T_o   = T[0];         // Reference temperature [K]
-  P_o   = Pr[0];   // Reference pressure [Pa]
-  S     = 117;   	   			       // Sutherland constant [K]       
-
-  Cv_R[0] = 5/2;                                    // Heat capacity|volume (O2)
-  Cv_R[1] = 5/2;                                    // Heat capacity|volume (N2)
-  Cv_R[2] = 3;                                      // Heat capacity|volume (CO2)
-  Cv_R[3] = 3;                                      // Heat capacity|volume (O3)
-  Cp_R[0] = 7/2;                                    // Heat capacity|pressure (O2)
-  Cp_R[1] = 7/2;                                    // Heat capacity|pressure (N2)
-  Cp_R[2] = 4;                                      // Heat capacity|pressure (CO2)
-  Cp_R[3] = 4;                                      // Heat capacity|pressure (O3)
-  theta[0]= 2239.1;                                 // Charact. temperature (O2)
-  theta[1]= 3352;                                   // Charact. temperature (N2)
-  theta[2]= 915;                                    // Charact. temperature (CO2)
-  theta[3]= 1037;                                   // Charact. temperature (O3)
-
-	//gamma   = 1.371 + 2.46E-04*T_z - 6.436E-07*pow(T_z,2) + 5.2E-10*pow(T_z,3) - 1.796E-13*pow(T_z,4) + 2.182E-17*pow(T_z,5);
-	gamma   = 1.4;
-			 
-  for (ii=0; ii<n; ii++) {
-			z       = ii*dz/1000.0;		// km
-			T_z     = T[ii];	// K
-			P_z     = Pr[ii];	// Pa;
-			c_snd_z = sqrt(gamma*P_z/rho[ii]);  // in m/s					 
-			mu      = mu_o*sqrt(T_z/T_o)*((1+S/T_o)/(1+S/T_z)); // Viscosity [kg/(m*s)]
-			nu      = (8*Pi*freq*mu)/(3*P_z);                   // Nondimensional frequency
-			 
-			//-------- Gas fraction polynomial fits -----------------------------------
-			if (z > 90.)                                         // O2 profile
-				X[0] = pow(10,49.296-(1.5524*z)+(1.8714E-2*pow(z,2))-(1.1069E-4*pow(z,3))+(3.199E-7*pow(z,4))-(3.6211E-10*pow(z,5)));
-			else
-				X[0] = pow(10,-0.67887);
-
-			if (z > 76.)                                         // N2 profile
-				X[1] = pow(10,(1.3972E-1)-(5.6269E-3*z)+(3.9407E-5*pow(z,2))-(1.0737E-7*pow(z,3)));
-			else
-				X[1] = pow(10,-0.10744);
-
-			X[2] = pow(10,-3.3979);                              // CO2 profile
-
-			if (z > 80. )                                        // O3 profile
-				X[3] = pow(10,-4.234-(3.0975E-2*z));
-			else
-				X[3] = pow(10,-19.027+(1.3093*z)-(4.6496E-2*pow(z,2))+(7.8543E-4*pow(z,3))-(6.5169E-6*pow(z,4))+(2.1343E-8*pow(z,5)));
-
-			if (z > 95. )                                        // O profile
-				X[4] = pow(10,-3.2456+(4.6642E-2*z)-(2.6894E-4*pow(z,2))+(5.264E-7*pow(z,3)));
-			else
-				X[4] = pow(10,-11.195+(1.5408E-1*z)-(1.4348E-3*pow(z,2))+(1.0166E-5*pow(z,3)));
-
-							                                             // N profile 
-			X[5]  = pow(10,-53.746+(1.5439*z)-(1.8824E-2*pow(z,2))+(1.1587E-4*pow(z,3))-(3.5399E-7*pow(z,4))+(4.2609E-10*pow(z,5)));
-
-			if (z > 30. )                                         // H2O profile
-				X[6] = pow(10,-4.2563+(7.6245E-2*z)-(2.1824E-3*pow(z,2))-(2.3010E-6*pow(z,3))+(2.4265E-7*pow(z,4))-(1.2500E-09*pow(z,5)));
-			else 
-			{
-				if (z > 100.)
-				 X[6] = pow(10,-0.62534-(8.3665E-2*z));
-				else
-				 X[6] = pow(10,-1.7491+(4.4986E-2*z)-(6.8549E-2*pow(z,2))+(5.4639E-3*pow(z,3))-(1.5539E-4*pow(z,4))+(1.5063E-06*pow(z,5)));
-			}
-			X_ON = (X[0] + X[1])/0.9903;
-
-			//-------- Rotational collision number-------------------------------------
-			Z_rot[0] = 54.1*exp(-17.3*(pow(T_z,-1./3.)));   // O2
-			Z_rot[1] = 63.3*exp(-16.7*(pow(T_z,-1./3.)));   // N2
-			Z_rot_   = 1./((X[1]/Z_rot[1])+(X[0]/Z_rot[0]));
-
-			//-------- Nondimensional atmospheric quantities---------------------------
-			sigma = 5./sqrt(21.);
-			nn    = (4./5.)*sqrt(3./7.)*Z_rot_;
-			chi   = 3.*nn*nu/4.;
-			cchi  = 2.36*chi;
-
-			//---------Classical + rotational loss/dispersion--------------------------
-			beta_0  = 2*Pi*freq/c_snd_z; 
-			beta_1  = beta_0*sqrt(0.5*(sqrt(1+pow(nu,2))+1)/(1+pow(nu,2)));
-			beta_2  = beta_0*sqrt((1+pow(chi,2))/(1+pow((sigma*chi),2))); 
-			alpha_1 = beta_0*sqrt(0.5*(sqrt(1+pow(nu,2))-1)/(1+pow(nu,2)));
-			alpha_2 = beta_0*(((sigma/2-1/(2*sigma))*chi)/(sqrt((1+pow(chi,2))*(1+pow(sigma*chi,2)))));
-			//a_cl    = alpha_1*(beta_2/beta_0);
-			//a_rot = alpha_2*(beta_1/beta_0)*X_ON;
-
-			a_cl    = (2*Pi*freq/c_snd_z)*sqrt(0.5*(sqrt(1+pow(nu,2))-1)*(1+pow(cchi,2))/((1+pow(nu,2))*(1+pow(sigma*cchi,2))));
-			a_rot   = (2*Pi*freq/c_snd_z)*X_ON*((pow(sigma,2)-1)*chi/(2*sigma))*sqrt(0.5*(sqrt(1+pow(nu,2))+1)/((1+pow(nu,2))*(1+pow(cchi,2))));
-			a_diff  = 0.003*a_cl;
-
-			//---------Vibrational relaxation-------------------------------------------
-			Tr = pow(T_z/T_o,-1./3.)-1;
-			A1 = (X[0]+X[1])*24*exp(-9.16*Tr);
-			A2 = (X[4]+X[5])*2400;
-			B  = 40400*exp(10*Tr);
-			C  = 0.02*exp(-11.2*Tr);
-			D  = 0.391*exp(8.41*Tr);
-			E  = 9*exp(-19.9*Tr);
-			F  = 60000;
-			G  = 28000*exp(-4.17*Tr);
-			H  = 22000*exp(-7.68*Tr);
-			I  = 15100*exp(-10.4*Tr);
-			J  = 11500*exp(-9.17*Tr);
-			K  = (8.48E08)*exp(9.17*Tr);
-			L  = exp(-7.72*Tr);
-			ZZ = H*X[2]+I*(X[0]+0.5*X[4])+J*(X[1]+0.5*X[5])+K*(X[6]+X[3]);
-			hu = 100*(X[3]+X[6]);
-			f_vib[0] = (P_z/P_o)*(mu_o/mu)*(A1+A2+B*hu*(C+hu)*(D+hu));
-			f_vib[1] = (P_z/P_o)*(mu_o/mu)*(E+F*X[3]+G*X[6]);
-			f_vib[2] = (P_z/P_o)*(mu_o/mu)*ZZ;
-			f_vib[3] = (P_z/P_o)*(mu_o/mu)*(1.2E5)*L;
-
-			a_vib = 0.;
-			for (m=0; m<4; m++)
-			{
-				C_R        = ((pow(theta[m]/T_z,2))*exp(-theta[m]/T_z))/(pow(1-exp(-theta[m]/T_z),2));
-				A_max      = (X[m]*(Pi/2)*C_R)/(Cp_R[m]*(Cv_R[m]+C_R));
-				a_vib_c[m] = (A_max/c_snd_z)*((2*(pow(freq,2))/f_vib[m])/(1+pow(freq/f_vib[m],2)));
-				a_vib      = a_vib + a_vib_c[m];
-			}
-
-			alpha[ii] = a_cl + a_rot + a_diff + a_vib;
-			
-			// alter alpha for some studies
-			alpha[ii] = tweak_abs*alpha[ii];
-  }
-  printf("Using Sutherland-Bass absorption times a factor of %g\n", tweak_abs);
-  return 0;
-}
-*/
-
 
 // updated getAbsorption function: bug fixed by Joel and Jelle - Jun 2012
 // updated: will accept attenuation coeff. loaded from a file
@@ -814,7 +690,7 @@ int NCPA::SolveWMod::getAbsorption(int n, double dz, SampledProfile *p, double f
     double T_o, P_o, S, z;
     double X[7], X_ON, Z_rot[2], Z_rot_;
     double sigma, nn, chi, cchi, mu, nu, mu_o;
-    double beta_0, beta_1, beta_2, alpha_1, alpha_2;
+    //double beta_0, beta_1, beta_2, alpha_1, alpha_2;
     double a_cl, a_rot, a_diff, a_vib;
     double T_z, P_z, c_snd_z, gamma;
     double A1, A2, B, C, D, E, F, G, H, I, J, K, L, ZZ, hu;
@@ -899,11 +775,12 @@ int NCPA::SolveWMod::getAbsorption(int n, double dz, SampledProfile *p, double f
 			  cchi  = 2.36*chi;
 
 			  //---------Classical + rotational loss/dispersion--------------------------
-			  beta_0  = 2*Pi*freq/c_snd_z; 
-			  beta_1  = beta_0*sqrt(0.5*(sqrt(1+pow(nu,2))+1)/(1+pow(nu,2)));
-			  beta_2  = beta_0*sqrt((1+pow(chi,2))/(1+pow((sigma*chi),2))); 
-			  alpha_1 = beta_0*sqrt(0.5*(sqrt(1+pow(nu,2))-1)/(1+pow(nu,2)));
-			  alpha_2 = beta_0*(((sigma/2-1/(2*sigma))*chi)/(sqrt((1+pow(chi,2))*(1+pow(sigma*chi,2)))));
+			  //beta_0  = 2*Pi*freq/c_snd_z; 
+			  //beta_1  = beta_0*sqrt(0.5*(sqrt(1+pow(nu,2))+1)/(1+pow(nu,2)));
+			  //beta_2  = beta_0*sqrt((1+pow(chi,2))/(1+pow((sigma*chi),2))); 
+			  //alpha_1 = beta_0*sqrt(0.5*(sqrt(1+pow(nu,2))-1)/(1+pow(nu,2)));
+			  //alpha_2 = beta_0*(((sigma/2-1/(2*sigma))*chi)/(sqrt((1+pow(chi,2))*(1+pow(sigma*chi,2)))));
+
 			  //a_cl    = alpha_1*(beta_2/beta_0);
 			  //a_rot = alpha_2*(beta_1/beta_0)*X_ON;
 
@@ -1133,7 +1010,9 @@ int NCPA::SolveWMod::getModalTrace(int nz, double z_min, double sourceheight, do
   *k_min  = omega/cefftop;
   
   // check if duct is not formed and modes exist
-  if (cefftop<ceff_grnd) {
+    // disabled 20170802 DV
+    if (0) {
+    if (cefftop<ceff_grnd) {
       printf(" --------------------------------------------------------------\n");
       printf(" ERROR!\n");
       printf(" It appears that ducting conditions are not formed and \n");
@@ -1143,7 +1022,8 @@ int NCPA::SolveWMod::getModalTrace(int nz, double z_min, double sourceheight, do
       printf(" Suggest increasing maxheight and checking your profile file.\n");
       printf(" --------------------------------------------------------------\n");
       exit(1);
-  }
+    }
+    }
   
   // optional save ceff
   if (0) {
