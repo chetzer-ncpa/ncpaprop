@@ -65,7 +65,8 @@ namespace NCPA {
                         double v( double z );
                         double w( double z );
                         double ceff( double z, double phi );
-			double c0( double z );
+			// @CHH: Use parent object's method
+			//double c0( double z );    
 			double p( double z );
                         double rho( double z );
 			double z0();

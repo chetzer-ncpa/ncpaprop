@@ -14,8 +14,32 @@ bool NCPA::AtmosphericProfile::good() {
 	return good_;
 }
 
+bool NCPA::AtmosphericProfile::hasW() {
+	return hasW_;
+}
+
+bool NCPA::AtmosphericProfile::hasP() {
+	return hasP_;
+}
+
+bool NCPA::AtmosphericProfile::hasRho() {
+	return hasRho_;
+}
+
 double NCPA::AtmosphericProfile::c0( double z ) {
-	return 1.0e-3 * sqrt( GAM * R * this->t(z) );
+        if (this->hasRho() && this->hasP()) {
+        	return this->calculate_c0_using_p_( this->p(z), this->rho(z) );
+        } else {
+        	return this->calculate_c0_using_t_( this->t(z) );
+        }
+}
+
+double NCPA::AtmosphericProfile::calculate_c0_using_t_( double t ) {
+	return 1.0e-3 * sqrt( GAM * R * t );
+}
+
+double NCPA::AtmosphericProfile::calculate_c0_using_p_( double p, double rho ) {
+	return 1.0e-3 * sqrt( GAM * p / rho );
 }
 
 double NCPA::AtmosphericProfile::ceff( double z, double phi ) {

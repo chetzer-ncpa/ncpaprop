@@ -18,6 +18,13 @@ namespace NCPA {
 			bool good_; /**< Status flag.  Indicates whether or not the profile contains valid data. */
 			double eps_z; /**< Vertical tolerance.  Used for computing vertical derivatives. Must be >= dz for stratified profiles.*/
 			Location *origin_;
+			
+			bool 	hasW_,		/**< Indicates whether the specification includes vertical winds. */
+				hasP_,		/**< Indicates whether the specification includes pressure. */
+				hasRho_;	/**< Indicates whether the specification includes density. */
+				
+			virtual double calculate_c0_using_t_( double t );	/** calculate c0 using sqrt( gamma * R * T ) */
+			virtual double calculate_c0_using_p_( double p, double rho );	/** calculate c0 using sqrt( gamma * p / rho ) */
 
 		public:
 			/**
@@ -35,6 +42,21 @@ namespace NCPA {
 			  * @return TRUE if the specification is ready for use, FALSE otherwise.
 			  */
 			virtual bool good();
+			
+			/**
+			  * returns whether the specification includes vertical winds. 
+			  */
+			virtual bool hasW();
+		
+			/**
+			  * returns whether the specification includes pressure. 
+			  */
+			virtual bool hasP();
+		
+			/**
+			  * returns whether the specification includes density. 
+			  */
+			virtual bool hasRho();
 
 			// Properties of the atmospheric specification, must be overridden by subclass
 			/**
@@ -97,9 +119,10 @@ namespace NCPA {
 			virtual double ceff( double z, double phi );
 
 			/**
-			  * Static sound speed.  Returns the thermodynamic sound speed, not including wind effects.
+			  * Static sound speed.  Returns the  sound speed, not including wind effects.  Sound speed is calculated as
+			  * sqrt( gamma * P / rho ) if P and rho are available, sqrt( gamma * R * T ) otherwise.
 			  * @param z The altitude for which to return the sound speed, in km relative to MSL.
-			  * @return The static (thermodynamic) sound speed at point (x,y,z), in km/s.
+			  * @return The static sound speed at point (x,y,z), in km/s.
 			  */
 			virtual double c0( double z );
 

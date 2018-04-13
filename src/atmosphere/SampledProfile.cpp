@@ -37,6 +37,9 @@ void NCPA::SampledProfile::init_() {
 	t_spline = u_spline = v_spline = w_spline = p_spline = rho_spline = c0_spline = ceff_spline = 0;
 	
 	good_ = false;
+	hasW_ = false;
+	hasP_ = false;
+	hasRho_ = false;
 }
 
 void NCPA::SampledProfile::clearOut() {
@@ -55,6 +58,9 @@ void NCPA::SampledProfile::clearOut() {
 	if (z_ != 0)
 		delete [] z_;
 	good_ = false;
+	hasP_ = false;
+	hasW_ = false;
+	hasRho_ = false;
 	delete origin_;
 	delete t_acc;
 	delete u_acc;
@@ -106,30 +112,39 @@ NCPA::SampledProfile::SampledProfile( double lat, double lon, int nz, double *z,
 		t_[ i ] = t[ i ];
 		u_[ i ] = u[ i ];
 		v_[ i ] = v[ i ];
-		if (w != 0)
+		
+		if (w != 0) {
 			w_[ i ] = w[ i ];
-		else
+			hasW_ = true;
+		} else {
 			w_[ i ] = 0.0;
-		if (p != 0)
+		}
+		
+		if (p != 0) {
 			p_[ i ] = p[ i ];
-		else
+			hasP_ = true;
+		} else {
 			p_[ i ] = 0.0;
-		if (rho != 0)
+		}
+		
+		if (rho != 0) {
 			rho_[ i ] = rho[ i ];
-		else
+			hasRho_ = true;
+		} else {
 			rho_[ i ] = 0.0;
+		}
 				
-		c0_[ i ] = 1.0e-3 * sqrt( GAM * R * t_[ i ] );
-		//ceff_[ i ] = c0_[ i ] + std::sqrt( u_[i]*u_[i] + v_[i]*v_[i] ) * std::cos( NCPA::deg2rad(propAz_) - direction );
+		if ( hasP_ && hasRho_ ) {
+			c0_[i] = calculate_c0_using_p_( p_[ i ], rho_[ i ] );
+		} else {
+			c0_[i] = calculate_c0_using_t_( t_[ i ] );
+		}
 		
 		minZ_ = (z_[i] < minZ_) ? z_[i] : minZ_;
 		maxZ_ = (z_[i] > maxZ_) ? z_[i] : maxZ_;
 	}
 
-	//dz_min_ = this->dz_min();
-	
 	initSplines();
-	
 	good_ = true;
 }
 
@@ -161,22 +176,32 @@ NCPA::SampledProfile::SampledProfile( int nz, double *z, double *t,
                 t_[ i ] = t[ i ];
                 u_[ i ] = u[ i ];
                 v_[ i ] = v[ i ];
-                if (w != 0)
-                        w_[ i ] = w[ i ];
-                else
-                        w_[ i ] = 0.0;
-                if (p != 0)
-                        p_[ i ] = p[ i ];
-                else
-                        p_[ i ] = 0.0;
-                if (rho != 0)
-                        rho_[ i ] = rho[ i ];
-                else
-                        rho_[ i ] = 0.0;
+		if (w != 0) {
+			w_[ i ] = w[ i ];
+			hasW_ = true;
+		} else {
+			w_[ i ] = 0.0;
+		}
 		
+		if (p != 0) {
+			p_[ i ] = p[ i ];
+			hasP_ = true;
+		} else {
+			p_[ i ] = 0.0;
+		}
 		
-		c0_[ i ] = 1.0e-3 * sqrt( GAM * R * t_[ i ] );
-		//ceff_[ i ] = c0_[ i ] + std::sqrt( u_[i]*u_[i] + v_[i]*v_[i] ) * std::cos( NCPA::deg2rad(propAz_) - direction );
+		if (rho != 0) {
+			rho_[ i ] = rho[ i ];
+			hasRho_ = true;
+		} else {
+			rho_[ i ] = 0.0;
+		}
+				
+		if ( hasP_ && hasRho_ ) {
+			c0_[i] = calculate_c0_using_p_( p_[ i ], rho_[ i ] );
+		} else {
+			c0_[i] = calculate_c0_using_t_( t_[ i ] );
+		}
 		
 		minZ_ = (z_[i] < minZ_) ? z_[i] : minZ_;
 		maxZ_ = (z_[i] > maxZ_) ? z_[i] : maxZ_;
@@ -214,7 +239,7 @@ NCPA::SampledProfile::SampledProfile( SampledProfile &p ) {
                 p_[ i ] = p.p_[ i ];
                 rho_[ i ] = p.rho_[ i ];
 		
-		c0_[ i ] = 1.0e-3 * sqrt( GAM * R * t_[ i ] );
+		c0_[ i ] = p.c0_[ i ];
 		//ceff_[ i ] = c0_[ i ] + std::sqrt( u_[i]*u_[i] + v_[i]*v_[i] ) * std::cos( NCPA::deg2rad(propAz_) - direction );
 		minZ_ = (z_[i] < minZ_) ? z_[i] : minZ_;
 		maxZ_ = (z_[i] > maxZ_) ? z_[i] : maxZ_;
@@ -267,7 +292,7 @@ void NCPA::SampledProfile::initSplines() {
 NCPA::SampledProfile::SampledProfile( std::string filename, const char *order, int skiplines, bool inMPS ) {
 	init_();
 
-	// check to see if z, t, u, and v are all present in order
+	// check to see if z, t, u, and v are all present in order variable
 	if (!((std::strpbrk(order,"Zz") != NULL) && (std::strpbrk(order,"Tt") != NULL)
 		&& (std::strpbrk(order,"Uu") != NULL) && (std::strpbrk(order,"Vv") != NULL))) {
 		throw std::invalid_argument( "Z, T, U, and V are all required!" );
@@ -305,14 +330,6 @@ NCPA::SampledProfile::SampledProfile( std::string filename, const char *order, i
 		clearOut();
 		throw std::runtime_error( "Couldn't construct atmosphere!" );
 	}
-	
-	/*do {
-		memset(buffer,'\0',4096);
-		instream.getline( buffer, 4096 );
-		if (strlen(buffer) > 0)
-			nz_++;
-	} while (!instream.eof());
-	*/
 
         z_ = new double[ nz_ ];
         t_ = new double[ nz_ ];
@@ -375,14 +392,17 @@ NCPA::SampledProfile::SampledProfile( std::string filename, const char *order, i
 					case 'W':
 					case 'w':
 						w_[ i ] = std::atof( tok ) * scale;
+						hasW_ = true;
 						break;
 					case 'P':
 					case 'p':
 						p_[ i ] = std::atof( tok );
+						hasP_ = true;
 						break;
 					case 'D':
 					case 'd':
 						rho_[ i ] = std::atof( tok );
+						hasRho_ = true;
 						break;
 					default:
 						std::ostringstream oss("");
@@ -412,28 +432,29 @@ NCPA::SampledProfile::SampledProfile( std::string filename, const char *order, i
 	trimmed[ tokens ] = '\0';
 	for (unsigned int i = 0; i < nz_; i++) {
 		
-		//double direction = PI/2 - std::atan2( v_[i], u_[i] );
-		//while (direction < 0) {
-		//	direction += 2 * PI;
-		//}
-		
-		c0_[ i ] = 1.0e-3 * sqrt( GAM * R * t_[ i ] );
-		//ceff_[ i ] = c0_[ i ] + std::sqrt( u_[i]*u_[i] + v_[i]*v_[i] ) * std::cos( NCPA::deg2rad(propAz_) - direction );
-		if (std::strpbrk( trimmed, "wW" ) == NULL) {
+		// fill unused vectors with 0
+		if ( ! hasW_ ) {
 			w_[ i ] = 0;
 		}
-		if (std::strpbrk( trimmed, "pP" ) == NULL) {
+		if ( ! hasP_ ) {
 			p_[ i ] = 0;
 		}
-		if (std::strpbrk( trimmed, "dD" ) == NULL) {
+		if ( ! hasRho_ ) {
 			rho_[ i ] = 0;
+		}
+		
+		// precalculate c0 vector
+		if ( hasP_ && hasRho_ ) {
+			c0_[i] = calculate_c0_using_p_( p_[ i ], rho_[ i ] );
+		} else {
+			c0_[i] = calculate_c0_using_t_( t_[ i ] );
 		}
 		
 		minZ_ = (z_[i] < minZ_) ? z_[i] : minZ_;
 		maxZ_ = (z_[i] > maxZ_) ? z_[i] : maxZ_;
 	}
+	
 	z0_ = z_[ 0 ];
-	//dz_min_ = this->dz_min();
 	initSplines();
 	good_ = true;
 }
@@ -551,14 +572,17 @@ NCPA::SampledProfile::SampledProfile( std::string filename, const char *order, i
 					case 'W':
 					case 'w':
 						w_[ i ] = std::atof( tok ) * scale;
+						hasW_ = true;
 						break;
 					case 'P':
 					case 'p':
 						p_[ i ] = std::atof( tok );
+						hasP_ = true;
 						break;
 					case 'D':
 					case 'd':
 						rho_[ i ] = std::atof( tok );
+						hasRho_ = true;
 						break;
 					default:
 						std::ostringstream oss("");
@@ -588,28 +612,28 @@ NCPA::SampledProfile::SampledProfile( std::string filename, const char *order, i
 	trimmed[ tokens ] = '\0';
 	for (unsigned int i = 0; i < nz_; i++) {
 		
-		//double direction = PI/2 - std::atan2( v_[i], u_[i] );
-		//while (direction < 0) {
-		//	direction += 2 * PI;
-		//}
-		
-		c0_[ i ] = 1.0e-3 * sqrt( GAM * R * t_[ i ] );
-		//ceff_[ i ] = c0_[ i ] + std::sqrt( u_[i]*u_[i] + v_[i]*v_[i] ) * std::cos( NCPA::deg2rad(propAz_) - direction );
-		if (std::strpbrk( trimmed, "wW" ) == NULL) {
+		// fill unused vectors with 0
+		if ( ! hasW_ ) {
 			w_[ i ] = 0;
 		}
-		if (std::strpbrk( trimmed, "pP" ) == NULL) {
+		if ( ! hasP_ ) {
 			p_[ i ] = 0;
 		}
-		if (std::strpbrk( trimmed, "dD" ) == NULL) {
+		if ( ! hasRho_ ) {
 			rho_[ i ] = 0;
+		}
+		
+		// precalculate c0 vector
+		if ( hasP_ && hasRho_ ) {
+			c0_[i] = calculate_c0_using_p_( p_[ i ], rho_[ i ] );
+		} else {
+			c0_[i] = calculate_c0_using_t_( t_[ i ] );
 		}
 		
 		minZ_ = (z_[i] < minZ_) ? z_[i] : minZ_;
 		maxZ_ = (z_[i] > maxZ_) ? z_[i] : maxZ_;
 	}
 	z0_ = z_[ 0 ];
-	//dz_min_ = this->dz_min();
 	initSplines();
 	good_ = true;
 }
@@ -662,39 +686,11 @@ unsigned int NCPA::SampledProfile::z2ind_( double z_in ) const {
 	} else {
 		return floor+1;
 	}
-	
-	/*
-        unsigned int index = 0;
-        double bottom, top;
-        
-
-        for (index = 0; index < (nz_-1); index++) {
-                if (index == 0) {
-                        bottom = z_[0];
-                } else {
-                        bottom = (z_[index] + z_[index-1]) / 2;
-                }
-                top = (z_[index] + z_[index+1]) / 2;
-                if (z_in >= bottom && z_in < top)
-                        return index;
-        }
-        return nz_-1;
-	*/
 }
 
 int NCPA::SampledProfile::nz() const {
         return nz_;
 }
-
-/*
-double NCPA::SampledProfile::dz_min() const {
-	double dz = 1e10;
-	for (int i = 1; i < nz_; i++) {
-		dz = (z_[i]-z_[i-1] < dz) ? z_[i]-z_[i-1] : dz;
-	}
-	return dz;
-}
-*/
 
 unsigned int NCPA::SampledProfile::z2ind_floor_( double z_in ) const {
 		

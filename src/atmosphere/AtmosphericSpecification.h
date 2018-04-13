@@ -37,6 +37,10 @@ namespace NCPA {
 			bool good_; /**< Status flag.  Indicates whether or not the profile contains valid data. */
 			double  eps_x, /**< Horizontal tolerance.  Used for computing derivatives in the horizontal directions. */
 				eps_z; /**< Vertical tolerance.  Used for computing vertical derivatives. Must be >= dz for stratified specifications.*/
+				
+			bool 	hasW_,		/**< Indicates whether the specification includes vertical winds. */
+				hasP_,		/**< Indicates whether the specification includes pressure. */
+				hasRho_;	/**< Indicates whether the specification includes density. */
 
 		public:
 			/**
@@ -49,6 +53,22 @@ namespace NCPA {
 			  * @return TRUE if the specification is ready for use, FALSE otherwise.
 			  */
 			virtual bool good();
+			
+			/**
+			  * returns whether the specification includes vertical winds. 
+			  */
+			virtual bool hasW();
+			
+			/**
+			  * returns whether the specification includes pressure. 
+			  */
+			virtual bool hasP();
+			
+			/**
+			  * returns whether the specification includes density. 
+			  */
+			virtual bool hasRho();
+			
 			
 			/**
 			 * Pull a 1-D atmospheric profile from the Specification.

@@ -88,6 +88,10 @@ double NCPA::Sounding::rho( double x, double y, double z ) {
 	return profile_->rho( z );
 }
 
+double NCPA::Sounding::c0( double x, double y, double z ) {
+	return profile_->c0( z );
+}
+
 double NCPA::Sounding::dtdx( double x, double y, double z ) { return 0.0; }
 double NCPA::Sounding::dtdy( double x, double y, double z ) { return 0.0; }
 double NCPA::Sounding::ddtdxdz( double x, double y, double z ) { return 0.0; }

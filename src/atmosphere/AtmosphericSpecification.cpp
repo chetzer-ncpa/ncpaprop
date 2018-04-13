@@ -20,15 +20,27 @@ bool NCPA::AtmosphericSpecification::good() {
 	return good_;
 }
 
+bool NCPA::AtmosphericSpecification::hasW() {
+	return hasW_;
+}
+
+bool NCPA::AtmosphericSpecification::hasP() {
+	return hasP_;
+}
+
+bool NCPA::AtmosphericSpecification::hasRho() {
+	return hasRho_;
+}
+
 double NCPA::AtmosphericSpecification::c0( double x, double y, double z ) {
-//        if (z < z0(x,y)) MY_THROW( "Invalid z value requested!" );
-    return 1.0e-3 * sqrt(GAM*R*this->t(x,y,z));
+    if (this->hasRho() && this->hasP()) {
+    	return 1.0e-3 * sqrt( GAM * this->p(x,y,z) / this->rho(x,y,z) );
+    } else {
+    	return 1.0e-3 * sqrt(GAM*R*this->t(x,y,z));
+    }
 }
 
 double NCPA::AtmosphericSpecification::ceff( double x, double y, double z, double phi ) {
-        if (z < z0(x,y)) {
-//		MY_THROW( "Invalid z value requested!" );
-	}
     return this->c0(x,y,z) + this->wcomponent(x,y,z,phi);
 }
 

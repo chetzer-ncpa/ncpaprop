@@ -166,9 +166,9 @@ double NCPA::JetProfile::w(double z) {
     return 0.0;
 }
 
-double NCPA::JetProfile::c0(double z) {
-    return 1.0e-3 * sqrt(GAM * R * this->t(z));
-}
+//double NCPA::JetProfile::c0(double z) {
+//    return 1.0e-3 * sqrt(GAM * R * this->t(z));
+//}
 
 double NCPA::JetProfile::ceff(double z, double phi) {
     return this->c0(z) + this->wcomponent(z, phi);

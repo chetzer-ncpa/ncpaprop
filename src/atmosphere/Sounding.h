@@ -39,6 +39,7 @@ namespace NCPA {
 			virtual double w( double x, double y, double z );
 			virtual double p( double x, double y, double z );
 			virtual double rho( double x, double y, double z );
+			virtual double c0( double x, double y, double z );
 			virtual double z0( double x, double y );
 			
                         virtual double dtdz( double x, double y, double z );
