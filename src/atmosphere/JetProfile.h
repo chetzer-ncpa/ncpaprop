@@ -18,6 +18,9 @@ namespace NCPA {
 	class JetProfile : public NCPA::AtmosphericProfile {
 
 		private:
+			const static double A1, A2, A3, A4, A5, A6, A7, A8;
+			const static double B1, B2, B3, B4, B5, B6, B7, B8;
+			/*
 			const static double A1 =     -3.9082017e-2;
 			const static double A2 =     -1.1526465e-3;
 			const static double A3 =     3.2891937e-5;
@@ -35,11 +38,15 @@ namespace NCPA {
 			const static double B6 =     4.247473e-4;
 			const static double B7 =     -3.958318e-6;
 			const static double B8 =     1.7295795e-8;
+			*/
 
+			/*
+			// Prototyping and testing variables, currently unused
 			double  v_strat, v_jet, v_noct,
 				z_strat, z_jet, z_noct,
 				strat_jet_width, jet_width, noct_width;
 			double azimuth, jet_azimuth, noct_azimuth;
+			*/
 			
 			std::vector< _jetStruct > _jets;
 			

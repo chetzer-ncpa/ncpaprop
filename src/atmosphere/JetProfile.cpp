@@ -12,6 +12,24 @@
 #define R 287.0
 
 
+// Initialize non-integral const static variables
+const double NCPA::JetProfile::A1 =     -3.9082017e-2;
+const double NCPA::JetProfile::A2 =     -1.1526465e-3;
+const double NCPA::JetProfile::A3 =     3.2891937e-5;
+const double NCPA::JetProfile::A4 =     -2.0494958e-7;
+const double NCPA::JetProfile::A5 =     -4.7087295e-2;
+const double NCPA::JetProfile::A6 =     1.2506387e-3;
+const double NCPA::JetProfile::A7 =     -1.5194498e-5;
+const double NCPA::JetProfile::A8 =     6.518877e-8;
+const double NCPA::JetProfile::B1 =     -4.9244637e-3;
+const double NCPA::JetProfile::B2 =     -1.2984142e-6;
+const double NCPA::JetProfile::B3 =     -1.5701595e-6;
+const double NCPA::JetProfile::B4 =     1.5535974e-8;
+const double NCPA::JetProfile::B5 =     -2.7221769e-2;
+const double NCPA::JetProfile::B6 =     4.247473e-4;
+const double NCPA::JetProfile::B7 =     -3.958318e-6;
+const double NCPA::JetProfile::B8 =     1.7295795e-8;
+
 NCPA::JetProfile::JetProfile() {
 	
 	_jets.clear();
