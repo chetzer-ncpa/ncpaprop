@@ -9,8 +9,9 @@
 namespace NCPA {
 
 	/**
-	 * The AtmosphericSpecification abstract base class.  All classes that are to be used as atmospheric specifications
-	 * for propagation modeling and the like should be children of this class.
+	 * The AtmosphericProfile abstract base class.  All classes that are to be used as atmospheric profiles
+	 * for propagation modeling and the like should be children of this class.  This class specifically
+	 * represents 1-D atmospheric profiles, whereas the AtmosphericSpecification ABC can be 2-D or 3-D.
 	 */
 	class AtmosphericProfile {
 
@@ -34,8 +35,8 @@ namespace NCPA {
 
 			
 			virtual void setOrigin( double lat, double lon );
-			virtual double lat();
-			virtual double lon();
+			virtual double lat() const;
+			virtual double lon() const;
 			
 			/**
 			  * Status test.  Used to test whether or not the specification contains valid data and is ready for use.

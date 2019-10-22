@@ -1,7 +1,6 @@
 #include <cmath>
 #include "AtmosphericProfile.h"
 #include "util.h"
-//#include "ExceptionWithStack.h"
 #include <stdexcept>
 
 #define GAM 1.4
@@ -219,10 +218,10 @@ void NCPA::AtmosphericProfile::setOrigin( double lat, double lon ) {
 	origin_ = new Location( lat, lon );
 }
 
-double NCPA::AtmosphericProfile::lat() {
+double NCPA::AtmosphericProfile::lat() const {
 	return origin_->lat();
 }
 
-double NCPA::AtmosphericProfile::lon() {
+double NCPA::AtmosphericProfile::lon() const {
 	return origin_->lon();
 }

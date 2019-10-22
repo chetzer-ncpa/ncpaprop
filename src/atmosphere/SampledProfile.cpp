@@ -876,7 +876,7 @@ double NCPA::SampledProfile::ceff( double z, double phi ) {
 }
 
 double NCPA::SampledProfile::z( unsigned int index ) const {
-	if (index < 0 || index >= nz_) {
+	if (index >= nz_) {
 		std::range_error e("Index out of bounds!");
 		throw e;
 	}
@@ -1205,7 +1205,7 @@ double NCPA::SampledProfile::dc0dz( double z ) {
 double NCPA::SampledProfile::ddc0dzdz( double z ) {
 	if ((!good_) ) {
 		return 0;
-	} else if ( (c0_ == 0)) {
+	} else if (c0_ == 0) {
 		std::runtime_error e( "Profile is not ready!" );
 		throw e;
 	} else if (z < minZ_ ) {
