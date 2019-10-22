@@ -124,8 +124,8 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
   opt->addUsage( "at the ground or the specified receiver height and saves the data to 2 files:" );
   opt->addUsage( "   file tloss_1d.nm - considering attenuation in the atmosphere" );
   opt->addUsage( "   file tloss_1d.lossless.nm  - no attenuation" );
-	opt->addUsage( "Additionally, if the flag --write_2D_TLoss is present on the command line" );
-	opt->addUsage( "the 2D TL is saved to file tloss2d.nm" );  
+  opt->addUsage( "Additionally, if the flag --write_2D_TLoss is present on the command line" );
+  opt->addUsage( "the 2D TL is saved to file tloss2d.nm" );  
   opt->addUsage( "The user can also choose to propagate in N different directions" );
   opt->addUsage( "i.e. (N by 2D mode) by using the option --Nby2Dprop ." );
   opt->addUsage( "" );

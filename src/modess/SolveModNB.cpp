@@ -206,7 +206,7 @@ void NCPA::SolveModNB::setParams(ProcessOptionsNB *oNB, SampledProfile *atm_prof
   maxheight          = oNB->getMaxheight();
   sourceheight       = oNB->getSourceheight();
   receiverheight     = oNB->getReceiverheight();
-  tol				   			 = oNB->getSlepcTolerance();    
+  tol		     = oNB->getSlepcTolerance();    
   Nz_grid            = oNB->getNz_grid();
   Nrng_steps         = oNB->getNrng_steps();
   Lamb_wave_BC       = oNB->getLamb_wave_BC();
@@ -248,6 +248,7 @@ void NCPA::SolveModNB::setParams(ProcessOptionsNB *oNB, SampledProfile *atm_prof
   atm_profile = atm_prof;
 
   // get Hgt, zw, mw, T, rho, Pr in SI units; they are freed in computeModes()
+  // @todo write functions to allocate and free these, it shouldn't be hidden
   Hgt   = new double [Nz_grid];
   zw    = new double [Nz_grid];
   mw    = new double [Nz_grid];
@@ -261,7 +262,8 @@ void NCPA::SolveModNB::setParams(ProcessOptionsNB *oNB, SampledProfile *atm_prof
   // may avoid some errors asociated with the code thinking that it goes above 
   // the max height when in fact the height may only differ from max height by
   // a rounding error. This should be revisited.
-  //
+  // @todo revisit this
+  // @todo add max_valid_height to AtmosphericProfile class
   if (maxheight/1000.0 >= atm_profile->z(atm_profile->nz()-1)) {
       maxheight = (atm_profile->z(atm_profile->nz()-1) - 1e-9)*1000.0; // slightly less
 		  cout << "\nmaxheight adjusted to: " << maxheight 
@@ -290,7 +292,7 @@ void NCPA::SolveModNB::setParams(ProcessOptionsNB *oNB, SampledProfile *atm_prof
 
   //
   // a block to check parameter validity; this could constitute another function
-  //
+  // @todo separate out into function
   if (freq < 0) {
       cout << "freq = " << freq << endl;
       cout << "Frequency must be positive ... program terminated." << endl;
@@ -328,12 +330,12 @@ void NCPA::SolveModNB::printParams() {
   printf(" Normal Modes Eff. Sound Speed run info:\n");
   printf("                   freq : %g\n", freq);
   if (!Nby2Dprop) {
-  printf("                azimuth : %g\n", azi);
+  	printf("                azimuth : %g\n", azi);
   }
   else {
-  printf("     azimuth_start (deg): %g\n", azi_min);
-  printf("       azimuth_end (deg): %g\n", azi_max);
-  printf("      azimuth_step (deg): %g\n", azi_step);
+  	printf("     azimuth_start (deg): %g\n", azi_min);
+  	printf("       azimuth_end (deg): %g\n", azi_max);
+  	printf("      azimuth_step (deg): %g\n", azi_step);
   }
   printf("                Nz_grid : %d\n", Nz_grid);
   printf("      z_min (meters MSL): %g\n", z_min);
@@ -355,16 +357,16 @@ void NCPA::SolveModNB::printParams() {
   printf("             wind_units : %s\n", wind_units.c_str());
   printf("    atmospheric profile : %s\n", atmosfile.c_str());
   if (!usrattfile.empty()) {
-  printf("  User attenuation file : %s\n", usrattfile.c_str());
+  	printf("  User attenuation file : %s\n", usrattfile.c_str());
   }
   if (!modstartfile.empty()) {
-  printf(" modal starter saved in : %s\n", modstartfile.c_str());
+  	printf(" modal starter saved in : %s\n", modstartfile.c_str());
   }
 
   printf("       wvnum_filter_flg : %d\n", wvnum_filter_flg);
   if (wvnum_filter_flg==1) {
-  printf("                  c_min : %g m/s\n", c_min);
-  printf("                  c_max : %g m/s\n", c_max);
+  	printf("                  c_min : %g m/s\n", c_min);
+  	printf("                  c_max : %g m/s\n", c_max);
   }
 }
 
@@ -378,7 +380,7 @@ int NCPA::SolveModNB::computeModes() {
   ST             stx;
   KSP            kspx;
   PC             pcx;
-  const EPSType  type;
+  EPSType  	 type;        // CHH 191022: removed const qualifier
   PetscReal      re, im;
   PetscScalar    kr, ki, *xr_;
   Vec            xr, xi;
@@ -415,7 +417,7 @@ int NCPA::SolveModNB::computeModes() {
   z_min_km = z_min/1000.0;
   
   //
-  // loop over azimuths (if not (N by 2D) it's only one azimuth
+  // loop over azimuths (if not (N by 2D) it's only one azimuth)
   //
   for (it=0; it<Naz; it++) {
   
@@ -435,6 +437,7 @@ int NCPA::SolveModNB::computeModes() {
     // admittance = -1/2*dln(rho)/dz
     //  
     admittance = 0.0; // default
+    // @todo turn this into two nested if's for clarity
     if ((gnd_imp_model.compare("rigid")==0) && Lamb_wave_BC) { //Lamb_wave_BC
         admittance = -atm_profile->drhodz(z_min_km)/1000.0/atm_profile->rho(z_min_km)/2.0; // SI units
     }
@@ -450,10 +453,7 @@ int NCPA::SolveModNB::computeModes() {
     //
     // Get the main diagonal and the number of modes
     //		
-    // i = getModalTrace(Nz_grid, z_min, sourceheight, receiverheight, dz, atm_profile, admittance, freq, azi, diag, &k_min, &k_max, turnoff_WKB);    
     i = getModalTrace(Nz_grid, z_min, sourceheight, receiverheight, dz, atm_profile, admittance, freq, azi, diag, &k_min, &k_max, turnoff_WKB, c_eff);
-
-//printf("out of modalTrace(); wavnum_filter = %d\n", wvnum_filter_flg);
 
     // if wavenumber filtering is on, redefine k_min, k_max
     if (wvnum_filter_flg) {
@@ -467,26 +467,15 @@ int NCPA::SolveModNB::computeModes() {
     printf (" -> Normal mode solution at %5.3f Hz and %5.2f deg (%d modes)...\n", freq, azi, nev);
     printf (" -> Discrete spectrum: %5.2f m/s to %5.2f m/s\n", 2*Pi*freq/k_max, 2*Pi*freq/k_min);
     
-    // abort if no modes are found; this is also checked in getModalTrace()
-    // disabled 20170802 DV
-    if (0) {
-    if (nev<=0) {
-        cout << "No modes found! " << endl
-             << "Check your input - especially the height and the profile file at the top." 
-             << endl << "Aborted." << endl; 
-        exit(1);
-    }
-    }
-
     // Initialize Slepc
     SlepcInitialize(PETSC_NULL,PETSC_NULL,(char*)0,PETSC_NULL); 
     ierr = MPI_Comm_rank(PETSC_COMM_WORLD,&rank); CHKERRQ(ierr);
     ierr = MPI_Comm_size(PETSC_COMM_WORLD,&size); CHKERRQ(ierr);  
 
     // Create the matrix A to use in the eigensystem problem: Ak=kx
-    ierr = MatCreate(PETSC_COMM_WORLD,&A);CHKERRQ(ierr);
-    ierr = MatSetSizes(A,PETSC_DECIDE,PETSC_DECIDE,Nz_grid,Nz_grid);CHKERRQ(ierr);
-    ierr = MatSetFromOptions(A);CHKERRQ(ierr);
+    ierr = MatCreate(PETSC_COMM_WORLD,&A); CHKERRQ(ierr);
+    ierr = MatSetSizes(A,PETSC_DECIDE,PETSC_DECIDE,Nz_grid,Nz_grid); CHKERRQ(ierr);
+    ierr = MatSetFromOptions(A); CHKERRQ(ierr);
     
     // the following Preallocation call is needed in PETSc version 3.3
     ierr = MatSeqAIJSetPreallocation(A, 3, PETSC_NULL); CHKERRQ(ierr);
@@ -497,28 +486,43 @@ int NCPA::SolveModNB::computeModes() {
 	    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
     // Make matrix A 
     ierr = MatGetOwnershipRange(A,&Istart,&Iend);CHKERRQ(ierr);
-    if (Istart==0) FirstBlock=PETSC_TRUE;
-    if (Iend==Nz_grid) LastBlock=PETSC_TRUE;
-    value[0]=1.0/h2; value[2]=1.0/h2;
+    if (Istart==0) 
+	    FirstBlock=PETSC_TRUE;
+    if (Iend==Nz_grid) 
+	    LastBlock=PETSC_TRUE;
+    
+    value[0]=1.0/h2; 
+    value[2]=1.0/h2;
     for( i=(FirstBlock? Istart+1: Istart); i<(LastBlock? Iend-1: Iend); i++ ) {
-		    value[1] = -2.0/h2 + diag[i];
-		    col[0]=i-1; col[1]=i; col[2]=i+1;
-		    ierr = MatSetValues(A,1,&i,3,col,value,INSERT_VALUES);CHKERRQ(ierr);
+	    value[1] = -2.0/h2 + diag[i];
+	    col[0]=i-1; 
+	    col[1]=i; 
+	    col[2]=i+1;
+	    ierr = MatSetValues(A,1,&i,3,col,value,INSERT_VALUES); CHKERRQ(ierr);
     }
     if (LastBlock) {
-		    i=Nz_grid-1; col[0]=Nz_grid-2; col[1]=Nz_grid-1;
-		    ierr = MatSetValues(A,1,&i,2,col,value,INSERT_VALUES);CHKERRQ(ierr);
+	    i=Nz_grid-1; 
+	    col[0]=Nz_grid-2; 
+	    col[1]=Nz_grid-1;
+	    ierr = MatSetValues(A,1,&i,2,col,value,INSERT_VALUES); CHKERRQ(ierr);
     }
     if (FirstBlock) {
-		    i=0; col[0]=0; col[1]=1; value[0]=-2.0/h2 + diag[0]; value[1]=1.0/h2;
-		    ierr = MatSetValues(A,1,&i,2,col,value,INSERT_VALUES);CHKERRQ(ierr);
+	    i=0; 
+	    col[0]=0; 
+	    col[1]=1; 
+	    value[0]=-2.0/h2 + diag[0]; 
+	    value[1]=1.0/h2;
+	    ierr = MatSetValues(A,1,&i,2,col,value,INSERT_VALUES); CHKERRQ(ierr);
     }
 
-    ierr = MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
-    ierr = MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
+    ierr = MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
+    ierr = MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
 
-    ierr = MatGetVecs(A,PETSC_NULL,&xr);CHKERRQ(ierr);
-    ierr = MatGetVecs(A,PETSC_NULL,&xi);CHKERRQ(ierr);
+    // CHH 191022: MatGetVecs() is deprecated, changed to MatCreateVecs()
+    //ierr = MatGetVecs(A,PETSC_NULL,&xr); CHKERRQ(ierr);
+    //ierr = MatGetVecs(A,PETSC_NULL,&xi); CHKERRQ(ierr);
+    ierr = MatCreateVecs(A,PETSC_NULL,&xr); CHKERRQ(ierr);
+    ierr = MatCreateVecs(A,PETSC_NULL,&xi); CHKERRQ(ierr);
 
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 	                Create the eigensolver and set various options
@@ -891,6 +895,7 @@ int NCPA::SolveModNB::getAbsorption(int n, double dz, SampledProfile *p, double 
     P_o   = Pr[0];        // Reference pressure [Pa]
     S     = 117;          // Sutherland constant [K]       
 
+    // @todo make these variable names descriptive
     Cv_R[0] = 5/2;                                    // Heat capacity|volume (O2)
     Cv_R[1] = 5/2;                                    // Heat capacity|volume (N2)
     Cv_R[2] = 3;                                      // Heat capacity|volume (CO2)
@@ -911,7 +916,7 @@ int NCPA::SolveModNB::getAbsorption(int n, double dz, SampledProfile *p, double 
 			  z       = ii*dz/1000.0;	// km	AGL		
 			  T_z     = T[ii];	      // K
 			  P_z     = Pr[ii];	      // Pa;
-			  c_snd_z = sqrt(gamma*P_z/rho[ii]);  // in m/s					 
+			  c_snd_z = sqrt(gamma*P_z/rho[ii]);  // in m/s
 			  mu      = mu_o*sqrt(T_z/T_o)*((1+S/T_o)/(1+S/T_z)); // Viscosity [kg/(m*s)]
 			  nu      = (8*Pi*freq*mu)/(3*P_z);                   // Nondimensional frequency
 			   
@@ -1239,6 +1244,7 @@ int NCPA::SolveModNB::getModalTrace(\
 {
   // DV Note: Claus's profile->ceff() computes ceff = sqrt(gamma*R*T) + wind; 
   // this version of getModalTrace computes ceff = sqrt(gamma*P/rho) + wind.
+  // @todo check to see if this is still true
   
   // use atmospherics input for the trace of the matrix.
   // the vector diag can be used to solve the modal problem
@@ -1333,7 +1339,7 @@ int NCPA::SolveModNB::getModalTrace(\
     }  
 
     *k_max = sqrt(kk);  // use this for ground-to-ground 1D Tloss 
-											  //(uses WKB trick to include only non-vanishing modes at the ground)			  
+			//(uses WKB trick to include only non-vanishing modes at the ground)			  
 	  // *k_max = k_max_full; 
   }
   else { // not ground-to-ground propagation
@@ -1368,7 +1374,7 @@ int NCPA::SolveModNB::getModalTrace(\
       target = new double [p->nz()];
       p->get_ceff(target, p->nz());
       
-      FILE *fp = fopen("ceff.nm", "w");     
+      FILE *fp = fopen("ceff.nm", "w");    
       for (i=0; i<p->nz(); i++) {     
           z_km = p->z(i);
           //printf("%g target[%d] = %g; %g\n", z_km, i, target[i]*1000.0, ceffz[i]);
@@ -1786,7 +1792,7 @@ int NCPA::SolveModNB::getModalStarter(int nz, int select_modes, double dz, doubl
 //////////////////////////////////////////////////////////////////////////////
 
 // Code from Jelle 20151012
-
+/* @todo Remove possibly
 void NCPA::SolveModNB::getTLoss1D_Jelle(int n, int select_modes, double dz, int n_r, double dr, double z_src, double z_rcv, double freq, complex<double> *k_pert, double **v_s)
  {
   int i, m;
@@ -1826,8 +1832,9 @@ void NCPA::SolveModNB::getTLoss1D_Jelle(int n, int select_modes, double dz, int 
   fclose(tloss_1d);
   fclose(tloss_ll_1d);
  }
+*/
 
-
+/* @todo Remove possibly
 // Code from Jelle 2015101
 void NCPA::SolveModNB::getModalStarter(int n, int select_modes, double dz, double freq, double z_src, complex<double> *k_pert, double **v_s)
  {
@@ -1860,7 +1867,7 @@ void NCPA::SolveModNB::getModalStarter(int n, int select_modes, double dz, doubl
   }
   fclose(modal_starter);
  }
-
+*/
 
 
 // End of Code from Jelle 2015101

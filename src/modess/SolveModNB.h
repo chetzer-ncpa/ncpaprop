@@ -5,6 +5,8 @@
 namespace NCPA {
   class SolveModNB {
     public:           
+	    // @todo possibly remove
+	    // @todo Get rid of backslashes
       SolveModNB( \
             double freq, int Naz, double azi, double delta_az, \
             string atmosfile, string wind_units, NCPA::SampledProfile *atm_profile, \
@@ -18,8 +20,8 @@ namespace NCPA {
             
       SolveModNB(ProcessOptionsNB *oNB, NCPA::SampledProfile *atm_profile); // constructor 2
       
-      //~SolveModNB(); //destructor          
-
+      // @todo possibly remove
+      // @todo get rid of backslashes
       void setParams( \
             double freq1, int Naz, double azi1, double delta_az, \
             string atmosfile1, string wind_units1, NCPA::SampledProfile *atm_prof, \
@@ -37,12 +39,8 @@ namespace NCPA {
 
       int computeModes();	
 
-      //int getAbsorption(int n, double dz, NCPA::SampledProfile *p, double freq, double *alpha);
-      
       int getAbsorption(int n, double dz, NCPA::SampledProfile *p, double freq, string usrattfile, double *alpha);
 
-//      int getModalTrace(int nz, double z_min, double sourceheight, double receiverheight, double dz, NCPA::SampledProfile *p, double admittance, double freq, double azi, double *diag, double *k_min, double *k_max, bool turnoff_WKB);
-      
       int getModalTrace(int nz, double z_min, double sourceheight, double receiverheight, double dz, NCPA::SampledProfile *p, double admittance, double freq, double azi, double *diag, double *k_min, double *k_max, bool turnoff_WKB, double *c_eff);      
 
       int getNumberOfModes(int n, double dz, double *diag, double k_min, double k_max, int *nev);
@@ -56,16 +54,16 @@ namespace NCPA {
       int getTLoss1D(int select_modes, double dz, int n_r, double dr, double z_src, double z_rcv, double *rho, complex<double> *k_pert, double **v_s);     
       
 // from Jelle 20151012      
-      void getTLoss1D_Jelle(int n, int select_modes, double dz, int n_r, double dr, double z_src, double z_rcv, double freq, complex<double> *k_pert, double **v_s);
+      //void getTLoss1D_Jelle(int n, int select_modes, double dz, int n_r, double dr, double z_src, double z_rcv, double freq, complex<double> *k_pert, double **v_s);
 
 // from Jelle 20151012      
-      void getModalStarter(int n, int select_modes, double dz, double freq, double z_src, complex<double> *k_pert, double **v_s);      
+      //void getModalStarter(int n, int select_modes, double dz, double freq, double z_src, complex<double> *k_pert, double **v_s);      
       
       int getTLoss1DNx2(double azimuth, int select_modes, double dz, int n_r, double dr, double z_src, double z_rcv,  double *rho, complex<double> *k_pert, double **v_s, bool Nx2, int iter);      
 
       int getTLoss2D(int nz, int select_modes, double dz, int n_r, double dr, double z_src, double *rho, complex<double> *k_pert, double **v_s);
       
-      int getModalStarter(int nz, int select_modes, double dz, double z_src, double z_rcv, double *rho, complex<double> *k_pert, double **v_s, string modstartfile);   
+      //int getModalStarter(int nz, int select_modes, double dz, double z_src, double z_rcv, double *rho, complex<double> *k_pert, double **v_s, string modstartfile);   
       
       // Modal starter - DV 20151014
       // Modification to apply the sqrt(k0) factor to agree with Jelle's getModalStarter; 
