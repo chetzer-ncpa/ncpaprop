@@ -1,4 +1,4 @@
-export PETSC_ARCH:=arch-darwin-c-real-debug
+export PETSC_ARCH:=arch-darwin-c-real
 include ${PETSC_DIR}/lib/petsc/conf/variables
 #include ${PETSC_DIR}/lib/petsc/conf/rules
 include ${SLEPC_DIR}/lib/slepc/conf/slepc_common
