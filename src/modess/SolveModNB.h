@@ -53,17 +53,11 @@ namespace NCPA {
 
       int getTLoss1D(int select_modes, double dz, int n_r, double dr, double z_src, double z_rcv, double *rho, complex<double> *k_pert, double **v_s);     
       
-// from Jelle 20151012      
-      //void getTLoss1D_Jelle(int n, int select_modes, double dz, int n_r, double dr, double z_src, double z_rcv, double freq, complex<double> *k_pert, double **v_s);
 
-// from Jelle 20151012      
-      //void getModalStarter(int n, int select_modes, double dz, double freq, double z_src, complex<double> *k_pert, double **v_s);      
       
       int getTLoss1DNx2(double azimuth, int select_modes, double dz, int n_r, double dr, double z_src, double z_rcv,  double *rho, complex<double> *k_pert, double **v_s, bool Nx2, int iter);      
 
-      int getTLoss2D(int nz, int select_modes, double dz, int n_r, double dr, double z_src, double *rho, complex<double> *k_pert, double **v_s);
-      
-      //int getModalStarter(int nz, int select_modes, double dz, double z_src, double z_rcv, double *rho, complex<double> *k_pert, double **v_s, string modstartfile);   
+      int getTLoss2D(int nz, int select_modes, double dz, int n_r, double dr, double z_src, double *rho, complex<double> *k_pert, double **v_s); 
       
       // Modal starter - DV 20151014
       // Modification to apply the sqrt(k0) factor to agree with Jelle's getModalStarter; 
