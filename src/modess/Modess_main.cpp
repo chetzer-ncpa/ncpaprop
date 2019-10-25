@@ -10,7 +10,8 @@
 #include "anyoption.h"
 #include "ProcessOptionsNB.h"
 #include "SolveModNB.h"
-#include "Modess_lib.h"
+//#include "Modess_lib.h"
+#include "util.h"
 
 #ifndef Pi
 #define Pi 3.141592653589793
@@ -67,7 +68,11 @@ int main( int argc, char **argv ) {
   skiplines      = oNB->getSkiplines();
 
   // get atmospheric profile object; the azimuth is set inside SolveModNB
-  SampledProfile *atm_profile = new SampledProfile( atmosfile, atmosfileorder.c_str(), skiplines );
+  bool inMPS = 0;
+  if ( strcmp( wind_units.c_str(), "mpersec" ) == 0) {
+	  inMPS = 1;
+  }
+  SampledProfile *atm_profile = new SampledProfile( atmosfile, atmosfileorder.c_str(), skiplines, inMPS );
 	 
   // get solver object
   SolveModNB *a = new SolveModNB(oNB, atm_profile);  
@@ -91,7 +96,8 @@ int main( int argc, char **argv ) {
 
   // save atm. profile if requested
   if (oNB->getWriteAtmProfile()) {
-      saveAtm_profile(atm_profile, wind_units);
+	  atm_profile->save_profile( wind_units );
+      //saveAtm_profile(atm_profile, wind_units);
       //saveAtm_profile(atm_profile, oNB->getWindUnits(wind_units));
   }	
   else { printf(" write_atm_profile flag : %d\n", oNB->getWriteAtmProfile()); }

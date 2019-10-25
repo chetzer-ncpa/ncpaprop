@@ -8,13 +8,16 @@ include ${SLEPC_DIR}/lib/slepc/conf/slepc_common
 #include $(SLEPC_DIR)/conf/slepc_common
 
 INCPATHS = -I. -I../common -I../atmosphere -I/usr/local/include -I/usr/include ${PETSC_CC_INCLUDES} ${SLEPC_CC_INCLUDES}
+OBJS=Modess_main.o SolveModNB.o ProcessOptionsNB.o
+TARGET=Modess
 
-all: Modess
+
+all: $(TARGET)
 
 .PHONY: clean
 
 # link	
-Modess: Modess_main.o SolveModNB.o ProcessOptionsNB.o Modess_lib.o
+$(TARGET): $(OBJS)
 	${CXX_LINKER} -o $@ $^  -L/usr/lib ../../lib/libatmosphere.a ../../lib/libcommon.a  ${CXX_LINKER_FLAGS} ${SLEPC_LIB} ${PETSC_LIB} -lgsl -lgslcblas -lm -lfftw3 
 	cp $@ ../../bin
 	
@@ -23,4 +26,4 @@ Modess: Modess_main.o SolveModNB.o ProcessOptionsNB.o Modess_lib.o
 	${CXX} ${INCPATHS} -fpic -c -Wall ${CXX_FLAGS} -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -o $@ $<
 
 clean::
-	-$(RM) -rf Modess_main.o SolveModNB.o ProcessOptionsNB.o Modess_lib.o Modess
+	-$(RM) -rf $(OBJS) $(TARGET)

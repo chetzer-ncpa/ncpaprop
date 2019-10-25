@@ -11,7 +11,7 @@
 #include <sstream>
 #include "util.h"
 
-#define PI 3.14159
+#define PI 3.141592653589793
 
 double NCPA::min( double a, double b ) {
 	return a < b ? a : b;
@@ -217,4 +217,25 @@ double NCPA::normalizeAzimuth( double in ) {
 		out -= 360;
 	}
 	return out;
+}
+
+// Following functions came from various <module>_lib files
+double** NCPA::dmatrix(long nr, long nc) {
+  // allocate a double matrix
+  double **v;
+  v = new double* [nr];
+  for (long i=0; i<nr; i++) {
+      v[i] = new double [nc];
+  }
+  return v;
+}
+
+
+int NCPA::free_dmatrix(double**v, long nr, long nc) {
+  // free a double matrix
+  for (long i=0; i<nr; i++) {
+      delete v[i];
+  }
+  delete v;
+  return 0;
 }

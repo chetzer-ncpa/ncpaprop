@@ -6,7 +6,8 @@
 #include "Atmosphere.h"
 #include "anyoption.h"
 #include "SolveModNB.h"
-#include "Modess_lib.h"
+//#include "Modess_lib.h"
+#include "util.h"
 #include "slepceps.h"
 #include "slepcst.h"
 #include "ProcessOptionsNB.h"
@@ -940,7 +941,7 @@ int NCPA::SolveModNB::getModalTrace(\
 {
   // DV Note: Claus's profile->ceff() computes ceff = sqrt(gamma*R*T) + wind; 
   // this version of getModalTrace computes ceff = sqrt(gamma*P/rho) + wind.
-  // @todo check to see if this is still true
+  // @todo Try using calculated ceff in p and see if same results
   
   // use atmospherics input for the trace of the matrix.
   // the vector diag can be used to solve the modal problem

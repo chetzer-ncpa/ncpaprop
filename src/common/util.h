@@ -37,6 +37,13 @@ namespace NCPA {
 	std::vector< std::string > split( std::string input, std::string delimiters );
 	bool checkAzimuthLimits( double toCheck, double target, double tolerance );
 	double normalizeAzimuth( double in );
+	
+	// Utility functions
+	double **dmatrix(long nr, long nc);
+	int free_dmatrix(double** v, long nr, long nc);
+	
+	
+	
 //	double phase( std::complex< double > );
 	
 	// Constants
