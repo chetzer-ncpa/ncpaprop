@@ -38,7 +38,8 @@ double NCPA::AtmosphericProfile::calculate_c0_using_t_( double t ) {
 }
 
 double NCPA::AtmosphericProfile::calculate_c0_using_p_( double p, double rho ) {
-	return 1.0e-3 * sqrt( GAM * p / rho );
+	// Add factor of 0.1 to correct for non-SI units
+	return 1.0e-3 * sqrt( 0.1 * GAM * p / rho );    
 }
 
 double NCPA::AtmosphericProfile::ceff( double z, double phi ) {
