@@ -16,7 +16,7 @@ all: $(TARGET)
 
 # link	
 $(TARGET): $(OBJS)
-	${CXX_LINKER} -o $@ $^  -L/usr/lib ../../lib/libatmosphere.a ../../lib/libcommon.a $(SLEPC_LIB) -lgsl -lgslcblas -lm -lfftw3 
+	${CXX_LINKER} -o $@ $^ ${CXX_LINKER_FLAGS} -L/usr/lib ../../lib/libatmosphere.a ../../lib/libcommon.a $(SLEPC_LIB) -lgsl -lgslcblas -lm -lfftw3 
 	cp $@ ../../bin
 	
 # compile 
