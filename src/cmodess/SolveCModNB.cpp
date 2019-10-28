@@ -18,6 +18,7 @@ using namespace std;
 //
 // constructor 1
 //
+/*
 NCPA::SolveCModNB::SolveCModNB( \
             double freq, int Naz, double azi_min, double azi_step, \
             string atmosfile, string wind_units, NCPA::SampledProfile *atm_profile, \
@@ -37,6 +38,7 @@ NCPA::SolveCModNB::SolveCModNB( \
               Nby2Dprop, turnoff_WKB);
                      
 }
+*/
 
 //
 // constructor 2
@@ -62,6 +64,7 @@ NCPA::SolveCModNB::~SolveCModNB()
 }
 */
 
+/*
 // setParams - prototype 1
 void NCPA::SolveCModNB::setParams( \
             double freq1, int Naz1, double azi1, double azi_step1, \
@@ -176,7 +179,7 @@ void NCPA::SolveCModNB::setParams( \
       exit(1);
   }							
 }
-
+*/
 
 // setParams() prototype 2
 void NCPA::SolveCModNB::setParams(ProcessOptionsNB *oNB, SampledProfile *atm_prof)
@@ -361,7 +364,7 @@ int NCPA::SolveCModNB::computeModes() {
   ST             stx;
   //KSP            kspx;
   //PC             pcx;
-  const EPSType  type;
+  EPSType  type;	// CHH 191028: Removed const qualifier
   PetscReal      re, im;
   PetscScalar    kr, ki, *xr_, sigma;
   Vec            xr, xi;
@@ -513,8 +516,11 @@ int NCPA::SolveCModNB::computeModes() {
     ierr = MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
     ierr = MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
 
-    ierr = MatGetVecs(A,PETSC_NULL,&xr);CHKERRQ(ierr);
-    ierr = MatGetVecs(A,PETSC_NULL,&xi);CHKERRQ(ierr);
+    // CHH 191028: MatGetVecs is deprecated, using MatCreateVecs
+    //ierr = MatGetVecs(A,PETSC_NULL,&xr);CHKERRQ(ierr);
+    //ierr = MatGetVecs(A,PETSC_NULL,&xi);CHKERRQ(ierr);
+    ierr = MatCreateVecs(A,PETSC_NULL,&xr);CHKERRQ(ierr);
+    ierr = MatCreateVecs(A,PETSC_NULL,&xi);CHKERRQ(ierr);
 
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 	                Create the eigensolver and set various options
@@ -581,7 +587,9 @@ int NCPA::SolveCModNB::computeModes() {
     if (nconv>0) {
         for (i=0;i<nconv;i++) {
             ierr = EPSGetEigenpair(eps,i,&kr,&ki,xr,xi);CHKERRQ(ierr);
-            ierr = EPSComputeRelativeError(eps,i,&error);CHKERRQ(ierr);
+	    // EPSComputeRelativeError deprecated, using EPSComputeError
+            //ierr = EPSComputeRelativeError(eps,i,&error);CHKERRQ(ierr);
+	    ierr = EPSComputeError(eps,i,EPS_ERROR_RELATIVE,&error);CHKERRQ(ierr);
   #if defined(PETSC_USE_COMPLEX)
                 re = PetscRealPart(kr);
                 im = PetscImaginaryPart(kr);
@@ -1543,7 +1551,7 @@ int NCPA::SolveCModNB::getTLoss2D(int nz, int select_modes, double dz, int n_r, 
 }
 
 
-
+/*
 int NCPA::SolveCModNB::writeDispersion(int select_modes, double dz, double z_src, double z_rcv, double freq, complex<double> *k_s, complex<double> **v_s)
 {
   int i;
@@ -1564,7 +1572,7 @@ int NCPA::SolveCModNB::writeDispersion(int select_modes, double dz, double z_src
   printf("           file %s created\n", dispersion_file);
   return 0;
 }
- 
+ */
  
 // DV 20150928 - added rho as argument
 int NCPA::SolveCModNB::writeDispersion(int select_modes, double dz, double z_src, double z_rcv, double freq, complex<double> *k_s, complex<double> **v_s, double *rho)
