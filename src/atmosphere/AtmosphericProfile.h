@@ -3,6 +3,9 @@
 
 #include "geographic.h"
 
+// @todo Add method to set internal units and return them appropriately (wind speed,
+// pressure, and density)
+
 /**
  * The NCPA namespace.  Used to indicate NCPA-written code.
  */
