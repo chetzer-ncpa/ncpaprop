@@ -357,7 +357,7 @@ int NCPA::SolveModBB::computeModESS() {
   ST              stx;
   KSP             kspx;
   PC              pcx;
-  const EPSType   type;
+  EPSType         type;        // CHH 191029: Removed const 
   PetscReal       re, im;
   PetscScalar     kr, ki, *xr_;
   Vec             xr, xi;
@@ -529,8 +529,9 @@ int NCPA::SolveModBB::computeModESS() {
       ierr = MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
       ierr = MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
 
-      ierr = MatGetVecs(A,PETSC_NULL,&xr);CHKERRQ(ierr);
-      ierr = MatGetVecs(A,PETSC_NULL,&xi);CHKERRQ(ierr);
+      // CHH 191028: MatGetVecs deprecated, changed to MatCreateVecs
+      ierr = MatCreateVecs(A,PETSC_NULL,&xr);CHKERRQ(ierr);
+      ierr = MatCreateVecs(A,PETSC_NULL,&xi);CHKERRQ(ierr);
 
       /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
                     Create the eigensolver and set various options
@@ -671,7 +672,7 @@ int NCPA::SolveModBB::computeWmodes() {
   Mat            A, B;       
   EPS            eps;  		// eigenproblem solver context      
   ST             stx;
-  const EPSType  type;
+  EPSType  type;                
   PetscReal      re, im;
   PetscScalar    kr, ki, *xr_;
   Vec            xr, xi;
@@ -933,8 +934,9 @@ int NCPA::SolveModBB::computeWmodes() {
     ierr = MatAssemblyBegin(B,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
     ierr = MatAssemblyEnd  (B,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
 
-    ierr = MatGetVecs(A,PETSC_NULL,&xr);CHKERRQ(ierr);
-    ierr = MatGetVecs(A,PETSC_NULL,&xi);CHKERRQ(ierr);
+    // CHH 191028: MatGetVecs deprecated, changed to MatCreateVecs
+    ierr = MatCreateVecs(A,PETSC_NULL,&xr);CHKERRQ(ierr);
+    ierr = MatCreateVecs(A,PETSC_NULL,&xi);CHKERRQ(ierr);
 
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
                   Create the eigensolver and set various options

@@ -97,7 +97,8 @@ int main( int argc, char **argv ) {
       
       // save atm. profile if requested
       if (1) {
-          saveAtm_profile(atm_profile, wind_units);
+          //saveAtm_profile(atm_profile, wind_units);
+	      atm_profile->save_profile( wind_units );
       }	
 
       delete a;

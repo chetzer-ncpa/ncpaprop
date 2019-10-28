@@ -102,7 +102,7 @@ int count_rows_arbcol(const char *filename) {
   return answer;
 }
  
- 
+/*
 double **dmatrix(long nr, long nc) {
   // allocate a double matrix
   double **v;
@@ -122,7 +122,7 @@ int free_dmatrix(double**v, long nr, long nc) {
   delete v;
   return 0;
 }
-
+*/
 
 double half_hann(int begin,int end,int i) {
   double answer;
@@ -1167,7 +1167,7 @@ complex<double> ***getPz1z2 (int I1, int I2, double r1, double r2, double dr, st
   return Pfzr;
 }
 
-
+/*
 complex<double> **cmatrix(long nr, long nc) {
   // allocate a complex<double> matrix
   complex<double> **v;
@@ -1186,7 +1186,7 @@ int free_cmatrix(complex<double>**v, long nr, long nc) {
   delete v;
   return 0;
 }
-
+*/
 
 complex<double> ***c3Darray(size_t xlen, size_t ylen, size_t zlen)
 {
@@ -1436,7 +1436,7 @@ int saveMatrix2bin(const char *filename, double **M, int nr, int nc) {
   return 0;
 }
 
-
+/*
 int saveAtm_profile(NCPA::SampledProfile *p, std::string wind_units) {
   int i, nz;
   double z, u, v, c, ceff, azi_rad; //dz_km; 
@@ -1462,7 +1462,7 @@ int saveAtm_profile(NCPA::SampledProfile *p, std::string wind_units) {
   printf("Interpolated atmospheric profiles (z,u,v,w,t,d,p,c,c_eff) saved in: atm_profile.bbnm\n");
   return 0;
 }
-
+*/
 
 int load_source_pulse_td(string srcpulsetdfn, vector<double> &t, vector<double> &tdp ) {
   // load time domain source pulse: time (s) | amplitude
