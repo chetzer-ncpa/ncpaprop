@@ -4,6 +4,7 @@
 #include <string>
 #include <istream>
 #include <vector>
+#include <complex>
 
 namespace NCPA {
 	float min( const float *, int );
@@ -41,7 +42,8 @@ namespace NCPA {
 	// Utility functions
 	double **dmatrix(long nr, long nc);
 	int free_dmatrix(double** v, long nr, long nc);
-	
+	std::complex<double> **cmatrix(long nr, long nc);
+	int free_cmatrix(std::complex<double> **v, long nr, long nc);
 	
 	
 //	double phase( std::complex< double > );

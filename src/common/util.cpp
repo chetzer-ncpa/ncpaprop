@@ -231,8 +231,27 @@ double** NCPA::dmatrix(long nr, long nc) {
 }
 
 
-int NCPA::free_dmatrix(double**v, long nr, long nc) {
+int NCPA::free_dmatrix(double **v, long nr, long nc) {
   // free a double matrix
+  for (long i=0; i<nr; i++) {
+      delete v[i];
+  }
+  delete v;
+  return 0;
+}
+
+std::complex<double> **NCPA::cmatrix(long nr, long nc) {
+  // allocate a complex<double> matrix
+  std::complex<double> **v;
+  v = new std::complex<double>* [nr];
+  for (long i=0; i<nr; i++) {
+      v[i] = new std::complex<double> [nc];
+  }
+  return v;
+}
+
+int NCPA::free_cmatrix( std::complex<double> **v, long nr, long nc) {
+  // free a complex<double> matrix
   for (long i=0; i<nr; i++) {
       delete v[i];
   }
