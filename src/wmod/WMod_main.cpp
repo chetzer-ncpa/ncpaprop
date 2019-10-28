@@ -2,7 +2,7 @@
 #include "anyoption.h"
 #include "ProcessOptionsNB.h"
 #include "SolveWMod.h"
-#include "WMod_lib.h"
+#include "util.h"
 
 #ifndef Pi
 #define Pi 3.141592653589793
@@ -82,7 +82,8 @@ int main( int argc, char **argv ) {
   // save atm. profile if requested
   if (oNB->getWriteAtmProfile()) {
       //saveAtm_profile(atm_profile);
-      saveAtm_profile(atm_profile, wind_units);
+      //saveAtm_profile(atm_profile, wind_units);
+      atm_profile->save_profile( wind_units );
       //printf(" write_atm_profile flag : %d\n", write_atm_profile);
   }	
   else { printf(" write_atm_profile flag : %d\n", oNB->getWriteAtmProfile()); }
