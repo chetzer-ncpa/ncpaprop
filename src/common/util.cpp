@@ -258,3 +258,51 @@ int NCPA::free_cmatrix( std::complex<double> **v, long nr, long nc) {
   delete v;
   return 0;
 }
+
+std::complex<double> ***c3Darray(size_t xlen, size_t ylen, size_t zlen)
+{
+  std::complex<double> ***p;
+  size_t i, j;
+
+  if ((p = (std::complex<double> ***) calloc(xlen, (sizeof(*p)))) == NULL) {
+      perror("calloc 1");
+      return NULL;
+  }
+
+  for (i=0; i < xlen; ++i)
+      p[i] = NULL;
+
+  for (i=0; i < xlen; ++i)
+      if ((p[i] = (std::complex<double> **) calloc(ylen, (sizeof (*p[i])))) == NULL) {
+          perror("calloc 2");
+          NCPA::free_c3Darray(p, xlen, ylen);
+          return NULL;
+      }
+
+  for (i=0; i < xlen; ++i)
+      for (j=0; j < ylen; ++j)
+          p[i][j] = NULL;
+
+  for (i=0; i < xlen; ++i)
+      for (j=0; j < ylen; ++j)
+          if ((p[i][j] = (std::complex<double> *) calloc(zlen, (sizeof (*p[i][j])))) == NULL) {
+              perror("calloc 3");
+              NCPA::free_c3Darray(p, xlen, ylen);
+              return NULL;
+          }
+  return p;
+}
+
+
+void free_c3Darray(std::complex<double> ***data, size_t xlen, size_t ylen)
+{
+  size_t i, j;
+  for (i=0; i < xlen; ++i) {
+      if (data[i] != NULL) {
+          for (j=0; j < ylen; ++j)
+              free(data[i][j]);
+          free(data[i]);
+      }
+  }
+  free(data);
+}

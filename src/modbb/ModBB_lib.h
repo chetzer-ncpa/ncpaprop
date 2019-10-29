@@ -1,6 +1,7 @@
 #include "Atmosphere.h"
 #include <complex>
 #include <list>
+#include "util.h"
 
 
 //double **dmatrix(long nr, long nc);
@@ -95,8 +96,8 @@ complex<double> ***getPz1z2 (int I1, int I2, double r1, double r2, double dr, st
 
 //int free_cmatrix(complex<double>**v, long nr, long nc);
 // @todo Move these to util.c/util.h
-complex<double> ***c3Darray(size_t xlen, size_t ylen, size_t zlen);
-void free_c3Darray(complex<double> ***data, size_t xlen, size_t ylen);
+//complex<double> ***c3Darray(size_t xlen, size_t ylen, size_t zlen);
+//void free_c3Darray(complex<double> ***data, size_t xlen, size_t ylen);
 
 // comparison, freq in filename.
 bool compare_freq (string first, string second);
