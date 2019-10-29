@@ -259,7 +259,7 @@ int NCPA::free_cmatrix( std::complex<double> **v, long nr, long nc) {
   return 0;
 }
 
-std::complex<double> ***c3Darray(size_t xlen, size_t ylen, size_t zlen)
+std::complex<double> ***NCPA::c3Darray(size_t xlen, size_t ylen, size_t zlen)
 {
   std::complex<double> ***p;
   size_t i, j;
@@ -294,7 +294,7 @@ std::complex<double> ***c3Darray(size_t xlen, size_t ylen, size_t zlen)
 }
 
 
-void free_c3Darray(std::complex<double> ***data, size_t xlen, size_t ylen)
+void NCPA::free_c3Darray(std::complex<double> ***data, size_t xlen, size_t ylen)
 {
   size_t i, j;
   for (i=0; i < xlen; ++i) {
