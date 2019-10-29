@@ -124,7 +124,7 @@ int main ( int argc, char **argv )  {
   // some flags defining pulse propagation to single receiver or a series
   // or equispaced receivers
   bool   pprop_s2r_flg;
-  bool   pprop_s2r_grid_flg;
+  //bool   pprop_s2r_grid_flg;    // CHH 191029 Unused
   bool   plt_flg;
 
 
@@ -221,7 +221,7 @@ int main ( int argc, char **argv )  {
   
   
   vector<double> fv;
-  double fmax, f_step;
+  double f_step;    // CHH 191029: fmax unused
   fv = getFreq_vector(pape_output_dir, filepattern);
   int Nfreq = fv.size();
   f_step = fv[1]-fv[0];
@@ -236,11 +236,11 @@ int main ( int argc, char **argv )  {
 	// all set to propagate the pulse				
 	
   // This call uses FFTN from #define FFTN
-  // pulse_prop_src2rcv_grid3( waveform_out_file.c_str(), max_cel, \
-								            R_start, DR, R_end, Nfreq, f_step, fv.data(), \
-								            f_center, \
-				                    pape_output_dir, filepattern, \
-				                    src_flg, src_file, pprop_s2r_flg);
+  // pulse_prop_src2rcv_grid3( waveform_out_file.c_str(), max_cel, 
+  //                           R_start, DR, R_end, Nfreq, f_step, fv.data(), 
+  //  		               f_center, 
+  //			       pape_output_dir, filepattern, 
+  //			       src_flg, src_file, pprop_s2r_flg);
 
 	// This call uses NFFT as an argument			                    
   pulse_prop_src2rcv_grid4( waveform_out_file.c_str(), max_cel, \
@@ -250,11 +250,12 @@ int main ( int argc, char **argv )  {
 				                    src_flg, src_file, pprop_s2r_flg);				                    										          
   
   // (gnu)plot results if requested; calls a bash script
+  // @todo get rid of this and its associated options
   if (plt_flg) {
     char buffer [256];
     sprintf(buffer, "%s %s", "./xPlotMods.script plotpulse ", waveform_out_file.c_str());
     printf ("Executing command %s\n", buffer);
-    int i=system (buffer);
+    system (buffer);
     //printf ("The value returned was: %d.\n",i);
   }									          						                    
                     
@@ -1546,7 +1547,7 @@ void fft_pulse_prop(double t0, int n_freqs, double df, double *f_vec, \
                     vector< complex<double> > PP, complex<double> *dft_vec, \
                     complex<double> *pulse_vec)
 {
-  int i,i0,j,smooth_space;
+  int i,i0,smooth_space;    // CHH 191029: j unused
   complex<double> cup,t_phase,*arg_vec;
   complex<double> I (0.0, 1.0);  
   fftw_plan p;
@@ -1620,7 +1621,7 @@ int pulse_prop_src2rcv_grid2(\
   int i,n;
   double rr, tskip, fmx, t0;	
   complex<double> cup,*dft_vec,*pulse_vec,*arg_vec;
-  complex<double> I = complex<double> (0.0, 1.0);
+  //complex<double> I = complex<double> (0.0, 1.0);  // CHH 191029: Unused
   FILE *f;
 
   dft_vec   = new complex<double> [n_freqs];
@@ -1710,7 +1711,7 @@ int pulse_prop_src2rcv_grid3(\
   int i,n;
   double rr, tskip, fmx, t0;	
   complex<double> cup,*dft_vec,*pulse_vec,*arg_vec;
-  complex<double> I = complex<double> (0.0, 1.0);
+  //complex<double> I = complex<double> (0.0, 1.0);  // CHH 191029: Unused
   vector< complex<double> > PP;
   FILE *f;
 
@@ -1815,7 +1816,7 @@ int pulse_prop_src2rcv_grid4(\
   int i,n;
   double rr, tskip, fmx, t0;	
   complex<double> cup,*dft_vec,*pulse_vec,*arg_vec;
-  complex<double> I = complex<double> (0.0, 1.0);
+  //complex<double> I = complex<double> (0.0, 1.0);  // CHH 191029: Unused
   vector< complex<double> > PP;
   FILE *f;
   
@@ -1834,11 +1835,10 @@ int pulse_prop_src2rcv_grid4(\
   fmx = ((double)FFTN)*f_step; // max frequency
   
   
-//  get_source_spectrum(n_freqs,  f_step, f_vec,  f_center, \
-								      dft_vec, pulse_vec, arg_vec, src_flg,  srcfile);
+
 								      
-  get_source_spectrum(n_freqs,  NFFT, f_step, f_vec,  f_center, \
-								      dft_vec, pulse_vec, arg_vec, src_flg,  srcfile);								      
+  get_source_spectrum(n_freqs,  NFFT, f_step, f_vec,  f_center,
+		      dft_vec, pulse_vec, arg_vec, src_flg,  srcfile);								      
 								      
 	
 	if (pprop_src2rcv_flg) { // propagation to one receiver at distance RR from source
