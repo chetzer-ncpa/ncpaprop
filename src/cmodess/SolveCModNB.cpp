@@ -3,9 +3,10 @@
 #include "Atmosphere.h"
 #include "anyoption.h"
 #include "SolveCModNB.h"
-#include "CModess_lib.h"
+//#include "CModess_lib.h"
 #include "slepceps.h"
 #include "slepcst.h"
+#include "util.h"
 
 #ifndef Pi
 #define Pi 3.141592653589793
