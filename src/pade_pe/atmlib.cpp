@@ -17,7 +17,7 @@ typedef unsigned char byte;
 void AtmLibrary::readG2SBinary( ifstream* g2s_env, double *alt, double *range, double **zw_2D, double **mw_2D, double **T_2D, double **rho_2D, double **pr_2D)
  {
   g2s_env->seekg( 0 , ios_base::beg );             // go back to beginning of file
-  BinaryReader *binread = new BinaryReader();
+  NCPA::BinaryReader *binread = new NCPA::BinaryReader();
   int *filevars = new int[ 2 ];
 
   // get # profiles and # layers per profile from .env file
@@ -135,7 +135,7 @@ void AtmLibrary::readG2SBinary( ifstream* g2s_env, double *alt, double *range, d
 void AtmLibrary::getBinaryG2SDimensions( ifstream* g2s_env, int *atm_nz, int *atm_nr)
  {
   g2s_env->seekg( 0 , ios_base::beg );             // go back to beginning of file
-  BinaryReader *binread = new BinaryReader();
+  NCPA::BinaryReader *binread = new NCPA::BinaryReader();
   int *filevars = new int[ 2 ];
 
   // get # profiles and # layers per profile from .env file

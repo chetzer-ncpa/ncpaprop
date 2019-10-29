@@ -564,7 +564,7 @@ void buildAbsorptiveLayer() {
 }
 
 void rhsMultiplication(int i_pade, complex<double> **Bd, complex<double> **Bo, complex<double> *psi_o) {
-  complex<double> *work = new complex<double> [ nz ];
+  complex<double> *work = new complex<double>[ nz ];
   work[0] = Bd[0][i_pade]*psi_o[0] + Bo[0][i_pade]*psi_o[1];
   for(int i=1; i<nz-1; i++) {
       work[i] = Bo[i-1][i_pade]*psi_o[i-1] + Bd[i][i_pade]*psi_o[i] + Bo[i][i_pade]*psi_o[i+1];
@@ -573,13 +573,13 @@ void rhsMultiplication(int i_pade, complex<double> **Bd, complex<double> **Bo, c
   for (int i=0; i<nz-1; i++) {
       psi_o[i] = work[i];
   }
-  delete work;
+  delete [] work;
 }
 
 
 void tridagSolver(int i_pade, complex<double> **Cl, complex<double> **Cd, complex<double> **Cu, complex<double> *psi_o, complex<double> *psi_dr) {
   complex<double> bet;
-  complex<double> *gam = new complex<double> [ nz ];
+  complex<double> *gam = new complex<double>[ nz ];
   if (Cd[0][i_pade] == 0.0) cerr << "Error 1 in tridag" << endl;
 
   psi_dr[0]=psi_o[0]/(bet=Cd[0][i_pade]);
@@ -593,7 +593,7 @@ void tridagSolver(int i_pade, complex<double> **Cl, complex<double> **Cd, comple
       psi_dr[j] -= gam[j+1]*psi_dr[j+1];
   }
 
-  delete gam;
+  delete [] gam;
 }
 
 void marchField(complex<double> *psi_o,complex<double> *psi_dr,double *abs_layer) {
@@ -606,8 +606,12 @@ void marchField(complex<double> *psi_o,complex<double> *psi_dr,double *abs_layer
       taper   = (1.0-rdx_factor)/(1.0+exp(rdx_slope*(alt_int[i]-rdx_height)))+rdx_factor;
       //damping = exp(-abs_layer[i]*dr);
       damping = exp(-abs_layer[i]*dr) * exp(-taper*abs_sb[i]*1.0*dr);
-      real(psi_o[i]) = real(psi_dr[i])*damping;
-      imag(psi_o[i]) = imag(psi_dr[i])*damping;
+      
+      // CHH 191029: Rewrote to comply with c++11 syntax:
+      //real(psi_o[i]) = real(psi_dr[i])*damping;
+      //imag(psi_o[i]) = imag(psi_dr[i])*damping;
+      psi_o[ i ].real( psi_dr[ i ].real() * damping );
+      psi_o[ i ].imag( psi_dr[ i ].imag() * damping );
   }
 }
 
