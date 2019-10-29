@@ -177,7 +177,7 @@ int NCPA::SolveCModBB::computeCModes() {
   ST             stx;
   //KSP            kspx;
   //PC             pcx;
-  const EPSType  type;
+  EPSType  type;
   PetscReal      re, im;
   PetscScalar    kr, ki, *xr_, sigma;
   Vec            xr, xi;
@@ -334,8 +334,9 @@ int NCPA::SolveCModBB::computeCModes() {
     ierr = MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
     ierr = MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
 
-    ierr = MatGetVecs(A,PETSC_NULL,&xr);CHKERRQ(ierr);
-    ierr = MatGetVecs(A,PETSC_NULL,&xi);CHKERRQ(ierr);
+    // CHH 191029: MatGetVecs deprecated, changed to MatCreateVecs
+    ierr = MatCreateVecs(A,PETSC_NULL,&xr);CHKERRQ(ierr);
+    ierr = MatCreateVecs(A,PETSC_NULL,&xi);CHKERRQ(ierr);
 
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 	                Create the eigensolver and set various options
@@ -402,7 +403,9 @@ int NCPA::SolveCModBB::computeCModes() {
     if (nconv>0) {
         for (i=0;i<nconv;i++) {
             ierr = EPSGetEigenpair(eps,i,&kr,&ki,xr,xi);CHKERRQ(ierr);
-            ierr = EPSComputeRelativeError(eps,i,&error);CHKERRQ(ierr);
+            // CHH 191029: EPSComputeRelativeError deprecated
+	    //ierr = EPSComputeRelativeError(eps,i,&error);CHKERRQ(ierr);
+	    ierr = EPSComputeError(eps,i,EPS_ERROR_RELATIVE,&error);CHKERRQ(ierr);
   #if defined(PETSC_USE_COMPLEX)
                 re = PetscRealPart(kr);
                 im = PetscImaginaryPart(kr);

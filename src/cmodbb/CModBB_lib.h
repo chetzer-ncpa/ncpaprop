@@ -2,13 +2,14 @@
 #include <complex>
 #include <list>
 
-
+/*
 double **dmatrix(long nr, long nc);
 int free_dmatrix(double**v, long nr, long nc);
 complex<double> **cmatrix(long nr, long nc);
 int free_cmatrix(complex<double>**v, long nr, long nc);
 complex<double> ***c3Darray(size_t xlen, size_t ylen, size_t zlen);
 void free_c3Darray(complex<double> ***data, size_t xlen, size_t ylen);
+*/
 
 int writeDispersion(int select_modes, double dz, double z_src, double freq, std::complex<double> *k_pert, double **v_s);
 

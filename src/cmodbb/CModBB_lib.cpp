@@ -100,7 +100,7 @@ int count_rows_arbcol(const char *filename) {
   return answer;
 }
  
- 
+/*
 double **dmatrix(long nr, long nc) {
   // allocate a double matrix
   double **v;
@@ -120,7 +120,7 @@ int free_dmatrix(double**v, long nr, long nc) {
   delete v;
   return 0;
 }
-
+*/
 
 double half_hann(int begin,int end,int i) {
   double answer;
@@ -386,7 +386,7 @@ int pulse_prop_src2rcv_grid2(\
   int i,n;
   double rr, tskip, fmx, t0;	
   complex<double> cup,*dft_vec,*pulse_vec,*arg_vec;
-  complex<double> I = complex<double> (0.0, 1.0);
+  //complex<double> I = complex<double> (0.0, 1.0);  // CHH 191029: Unused
   FILE *f;
 
   dft_vec   = new complex<double> [n_freqs];
@@ -715,7 +715,7 @@ complex<double> ***getPz1z2 (int I1, int I2, double r1, double r2, double dr, st
 }
 
 
-
+/*
 complex<double> **cmatrix(long nr, long nc) {
   // allocate a complex<double> matrix
   complex<double> **v;
@@ -783,6 +783,7 @@ void free_c3Darray(complex<double> ***data, size_t xlen, size_t ylen)
   }
   free(data);
 }
+*/
 
 // comparison, freq in filename.
 bool compare_freq (string first, string second)
