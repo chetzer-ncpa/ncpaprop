@@ -23,6 +23,7 @@ namespace NCPA {
 			// Base constructor
 			ODESystem();
 			ODESystem( EquationSet * );
+			virtual ~ODESystem();
 
 			virtual int rk4( double **solution, int steps, double *initialconditions,
 				double t0, double tend ) const;

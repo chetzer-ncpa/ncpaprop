@@ -12,6 +12,8 @@ NCPA::ODESystem::ODESystem( NCPA::EquationSet *equationset ) {
 	equations_ = equationset;
 }
 
+NCPA::ODESystem::~ODESystem() {}
+
 // Runs the 4th-order Runge-Kutta solver with no break conditions (i.e. each run is
 // carried through to the full number of steps
 int NCPA::ODESystem::rk4( double **solution, int steps, double *initialconditions, 
