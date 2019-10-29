@@ -16,7 +16,7 @@ linray linearRay3DStrat( double ds, double theta, double phi, double zs, double 
 {	
     linray R;
 	  double zzprev, range, dz, dxds, dyds, dzds, wx, wy, cef, cc, Sx, Sy, Sz, om;
-    double dSzdSy, dzdSy, dxdSx, dxdSy, dydSx, dydSy, dSzdSx, dzdSx, NN;
+    double dSzdSy, dzdSy, dxdSx, dxdSy, dydSx, dydSy, dSzdSx, dzdSx;
     double d1ccep[2], d1wxep[2], d1wyep[2], A[4][14], ptAtm[3], ptAtmDer[3][2];
     double *spl[3], *splrh;
     vector< vector<double> > atm;
@@ -164,7 +164,7 @@ linray linearRay3DStrat( double ds, double theta, double phi, double zs, double 
 {	
     linray R;
 	  double zzprev, range, rr, dz, dxds, dyds, dzds, wx, wy, cef, cc, Sx, Sy, Sz, om;
-    double dSzdSy, dzdSy, dxdSx, dxdSy, dydSx, dydSy, dSzdSx, dzdSx, NN;
+    double dSzdSy, dzdSy, dxdSx, dxdSy, dydSx, dydSy, dSzdSx, dzdSx;
     double d1ccep[2], d1wxep[2], d1wyep[2], A[4][14], ptAtm[3], ptAtmDer[3][2];
     double *spl[3], *splrh;
     vector< vector<double> > atm;

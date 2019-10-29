@@ -10,19 +10,24 @@
 
 #INCPATHS=-I. -I../common -I../atmosphere -I/usr/local/include -I/usr/include ${CCPPFLAGS}
 INCPATHS=-I. -I../common -I../atmosphere -I/usr/local/include
+OBJS=wnlrt.o ProcessOptionsNRT.o nonlinearRay.o linearRay3DStrat.o
+TARGET=wnlrt
 
-all: wnlrt
+CXX=mpicxx
+CXX_LINKER=mpicxx
+
+all: $(TARGET)
 
 .PHONY: clean
 
 # link	
-wnlrt: wnlrt.o ProcessOptionsNRT.o nonlinearRay.o linearRay3DStrat.o
-	g++ -o $@ $^  -L/usr/lib ../../lib/libatmosphere.a ../../lib/libcommon.a -lgsl -lgslcblas -lm -lfftw3 
+$(TARGET): $(OBJS)
+	${CXX_LINKER} -o $@ $^  -L/usr/lib ../../lib/libatmosphere.a ../../lib/libcommon.a -lgsl -lgslcblas -lm -lfftw3 
 	cp $@ ../../bin
 	
 # compile 
 %.o: %.cpp
-	g++ -fpic -c -ggdb -Wall ${INCPATHS} -o $@ $<
+	${CXX} -fpic -c -Wall ${INCPATHS} -o $@ $<
 
 clean::
-	-$(RM) -rf Modess_main.o SolveModNB.o ProcessOptionsNB.o Modess_lib.o Modess
+	-$(RM) -rf $(OBJS) $(TARGET)

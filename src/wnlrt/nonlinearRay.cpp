@@ -334,7 +334,7 @@ waveform generateNWave( int nn, double period, double taud, double amp )
 waveform generateWaveForm( int nn, double period, double taud, double &amp )
 {   
     waveform wf;
-    double ppmx, fac;
+    double ppmx;  // CHH 191029: fac Unused
     int j = -nn/2;
     ppmx = 0;
     for( int i=0; i<nn; i++ )
@@ -380,7 +380,7 @@ waveform generateWaveForm( int nn, double period, double &amp )
 waveform blastmodel( int nn, double period, double posPhaseDur, double pkOverpress, linray LR )
 {
     waveform wf;
-    double Po = LR.rh[0] * pow( LR.cc[0],2 )/1.4;
+    //double Po = LR.rh[0] * pow( LR.cc[0],2 )/1.4;  // CHH 191029: Unused
     int j = -nn/2;
     for( int i=0; i<nn; i++ )
     {
@@ -1105,7 +1105,7 @@ raypathParams::raypathParams( linray LRinput, int j )
 	nlp.push_back( LR.ja );
   nlp.push_back( LR.tr );
   
-  printf("LR.xx.size=%d   last elem=%g\n", LR.xx.size(), LR.xx.back());
+  printf("LR.xx.size=%lu   last elem=%g\n", LR.xx.size(), LR.xx.back());
   
 
   //exit(1);
