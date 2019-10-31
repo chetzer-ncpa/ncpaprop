@@ -6,6 +6,10 @@
 #include <vector>
 #include <complex>
 
+#ifndef PI
+#define PI 3.141592653589793
+#endif
+
 namespace NCPA {
 	float min( const float *, int );
 	float max( const float *, int );
