@@ -61,6 +61,8 @@
 
 #include "anyoption.h"
 
+using namespace std;
+
 AnyOption::AnyOption()
 {
 	init();
@@ -374,7 +376,7 @@ AnyOption::useCommandArgs( int _argc, char **_argv )
 }
 
 void
-AnyOption::useFiileName( const char *_filename )
+AnyOption::useFileName( const char *_filename )
 {
 	filename = _filename;
 	file_set = true;
@@ -928,7 +930,7 @@ AnyOption::processFile()
 bool
 AnyOption::processFile( const char *filename )
 {
-	useFiileName(filename );
+	useFileName(filename );
 	return ( processFile() );
 }
 
