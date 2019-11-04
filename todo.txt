@@ -1,3 +1,7 @@
+General:
+Move as much re-used code as possible into the "common" libraries
+Write general class for handling parameters, including methods for common checks
+
 Modess:
 Use sound speed calculation in SampledProfile, check for identity
 Write explicit functions to allocate and free memory in SolveModNB, currently
@@ -10,3 +14,4 @@ Descriptive variable names in getAbsorption() rather than meaningless arrays
 
 AtmosphericProfile:
 Create getMaxValidHeight() method
+Create getAbsorption() method 

@@ -42,7 +42,7 @@ INSTALL_MPICH="false"
 USE_DEBUG="false"
 
 # Set this to "true" to activate the script
-I_HAVE_FINISHED_SETTING_UP="true"
+I_HAVE_FINISHED_SETTING_UP="false"
 
 ##### Stop Making Changes Here #####
 
