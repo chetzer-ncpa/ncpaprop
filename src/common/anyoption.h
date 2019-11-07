@@ -34,7 +34,7 @@
 
 #define TRUE_FLAG "true" 
 
-//using namespace std;
+using namespace std;
 
 class AnyOption 
 {

@@ -1,5 +1,5 @@
-#ifndef __NCPA_ANYOPTION_VALIDATOR__
-#define __NCPA_ANYOPTION_VALIDATOR__
+#ifndef __NCPA_ANYOPTION_EXTENSIONS__
+#define __NCPA_ANYOPTION_EXTENSIONS__
 
 #include "anyoption.h"
 #include <map>

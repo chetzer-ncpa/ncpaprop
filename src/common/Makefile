@@ -1,10 +1,15 @@
+export PETSC_ARCH:=arch-darwin-c-real
+include ${PETSC_DIR}/lib/petsc/conf/variables
+#include ${PETSC_DIR}/lib/petsc/conf/rules
+include ${SLEPC_DIR}/lib/slepc/conf/slepc_common
+
 SOURCES=anyoption.cpp binaryreader.cpp geographic.cpp util.cpp
-OBJECTS=$(SOURCES:.cpp=.o)
+OBJS=$(SOURCES:.cpp=.o)
 
 # Set default values for compiler and flags
 TARGET=libcommon.a
 LINKCOMMAND=ar curv 
-CXX=g++
+#CXX=g++
 
 .PHONY: clean tidy common
 
@@ -12,15 +17,15 @@ all: common
 
 common: libcommon.a
 
-libcommon.a: $(OBJECTS)
-	${LINKCOMMAND} $@ $^
+libcommon.a: $(OBJS)
+	$(LINKCOMMAND) $@ $^
 	cp $@ ../../lib
 
 %.o: %.cpp
 	${CXX} -fpic -c -ggdb -Wall -I. -I../common -I../atmosphere -I/usr/local/include -o $@ $<
 
-clean:
-	rm -rf *.o $(TARGET) $(OBJECTS)
+clean::
+	rm -rf *.o $(TARGET) $(OBJS)
 
 tidy:
 	rm -rf *.o
