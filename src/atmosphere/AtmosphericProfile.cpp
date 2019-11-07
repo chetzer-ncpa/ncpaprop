@@ -4,7 +4,9 @@
 #include <stdexcept>
 
 #define GAM 1.4
+#ifndef PI
 #define PI 3.14159
+#endif
 #define R 287.0
 
 NCPA::AtmosphericProfile::~AtmosphericProfile() { }
