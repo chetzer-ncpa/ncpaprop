@@ -983,9 +983,9 @@ AnyOption::consumeFile( char *buffer )
        	if( *cursor == endofline ) { /* end of line */
           	if( pline != NULL ) /* valid line */
                		processLine( pline, linelength );
-                 	pline = NULL;
-                 	newline = true;
-           	}else if( newline ){ /* start of line */
+                pline = NULL;
+                newline = true;
+           	} else if ( newline ) { /* start of line */
                  	newline = false;
               		if( (*cursor != comment ) ){ /* not a comment */
 		    		pline = cursor ;
