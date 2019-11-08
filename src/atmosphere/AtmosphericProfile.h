@@ -10,6 +10,7 @@
  * The NCPA namespace.  Used to indicate NCPA-written code.
  */
 namespace NCPA {
+	
 
 	/**
 	 * The AtmosphericProfile abstract base class.  All classes that are to be used as atmospheric profiles
