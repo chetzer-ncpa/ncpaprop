@@ -224,7 +224,7 @@ int get_source_spectrum( \
 								complex<double> *arg_vec, int src_flg, string srcfile) 
 {
   int i;
-  double fmx, scale;
+  double fmx, scale = 1.0;
   complex<double> I = complex<double> (0.0, 1.0);
   FILE *f;
   fftw_plan p;

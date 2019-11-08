@@ -286,7 +286,7 @@ printf("Saving ray parameters in file %s\n", rayf.c_str());
 printf("with columns: [ x, y, z, raypath_length, travel_time, OMEGA, Jacobian ]\n");
 
 //printf("R.xx.size()=%d\n",R.xx.size());
-for(int i = 0; i < R.xx.size(); i++)  {
+for(unsigned int i = 0; i < R.xx.size(); i++)  {
   //printf("i=%d\n",i);
   fprintf (fp, "%15.5E %15.5E %15.5E %15.5E %15.5E %15.5E %15.5E\n", R.xx[i], R.yy[i], R.zz[i], R.ss[i], R.tr[i], R.om[i], R.ja[i]); 
 }

@@ -592,7 +592,7 @@ vector < complex<double> > interpDir(string pape_output_dir, string filepattern,
     
     // show interpolated values
     if (0) {
-      for (int j=0; j<P.size(); j++) {
+      for (unsigned int j=0; j<P.size(); j++) {
         printf("%3d  P = %g  %g \n", j, real(P[j]), imag(P[j]));
       } 
     }
@@ -600,7 +600,7 @@ vector < complex<double> > interpDir(string pape_output_dir, string filepattern,
     // save P
     if (0) {
         FILE *fp = fopen("Ppe.dat", "w");
-        for (int ii=0; ii<P.size(); ii++) {
+        for (unsigned int ii=0; ii<P.size(); ii++) {
             fprintf(fp, "%18.12e  %18.12e\n", real(P[ii]), imag(P[ii]));
         }
         printf("Interpolated values saved in 'Ppe.dat'\n");
@@ -760,7 +760,7 @@ int get_source_spectrum( \
 								complex<double> *arg_vec, int src_flg, string srcfile) 
 {
   int i;
-  double fmx, scale;
+  double fmx, scale = 1.0;
   complex<double> I = complex<double> (0.0, 1.0);
   FILE *f;
   fftw_plan p;

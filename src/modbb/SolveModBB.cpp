@@ -426,7 +426,7 @@ int NCPA::SolveModBB::computeModESS() {
   ierr = MPI_Comm_rank(PETSC_COMM_WORLD,&rank); CHKERRQ(ierr);
   ierr = MPI_Comm_size(PETSC_COMM_WORLD,&size); CHKERRQ(ierr);
   
-  FILE *fp;
+  FILE *fp = NULL;
   if (out_disp_src2rcv) {
     // open dispersion file for writing
     fp = fopen(disp_fn.c_str(),"w");
@@ -622,15 +622,19 @@ int NCPA::SolveModBB::computeModESS() {
       //
       if (out_dispersion) {
           // printf ("Writing to file: %s at freq = %8.3f Hz...\n", filen.c_str(), freq);
-          writeDispersion_bb_bin3( disp_fn, freq, Nfreq, f_step, Nz_grid, z_min, \
-                                   Nz_subgrid, delZ, NN, select_modes, dz, \
+          writeDispersion_bb_bin3( disp_fn, freq, Nfreq, f_step, Nz_grid, z_min, 
+                                   Nz_subgrid, delZ, NN, select_modes, dz, 
                                    sourceheight, rho, kreal, kim, v_s);															
       }
-      else if (out_disp_src2rcv) {			
+      else if (out_disp_src2rcv) {
           // source-to-receiver will be written to one ascii file
           //writeDispersion_bb_ascii( disp_fn, select_modes, dz, sourceheight, receiverheight, freq, rho, k_pert, v_s);
-          writeDispersion_bb_ascii( fp, select_modes, dz, \
+	      if (fp != NULL) {
+          	    writeDispersion_bb_ascii( fp, select_modes, dz,
                                     sourceheight, receiverheight, freq, rho, k_pert, v_s);
+			    } else {
+				    cerr << "Warning: can't write source-receiver dispersion to requested file" << endl;
+			    }
       }			
       cout << "frequency = " << freq << " Hz processed" << endl;			
 
@@ -641,7 +645,7 @@ int NCPA::SolveModBB::computeModESS() {
       ierr = VecDestroy(&xi); CHKERRQ(ierr); 	
   }	// end BIG LOOP over frequencies
   
-  if (out_disp_src2rcv) {
+  if (fp != NULL) {
     fclose(fp); // close the dispersion file
   }
 
@@ -745,7 +749,7 @@ int NCPA::SolveModBB::computeWmodes() {
   ierr = MPI_Comm_rank(PETSC_COMM_WORLD,&rank); CHKERRQ(ierr);
   ierr = MPI_Comm_size(PETSC_COMM_WORLD,&size); CHKERRQ(ierr);
 
-  FILE *fp;
+  FILE *fp = NULL;
   if (out_disp_src2rcv) {
     // open dispersion file for writing
     fp = fopen(disp_fn.c_str(),"w");
@@ -1033,8 +1037,12 @@ int NCPA::SolveModBB::computeWmodes() {
       else if (out_disp_src2rcv) {			
           // source-to-receiver will be written to one ascii file
           //writeDispersion_bb_ascii( disp_fn, select_modes, dz, sourceheight, receiverheight, freq, rho, k_pert, v_s);
-          writeDispersion_bb_ascii( fp, select_modes, dz, \
+	      if (fp != NULL) {
+          	    writeDispersion_bb_ascii( fp, select_modes, dz,
                                     sourceheight, receiverheight, freq, rho, k_pert, v_s);
+			    } else {
+				    cerr << "Can't write source-reciever dispersion to requested file" << endl;
+			    }
       }			
       cout << "frequency = " << freq << " Hz processed" << endl;			
 
@@ -1048,7 +1056,7 @@ int NCPA::SolveModBB::computeWmodes() {
       	
   }	// end BIG LOOP over frequencies
   
-  if (out_disp_src2rcv) {
+  if (fp != NULL) {
     fclose(fp); // close the dispersion file
   }
   // free the rest of locally dynamically allocated space

@@ -160,7 +160,7 @@ nonray nonlinearRay( int nn, double ssInit, attRed attRed, linray LR, waveform w
   SP.FFT( uu, umax );  // obtain uu = ifft(U3) and Usq=fft(u^2); also umax is returned
   //------------------------------------------------------------------------
   //Marching along the ray path
-  int j  = 0;
+  unsigned int j  = 0;
   int it = 1;
   
   
