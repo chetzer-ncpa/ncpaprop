@@ -3,7 +3,7 @@ include ${PETSC_DIR}/lib/petsc/conf/variables
 #include ${PETSC_DIR}/lib/petsc/conf/rules
 include ${SLEPC_DIR}/lib/slepc/conf/slepc_common
 
-SOURCES=anyoption.cpp binaryreader.cpp geographic.cpp util.cpp
+SOURCES=anyoption.cpp binaryreader.cpp geographic.cpp util.cpp units.cpp
 OBJS=$(SOURCES:.cpp=.o)
 
 # Set default values for compiler and flags
@@ -22,7 +22,7 @@ libcommon.a: $(OBJS)
 	cp $@ ../../lib
 
 %.o: %.cpp
-	${CXX} -fpic -c -ggdb -Wall -I. -I../common -I../atmosphere -I/usr/local/include -o $@ $<
+	${CXX} -fpic -c -ggdb -std=c++11 -Wall -I. -I../common -I../atmosphere -I/usr/local/include -o $@ $<
 
 clean::
 	rm -rf *.o $(TARGET) $(OBJS)
