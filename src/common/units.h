@@ -1,3 +1,7 @@
+/*
+Functions and constants for unit conversion.
+*/
+
 #ifndef NCPA_UNITS_H__
 #define NCPA_UNITS_H__
 
@@ -29,6 +33,12 @@ namespace NCPA {
 		DENSITY_UNITS_GPCM3
 	};
 	
+	/*
+	 * Convert a number from one unit to another.  Specifying the same units for both
+	 * input and output will return the original number with no processing, otherwise
+	 * numbers are internally converted to an intermediate SI unit and then reconverted
+	 * to the specified output unit.
+	 */
 	double convert_units( double input, TEMPERATURE_UNITS units_in, TEMPERATURE_UNITS units_out );
 	double convert_units( double input, DISTANCE_UNITS units_in, DISTANCE_UNITS units_out );
 	double convert_units( double input, SPEED_UNITS units_in, SPEED_UNITS units_out );
