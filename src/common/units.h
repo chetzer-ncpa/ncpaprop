@@ -7,30 +7,35 @@ Functions and constants for unit conversion.
 
 namespace NCPA {
 	
-	enum TEMPERATURE_UNITS : unsigned int {
-		TEMPERATURE_UNITS_K,
-		TEMPERATURE_UNITS_C,
-		TEMPERATURE_UNITS_F
+	enum UNITS_TEMPERATURE : unsigned int {
+		UNITS_TEMPERATURE_NONE = 0,
+		UNITS_TEMPERATURE_K,
+		UNITS_TEMPERATURE_C,
+		UNITS_TEMPERATURE_F
 	};
 	
-	enum DISTANCE_UNITS : unsigned int {
-		DISTANCE_UNITS_M,
-		DISTANCE_UNITS_KM
+	enum UNITS_DISTANCE : unsigned int {
+		UNITS_DISTANCE_NONE = 0,
+		UNITS_DISTANCE_M,
+		UNITS_DISTANCE_KM
 	};
 	
-	enum SPEED_UNITS : unsigned int {
-		SPEED_UNITS_MPS,
-		SPEED_UNITS_KMPS
+	enum UNITS_SPEED : unsigned int {
+		UNITS_SPEED_NONE = 0,
+		UNITS_SPEED_MPS,
+		UNITS_SPEED_KMPS
 	};
 	
-	enum PRESSURE_UNITS : unsigned int {
-		PRESSURE_UNITS_PA,
-		PRESSURE_UNITS_MBAR
+	enum UNITS_PRESSURE : unsigned int {
+		UNITS_PRESSURE_NONE = 0,
+		UNITS_PRESSURE_PA,
+		UNITS_PRESSURE_MBAR
 	};
 	
-	enum DENSITY_UNITS : unsigned int {
-		DENSITY_UNITS_KGPM3,
-		DENSITY_UNITS_GPCM3
+	enum UNITS_DENSITY : unsigned int {
+		UNITS_DENSITY_NONE = 0,
+		UNITS_DENSITY_KGPM3,
+		UNITS_DENSITY_GPCM3
 	};
 	
 	/*
@@ -39,11 +44,11 @@ namespace NCPA {
 	 * numbers are internally converted to an intermediate SI unit and then reconverted
 	 * to the specified output unit.
 	 */
-	double convert_units( double input, TEMPERATURE_UNITS units_in, TEMPERATURE_UNITS units_out );
-	double convert_units( double input, DISTANCE_UNITS units_in, DISTANCE_UNITS units_out );
-	double convert_units( double input, SPEED_UNITS units_in, SPEED_UNITS units_out );
-	double convert_units( double input, PRESSURE_UNITS units_in, PRESSURE_UNITS units_out );
-	double convert_units( double input, DENSITY_UNITS units_in, DENSITY_UNITS units_out );
+	double convert_units( double input, UNITS_TEMPERATURE units_in, UNITS_TEMPERATURE units_out );
+	double convert_units( double input, UNITS_DISTANCE units_in, UNITS_DISTANCE units_out );
+	double convert_units( double input, UNITS_SPEED units_in, UNITS_SPEED units_out );
+	double convert_units( double input, UNITS_PRESSURE units_in, UNITS_PRESSURE units_out );
+	double convert_units( double input, UNITS_DENSITY units_in, UNITS_DENSITY units_out );
 	
 }
 
