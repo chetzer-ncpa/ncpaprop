@@ -1,7 +1,8 @@
-#ifndef __ATMOSPHERIC_PROFILE_H__
-#define __ATMOSPHERIC_PROFILE_H__
+#ifndef ATMOSPHERIC_PROFILE_H__
+#define ATMOSPHERIC_PROFILE_H__
 
 #include "geographic.h"
+#include "units.h"
 
 // @todo Add method to set internal units and return them appropriately (wind speed,
 // pressure, and density)
@@ -10,6 +11,16 @@
  * The NCPA namespace.  Used to indicate NCPA-written code.
  */
 namespace NCPA {
+	
+	enum ATMOSPHERIC_QUANTITY : unsigned int {
+		QUANTITY_ALTITUDE,
+		QUANTITY_TEMPERATURE,
+		QUANTITY_WIND_WEST_TO_EAST,
+		QUANTITY_WIND_SOUTH_TO_NORTH,
+		QUANTITY_WIND_VERTICAL,
+		QUANTITY_PRESSURE,
+		QUANTITY_AIR_DENSITY
+	};
 
 	/**
 	 * The AtmosphericProfile abstract base class.  All classes that are to be used as atmospheric profiles
@@ -30,6 +41,16 @@ namespace NCPA {
 			virtual double calculate_c0_using_t_( double t );	/** calculate c0 using sqrt( gamma * R * T ) */
 			virtual double calculate_c0_using_p_( double p, double rho );	/** calculate c0 using sqrt( gamma * p / rho ) */
 
+			// internal and output units for atmospheric quantities
+			UNITS_TEMPERATURE	t_units_internal_, t_units_output_;
+			UNITS_DISTANCE		z_units_internal_, z_units_output_;
+			UNITS_SPEED		u_units_internal_, u_units_output_,
+						v_units_internal_, v_units_output_,
+						w_units_internal_, w_units_output_,
+						c_units_internal_, c_units_output_;
+			UNITS_PRESSURE		p_units_internal_, p_units_output_;
+			UNITS_DENSITY		rho_units_internal_, rho_units_output_;
+
 		public:
 			/**
 			  * Virtual destructor.
@@ -40,6 +61,18 @@ namespace NCPA {
 			virtual void setOrigin( double lat, double lon );
 			virtual double lat() const;
 			virtual double lon() const;
+			
+			/**
+			  * Set the output units for the getter functions t(), u(), etc
+			  */
+			virtual void setUnitsTemperature( UNITS_TEMPERATURE u );
+			virtual void setUnitsAltitude( UNITS_DISTANCE u );
+			virtual void setUnitsZonalWind( UNITS_SPEED u );
+			virtual void setUnitsMeridionalWind( UNITS_SPEED u );
+			virtual void setUnitsVerticalWind( UNITS_SPEED u );
+			virtual void setUnitsDensity( UNITS_DENSITY u );
+			virtual void setUnitsPressure( UNITS_PRESSURE u );
+			virtual void setUnitsSoundSpeed( UNITS_SPEED u );
 			
 			/**
 			  * Status test.  Used to test whether or not the specification contains valid data and is ready for use.
