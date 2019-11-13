@@ -1,3 +1,7 @@
+/**
+  * Extensions of and tools used with the AnyOption class presented in anyoption.h
+  */
+
 #ifndef __NCPA_ANYOPTION_EXTENSIONS__
 #define __NCPA_ANYOPTION_EXTENSIONS__
 
@@ -8,70 +12,183 @@
 
 namespace NCPA {
 	
+	/**
+	  * These indicate tests that do not depend on the type of the tested
+	  * value.
+	  */
 	enum OPTION_NOTYPE_TEST_TYPE : unsigned int {
-		OPTION_REQUIRED
+		
+		/** This option/flag must be present. */
+		OPTION_REQUIRED,
+		
+		/** 
+		  * Designates a group of options, one and only one of which
+		  * must be present.
+		  */
+		OPTION_RADIO_BUTTON
 	};
 	
+	/**
+	  * These indicate tests that apply to integer values
+	  */
 	enum OPTION_INTEGER_TEST_TYPE : unsigned int {
-		// integer tests.  Options are assumed to be optional and will return true if not present.
+		
+		/** Integer that must be > 0 */
 		OPTION_INTEGER_POSITIVE,
+		
+		/** Integer that must be < 0 */
 		OPTION_INTEGER_NEGATIVE,
+		
+		/** Integer that must be > another integer */
 		OPTION_INTEGER_GREATER_THAN,
+		
+		/** Integer that must be >= another integer */
 		OPTION_INTEGER_GREATER_THAN_EQUAL,
+		
+		/** Integer that must be < another integer */
 		OPTION_INTEGER_LESS_THAN,
+		
+		/** Integer that must be <= another integer */
 		OPTION_INTEGER_LESS_THAN_EQUAL,
+		
+		/** Integer that must == 0 */
 		OPTION_INTEGER_ZERO,
+		
+		/** Integer that must != 0 */
 		OPTION_INTEGER_NONZERO,
+		
+		/** Integer that must == another integer */
 		OPTION_INTEGER_EQUAL,
+		
+		/** Integer that must != another integer */
 		OPTION_INTEGER_NOT_EQUAL
 	};
 	
+	/**
+	  * These indicate tests that apply to double values
+	  */
 	enum OPTION_FLOAT_TEST_TYPE : unsigned int {
-		// floating point tests.  Options are assumed to be optional and will return true if not present.
+		
+		/** Double that must > 0.0 */
 		OPTION_FLOAT_POSITIVE,
+		
+		/** Double that must < 0.0 */
 		OPTION_FLOAT_NEGATIVE,
+		
+		/** Double that must > another double */
 		OPTION_FLOAT_GREATER_THAN,
+		
+		/** Double that must >= another double */
 		OPTION_FLOAT_GREATER_THAN_EQUAL,
+		
+		/** Double that must < another double */
 		OPTION_FLOAT_LESS_THAN,
+		
+		/** Double that must <= another double */
 		OPTION_FLOAT_LESS_THAN_EQUAL,
+		
+		/** Double that must == 0.0 (standard floating point caveats apply) */
 		OPTION_FLOAT_ZERO,
+		
+		/** Double that must != 0.0 (standard floating point caveats apply) */
 		OPTION_FLOAT_NONZERO			
 	};
 	
+	/**
+	  * These indicate tests that apply to string values
+	  */
 	enum OPTION_STRING_TEST_TYPE : unsigned int {
-		// string tests.  Options are assumed to be optional and will return true if not present.
+		
+		/** string .size() must be >= an integer */
 		OPTION_STRING_MINIMUM_LENGTH,
+		
+		/** string .size() must be <= an integer */
 		OPTION_STRING_MAXIMUM_LENGTH
 	};
 
-	// Abstract base class for validation criteria
+	/**
+	  * Abstract base class for validation criteria.  See subclass descriptions
+	  * for general usage, you won't instantiate this class directly.
+	  */
 	class OptionValidationCriterion {
 	public:
+		/**
+		  * Destructor.  Cleans up any dynamically allocated memory.
+		  */
 		virtual ~OptionValidationCriterion();
+		
+		/**
+		  * Run the validation checks specified for this option
+		  * @param opts A pointer to the AnyOption object that has ingested
+		  *             the command line and file options
+		  * @return true if the test passes, false otherwise
+		  */
 		virtual bool validate( AnyOption *opts ) = 0;
+		
+		/**
+		  * A text description of the test that is to be run.
+		  * @return A std::string containing a description of the test
+		  */
 		virtual std::string description() const = 0;
+		
+		/**
+		  * A text description of why the test failed, if applicable.
+		  * @return A std::string containing a description of the failure
+		  */
 		virtual std::string failureMessage() const = 0;
+		
+		/**
+		  * The name of the parameter to be checked
+		  * @return A std::string containing the parameter name
+		  */
 		virtual std::string optionName() const;
+		
 	protected:
+		
+		/**
+		  * The option name.
+		  */
 		std::string _optName;
+		
+		/**
+		  * The value that was last checked against.
+		  */
 		std::string _testedValue;
 	};
 	
+	class 
 	
+	/**
+	  * A class for simple validation of AnyOption parameters.
+	  */
 	class AnyOptionValidator {
 	public:
+		/**
+		  * Default constructor.  Allocates internal objects.
+		  */
 		AnyOptionValidator();
+		
+		/**
+		  * Destructor.  Clears internal objects and releases memory held by
+		  * option tests.
+		  */
 		~AnyOptionValidator();
 		
-		// No argument required
-		void addOption( const std::string &option, OPTION_NOTYPE_TEST_TYPE option_type );
-		void addOption( const std::string &option, OPTION_INTEGER_TEST_TYPE option_type );
-		void addOption( const std::string &option, OPTION_FLOAT_TEST_TYPE option_type );
+		/**
+		  * Creates and stores a type-independent parameter test.
+		  * @param option The name of the option or flag to be tested
+		  * @param option_type The type of test to be run.
+		  * @return A pointer to the test criterion, so that additional 
+		  *         parameters may be specified.
+		  */
+		OptionValidationCriterion * addOption( const std::string &option, OPTION_NOTYPE_TEST_TYPE option_type );
+		OptionValidationCriterion * addOption( const std::string &option, OPTION_INTEGER_TEST_TYPE option_type );
+		OptionValidationCriterion * addOption( const std::string &option, OPTION_FLOAT_TEST_TYPE option_type );
 		
 		// One argument required
-		void addOption( const std::string &option, OPTION_INTEGER_TEST_TYPE option_type, int boundary1 );
-		void addOption( const std::string &option, OPTION_FLOAT_TEST_TYPE option_type, double boundary1 );
-		void addOption( const std::string &option, OPTION_STRING_TEST_TYPE option_type, int boundary1 );
+		OptionValidationCriterion * addOption( const std::string &option, OPTION_INTEGER_TEST_TYPE option_type, int boundary1 );
+		OptionValidationCriterion * addOption( const std::string &option, OPTION_FLOAT_TEST_TYPE option_type, double boundary1 );
+		OptionValidationCriterion * addOption( const std::string &option, OPTION_STRING_TEST_TYPE option_type, int boundary1 );
 		
 		bool validateOptions( AnyOption *opts );
 		std::vector< NCPA::OptionValidationCriterion * > getFailedChecks() const;
@@ -90,6 +207,21 @@ namespace NCPA {
 		bool validate(  AnyOption *opts );
 		std::string description() const;
 		std::string failureMessage() const;
+	};
+	
+	// Test whether one and only one of a set is 
+	class RadioButtonCriterion : public OptionValidationCriterion {
+	public:
+		RadioButtonCriterion( const std::string option_name );
+		bool validate(  AnyOption *opts );
+		std::string description() const;
+		std::string failureMessage() const;
+		void addParameter( const std::string option_name );
+		std::string joinedString() const;
+		std::vector< std::string > lastMatched() const;
+	private:
+		std::vector< std::string > _buttons;
+		std::vector< std::string > _matched;
 	};
 
 	// Test whether an integer option is greater than (optionally or equal to)

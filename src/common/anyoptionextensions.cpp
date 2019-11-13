@@ -1,6 +1,7 @@
 #include "anyoptionextensions.h"
 #include "anyoption.h"
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <stdexcept>
 #include <cstring>
@@ -79,20 +80,25 @@ void NCPA::AnyOptionValidator::printDescriptions( std::ostream *out ) const {
 
 // addOption() functions for tests that do not have comparison criteria or for those whose
 // criteria are implicit in the type of test (e.g. positive)
-void NCPA::AnyOptionValidator::addOption( const std::string &option, OPTION_NOTYPE_TEST_TYPE option_type ) {
+NCPA::OptionValidationCriterion * NCPA::AnyOptionValidator::addOption( const std::string &option, OPTION_NOTYPE_TEST_TYPE option_type ) {
 	NCPA::OptionValidationCriterion *crit;
 	switch (option_type) {
 		case OPTION_REQUIRED:
 			crit = new NCPA::RequiredCriterion( option );
 			_criteria.push_back( crit );
 			break;
+		case OPTION_RADIO_BUTTON:
+			crit = new NCPA::RadioButtonCriterion( option );
+			_criteria.push_back( crit );
+			break;
 		default:
 			throw std::invalid_argument( "Type error, this test is for required options regardless of type" );
 	}
+	return crit;
 }
 
 
-void NCPA::AnyOptionValidator::addOption( const std::string &option, OPTION_INTEGER_TEST_TYPE option_type ) {
+NCPA::OptionValidationCriterion * NCPA::AnyOptionValidator::addOption( const std::string &option, OPTION_INTEGER_TEST_TYPE option_type ) {
 	NCPA::OptionValidationCriterion *crit;
 	switch (option_type) {
 		case OPTION_INTEGER_POSITIVE:
@@ -114,9 +120,10 @@ void NCPA::AnyOptionValidator::addOption( const std::string &option, OPTION_INTE
 		default:
 			throw std::invalid_argument( "Type error, this test is for integer tests with implicit conditions" );
 	}
+	return crit;
 }
 
-void NCPA::AnyOptionValidator::addOption( const std::string &option, OPTION_FLOAT_TEST_TYPE option_type ) {
+NCPA::OptionValidationCriterion * NCPA::AnyOptionValidator::addOption( const std::string &option, OPTION_FLOAT_TEST_TYPE option_type ) {
 	NCPA::OptionValidationCriterion *crit;
 	switch (option_type) {
 		case OPTION_FLOAT_POSITIVE:
@@ -138,6 +145,7 @@ void NCPA::AnyOptionValidator::addOption( const std::string &option, OPTION_FLOA
 		default:
 			throw std::invalid_argument( "Type error, this test is for floating-point tests with implicit conditions" );
 	}
+	return crit;
 }
 
 
@@ -146,7 +154,7 @@ void NCPA::AnyOptionValidator::addOption( const std::string &option, OPTION_FLOA
 
 
 
-void NCPA::AnyOptionValidator::addOption( const std::string &option, OPTION_INTEGER_TEST_TYPE option_type, int boundary1 ) {
+NCPA::OptionValidationCriterion * NCPA::AnyOptionValidator::addOption( const std::string &option, OPTION_INTEGER_TEST_TYPE option_type, int boundary1 ) {
 	NCPA::OptionValidationCriterion *crit;
 	switch (option_type) {
 		case OPTION_INTEGER_GREATER_THAN:
@@ -176,9 +184,10 @@ void NCPA::AnyOptionValidator::addOption( const std::string &option, OPTION_INTE
 		default:
 			throw std::invalid_argument( "Type error, this test is for integer tests with one condition" );
 	}
+	return crit;
 }
 
-void NCPA::AnyOptionValidator::addOption( const std::string &option, OPTION_FLOAT_TEST_TYPE option_type, double boundary1 ) {
+NCPA::OptionValidationCriterion * NCPA::AnyOptionValidator::addOption( const std::string &option, OPTION_FLOAT_TEST_TYPE option_type, double boundary1 ) {
 	NCPA::OptionValidationCriterion *crit;
 	switch (option_type) {
 		case OPTION_FLOAT_GREATER_THAN:
@@ -200,9 +209,10 @@ void NCPA::AnyOptionValidator::addOption( const std::string &option, OPTION_FLOA
 		default:
 			throw std::invalid_argument( "Type error, this test is for floating-point tests with one condition" );
 	}
+	return crit;
 }
 
-void NCPA::AnyOptionValidator::addOption( const std::string &option, OPTION_STRING_TEST_TYPE option_type, int boundary1 ) {
+NCPA::OptionValidationCriterion * NCPA::AnyOptionValidator::addOption( const std::string &option, OPTION_STRING_TEST_TYPE option_type, int boundary1 ) {
 	NCPA::OptionValidationCriterion *crit;
 	switch (option_type) {
 		case OPTION_STRING_MINIMUM_LENGTH:
@@ -216,6 +226,7 @@ void NCPA::AnyOptionValidator::addOption( const std::string &option, OPTION_STRI
 		default:
 			throw std::invalid_argument( "Type error, this test is for string tests with one condition" );
 	}
+	return crit;
 }
 
 
@@ -246,6 +257,54 @@ bool NCPA::RequiredCriterion::validate( AnyOption *opt )  {
 	} else {
 		return false;
 	}
+}
+
+
+NCPA::RadioButtonCriterion::RadioButtonCriterion( const std::string optionName ) {
+	_buttons.clear();
+	_buttons.push_back( optionName );
+	_matched.clear();
+}
+std::string NCPA::RadioButtonCriterion::description() const {
+	return "One and only one of " + this->joinedString() + " must be present.";
+}
+std::string NCPA::RadioButtonCriterion::failureMessage() const {
+	ostringstream oss;
+	oss << _matched.size() << " of " << this->joinedString()
+		<< " are present; must be one and only one.";
+	return oss.str();
+}
+std::string NCPA::RadioButtonCriterion::joinedString() const {
+	ostringstream oss;
+	oss << "{ ";
+	for (std::vector<std::string>::const_iterator it = _buttons.begin();
+			it != _buttons.end(); ++it) {
+		if (it != _buttons.begin()) {
+			oss << ", ";
+		}
+		oss << *it;
+	}
+	oss << " }";
+	return oss.str();
+}
+bool NCPA::RadioButtonCriterion::validate( AnyOption *opt )  {
+	_matched.clear();
+	
+	for (std::vector<std::string>::const_iterator it = _buttons.begin();
+			it != _buttons.end(); ++it) {
+		if (opt->getValue( it->c_str()) != NULL || opt->getFlag( it->c_str() ) ) {
+			_matched.push_back( *it );
+		}
+	}
+	
+	return (_matched.size() == 1);
+}
+void NCPA::RadioButtonCriterion::addParameter( std::string newButton ) {
+	_buttons.push_back( newButton );
+}
+std::vector< std::string > NCPA::RadioButtonCriterion::lastMatched() const {
+	std::vector< std::string > v( _matched );
+	return v;
 }
 
 
@@ -509,14 +568,15 @@ bool NCPA::StringMinimumLengthCriterion::validate( AnyOption *opt )  {
 	char *valStr = opt->getValue( _optName.c_str() );
 	if (valStr == NULL) {
 		_testedValue.clear();
-		//std::cout << "Option " << _optName << " not specified, passing" << std::endl;
+
 		return true;
 	}
 	
 	_testedValue = valStr;
-	//std::cout << "Length of '" << _testedValue << "' is " << _testedValue.length() << std::endl;
+
 	return ( _testedValue.length() >= _value );
 }
+
 
 NCPA::StringMaximumLengthCriterion::StringMaximumLengthCriterion( const std::string optionName, int maxLength ) {
 	_optName = optionName;
@@ -534,12 +594,10 @@ bool NCPA::StringMaximumLengthCriterion::validate( AnyOption *opt )  {
 	char *valStr = opt->getValue( _optName.c_str() );
 	if (valStr == NULL) {
 		_testedValue.clear();
-		//std::cout << "Option " << _optName << " not specified, passing" << std::endl;
 		return true;
 	}
 	
 	_testedValue = valStr;
-	//std::cout << "Length of '" << _testedValue << "' is " << _testedValue.length() << std::endl;
 	return ( _testedValue.length() <= _value );
 }
 
