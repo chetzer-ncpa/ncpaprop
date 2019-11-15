@@ -5,6 +5,7 @@
 #include <string>
 #include <stdexcept>
 #include <cstring>
+#include <algorithm>
 
 // Constructor.  Does nothing.
 NCPA::AnyOptionValidator::AnyOptionValidator() {
@@ -93,6 +94,20 @@ NCPA::OptionValidationCriterion * NCPA::AnyOptionValidator::addOption( const std
 			break;
 		default:
 			throw std::invalid_argument( "Type error, this test is for required options regardless of type" );
+	}
+	return crit;
+}
+
+
+NCPA::OptionValidationCriterion * NCPA::AnyOptionValidator::addOption( const std::string &option, OPTION_STRING_TEST_TYPE option_type ) {
+	NCPA::OptionValidationCriterion *crit;
+	switch (option_type) {
+		case OPTION_STRING_SET:
+			crit = new NCPA::StringSetCriterion( option );
+			_criteria.push_back( crit );
+			break;
+		default:
+			throw std::invalid_argument( "Type error, this test is for string tests with implicit conditions" );
 	}
 	return crit;
 }
@@ -262,15 +277,15 @@ bool NCPA::RequiredCriterion::validate( AnyOption *opt )  {
 
 NCPA::RadioButtonCriterion::RadioButtonCriterion( const std::string optionName ) {
 	_buttons.clear();
-	_buttons.push_back( optionName );
+	_optName = optionName;
 	_matched.clear();
 }
 std::string NCPA::RadioButtonCriterion::description() const {
-	return "One and only one of " + this->joinedString() + " must be present.";
+	return _optName + ": One and only one of " + this->joinedString() + " must be present.";
 }
 std::string NCPA::RadioButtonCriterion::failureMessage() const {
 	ostringstream oss;
-	oss << _matched.size() << " of " << this->joinedString()
+	oss << _optName << ": " << _matched.size() << " of " << this->joinedString()
 		<< " are present; must be one and only one.";
 	return oss.str();
 }
@@ -602,3 +617,36 @@ bool NCPA::StringMaximumLengthCriterion::validate( AnyOption *opt )  {
 }
 
 
+
+
+NCPA::StringSetCriterion::StringSetCriterion( const std::string optionName ) {
+	_choices.clear();
+	_optName = optionName;
+}
+std::string NCPA::StringSetCriterion::description() const {
+	return _optName + " must be in " + this->joinedString() + ".";
+}
+std::string NCPA::StringSetCriterion::failureMessage() const {
+	return _optName + " is not in " + this->joinedString() + ".";
+}
+std::string NCPA::StringSetCriterion::joinedString() const {
+	ostringstream oss;
+	oss << "{ ";
+	for (std::vector<std::string>::const_iterator it = _choices.begin();
+			it != _choices.end(); ++it) {
+		if (it != _choices.begin()) {
+			oss << ", ";
+		}
+		oss << '"' << *it << '"';
+	}
+	oss << " }";
+	return oss.str();
+}
+bool NCPA::StringSetCriterion::validate( AnyOption *opt )  {
+	std::string optValue = opt->getValue( _optName.c_str() );
+	std::vector< std::string >::const_iterator it = std::find( _choices.begin(), _choices.end(), optValue );
+	return ( it != _choices.end() );
+}
+void NCPA::StringSetCriterion::addParameter( std::string newChoice ) {
+	_choices.push_back( newChoice );
+}

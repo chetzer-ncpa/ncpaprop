@@ -103,7 +103,10 @@ namespace NCPA {
 		OPTION_STRING_MINIMUM_LENGTH,
 		
 		/** string .size() must be <= an integer */
-		OPTION_STRING_MAXIMUM_LENGTH
+		OPTION_STRING_MAXIMUM_LENGTH,
+		
+		/** string must match one of a set of strings */
+		OPTION_STRING_SET
 	};
 
 	/**
@@ -182,11 +185,13 @@ namespace NCPA {
 		OptionValidationCriterion * addOption( const std::string &option, OPTION_NOTYPE_TEST_TYPE option_type );
 		OptionValidationCriterion * addOption( const std::string &option, OPTION_INTEGER_TEST_TYPE option_type );
 		OptionValidationCriterion * addOption( const std::string &option, OPTION_FLOAT_TEST_TYPE option_type );
+		OptionValidationCriterion * addOption( const std::string &option, OPTION_STRING_TEST_TYPE option_type );
 		
 		// One argument required
 		OptionValidationCriterion * addOption( const std::string &option, OPTION_INTEGER_TEST_TYPE option_type, int boundary1 );
 		OptionValidationCriterion * addOption( const std::string &option, OPTION_FLOAT_TEST_TYPE option_type, double boundary1 );
 		OptionValidationCriterion * addOption( const std::string &option, OPTION_STRING_TEST_TYPE option_type, int boundary1 );
+		
 		
 		bool validateOptions( AnyOption *opts );
 		std::vector< NCPA::OptionValidationCriterion * > getFailedChecks() const;
@@ -358,6 +363,20 @@ namespace NCPA {
 		
 	private:
 		int _value;
+	};
+	
+	
+	// test whether a string is a member of a set or not
+	class StringSetCriterion : public OptionValidationCriterion {
+	public:
+		StringSetCriterion( const std::string option_name );
+		bool validate(  AnyOption *opts );
+		std::string description() const;
+		std::string failureMessage() const;
+		void addParameter( const std::string choice_name );
+		std::string joinedString() const;
+	private:
+		std::vector< std::string > _choices;
 	};
 	
 }
