@@ -19,13 +19,13 @@ namespace NCPA {
 	enum OPTION_NOTYPE_TEST_TYPE : unsigned int {
 		
 		/** This option/flag must be present. */
-		OPTION_REQUIRED,
+		OPTION_NOTYPE_REQUIRED,
 		
 		/** 
 		  * Designates a group of options, one and only one of which
 		  * must be present.
 		  */
-		OPTION_RADIO_BUTTON
+		OPTION_NOTYPE_RADIO_BUTTON
 	};
 	
 	/**
@@ -155,8 +155,6 @@ namespace NCPA {
 		  */
 		std::string _testedValue;
 	};
-	
-	class 
 	
 	/**
 	  * A class for simple validation of AnyOption parameters.

@@ -83,11 +83,11 @@ void NCPA::AnyOptionValidator::printDescriptions( std::ostream *out ) const {
 NCPA::OptionValidationCriterion * NCPA::AnyOptionValidator::addOption( const std::string &option, OPTION_NOTYPE_TEST_TYPE option_type ) {
 	NCPA::OptionValidationCriterion *crit;
 	switch (option_type) {
-		case OPTION_REQUIRED:
+		case OPTION_NOTYPE_REQUIRED:
 			crit = new NCPA::RequiredCriterion( option );
 			_criteria.push_back( crit );
 			break;
-		case OPTION_RADIO_BUTTON:
+		case OPTION_NOTYPE_RADIO_BUTTON:
 			crit = new NCPA::RadioButtonCriterion( option );
 			_criteria.push_back( crit );
 			break;
