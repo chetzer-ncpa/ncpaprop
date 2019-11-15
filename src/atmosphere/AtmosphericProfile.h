@@ -25,13 +25,15 @@ To-Do List for Overhaul:
 namespace NCPA {
 	
 	enum ATMOSPHERIC_QUANTITY : unsigned int {
+		QUANTITY_NONE = 0,
 		QUANTITY_ALTITUDE,
 		QUANTITY_TEMPERATURE,
 		QUANTITY_WIND_WEST_TO_EAST,
 		QUANTITY_WIND_SOUTH_TO_NORTH,
 		QUANTITY_WIND_VERTICAL,
 		QUANTITY_PRESSURE,
-		QUANTITY_AIR_DENSITY
+		QUANTITY_AIR_DENSITY,
+		QUANTITY_STATIC_SOUND_SPEED
 	};
 
 	/**
@@ -75,9 +77,9 @@ namespace NCPA {
 			virtual double lon() const;
 			
 			/**
-			  * Set the output units for the getter functions t(), u(), etc.
-			  * Internal units should be controlled by subclasses as needed
+			  * Set the units for the getter functions t(), u(), etc.
 			  */
+			//virtual void setUnits( ATMOSPHERIC_QUANTITY q, )
 			virtual void setUnitsTemperature( UNITS_TEMPERATURE u );
 			virtual void setUnitsAltitude( UNITS_DISTANCE u );
 			virtual void setUnitsZonalWind( UNITS_SPEED u );
