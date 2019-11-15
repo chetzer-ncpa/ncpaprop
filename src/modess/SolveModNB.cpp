@@ -125,6 +125,7 @@ void NCPA::SolveModNB::setParams(ProcessOptionsNB *oNB, SampledProfile *atm_prof
   
 	// Note: the rho, Pr, T, zw, mw are computed wrt ground level i.e.
 	// the first value is at the ground level e.g. rho[0] = rho(z_min)
+	// @todo make fill_vector( zvec ) methods in AtmosphericProfile()
 	for (int i=0; i<Nz_grid; i++) {
 		Hgt[i] = (z_min_km + i*dz_km) * 1000.0; // Hgt[0] = zground MSL
 		rho[i] = atm_profile->rho(z_min_km + i*dz_km) * 1000.0;
@@ -312,7 +313,7 @@ int NCPA::SolveModNB::computeModes() {
 		printf (" -> Discrete spectrum: %5.2f m/s to %5.2f m/s\n", 2*PI*freq/k_max, 2*PI*freq/k_min);
     
 		// Initialize Slepc
-		SlepcInitialize(PETSC_NULL,PETSC_NULL,(char*)0,PETSC_NULL); 
+		SlepcInitialize(PETSC_NULL,PETSC_NULL,(char*)0,PETSC_NULL); /* @todo move out of loop? */
 		ierr = MPI_Comm_rank(PETSC_COMM_WORLD,&rank); CHKERRQ(ierr);
 		ierr = MPI_Comm_size(PETSC_COMM_WORLD,&size); CHKERRQ(ierr);  
 
@@ -332,8 +333,8 @@ int NCPA::SolveModNB::computeModes() {
 		ierr = MatGetOwnershipRange(A,&Istart,&Iend);CHKERRQ(ierr);
 		if (Istart==0) 
 			FirstBlock=PETSC_TRUE;
-		if (Iend==Nz_grid) 
-			LastBlock=PETSC_TRUE;
+		if (Iend==Nz_grid) 		/* @todo check if should be Nz_grid-1 */
+			LastBlock=PETSC_TRUE;    
     
 		value[0]=1.0/h2; 
 		value[2]=1.0/h2;
@@ -374,13 +375,13 @@ int NCPA::SolveModNB::computeModes() {
 		/* 
 		Create eigensolver context
 		*/
-		ierr = EPSCreate(PETSC_COMM_WORLD,&eps);CHKERRQ(ierr);
+		ierr = EPSCreate(PETSC_COMM_WORLD,&eps); CHKERRQ(ierr);
 
 		/* 
 		Set operators. In this case, it is a standard eigenvalue problem
 		*/
-		ierr = EPSSetOperators(eps,A,PETSC_NULL);CHKERRQ(ierr);
-		ierr = EPSSetProblemType(eps,EPS_HEP);CHKERRQ(ierr);
+		ierr = EPSSetOperators(eps,A,PETSC_NULL); CHKERRQ(ierr);
+		ierr = EPSSetProblemType(eps,EPS_HEP); CHKERRQ(ierr);
 
 		/*
 		Set solver parameters at runtime
