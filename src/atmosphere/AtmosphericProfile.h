@@ -1,3 +1,15 @@
+/**
+To-Do List for Overhaul:
+
+1.  Add getValue(), getValues(), hasQuantity() that use ATMOSPHERIC_QUANTITY enum
+2.  Replace internal vs. output units with just internal units, change_units method,
+    and overloaded getValue() and getValues() methods with temporary unit conversions.
+*/
+
+
+
+
+
 #ifndef ATMOSPHERIC_PROFILE_H__
 #define ATMOSPHERIC_PROFILE_H__
 
@@ -63,7 +75,8 @@ namespace NCPA {
 			virtual double lon() const;
 			
 			/**
-			  * Set the output units for the getter functions t(), u(), etc
+			  * Set the output units for the getter functions t(), u(), etc.
+			  * Internal units should be controlled by subclasses as needed
 			  */
 			virtual void setUnitsTemperature( UNITS_TEMPERATURE u );
 			virtual void setUnitsAltitude( UNITS_DISTANCE u );
