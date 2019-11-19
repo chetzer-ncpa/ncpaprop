@@ -6,7 +6,14 @@
 #include <iostream>
 
 
-
+/* 
+Constructor for the UnitConverter class.
+Internally the class uses a std::map to associate a 
+std::pair< UNITS_TYPE, UNITS_TYPE > key with a function pointer that performs the
+indicated conversion.  The constructor populates this map with all defined
+conversions.  No memory is dynamically allocated within the constructor so no
+explicit destructor is required.
+*/
 NCPA::UnitConverter::UnitConverter() {
 	
 	// set up valid unit pairs: temperature conversion
@@ -51,30 +58,53 @@ NCPA::UnitConverter::UnitConverter() {
 
 double NCPA::UnitConverter::convert( double in, NCPA::UNITS_TYPE type_in, NCPA::UNITS_TYPE type_out ) {
 	double out = 0.0;
-	this->convert( &in, 1, type_in, type_out, &out );
+	try {
+		// Call the vector conversion with one-element vectors
+		this->convert( &in, 1, type_in, type_out, &out );
+	} catch (const std::out_of_range& oor) {
+		// didn't find the requested conversion, kick it upstairs, user
+		// will have been notified in the called function
+		throw;
+	}
 	return out;
 }
 
-
+/*
+Converts one or more double values from one unit to another.
+*/
 void NCPA::UnitConverter::convert( const double *in, unsigned int nSamples, 
 	NCPA::UNITS_TYPE type_in, NCPA::UNITS_TYPE type_out, double *out ) {
 		
+	// Is the conversion from one type to the same type?
 	if (type_in == type_out) {
+		
+		// If the identity conversion is in place, just return
 		if (in == out) {
 			return;
 		}
+		
+		// Copy the old values to the new values with no conversion
 		std::memcpy( out, in, nSamples*sizeof(double) );
 		return;
 	}
 	
+	// Create a pair with the requested in and out units
 	conversion_pair cpair( type_in, type_out );
+	
+	// function will go here if found
 	conversion_function fPtr;
 	try {
+		// see if the requested conversion exists in the map.  If not, it throws
+		// an out_of_range exception that is caught later
 		fPtr = _map.at( cpair );
+		
+		// perform the requested conversion
 		for (unsigned int i = 0; i < nSamples; i++) {
 			out[ i ] = fPtr( in[ i ] );
 		}
+		
 	} catch (const std::out_of_range& oor) {
+		// didn't find the conversion, notify the user and kick it upstairs
 		std::cerr << "Invalid conversion requested: " << oor.what() << std::endl;
 		throw;
 	}
@@ -82,7 +112,9 @@ void NCPA::UnitConverter::convert( const double *in, unsigned int nSamples,
 }
 
 
-
+/*
+Generates and returns a std::pair with the two unit types, for use as a map key.
+*/
 conversion_pair NCPA::UnitConverter::get_unit_pair_( NCPA::UNITS_TYPE t1, NCPA::UNITS_TYPE t2 ) {
 	return std::make_pair( t1, t2 );
 }
