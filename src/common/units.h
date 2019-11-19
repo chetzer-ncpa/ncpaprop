@@ -74,6 +74,14 @@ namespace NCPA {
 		void convert( const double *in, unsigned int nSamples, 
 			UNITS_TYPE type_in, UNITS_TYPE type_out, double *out );
 	
+		/**
+		 * Convert a single double value from one unit to another.
+		 * @param in		A double value to convert.
+		 * @param type_in	The units to convert from
+		 * @param type_out	The units to convert to
+		 * @return 		The converted value
+		 */
+		double convert( double in, UNITS_TYPE type_in, UNITS_TYPE type_out );
 		
 	
 	protected:

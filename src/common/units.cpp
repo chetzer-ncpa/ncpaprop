@@ -49,6 +49,12 @@ NCPA::UnitConverter::UnitConverter() {
 }
 
 
+double NCPA::UnitConverter::convert( double in, NCPA::UNITS_TYPE type_in, NCPA::UNITS_TYPE type_out ) {
+	double out = 0.0;
+	this->convert( &in, 1, type_in, type_out, &out );
+	return out;
+}
+
 
 void NCPA::UnitConverter::convert( const double *in, unsigned int nSamples, 
 	NCPA::UNITS_TYPE type_in, NCPA::UNITS_TYPE type_out, double *out ) {
