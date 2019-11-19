@@ -1,205 +1,82 @@
 #include "units.h"
+#include <map>
+#include <utility>
 #include <stdexcept>
+#include <cstring>
+#include <iostream>
 
 
-// convert temperature units.
-// Note: to expand for new units, add case statements for input->degC and degC->output
-double NCPA::convert_units( double input, NCPA::UNITS_TEMPERATURE units_in, NCPA::UNITS_TEMPERATURE units_out ) {
+
+NCPA::UnitConverter::UnitConverter() {
 	
-	// check for identity conversion
-	if (units_in == units_out) {
-		return input;
-	}
+	// set up valid unit pairs: temperature conversion
+	_map[ get_unit_pair_( UNITS_TEMPERATURE_CELSIUS, UNITS_TEMPERATURE_FAHRENHEIT ) ] 
+		= convert_temperature_c_to_f_;
+	_map[ get_unit_pair_( UNITS_TEMPERATURE_CELSIUS, UNITS_TEMPERATURE_KELVIN ) ] 
+		= convert_temperature_c_to_k_;
+	_map[ get_unit_pair_( UNITS_TEMPERATURE_KELVIN, UNITS_TEMPERATURE_FAHRENHEIT ) ] 
+		= convert_temperature_k_to_f_;
+	_map[ get_unit_pair_( UNITS_TEMPERATURE_KELVIN, UNITS_TEMPERATURE_CELSIUS ) ]
+		= convert_temperature_k_to_c_;
+	_map[ get_unit_pair_( UNITS_TEMPERATURE_FAHRENHEIT, UNITS_TEMPERATURE_KELVIN ) ] 
+		= convert_temperature_f_to_k_;
+	_map[ get_unit_pair_( UNITS_TEMPERATURE_FAHRENHEIT, UNITS_TEMPERATURE_CELSIUS ) ]
+		= convert_temperature_f_to_c_;
 	
-	double intermediate, output;
+	// length conversion
+	_map[ get_unit_pair_( UNITS_DISTANCE_METERS, UNITS_DISTANCE_KILOMETERS ) ] 
+		= convert_distance_m_to_km_;
+	_map[ get_unit_pair_( UNITS_DISTANCE_KILOMETERS, UNITS_DISTANCE_METERS ) ] 
+		= convert_distance_km_to_m_;
 	
-	// intermediate temperature units: degrees C
-	switch (units_in) {
-		case NCPA::UNITS_TEMPERATURE_C:
-			intermediate = input;
-			break;
-		case NCPA::UNITS_TEMPERATURE_K:
-			intermediate = input - 273.15;
-			break;
-		case NCPA::UNITS_TEMPERATURE_F:
-			intermediate = ( input - 32.0 ) * 5.0 / 9.0;
-			break;
-		default:
-			throw std::invalid_argument( "Unknown or unimplemented input temperature units" );
-	}
+	// speed conversion
+	_map[ get_unit_pair_( UNITS_SPEED_METERS_PER_SECOND, UNITS_SPEED_KILOMETERS_PER_SECOND ) ] 
+		= convert_speed_mps_to_kmps_;
+	_map[ get_unit_pair_( UNITS_SPEED_KILOMETERS_PER_SECOND, UNITS_SPEED_METERS_PER_SECOND ) ] 
+		= convert_speed_kmps_to_mps_;
 	
-	// now convert to proper output units
-	switch (units_out) {
-		case NCPA::UNITS_TEMPERATURE_C:
-			output = intermediate;
-			break;
-		case NCPA::UNITS_TEMPERATURE_K:
-			output = intermediate + 273.15;
-			break;
-		case NCPA::UNITS_TEMPERATURE_F:
-			output = ( intermediate * 9.0 / 5.0 ) + 32.0;
-			break;
-		default:
-			throw std::invalid_argument( "Unknown or unimplemented output temperature units" );
-	}
+	// pressure conversion
+	_map[ get_unit_pair_( UNITS_PRESSURE_PASCALS, UNITS_PRESSURE_MILLIBARS ) ] 
+		= convert_pressure_pa_to_mbar_;
+	_map[ get_unit_pair_( UNITS_PRESSURE_MILLIBARS, UNITS_PRESSURE_PASCALS ) ] 
+		= convert_pressure_mbar_to_pa_;
 	
-	return output;
+	// density conversion
+	_map[ get_unit_pair_( UNITS_DENSITY_KILOGRAMS_PER_CUBIC_METER, UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER ) ] 
+		= convert_density_kgpm3_to_gpcm3_;
+	_map[ get_unit_pair_( UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER, UNITS_DENSITY_KILOGRAMS_PER_CUBIC_METER ) ] 
+		= convert_density_gpcm3_to_kgpm3_;
 }
 
 
 
-// convert distance units.
-// Note: to expand for new units, add case statements for input->m and m->output
-double NCPA::convert_units( double input, NCPA::UNITS_DISTANCE units_in, NCPA::UNITS_DISTANCE units_out ) {
-	
-	// check for identity conversion
-	if (units_in == units_out) {
-		return input;
+void NCPA::UnitConverter::convert( const double *in, unsigned int nSamples, 
+	NCPA::UNITS_TYPE type_in, NCPA::UNITS_TYPE type_out, double *out ) {
+		
+	if (type_in == type_out) {
+		if (in == out) {
+			return;
+		}
+		std::memcpy( out, in, nSamples*sizeof(double) );
+		return;
 	}
 	
-	double intermediate, output;
-	
-	// intermediate distance units: meters
-	switch (units_in) {
-		case NCPA::UNITS_DISTANCE_M:
-			intermediate = input;
-			break;
-		case NCPA::UNITS_DISTANCE_KM:
-			intermediate = input * 1000.0;
-			break;
-		default:
-			throw std::invalid_argument( "Unknown or unimplemented input distance units" );
+	conversion_pair cpair( type_in, type_out );
+	conversion_function fPtr;
+	try {
+		fPtr = _map.at( cpair );
+		for (unsigned int i = 0; i < nSamples; i++) {
+			out[ i ] = fPtr( in[ i ] );
+		}
+	} catch (const std::out_of_range& oor) {
+		std::cerr << "Invalid conversion requested: " << oor.what() << std::endl;
+		throw;
 	}
 	
-	// now convert to proper output units
-	switch (units_out) {
-		case NCPA::UNITS_DISTANCE_M:
-			output = intermediate;
-			break;
-		case NCPA::UNITS_DISTANCE_KM:
-			output = intermediate * 0.001;
-			break;
-		default:
-			throw std::invalid_argument( "Unknown or unimplemented output distance units" );
-	}
-	
-	return output;
-}
-
-
-// convert speed units.
-// Note: to expand for new units, add case statements for input->m/s and m/s->output
-double NCPA::convert_units( double input, NCPA::UNITS_SPEED units_in, NCPA::UNITS_SPEED units_out ) {
-	
-	// check for identity conversion
-	if (units_in == units_out) {
-		return input;
-	}
-	
-	double intermediate, output;
-	
-	// intermediate speed units: meters/sec
-	switch (units_in) {
-		case NCPA::UNITS_SPEED_MPS:
-			intermediate = input;
-			break;
-		case NCPA::UNITS_SPEED_KMPS:
-			intermediate = input * 1000.0;
-			break;
-		default:
-			throw std::invalid_argument( "Unknown or unimplemented input speed units" );
-	}
-	
-	// now convert to proper output units
-	switch (units_out) {
-		case NCPA::UNITS_SPEED_MPS:
-			output = intermediate;
-			break;
-		case NCPA::UNITS_SPEED_KMPS:
-			output = intermediate * 0.001;
-			break;
-		default:
-			throw std::invalid_argument( "Unknown or unimplemented output speed units" );
-	}
-	
-	return output;
-}
-
-
-// convert pressure units.
-// Note: to expand for new units, add case statements for input->Pa and Pa->output
-double NCPA::convert_units( double input, NCPA::UNITS_PRESSURE units_in, NCPA::UNITS_PRESSURE units_out ) {
-	
-	// check for identity conversion
-	if (units_in == units_out) {
-		return input;
-	}
-	
-	double intermediate, output;
-	
-	// intermediate pressure units: Pascals
-	switch (units_in) {
-		case NCPA::UNITS_PRESSURE_PA:
-			intermediate = input;
-			break;
-		case NCPA::UNITS_PRESSURE_MBAR:
-			intermediate = input * 100.0;
-			break;
-		default:
-			throw std::invalid_argument( "Unknown or unimplemented input pressure units" );
-	}
-	
-	// now convert to proper output units
-	switch (units_out) {
-		case NCPA::UNITS_PRESSURE_PA:
-			output = intermediate;
-			break;
-		case NCPA::UNITS_PRESSURE_MBAR:
-			output = intermediate * 0.01;
-			break;
-		default:
-			throw std::invalid_argument( "Unknown or unimplemented output pressure units" );
-	}
-	
-	return output;
 }
 
 
 
-// convert density units.
-// Note: to expand for new units, add case statements for input->kg/m3 and kg/m3->output
-double NCPA::convert_units( double input, NCPA::UNITS_DENSITY units_in, NCPA::UNITS_DENSITY units_out ) {
-	
-	// check for identity conversion
-	if (units_in == units_out) {
-		return input;
-	}
-	
-	double intermediate, output;
-	
-	// intermediate density units: kg/m3
-	switch (units_in) {
-		case NCPA::UNITS_DENSITY_KGPM3:
-			intermediate = input;
-			break;
-		case NCPA::UNITS_DENSITY_GPCM3:
-			intermediate = input * 1000.0;
-			break;
-		default:
-			throw std::invalid_argument( "Unknown or unimplemented input density units" );
-	}
-	
-	// now convert to proper output units
-	switch (units_out) {
-		case NCPA::UNITS_DENSITY_KGPM3:
-			output = intermediate;
-			break;
-		case NCPA::UNITS_DENSITY_GPCM3:
-			output = intermediate * 0.001;
-			break;
-		default:
-			throw std::invalid_argument( "Unknown or unimplemented output density units" );
-	}
-	
-	return output;
+conversion_pair NCPA::UnitConverter::get_unit_pair_( NCPA::UNITS_TYPE t1, NCPA::UNITS_TYPE t2 ) {
+	return std::make_pair( t1, t2 );
 }
