@@ -57,6 +57,12 @@ void NCPA::Units::initialize_() {
 		= convert_density_kgpm3_to_gpcm3_;
 	_map[ get_unit_pair_( UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER, UNITS_DENSITY_KILOGRAMS_PER_CUBIC_METER ) ] 
 		= convert_density_gpcm3_to_kgpm3_;
+	
+	// direction conversion
+	_map[ get_unit_pair_( UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH, UNITS_DIRECTION_DEGREES_COUNTERCLOCKWISE_FROM_EAST ) ] 
+		= convert_direction_geo_to_math_;
+	_map[ get_unit_pair_( UNITS_DIRECTION_DEGREES_COUNTERCLOCKWISE_FROM_EAST, UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH ) ] 
+		= convert_direction_math_to_geo_;
 }
 
 bool NCPA::Units::ready_() {

@@ -18,7 +18,8 @@ NCPA::UNITS_TYPE 	NCPA::UNITS_PRESSURE_PASCALS
 NCPA::UNITS_TYPE 	NCPA::UNITS_PRESSURE_MILLIBARS
 NCPA::UNITS_TYPE 	NCPA::UNITS_DENSITY_KILOGRAMS_PER_CUBIC_METER
 NCPA::UNITS_TYPE 	NCPA::UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER
-
+NCPA::UNITS_TYPE	NCPA::UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH
+NCPA::UNITS_TYPE	NCPA::UNITS_DIRECTION_DEGREES_COUNTERCLOCKWISE_FROM_EAST
 
 Examples:
 	using namespace NCPA;
@@ -40,7 +41,7 @@ Examples:
 
 
 To add a unit and its associated conversions, the following should be done:
-1. Add a symbol to the UNITS_TYPE enum in this file
+1. Add symbol(s) to the UNITS_TYPE enum in this file
 2. Add all appropriate inline static double conversion functions to the 
    protected section of the UnitConverter class in this file
 3. Map the conversion functions to the appropriate unit pairs in the body 
@@ -53,6 +54,9 @@ To add a unit and its associated conversions, the following should be done:
 #include <map>
 #include <utility>
 
+#ifndef PI
+#define PI 3.141592653589793
+#endif
 
 namespace NCPA {
 	
@@ -77,7 +81,13 @@ namespace NCPA {
 		UNITS_PRESSURE_MILLIBARS,			/**< Pressure in mbar */
 		
 		UNITS_DENSITY_KILOGRAMS_PER_CUBIC_METER,	/**< Density in kg/m^3 */
-		UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER	/**< Density in g/cm^3 */
+		UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER,	/**< Density in g/cm^3 */
+		
+		UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH,	/**< Direction in geographic azimuth */
+		UNITS_DIRECTION_DEGREES_COUNTERCLOCKWISE_FROM_EAST,	/**< Direction in "math" convention */
+			
+		UNITS_ANGLE_DEGREES,				/**< Angles in degrees */
+		UNITS_ANGLE_RADIANS				/**< Angles in radians */
 	};
 }
 
@@ -156,6 +166,23 @@ namespace NCPA {
 	
 		inline static double convert_density_kgpm3_to_gpcm3_( double in ) { return in * 0.001; }
 		inline static double convert_density_gpcm3_to_kgpm3_( double in ) { return in * 1000.0; }
+		
+		inline static double convert_angle_degrees_to_radians_( double in ) { return in * PI / 180.0; }
+		inline static double convert_angle_radians_to_degrees_( double in ) { return in * 180.0 / PI; }
+		
+		static double convert_direction_geo_to_math_( double in ) {
+			double out = 90.0 - in;
+			while (out < 0) {
+				out += 360.0;
+			}
+			while (out >= 360.0) {
+				out -= 360.0;
+			}
+			return out;
+		}
+		static double convert_direction_math_to_geo_( double in ) {
+			return convert_direction_geo_to_math_( in );
+		}
 	
 		inline static double convert_no_conversion( double in ) { return in; }
 	};
