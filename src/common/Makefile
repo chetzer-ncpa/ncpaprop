@@ -9,6 +9,11 @@ OBJS=$(SOURCES:.cpp=.o)
 # Set default values for compiler and flags
 TARGET=libcommon.a
 LINKCOMMAND=ar curv 
+STANDARD=-std=c++14
+DEBUG=-ggdb
+WARNING_FLAGS=-Wall
+CXXFLAGS=-fpic -c $(DEBUG) $(STANDARD) $(WARNING_FLAGS)
+INCLUDEPATH=-I. -I../common -I../atmosphere -I/usr/local/include
 #CXX=g++
 
 .PHONY: clean tidy common
@@ -22,7 +27,7 @@ libcommon.a: $(OBJS)
 	cp $@ ../../lib
 
 %.o: %.cpp
-	${CXX} -fpic -c -ggdb -std=c++11 -Wall -I. -I../common -I../atmosphere -I/usr/local/include -o $@ $<
+	${CXX} $(CXXFLAGS) $(INCLUDEPATH) -o $@ $<
 
 clean::
 	rm -rf *.o $(TARGET) $(OBJS)

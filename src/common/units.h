@@ -6,6 +6,7 @@ NCPA::UnitConverter: 	Handle all defined unit conversions.  Can convert single v
 			Will throw an exception if an undefined conversion is requested.
 
 Constants:
+NCPA::UNITS_TYPE	NCPA::UNITS_NONE
 NCPA::UNITS_TYPE 	NCPA::UNITS_TEMPERATURE_CELSIUS
 NCPA::UNITS_TYPE 	NCPA::UNITS_TEMPERATURE_KELVIN
 NCPA::UNITS_TYPE 	NCPA::UNITS_TEMPERATURE_FAHRENHEIT
@@ -21,22 +22,21 @@ NCPA::UNITS_TYPE 	NCPA::UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER
 
 Examples:
 	using namespace NCPA;
-	UnitConverter *uc = new UnitConverter();
-
+	
 	// Convert a single value
 	double temp_c = 50.0, temp_k;
-	temp_k = uc->convert( temp_c, UNITS_TEMPERATURE_CELSIUS, UNITS_TEMPERATURE_KELVIN );
+	temp_k = Units::convert( temp_c, UNITS_TEMPERATURE_CELSIUS, UNITS_TEMPERATURE_KELVIN );
 	// or
-	uc->convert( &temp_c, 1, UNITS_TEMPERATURE_CELSIUS, UNITS_TEMPERATURE_KELVIN, &temp_k );
+	Units::convert( &temp_c, 1, UNITS_TEMPERATURE_CELSIUS, UNITS_TEMPERATURE_KELVIN, &temp_k );
 
 	// Convert a vector of values
 	double Pa_vec[ 20 ] = { ... };
 	double mbar_vec[ 20 ];
-	uc->convert( Pa_vec, 20, UNITS_PRESSURE_PASCALS, UNITS_PRESSURE_MILLIBARS, mbar_vec );
+	Units::convert( Pa_vec, 20, UNITS_PRESSURE_PASCALS, UNITS_PRESSURE_MILLIBARS, mbar_vec );
 
 	// Can also convert in-place
 	double distance[ 300 ] = { ... };
-	uc->convert( distance, 300, UNITS_DISTANCE_METERS, UNITS_DISTANCE_KILOMETERS, distance );
+	Units::convert( distance, 300, UNITS_DISTANCE_METERS, UNITS_DISTANCE_KILOMETERS, distance );
 
 
 To add a unit and its associated conversions, the following should be done:
@@ -91,15 +91,9 @@ namespace NCPA {
 	/**
 	 * A class for converting units.
 	 */
-	class UnitConverter {
+	class Units {
 	
 	public:
-		/**
-		 * Default constructor.
-		 * Creates a new UnitConverter object and populates the conversions.
-		 */
-		UnitConverter();
-		
 		/**
 		 * Convert an array of numbers from one unit to another.
 		 * @param in 		A pointer to an array of double values
@@ -110,7 +104,7 @@ namespace NCPA {
 		 * @throws out_of_range	if an undefined conversion is requested.
 		 * @see UNITS_TYPE
 		 */
-		void convert( const double *in, unsigned int nSamples, 
+		static void convert( const double *in, unsigned int nSamples, 
 			UNITS_TYPE type_in, UNITS_TYPE type_out, double *out );
 	
 		/**
@@ -121,12 +115,12 @@ namespace NCPA {
 		 * @return 		The converted value
 		 * @throws out_of_range	if an undefined conversion is requested.
 		 */
-		double convert( double in, UNITS_TYPE type_in, UNITS_TYPE type_out );
+		static double convert( double in, UNITS_TYPE type_in, UNITS_TYPE type_out );
 		
 	
 	protected:
 		
-		conversion_map _map; 
+		static conversion_map _map; 
 
 		/**
 		 * Generates a pair object associating the two units to be converted.
@@ -134,7 +128,10 @@ namespace NCPA {
 		 * @param t2		The unit to be converted to
 		 * @return 		A pair object that can be used as a map key
 		 */
-		conversion_pair get_unit_pair_( UNITS_TYPE t1, UNITS_TYPE t2 );
+		static conversion_pair get_unit_pair_( UNITS_TYPE t1, UNITS_TYPE t2 );
+		
+		static void initialize_();
+		static bool ready_();
 
 		// These functions are for specific unit conversions 
 		inline static double convert_temperature_f_to_c_( double in ) { return ( in - 32.0 ) * 5.0 / 9.0; }
@@ -162,6 +159,7 @@ namespace NCPA {
 	
 		inline static double convert_no_conversion( double in ) { return in; }
 	};
+
 
 }
 
