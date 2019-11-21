@@ -201,8 +201,8 @@ void NCPA::Units::convert( const double *in, unsigned int nSamples,
 		
 	} catch (const std::out_of_range& oor) {
 		// didn't find the conversion, notify the user and kick it upstairs
-		std::cerr << "Invalid conversion requested: " << oor.what() << std::endl;
-		throw;
+		throw std::out_of_range( "Undefined conversion requested from " 
+			+ NCPA::toString( type_in ) + " to " + NCPA::toString( type_out ) );
 	}
 	
 }
