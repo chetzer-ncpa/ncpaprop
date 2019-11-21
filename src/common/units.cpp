@@ -42,7 +42,7 @@ std::string NCPA::toString( UNITS_TYPE u ) {
 		case UNITS_ANGLE_RADIANS:
 			return "radians";
 		default:
-			throw std::out_of_bounds( "Unrecognized units type" );
+			throw std::out_of_range( "Unrecognized units type" );
 	}
 }
 
@@ -82,7 +82,7 @@ std::string NCPA::toStr( UNITS_TYPE u ) {
 		case UNITS_ANGLE_RADIANS:
 			return "rad";
 		default:
-			throw std::out_of_bounds( "Unrecognized units type" );
+			throw std::out_of_range( "Unrecognized units type" );
 	}
 }
 
