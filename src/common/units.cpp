@@ -7,6 +7,85 @@
 
 conversion_map NCPA::Units::_map = conversion_map();
 
+std::string NCPA::toString( UNITS_TYPE u ) {
+	switch (u) {
+		case UNITS_NONE:
+			return "No units";
+		case UNITS_TEMPERATURE_KELVIN:
+			return "degrees Kelvin";
+		case UNITS_TEMPERATURE_CELSIUS:
+			return "degrees Celsius";
+		case UNITS_TEMPERATURE_FAHRENHEIT:
+			return "degrees Fahrenheit";
+		case UNITS_DISTANCE_METERS:
+			return "meters";
+		case UNITS_DISTANCE_KILOMETERS:
+			return "kilometers";
+		case UNITS_SPEED_METERS_PER_SECOND:
+			return "meters per second";
+		case UNITS_SPEED_KILOMETERS_PER_SECOND:
+			return "kilometers per second";
+		case UNITS_PRESSURE_PASCALS:
+			return "Pascals";
+		case UNITS_PRESSURE_MILLIBARS:
+			return "millibars";
+		case UNITS_DENSITY_KILOGRAMS_PER_CUBIC_METER:
+			return "kilograms per cubic meter";
+		case UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER:
+			return "grams per cubic centimeter";
+		case UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH:
+			return "degrees clockwise from North";
+		case UNITS_DIRECTION_DEGREES_COUNTERCLOCKWISE_FROM_EAST:
+			return "degrees counterclockwise from East";
+		case UNITS_ANGLE_DEGREES:
+			return "degrees";
+		case UNITS_ANGLE_RADIANS:
+			return "radians";
+		default:
+			throw std::out_of_bounds( "Unrecognized units type" );
+	}
+}
+
+
+std::string NCPA::toStr( UNITS_TYPE u ) {
+	switch (u) {
+		case UNITS_NONE:
+			return "N/A";
+		case UNITS_TEMPERATURE_KELVIN:
+			return "K";
+		case UNITS_TEMPERATURE_CELSIUS:
+			return "C";
+		case UNITS_TEMPERATURE_FAHRENHEIT:
+			return "F";
+		case UNITS_DISTANCE_METERS:
+			return "m";
+		case UNITS_DISTANCE_KILOMETERS:
+			return "km";
+		case UNITS_SPEED_METERS_PER_SECOND:
+			return "m/s";
+		case UNITS_SPEED_KILOMETERS_PER_SECOND:
+			return "km/s";
+		case UNITS_PRESSURE_PASCALS:
+			return "Pa";
+		case UNITS_PRESSURE_MILLIBARS:
+			return "mbar";
+		case UNITS_DENSITY_KILOGRAMS_PER_CUBIC_METER:
+			return "kg/m3";
+		case UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER:
+			return "g/cm3";
+		case UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH:
+			return "deg CW from N";
+		case UNITS_DIRECTION_DEGREES_COUNTERCLOCKWISE_FROM_EAST:
+			return "deg CCW from E";
+		case UNITS_ANGLE_DEGREES:
+			return "deg";
+		case UNITS_ANGLE_RADIANS:
+			return "rad";
+		default:
+			throw std::out_of_bounds( "Unrecognized units type" );
+	}
+}
+
 
 /* 
 Constructor for the UnitConverter class.

@@ -42,9 +42,10 @@ Examples:
 
 To add a unit and its associated conversions, the following should be done:
 1. Add symbol(s) to the UNITS_TYPE enum in this file
-2. Add all appropriate inline static double conversion functions to the 
+2. Add cases to toString() and toStr() functions.
+3. Add all appropriate inline static double conversion functions to the 
    protected section of the UnitConverter class in this file
-3. Map the conversion functions to the appropriate unit pairs in the body 
+4. Map the conversion functions to the appropriate unit pairs in the body 
    of the UnitConverter constructor in units.cpp
 */
 
@@ -65,30 +66,48 @@ namespace NCPA {
 	 * Constants that can be used to identify or specify units.
 	 */
 	enum UNITS_TYPE : unsigned int {
-		UNITS_NONE = 0,					/**< Indicates no units */
+		UNITS_NONE = 0,						/**< Indicates no units */
 		
-		UNITS_TEMPERATURE_KELVIN,			/**< Temperature in Kelvin */
-		UNITS_TEMPERATURE_CELSIUS,			/**< Temperature in Celsius */
-		UNITS_TEMPERATURE_FAHRENHEIT,			/**< Temperature in Fahrenheit */
+		UNITS_TEMPERATURE_KELVIN,				/**< Temperature in Kelvin */
+		UNITS_TEMPERATURE_CELSIUS,				/**< Temperature in Celsius */
+		UNITS_TEMPERATURE_FAHRENHEIT,				/**< Temperature in Fahrenheit */
 		
-		UNITS_DISTANCE_METERS,				/**< Distance in meters */
-		UNITS_DISTANCE_KILOMETERS,			/**< Distance in kilometers */
+		UNITS_DISTANCE_METERS,					/**< Distance in meters */
+		UNITS_DISTANCE_KILOMETERS,				/**< Distance in kilometers */
 		
-		UNITS_SPEED_METERS_PER_SECOND,			/**< Speed in m/s */
-		UNITS_SPEED_KILOMETERS_PER_SECOND,		/**< Speed in km/s */
+		UNITS_SPEED_METERS_PER_SECOND,				/**< Speed in m/s */
+		UNITS_SPEED_KILOMETERS_PER_SECOND,			/**< Speed in km/s */
 		
-		UNITS_PRESSURE_PASCALS,				/**< Pressure in Pa */
-		UNITS_PRESSURE_MILLIBARS,			/**< Pressure in mbar */
+		UNITS_PRESSURE_PASCALS,					/**< Pressure in Pa */
+		UNITS_PRESSURE_MILLIBARS,				/**< Pressure in mbar */
 		
-		UNITS_DENSITY_KILOGRAMS_PER_CUBIC_METER,	/**< Density in kg/m^3 */
-		UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER,	/**< Density in g/cm^3 */
+		UNITS_DENSITY_KILOGRAMS_PER_CUBIC_METER,		/**< Density in kg/m^3 */
+		UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER,		/**< Density in g/cm^3 */
 		
-		UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH,	/**< Direction in geographic azimuth */
+		UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH,		/**< Direction in geographic azimuth */
 		UNITS_DIRECTION_DEGREES_COUNTERCLOCKWISE_FROM_EAST,	/**< Direction in "math" convention */
 			
-		UNITS_ANGLE_DEGREES,				/**< Angles in degrees */
-		UNITS_ANGLE_RADIANS				/**< Angles in radians */
+		UNITS_ANGLE_DEGREES,					/**< Angles in degrees */
+		UNITS_ANGLE_RADIANS					/**< Angles in radians */
 	};
+	
+	/**
+	 * Returns the string identification of the units type.
+	 *
+	 * @param type		The units constant to translate
+	 * @return		The string identifying the constant
+	 * @throws out_of_bounds if the constant is not recognized
+	 */
+	std::string toString( UNITS_TYPE type );
+	
+	/**
+	 * Returns the abbreviated string identification of the units type.
+	 *
+	 * @param type		The units constant to translate
+	 * @return		The abbreviation identifying the constant
+	 * @throws out_of_bounds if the constant is not recognized
+	 */
+	std::string toStr( UNITS_TYPE type );
 }
 
 
