@@ -200,6 +200,7 @@ namespace NCPA {
 			return out;
 		}
 		static double convert_direction_math_to_geo_( double in ) {
+			// the same calculation works in both directions
 			return convert_direction_geo_to_math_( in );
 		}
 	
