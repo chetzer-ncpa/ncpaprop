@@ -2,11 +2,53 @@
   * Extensions of and tools used with the AnyOption class presented in anyoption.h
   */
 
+
+/*
+Example:
+
+	// Option parser and validator
+	using namespace std;
+	using namespace NCPA;
+	AnyOption *opt = new AnyOption();
+	AnyOptionValidator *validator = new AnyOptionValidator();
+
+	// Required and must be positive
+	opt->setOption( "positive_int" );  	
+	validator->addTest( "positive_int", NCPA::OPTION_REQUIRED );
+	validator->addTest( "positive_int", NCPA::OPTION_INTEGER_POSITIVE );
+
+	// one and only one of these must exist
+	opt->setFlag( "flagOne" );		
+	opt->setFlag( "flagTwo" );		
+	opt->setFlag( "flagThree" );
+	OptionTest *radioTest = validator->addTest( "groupOne", NCPA::OPTION_RADIO_BUTTON );
+	radioTest->addStringParameter( "flagOne" );
+	radioTest->addStringParameter( "flagTwo" );
+	radioTest->addStringParameter( "flagThree" );
+
+	// Optional, but must be one of a set of values
+	opt->setOption( "str_set" );
+	OptionTest *setTest = validator->addTest( "str_set", NCPA::OPTION_STRING_SET );
+	setCrit->addStringParameter( "this" );
+	setCrit->addStringParameter( "is" );
+	setCrit->addStringParameter( "a" );
+	setCrit->addStringParameter( "test" );
+
+	// get options from file and validate
+	opt->processFile( "./tester.options" );
+	if (validator->validateOptions( opt )) {
+		cout << endl << "All options OK" << endl;
+	} else {
+		cout << endl << "Error.  Failed options:" << endl;
+		validator->printFailedTests( &cout );
+	}
+
+*/
+
 #ifndef __NCPA_ANYOPTION_EXTENSIONS__
 #define __NCPA_ANYOPTION_EXTENSIONS__
 
 #include "anyoption.h"
-#include <map>
 #include <string>
 #include <vector>
 
@@ -16,22 +58,16 @@ namespace NCPA {
 	  * These indicate tests that do not depend on the type of the tested
 	  * value.
 	  */
-	enum OPTION_NOTYPE_TEST_TYPE : unsigned int {
+	enum OPTION_TEST_TYPE : unsigned int {
 		
 		/** This option/flag must be present. */
-		OPTION_NOTYPE_REQUIRED,
+		OPTION_REQUIRED,
 		
 		/** 
 		  * Designates a group of options, one and only one of which
 		  * must be present.
 		  */
-		OPTION_NOTYPE_RADIO_BUTTON
-	};
-	
-	/**
-	  * These indicate tests that apply to integer values
-	  */
-	enum OPTION_INTEGER_TEST_TYPE : unsigned int {
+		OPTION_RADIO_BUTTON,
 		
 		/** Integer that must be > 0 */
 		OPTION_INTEGER_POSITIVE,
@@ -43,13 +79,13 @@ namespace NCPA {
 		OPTION_INTEGER_GREATER_THAN,
 		
 		/** Integer that must be >= another integer */
-		OPTION_INTEGER_GREATER_THAN_EQUAL,
+		OPTION_INTEGER_GREATER_THAN_OR_EQUAL,
 		
 		/** Integer that must be < another integer */
 		OPTION_INTEGER_LESS_THAN,
 		
 		/** Integer that must be <= another integer */
-		OPTION_INTEGER_LESS_THAN_EQUAL,
+		OPTION_INTEGER_LESS_THAN_OR_EQUAL,
 		
 		/** Integer that must == 0 */
 		OPTION_INTEGER_ZERO,
@@ -61,13 +97,7 @@ namespace NCPA {
 		OPTION_INTEGER_EQUAL,
 		
 		/** Integer that must != another integer */
-		OPTION_INTEGER_NOT_EQUAL
-	};
-	
-	/**
-	  * These indicate tests that apply to double values
-	  */
-	enum OPTION_FLOAT_TEST_TYPE : unsigned int {
+		OPTION_INTEGER_NOT_EQUAL,
 		
 		/** Double that must > 0.0 */
 		OPTION_FLOAT_POSITIVE,
@@ -79,25 +109,25 @@ namespace NCPA {
 		OPTION_FLOAT_GREATER_THAN,
 		
 		/** Double that must >= another double */
-		OPTION_FLOAT_GREATER_THAN_EQUAL,
+		OPTION_FLOAT_GREATER_THAN_OR_EQUAL,
 		
 		/** Double that must < another double */
 		OPTION_FLOAT_LESS_THAN,
 		
 		/** Double that must <= another double */
-		OPTION_FLOAT_LESS_THAN_EQUAL,
+		OPTION_FLOAT_LESS_THAN_OR_EQUAL,
+		
+		/** Double that must == another double (standard floating point caveats apply) */
+		OPTION_FLOAT_EQUAL,
+		
+		/** Double that must != another double (standard floating point caveats apply) */
+		OPTION_FLOAT_NOT_EQUAL,
 		
 		/** Double that must == 0.0 (standard floating point caveats apply) */
 		OPTION_FLOAT_ZERO,
 		
 		/** Double that must != 0.0 (standard floating point caveats apply) */
-		OPTION_FLOAT_NONZERO			
-	};
-	
-	/**
-	  * These indicate tests that apply to string values
-	  */
-	enum OPTION_STRING_TEST_TYPE : unsigned int {
+		OPTION_FLOAT_NONZERO,		
 		
 		/** string .size() must be >= an integer */
 		OPTION_STRING_MINIMUM_LENGTH,
@@ -113,12 +143,12 @@ namespace NCPA {
 	  * Abstract base class for validation criteria.  See subclass descriptions
 	  * for general usage, you won't instantiate this class directly.
 	  */
-	class OptionValidationCriterion {
+	class OptionTest {
 	public:
 		/**
 		  * Destructor.  Cleans up any dynamically allocated memory.
 		  */
-		virtual ~OptionValidationCriterion();
+		virtual ~OptionTest();
 		
 		/**
 		  * Run the validation checks specified for this option
@@ -146,6 +176,45 @@ namespace NCPA {
 		  */
 		virtual std::string optionName() const;
 		
+		/**
+		  * Add an integer parameter to the test, if applicable.
+		  *
+		  * Does nothing unless overridden.
+		  * @param param	The parameter to add to the test
+		  */
+		virtual void addIntegerParameter( int param );
+		
+		/**
+		  * Add an integer parameter to the test, if applicable.
+		  *
+		  * Does nothing unless overridden.
+		  * @param param	The parameter to add to the test
+		  */
+		virtual void addFloatParameter( double param );
+		
+		/**
+		  * Add an integer parameter to the test, if applicable.
+		  *
+		  * Does nothing unless overridden.
+		  * @param param	The parameter to add to the test
+		  */
+		virtual void addStringParameter( const std::string param );
+		
+		/**
+		  * Indicates if the test is ready to be run (i.e. any necessary 
+		  * parameters have been supplied).
+		  *
+		  * @return true if the test can be run meaningfully, false otherwise
+		  */
+		virtual bool ready() const;
+		
+		/**
+		  * Returns the value the test is checking for, as a string.
+		  *
+		  * @return the test value in string form, implementation-dependent
+		  */
+		virtual std::string valueString() const = 0;
+		
 	protected:
 		
 		/**
@@ -157,6 +226,11 @@ namespace NCPA {
 		  * The value that was last checked against.
 		  */
 		std::string _testedValue;
+		
+		/**
+		  * All information has been provided and the test can be run.
+		  */
+		bool _ready;
 	};
 	
 	/**
@@ -182,199 +256,276 @@ namespace NCPA {
 		  * @return A pointer to the test criterion, so that additional 
 		  *         parameters may be specified.
 		  */
-		OptionValidationCriterion * addOption( const std::string &option, OPTION_NOTYPE_TEST_TYPE option_type );
-		OptionValidationCriterion * addOption( const std::string &option, OPTION_INTEGER_TEST_TYPE option_type );
-		OptionValidationCriterion * addOption( const std::string &option, OPTION_FLOAT_TEST_TYPE option_type );
-		OptionValidationCriterion * addOption( const std::string &option, OPTION_STRING_TEST_TYPE option_type );
+		OptionTest * addTest( const std::string option, OPTION_TEST_TYPE option_type );
 		
-		// One argument required
-		OptionValidationCriterion * addOption( const std::string &option, OPTION_INTEGER_TEST_TYPE option_type, int boundary1 );
-		OptionValidationCriterion * addOption( const std::string &option, OPTION_FLOAT_TEST_TYPE option_type, double boundary1 );
-		OptionValidationCriterion * addOption( const std::string &option, OPTION_STRING_TEST_TYPE option_type, int boundary1 );
-		
-		
+		/**
+		  * Runs all indicated tests.
+		  *
+		  * Runs all tests in unspecified order.  Failed tests can be retrieved with the
+		  * getFailedTests() or printed with printFailedTests().
+		  *
+		  * @param opts 	A pointer containing the parameters
+		  * @return true if all tests pass, false otherwise
+		  * @see getFailedTests()
+		  * @see printFailedTests()
+		  */
 		bool validateOptions( AnyOption *opts );
-		std::vector< NCPA::OptionValidationCriterion * > getFailedChecks() const;
-		void printFailedChecks( std::ostream *out ) const;
+		
+		/**
+		  * Retrieves the failed test objects.
+		  *
+		  * @return a vector of pointers to the test objects reporting failure
+		  */
+		std::vector< NCPA::OptionTest * > getFailedTests() const;
+		
+		/**
+		  * Prints the failure messages of all tests reporting failure.
+		  *
+		  * @param out The string to which to print them.
+		  */
+		void printFailedTests( std::ostream *out ) const;
+		
+		/**
+		  * Prints the description messages of all tests.
+		  *
+		  * @param out The string to which to print them.
+		  */
 		void printDescriptions( std::ostream *out ) const;
+		
 	private:
-		std::vector< NCPA::OptionValidationCriterion * > _criteria;
-		std::vector< NCPA::OptionValidationCriterion * > _failed;
+		std::vector< NCPA::OptionTest * > _criteria;
+		std::vector< NCPA::OptionTest * > _failed;
 	};
 	
 	
-	// Test whether an option is present
-	class RequiredCriterion : public OptionValidationCriterion {
+	/** Test whether an option is present */
+	class RequiredTest : public OptionTest {
 	public:
-		RequiredCriterion( const std::string option_name );
+		RequiredTest( const std::string option_name );
 		bool validate(  AnyOption *opts );
 		std::string description() const;
 		std::string failureMessage() const;
+		std::string valueString() const;
 	};
 	
-	// Test whether one and only one of a set is 
-	class RadioButtonCriterion : public OptionValidationCriterion {
+	/** Test whether one and only one of a set of options or flags is present */
+	class RadioButtonTest : public OptionTest {
 	public:
-		RadioButtonCriterion( const std::string option_name );
+		RadioButtonTest( const std::string option_name );
 		bool validate(  AnyOption *opts );
 		std::string description() const;
 		std::string failureMessage() const;
-		void addParameter( const std::string option_name );
-		std::string joinedString() const;
+		void addStringParameter( const std::string param );
+		std::string valueString() const;
 		std::vector< std::string > lastMatched() const;
+		bool ready() const;
 	private:
 		std::vector< std::string > _buttons;
 		std::vector< std::string > _matched;
 	};
 
-	// Test whether an integer option is greater than (optionally or equal to)
-	class IntegerGreaterThanCriterion : public OptionValidationCriterion {
+	/** Test whether an integer option is greater than a parameter */
+	class IntegerGreaterThanTest : public OptionTest {
 	public:
-		IntegerGreaterThanCriterion( const std::string option_name, int comparison, bool trueIfEquals );
+		IntegerGreaterThanTest( const std::string option_name );
 		bool validate(  AnyOption *opts ) ;
 		std::string description() const;
 		std::string failureMessage() const;
-		
+		void addIntegerParameter( int param );
+		std::string valueString() const;
 	private:
 		bool _trueIfEquals;
 		int _value;
 	};
 
-	// Test whether an integer option is less than (optionally or equal to)
-	class IntegerLessThanCriterion : public OptionValidationCriterion {
+	/** Test whether an integer option is greater than or equal to a parameter */
+	class IntegerGreaterThanOrEqualToTest : public OptionTest {
 	public:
-		IntegerLessThanCriterion( const std::string option_name, int comparison, bool trueIfEquals );
+		IntegerGreaterThanOrEqualToTest( const std::string option_name );
 		bool validate(  AnyOption *opts ) ;
 		std::string description() const;
 		std::string failureMessage() const;
-		
+		void addIntegerParameter( int param );
+		std::string valueString() const;
+	private:
+		bool _trueIfEquals;
+		int _value;
+	};
+
+	/** Test whether an integer option is less than a parameter */
+	class IntegerLessThanTest : public OptionTest {
+	public:
+		IntegerLessThanTest( const std::string option_name );
+		bool validate(  AnyOption *opts ) ;
+		std::string description() const;
+		std::string failureMessage() const;
+		void addIntegerParameter( int param );
+		std::string valueString() const;
+	private:
+		bool _trueIfEquals;
+		int _value;
+	};
+	
+	// Test whether an integer option is less than
+	class IntegerLessThanOrEqualToTest : public OptionTest {
+	public:
+		IntegerLessThanOrEqualToTest( const std::string option_name );
+		bool validate(  AnyOption *opts ) ;
+		std::string description() const;
+		std::string failureMessage() const;
+		void addIntegerParameter( int param );
+		std::string valueString() const;
 	private:
 		bool _trueIfEquals;
 		int _value;
 	};
 	
 	// Test whether an integer option is equal to
-	class IntegerEqualsCriterion : public OptionValidationCriterion {
+	class IntegerEqualToTest : public OptionTest {
 	public:
-		IntegerEqualsCriterion( const std::string option_name, int comparison );
+		IntegerEqualToTest( const std::string option_name );
 		bool validate( AnyOption *opts ) ;
 		std::string description() const;
 		std::string failureMessage() const;
-		
+		void addIntegerParameter( int param );
+		std::string valueString() const;
 	private:
 		int _value;
 	};
 	
 	// Test whether an integer option is not equal to
-	class IntegerNotEqualsCriterion : public OptionValidationCriterion {
+	class IntegerNotEqualToTest : public OptionTest {
 	public:
-		IntegerNotEqualsCriterion( const std::string option_name, int comparison );
+		IntegerNotEqualToTest( const std::string option_name );
 		bool validate( AnyOption *opts ) ;
 		std::string description() const;
 		std::string failureMessage() const;
-		
+		void addIntegerParameter( int param );
+		std::string valueString() const;
 	private:
 		int _value;
 	};
 	
-	// Test whether an integer option is greater than (optionally or equal to)
-	class IntegerBetweenCriterion : public OptionValidationCriterion {
-	public:
-		IntegerBetweenCriterion( const std::string option_name, int minval, int maxval, bool trueIfEquals );
-		bool validate(  AnyOption *opts ) ;
-		std::string description() const;
-		std::string failureMessage() const;
-		
-	private:
-		bool _trueIfEquals;
-		int _minval, _maxval;
-	};
 	
-	
-	// Test whether a floating point option is greater than (optionally or equal to)
-	class FloatGreaterThanCriterion : public OptionValidationCriterion {
+	// Test whether a floating point option is greater than
+	class FloatGreaterThanTest : public OptionTest {
 	public:
-		FloatGreaterThanCriterion( const std::string option_name, double comparison, bool trueIfEquals );
+		FloatGreaterThanTest( const std::string option_name );
 		bool validate( AnyOption *opts ) ;
 		std::string description() const;
 		std::string failureMessage() const;
-		
+		void addFloatParameter( double param );
+		std::string valueString() const;
+	private:
+		bool _trueIfEquals;
+		double _value;
+	};
+	
+	// Test whether a floating point option is greater than or equal to
+	class FloatGreaterThanOrEqualToTest : public OptionTest {
+	public:
+		FloatGreaterThanOrEqualToTest( const std::string option_name );
+		bool validate( AnyOption *opts ) ;
+		std::string description() const;
+		std::string failureMessage() const;
+		void addFloatParameter( double param );
+		std::string valueString() const;
 	private:
 		bool _trueIfEquals;
 		double _value;
 	};
 
-	// Test whether a floating point option is less than (optionally or equal to)
-	class FloatLessThanCriterion : public OptionValidationCriterion {
+	// Test whether a floating point option is less than
+	class FloatLessThanTest : public OptionTest {
 	public:
-		FloatLessThanCriterion( const std::string option_name, double comparison, bool trueIfEquals );
+		FloatLessThanTest( const std::string option_name );
 		bool validate( AnyOption *opts ) ;
 		std::string description() const;
 		std::string failureMessage() const;
-		
+		void addFloatParameter( double param );
+		std::string valueString() const;
+	private:
+		bool _trueIfEquals;
+		double _value;
+	};
+	
+	// Test whether a floating point option is less than or equal to
+	class FloatLessThanOrEqualToTest : public OptionTest {
+	public:
+		FloatLessThanOrEqualToTest( const std::string option_name );
+		bool validate( AnyOption *opts ) ;
+		std::string description() const;
+		std::string failureMessage() const;
+		void addFloatParameter( double param );
+		std::string valueString() const;
 	private:
 		bool _trueIfEquals;
 		double _value;
 	};
 	
 	// Test whether a floating point option is equal to (standard caveats apply)
-	class FloatEqualsCriterion : public OptionValidationCriterion {
+	class FloatEqualToTest : public OptionTest {
 	public:
-		FloatEqualsCriterion( const std::string option_name, double comparison );
+		FloatEqualToTest( const std::string option_name );
 		bool validate( AnyOption *opts ) ;
 		std::string description() const;
 		std::string failureMessage() const;
-		
+		void addFloatParameter( double param );
+		std::string valueString() const;
 	private:
 		double _value;
 	};
 	
 	// Test whether a floating point option is not equal to (standard caveats apply)
-	class FloatNotEqualsCriterion : public OptionValidationCriterion {
+	class FloatNotEqualToTest : public OptionTest {
 	public:
-		FloatNotEqualsCriterion( const std::string option_name, double comparison );
+		FloatNotEqualToTest( const std::string option_name );
 		bool validate( AnyOption *opts ) ;
 		std::string description() const;
 		std::string failureMessage() const;
-		
+		void addFloatParameter( double param );
+		std::string valueString() const;
 	private:
 		double _value;
 	};
 	
 	// Test whether the length of a string is at least N characters
-	class StringMinimumLengthCriterion : public OptionValidationCriterion {
+	class StringMinimumLengthTest : public OptionTest {
 	public:
-		StringMinimumLengthCriterion( const std::string option_name, int minLength );
+		StringMinimumLengthTest( const std::string option_name );
 		bool validate( AnyOption *opts ) ;
 		std::string description() const;
 		std::string failureMessage() const;
-		
+		void addIntegerParameter( int param );
+		std::string valueString() const;
 	private:
 		int _value;
 	};
 	
 	// Test whether the length of a string is at most N characters
-	class StringMaximumLengthCriterion : public OptionValidationCriterion {
+	class StringMaximumLengthTest : public OptionTest {
 	public:
-		StringMaximumLengthCriterion( const std::string option_name, int maxLength );
+		StringMaximumLengthTest( const std::string option_name );
 		bool validate( AnyOption *opts ) ;
 		std::string description() const;
 		std::string failureMessage() const;
-		
+		void addIntegerParameter( int param );
+		std::string valueString() const;
 	private:
 		int _value;
 	};
 	
 	
 	// test whether a string is a member of a set or not
-	class StringSetCriterion : public OptionValidationCriterion {
+	class StringSetTest : public OptionTest {
 	public:
-		StringSetCriterion( const std::string option_name );
+		StringSetTest( const std::string option_name );
 		bool validate(  AnyOption *opts );
 		std::string description() const;
 		std::string failureMessage() const;
-		void addParameter( const std::string choice_name );
-		std::string joinedString() const;
+		void addStringParameter( const std::string choice_name );
+		std::string valueString() const;
+		bool ready() const;
 	private:
 		std::vector< std::string > _choices;
 	};
