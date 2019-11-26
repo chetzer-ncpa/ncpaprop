@@ -829,7 +829,10 @@ std::string NCPA::StringMinimumLengthTest::valueString() const {
 	return this->ready() ? std::to_string(_value) : "";
 }
 void NCPA::StringMinimumLengthTest::addIntegerParameter( int param ) {
-	_value = param;
+	if (param < 0) {
+		throw std::range_error( "String length must not be negative" );
+	}
+	_value = (unsigned int)param;
 	_ready = true;
 }
 
@@ -868,7 +871,10 @@ std::string NCPA::StringMaximumLengthTest::valueString() const {
 	return this->ready() ? std::to_string(_value) : "";
 }
 void NCPA::StringMaximumLengthTest::addIntegerParameter( int param ) {
-	_value = param;
+	if (param < 0) {
+		throw std::range_error( "String length must not be negative" );
+	}
+	_value = (unsigned int)param;
 	_ready = true;
 }
 

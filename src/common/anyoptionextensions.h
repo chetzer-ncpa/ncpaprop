@@ -499,7 +499,7 @@ namespace NCPA {
 		void addIntegerParameter( int param );
 		std::string valueString() const;
 	private:
-		int _value;
+		unsigned int _value;
 	};
 	
 	// Test whether the length of a string is at most N characters
@@ -512,7 +512,7 @@ namespace NCPA {
 		void addIntegerParameter( int param );
 		std::string valueString() const;
 	private:
-		int _value;
+		unsigned int _value;
 	};
 	
 	
