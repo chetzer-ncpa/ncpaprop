@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 
 ###### IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT #####
 #
@@ -17,14 +17,17 @@
 # using your system package manager to install these beforehand.  You will need wget to
 # download SLEPc, or change the command to use your command-line downloader of choice.
 #
+# Note: in Ubuntu, the prerequisites can be obtained with:
+#   sudo apt-get install libblas-dev liblapack-dev libopenmpi-dev 
+#
 ###### IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT #####
 
 ##### Start Customizing Here #####
 
 # Install locations: Where the PETSc libraries should be installed.  These will be
 # created if they do not already exist
-PETSC_INSTALL_BASE=/Users/claus/code/petsc
-SLEPC_INSTALL_BASE=/Users/claus/code/slepc
+PETSC_INSTALL_BASE=/home/claus/code/petsc
+SLEPC_INSTALL_BASE=/home/claus/code/slepc
 
 # Current SLEPc version, which can be checked and updated from http://slepc.upv.es/download/
 SLEPC_VERSION="3.12.0"
@@ -58,10 +61,10 @@ if [[ -d "$PETSC_INSTALL_BASE" ]] ; then
 else
 	echo "Creating $PETSC_INSTALL_BASE"
 	mkdir -p $PETSC_INSTALL_BASE
-        if [[ ! -d "$PETSC_INSTALL_BASE" ]] ; then
-                echo "Error creating $PETSC_INSTALL_BASE"
-                exit
-        fi
+	if [[ ! -d "$PETSC_INSTALL_BASE" ]] ; then
+		echo "Error creating $PETSC_INSTALL_BASE"
+		exit
+	fi
 fi
 cd $PETSC_INSTALL_BASE
 export PETSC_DIR=$PETSC_INSTALL_BASE
@@ -106,10 +109,10 @@ if [[ -d "$SLEPC_INSTALL_BASE" ]] ; then
 else
 	echo "Creating $SLEPC_INSTALL_BASE"
 	mkdir -p $SLEPC_INSTALL_BASE
-        if [[ ! -d "$SLEPC_INSTALL_BASE" ]] ; then
-                echo "Error creating $SLEPC_INSTALL_BASE"
-                exit
-        fi
+	if [[ ! -d "$SLEPC_INSTALL_BASE" ]] ; then
+		echo "Error creating $SLEPC_INSTALL_BASE"
+		exit
+	fi
 fi
 cd $SLEPC_INSTALL_BASE
 export SLEPC_DIR="${SLEPC_INSTALL_BASE}/slepc-${SLEPC_VERSION}"
@@ -132,7 +135,11 @@ make
 
 # provide info
 echo "Installation complete"
-echo "When configuring ncpaprop for compilation, use the flags --with-petsc-real=arch-${OS_TYPE}-c-real${debug_str} and --with-petsc-complex=arch-${OS_TYPE}-c-complex${debug_str}"
+#echo "When configuring ncpaprop for compilation, use the flags --with-petsc-real=arch-${OS_TYPE}-c-real${debug_str} and --with-petsc-complex=arch-${OS_TYPE}-c-complex${debug_str}"
+echo "To make ncpaprop in one step, first edit the Makefile and set:"
+echo "PETSC_ARCH_REAL = arch-${OS_TYPE}-c-real${debug_str}"
+echo "PETSC_ARCH_COMPLEX = arch-${OS_TYPE}-c-complex${debug_str}"
+echo "Then, type 'make all'"
 echo ""
 echo "Add to ~/.bashrc:"
 echo "export PETSC_DIR=${PETSC_DIR}"
