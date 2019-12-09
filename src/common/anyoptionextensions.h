@@ -64,6 +64,12 @@ namespace NCPA {
 		OPTION_REQUIRED,
 		
 		/** 
+		  * This option/flag must be present if at least one of a set of 
+		  * other options is present. 
+		*/
+		OPTION_REQUIRED_IF,
+		
+		/** 
 		  * Designates a group of options, one and only one of which
 		  * must be present.
 		  */
@@ -306,6 +312,20 @@ namespace NCPA {
 		std::string description() const;
 		std::string failureMessage() const;
 		std::string valueString() const;
+	};
+	
+	/** Test whether an option is present if another option is also set */
+	class RequiredIfOtherIsPresentTest : public OptionTest {
+	public:
+		RequiredIfOtherIsPresentTest( const std::string option_name );
+		bool validate( AnyOption *opts );
+		std::string description() const;
+		std::string failureMessage() const;
+		std::string valueString() const;
+		void addStringParameter( const std::string param );
+		bool ready() const;
+	private:
+		std::vector< std::string > _prereqs;
 	};
 	
 	/** Test whether one and only one of a set of options or flags is present */

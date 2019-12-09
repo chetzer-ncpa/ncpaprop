@@ -101,25 +101,23 @@ NCPA::OptionTest * NCPA::AnyOptionValidator::addTest( const std::string option,
 	switch (option_type) {
 		case OPTION_REQUIRED:
 			crit = new NCPA::RequiredTest( option );
-			_criteria.push_back( crit );
+			break;
+		case OPTION_REQUIRED_IF:
+			crit = new NCPA::RequiredIfOtherIsPresentTest( option );
 			break;
 		case OPTION_RADIO_BUTTON:
 			crit = new NCPA::RadioButtonTest( option );
-			_criteria.push_back( crit );
 			break;
 		case OPTION_STRING_SET:
 			crit = new NCPA::StringSetTest( option );
-			_criteria.push_back( crit );
 			break;
 		case OPTION_INTEGER_POSITIVE:
 			crit = new NCPA::IntegerGreaterThanTest( option );
 			crit->addIntegerParameter( 0 );
-			_criteria.push_back( crit );
 			break;
 		case OPTION_INTEGER_NEGATIVE:
 			crit = new NCPA::IntegerLessThanTest( option );
 			crit->addIntegerParameter( 0 );
-			_criteria.push_back( crit );
 			break;
 		case OPTION_INTEGER_ZERO:
 			crit = new NCPA::IntegerEqualToTest( option );
@@ -129,87 +127,69 @@ NCPA::OptionTest * NCPA::AnyOptionValidator::addTest( const std::string option,
 		case OPTION_INTEGER_NONZERO:
 			crit = new NCPA::IntegerNotEqualToTest( option );
 			crit->addIntegerParameter( 0 );
-			_criteria.push_back( crit );
 			break;
 		case OPTION_FLOAT_POSITIVE:
 			crit = new NCPA::FloatGreaterThanTest( option );
 			crit->addFloatParameter( 0.0 );
-			_criteria.push_back( crit );
 			break;
 		case OPTION_FLOAT_NEGATIVE:
 			crit = new NCPA::FloatLessThanTest( option );
 			crit->addFloatParameter( 0.0 );
-			_criteria.push_back( crit );
 			break;
 		case OPTION_FLOAT_ZERO:
 			crit = new NCPA::FloatEqualToTest( option );
 			crit->addFloatParameter( 0.0 );
-			_criteria.push_back( crit );
 			break;
 		case OPTION_FLOAT_NONZERO:
 			crit = new NCPA::FloatNotEqualToTest( option );
 			crit->addFloatParameter( 0.0 );
-			_criteria.push_back( crit );
 			break;
 		case OPTION_INTEGER_GREATER_THAN:
 			crit = new NCPA::IntegerGreaterThanTest( option );
-			_criteria.push_back( crit );
 			break;
 		case OPTION_INTEGER_GREATER_THAN_OR_EQUAL:
 			crit = new NCPA::IntegerGreaterThanOrEqualToTest( option );
-			_criteria.push_back( crit );
 			break;
 		case OPTION_INTEGER_LESS_THAN:
 			crit = new NCPA::IntegerLessThanTest( option );
-			_criteria.push_back( crit );
 			break;
 		case OPTION_INTEGER_LESS_THAN_OR_EQUAL:
 			crit = new NCPA::IntegerLessThanOrEqualToTest( option );
-			_criteria.push_back( crit );
 			break;
 		case OPTION_INTEGER_EQUAL:
 			crit = new NCPA::IntegerEqualToTest( option );
-			_criteria.push_back( crit );
 			break;
 		case OPTION_INTEGER_NOT_EQUAL:
 			crit = new NCPA::IntegerNotEqualToTest( option );
-			_criteria.push_back( crit );
 			break;
 		case OPTION_FLOAT_GREATER_THAN:
 			crit = new NCPA::FloatGreaterThanTest( option );
-			_criteria.push_back( crit );
 			break;
 		case OPTION_FLOAT_GREATER_THAN_OR_EQUAL:
 			crit = new NCPA::FloatGreaterThanOrEqualToTest( option );
-			_criteria.push_back( crit );
 			break;
 		case OPTION_FLOAT_LESS_THAN:
 			crit = new NCPA::FloatLessThanTest( option );
-			_criteria.push_back( crit );
 			break;
 		case OPTION_FLOAT_LESS_THAN_OR_EQUAL:
 			crit = new NCPA::FloatLessThanOrEqualToTest( option );
-			_criteria.push_back( crit );
 			break;
 		case OPTION_FLOAT_EQUAL:
 			crit = new NCPA::FloatEqualToTest( option );
-			_criteria.push_back( crit );
 			break;
 		case OPTION_FLOAT_NOT_EQUAL:
 			crit = new NCPA::FloatNotEqualToTest( option );
-			_criteria.push_back( crit );
 			break;
 		case OPTION_STRING_MINIMUM_LENGTH:
 			crit = new NCPA::StringMinimumLengthTest( option );
-			_criteria.push_back( crit );
 			break;
 		case OPTION_STRING_MAXIMUM_LENGTH:
 			crit = new NCPA::StringMaximumLengthTest( option );
-			_criteria.push_back( crit );
 			break;
 		default:
 			throw std::invalid_argument( "Undefined test requested" );
 	}
+	_criteria.push_back( crit );
 	return crit;
 }
 
@@ -260,7 +240,63 @@ bool NCPA::RequiredTest::validate( AnyOption *opt )  {
 std::string NCPA::RequiredTest::valueString() const { return ""; }
 
 
-
+NCPA::RequiredIfOtherIsPresentTest::RequiredIfOtherIsPresentTest( const std::string optionName ) {
+	_optName = optionName;
+	_ready = false;
+}
+std::string NCPA::RequiredIfOtherIsPresentTest::description() const {
+	return _optName + " is present if one of " + this->valueString() 
+		+ " is also present.";
+}
+std::string NCPA::RequiredIfOtherIsPresentTest::failureMessage() const {
+	return "One of " + this->valueString() + " is set, but " + _optName
+		+ " is not set.";
+}
+std::string NCPA::RequiredIfOtherIsPresentTest::valueString() const {
+	ostringstream oss;
+	oss << "{ ";
+	for (std::vector<std::string>::const_iterator it = _prereqs.begin();
+			it != _prereqs.end(); ++it) {
+		if (it != _prereqs.begin()) {
+			oss << ", ";
+		}
+		oss << *it;
+	}
+	oss << " }";
+	return oss.str();
+}
+bool NCPA::RequiredIfOtherIsPresentTest::validate( AnyOption *opt )  {
+	if (! this->ready() ) {
+		throw new std::logic_error( _optName + ": no options defined." );
+	}
+	bool prereqs_met = false;
+	
+	// see if at least one prereq is present
+	for (std::vector<std::string>::const_iterator it = _prereqs.begin();
+			it != _prereqs.end(); ++it) {
+		if (opt->getValue( it->c_str()) != NULL || opt->getFlag( it->c_str() ) ) {
+			prereqs_met = true;
+		}
+	}
+	
+	// if prereq(s) there, check for option presence
+	if (prereqs_met) {
+		if (opt->getValue( _optName.c_str()) != NULL || opt->getFlag( _optName.c_str() ) ) {
+			return true;
+		} else {
+			return false;
+		}
+	} else {
+		return true;
+	}
+}
+void NCPA::RequiredIfOtherIsPresentTest::addStringParameter( const std::string param ) {
+	std::string str = param;
+	_prereqs.push_back( str );
+}
+bool NCPA::RequiredIfOtherIsPresentTest::ready() const {
+	return !( _prereqs.empty() );
+}
 
 
 
