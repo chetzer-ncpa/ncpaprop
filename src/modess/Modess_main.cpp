@@ -10,7 +10,6 @@
 #include "anyoption.h"
 #include "ProcessOptionsNB.h"
 #include "SolveModNB.h"
-//#include "Modess_lib.h"
 #include "util.h"
 
 //#ifndef Pi
@@ -155,7 +154,7 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
 	opt->addUsage( " --azimuth_end            End azimuth ([0,360] degrees, clockwise from North)" );
 	opt->addUsage( " --azimuth_step           Step by which the azimuth is changed (in degrees)" );    	
 	opt->addUsage( "" );  
-  	
+
 	opt->addUsage( "OPTIONAL [defaults]:" );
 	opt->addUsage( " --maxheight_km           Calculation grid height in km above MSL [150 km]" );
 	opt->addUsage( " --zground_km             Height of the ground level above MSL [ 0 km ]" );  
@@ -181,7 +180,6 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
 	opt->addUsage( "                          where scP is the scaled pressure such that it can" );
 	opt->addUsage( "                          be directly ingested into pape to obtain the" );
 	opt->addUsage( "                          transmission loss." );
-
 	opt->addUsage( " --c_min                  Specify the minimum phase speed (in m/sec)." );
 	opt->addUsage( "                          This is used in conjunction with the --wvnum_filter" );
 	opt->addUsage( "                          flag which turns on wavenumber filtering by" );
@@ -240,7 +238,7 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
 	opt->addUsage( "                          real(k(i)), imag(k(i)), Mode(i)(z_src), Mode(i)(z_rcv)" );
 	opt->addUsage( "  atm_profile.nm          z,u,v,w,t,d,p,c,c_eff" );  
 	opt->addUsage( "" );
-  
+
 	opt->addUsage( " Examples (run from 'samples' directory): " );
 	opt->addUsage( "    ../bin/Modess --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --azimuth 90 --freq 0.1" );
 	opt->addUsage( "" );  
@@ -304,6 +302,3 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
 
 	return opt;
 }
-
-
- 
