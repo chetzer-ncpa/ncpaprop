@@ -114,6 +114,7 @@ bool NCPA::fexists( const char *filename ) {
 	return tf;
 }
 
+/*
 std::string NCPA::deblank( const std::string orig ) {
         int index = orig.length();
         while (orig[(int)--index] == ' ') ;
@@ -122,6 +123,7 @@ std::string NCPA::deblank( const std::string orig ) {
         while (temp[++index] == ' ') ;
         return temp.substr(index);
 }
+*/
 
 double NCPA::deg2rad( double d ) {
 	return d * PI / 180.0;
@@ -305,4 +307,20 @@ void NCPA::free_c3Darray(std::complex<double> ***data, size_t xlen, size_t ylen)
       }
   }
   free(data);
+}
+
+std::string NCPA::deblank( const std::string& str ) {
+	return NCPA::deblank( str, " \t\n" );
+}
+
+std::string NCPA::deblank( const std::string& str, const std::string& whitespace ) {
+	const size_t strBegin = str.find_first_not_of( whitespace );
+	if (strBegin == std::string::npos) {
+		return "";
+	}
+
+	const size_t strEnd = str.find_last_not_of( whitespace );
+	const size_t strRange = strEnd - strBegin + 1;
+
+	return str.substr( strBegin, strRange );
 }

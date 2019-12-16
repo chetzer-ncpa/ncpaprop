@@ -25,7 +25,7 @@ namespace NCPA {
 	int max( int, int );
 	std::string timeAsString( double d );
 	bool fexists( const char *filename );
-	std::string deblank( const std::string orig );
+	std::string deblank( const std::string& orig );
 	double deg2rad( double );
 	double rad2deg( double );
 	
@@ -40,6 +40,8 @@ namespace NCPA {
 	
 	// Split a string into more strings by tokenizing
 	std::vector< std::string > split( std::string input, std::string delimiters );
+	std::string deblank( const std::string& str, const std::string& whitespace );
+
 	bool checkAzimuthLimits( double toCheck, double target, double tolerance );
 	double normalizeAzimuth( double in );
 	
