@@ -16,15 +16,17 @@ architecture names in $PETSC_DIR and $SLEPC_DIR, the build likely succeeded.  Yo
 double-check this by running (using architecture names arch-linux-c-real and
 arch-linux-c-complex):
 
-cd $PETSC_DIR
-make PETSC_ARCH=arch-linux-c-real check
-make PETSC_ARCH=arch-linuc-c-complex check
-cd $SLEPC_DIR
-make PETSC_ARCH=arch-linux-c-real check
-make PETSC_ARCH=arch-linuc-c-complex check
+  `
+  cd $PETSC_DIR
+  make PETSC_ARCH=arch-linux-c-real check
+  make PETSC_ARCH=arch-linuc-c-complex check
+  cd $SLEPC_DIR
+  make PETSC_ARCH=arch-linux-c-real check
+  make PETSC_ARCH=arch-linuc-c-complex check
+  `
 
-Installation problems with PETSc and SLEPc are outside the scope of this document to
-solve, and the user is directed to the documentation for those packages.
+  Installation problems with PETSc and SLEPc are outside the scope of this document to
+  solve, and the user is directed to the documentation for those packages.
 
 2. Edit the master Makefile in this directory and set the PETSC_ARCH_REAL and
 PETSC_ARCH_COMPLEX variables to the values selected when they were built.  These
