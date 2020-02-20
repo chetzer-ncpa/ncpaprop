@@ -4,7 +4,8 @@
 
 namespace NCPA {
   class SolveCModNB {
-    public:           
+    public:      
+/*     
       SolveCModNB( \
             double freq, int Naz, double azi, double delta_az, \
             string atmosfile, string wind_units, NCPA::SampledProfile *atm_profile, \
@@ -15,11 +16,12 @@ namespace NCPA {
             double tol, int write_2D_TLoss, \
             bool write_phase_speeds, bool write_dispersion, bool write_modes, \
             bool Nby2prop, bool turnoff_WKB); // constructor
-            
+*/
+	                
       SolveCModNB(ProcessOptionsNB *oNB, NCPA::SampledProfile *atm_profile); // constructor 2
       
       //~SolveCModNB(); //destructor          
-
+      /*
       void setParams( \
             double freq1, int Naz, double azi1, double delta_az, \
             string atmosfile1, string wind_units1, NCPA::SampledProfile *atm_prof, \
@@ -30,7 +32,8 @@ namespace NCPA {
             int Lamb_wave_BC1, double tol1, int write_2D_TLoss1, \
             bool write_phase_speeds1, bool write_dispersion1, bool write_modes1, \
             bool Nby2prop1, bool turnoff_WKB1); 
-      
+*/
+            
       void setParams(ProcessOptionsNB *oNB, NCPA::SampledProfile *atm_prof);                 	
 		
       void printParams();
@@ -54,7 +57,7 @@ namespace NCPA {
 
       int getTLoss2D(int nz, int select_modes, double dz, int n_r, double dr, double z_src, double *rho, complex<double> *k_s, complex<double> **v_s);
 
-      int writeDispersion(int select_modes, double dz, double z_src, double z_rcv, double freq, complex<double> *k_s, complex<double> **v_s);
+      //int writeDispersion(int select_modes, double dz, double z_src, double z_rcv, double freq, complex<double> *k_s, complex<double> **v_s);
       
       int writeDispersion(int select_modes, double dz, double z_src, double z_rcv, double freq, complex<double> *k_s, complex<double> **v_s, double *rho);    
 

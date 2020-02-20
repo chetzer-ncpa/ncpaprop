@@ -119,7 +119,7 @@ int main(int argc,char **argv) {
 	  // Determining pressure correction when initial distance is 
 	  // other than 1 km from source. Otherwise, it is just 1.
     raypathParams RP( ER );
-    double presCor = RP.pressCorrection( ssInit );
+    //double presCor = RP.pressCorrection( ssInit );  // CHH 191029: Unused
     
     //----------------------------------------------------------
     //Generating model waveform
@@ -201,22 +201,22 @@ int main(int argc,char **argv) {
 
 void save2disk( const char *fn, double atfac, linray ER, nonray NR )
 {
-    char filename1[256], filename2[256], filename3[256], filename4[256];
+    char filename1[256], filename2[256], filename3[256];
        
     sprintf(filename1, "pressure_wf_evolution.dat");
     sprintf(filename2, "ray_params.dat");
     sprintf(filename3, "final_waveform_spectrum.dat");
     //sprintf(filename4, "%s_Cef_%03.0f_%.3f_%.1fEx.txt", tmp, yield, ER.tv, atfac );    
     
-    FILE *acoPress, *acoParam, *acoSpect, *acoCeffe;
+    FILE *acoPress, *acoParam, *acoSpect;
     acoPress = fopen( filename1, "w");
     acoParam = fopen( filename2, "w");
     acoSpect = fopen( filename3, "w");
     //acoCeffe = fopen( filename4, "w");
     
-    double cef;
-    double theta = ER.th;
-    double phi   = ER.ph;
+    //double cef;            // CHH 191029: Unused
+    //double theta = ER.th;  // CHH 191029: Unused
+    //double phi   = ER.ph;  // CHH 191029: Unused
     
     // save effective sound speed
     //for(unsigned int i = 0; i<prf.zz.size(); i++)
@@ -286,7 +286,7 @@ printf("Saving ray parameters in file %s\n", rayf.c_str());
 printf("with columns: [ x, y, z, raypath_length, travel_time, OMEGA, Jacobian ]\n");
 
 //printf("R.xx.size()=%d\n",R.xx.size());
-for(int i = 0; i < R.xx.size(); i++)  {
+for(unsigned int i = 0; i < R.xx.size(); i++)  {
   //printf("i=%d\n",i);
   fprintf (fp, "%15.5E %15.5E %15.5E %15.5E %15.5E %15.5E %15.5E\n", R.xx[i], R.yy[i], R.zz[i], R.ss[i], R.tr[i], R.om[i], R.ja[i]); 
 }

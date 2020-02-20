@@ -4,6 +4,7 @@
 #include <fftw3.h>
 #include "anyoption.h"
 #include "ModBB_lib.h"
+#include "util.h"
 
 using namespace NCPA;
 using namespace std;
@@ -102,7 +103,7 @@ int count_rows_arbcol(const char *filename) {
   return answer;
 }
  
- 
+/*
 double **dmatrix(long nr, long nc) {
   // allocate a double matrix
   double **v;
@@ -122,7 +123,7 @@ int free_dmatrix(double**v, long nr, long nc) {
   delete v;
   return 0;
 }
-
+*/
 
 double half_hann(int begin,int end,int i) {
   double answer;
@@ -1086,7 +1087,7 @@ complex<double> ***getPz1z2 (int I1, int I2, double r1, double r2, double dr, st
   epio8 = II*exp(-II*(Pi/4.0))/sqrt(8.0*Pi);
 
   // allocate 3-rank tensor
-  Pfzr = c3Darray(Nfiles, Nrng_steps, lenI);
+  Pfzr = NCPA::c3Darray(Nfiles, Nrng_steps, lenI);
 
   // iterate over sorted file list
   jj = 0;
@@ -1167,7 +1168,7 @@ complex<double> ***getPz1z2 (int I1, int I2, double r1, double r2, double dr, st
   return Pfzr;
 }
 
-
+/*
 complex<double> **cmatrix(long nr, long nc) {
   // allocate a complex<double> matrix
   complex<double> **v;
@@ -1186,14 +1187,14 @@ int free_cmatrix(complex<double>**v, long nr, long nc) {
   delete v;
   return 0;
 }
-
-
-complex<double> ***c3Darray(size_t xlen, size_t ylen, size_t zlen)
+*/
+/*
+std::complex<double> ***c3Darray(size_t xlen, size_t ylen, size_t zlen)
 {
-  complex<double> ***p;
+  std::complex<double> ***p;
   size_t i, j;
 
-  if ((p = (complex<double> ***) calloc(xlen, (sizeof(*p)))) == NULL) {
+  if ((p = (std::complex<double> ***) calloc(xlen, (sizeof(*p)))) == NULL) {
       perror("calloc 1");
       return NULL;
   }
@@ -1202,7 +1203,7 @@ complex<double> ***c3Darray(size_t xlen, size_t ylen, size_t zlen)
       p[i] = NULL;
 
   for (i=0; i < xlen; ++i)
-      if ((p[i] = (complex<double> **) calloc(ylen, (sizeof (*p[i])))) == NULL) {
+      if ((p[i] = (std::complex<double> **) calloc(ylen, (sizeof (*p[i])))) == NULL) {
           perror("calloc 2");
           free_c3Darray(p, xlen, ylen);
           return NULL;
@@ -1214,7 +1215,7 @@ complex<double> ***c3Darray(size_t xlen, size_t ylen, size_t zlen)
 
   for (i=0; i < xlen; ++i)
       for (j=0; j < ylen; ++j)
-          if ((p[i][j] = (complex<double> *) calloc(zlen, (sizeof (*p[i][j])))) == NULL) {
+          if ((p[i][j] = (std::complex<double> *) calloc(zlen, (sizeof (*p[i][j])))) == NULL) {
               perror("calloc 3");
               free_c3Darray(p, xlen, ylen);
               return NULL;
@@ -1223,7 +1224,7 @@ complex<double> ***c3Darray(size_t xlen, size_t ylen, size_t zlen)
 }
 
 
-void free_c3Darray(complex<double> ***data, size_t xlen, size_t ylen)
+void free_c3Darray(std::complex<double> ***data, size_t xlen, size_t ylen)
 {
   size_t i, j;
   for (i=0; i < xlen; ++i) {
@@ -1235,6 +1236,7 @@ void free_c3Darray(complex<double> ***data, size_t xlen, size_t ylen)
   }
   free(data);
 }
+*/
 
 // comparison, freq in filename.
 bool compare_freq (string first, string second)
@@ -1414,7 +1416,7 @@ int process2DPressure(double R_start_km, double width_km, double height_km, \
           cout << " ... saving 2D field at time " << tt << " secs to file " << filename << endl;
           saveMatrix2bin(filename, pp, lenI, Nx);
       }
-      free_c3Darray(Pfzr, Nfiles, Nx);		
+      NCPA::free_c3Darray(Pfzr, Nfiles, Nx);		
   }
 
   delete [] S;
@@ -1436,7 +1438,7 @@ int saveMatrix2bin(const char *filename, double **M, int nr, int nc) {
   return 0;
 }
 
-
+/*
 int saveAtm_profile(NCPA::SampledProfile *p, std::string wind_units) {
   int i, nz;
   double z, u, v, c, ceff, azi_rad; //dz_km; 
@@ -1462,7 +1464,7 @@ int saveAtm_profile(NCPA::SampledProfile *p, std::string wind_units) {
   printf("Interpolated atmospheric profiles (z,u,v,w,t,d,p,c,c_eff) saved in: atm_profile.bbnm\n");
   return 0;
 }
-
+*/
 
 int load_source_pulse_td(string srcpulsetdfn, vector<double> &t, vector<double> &tdp ) {
   // load time domain source pulse: time (s) | amplitude

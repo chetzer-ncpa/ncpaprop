@@ -121,6 +121,8 @@ namespace NCPA {
 		
 		virtual unsigned int z2ind_( double z_in ) const;
 		virtual unsigned int z2ind_floor_( double z_in ) const;
+		
+		virtual int save_profile( std::string wind_units ) const;
 	};
 }
 

@@ -6,8 +6,9 @@
 #include "geographic.h"
 #include "util.h"
 
+#ifndef PI
 #define PI 3.14159
-
+#endif
 
 // Geographic functions and such.
 

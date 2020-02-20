@@ -19,6 +19,7 @@ using namespace std;
 //
 // constructor
 //
+/*
 NCPA::SolveWMod::SolveWMod( \
             double freq, int Naz, double azi_min, double azi_step, \
             string atmosfile, string wind_units, NCPA::SampledProfile *atm_profile, \
@@ -38,6 +39,7 @@ NCPA::SolveWMod::SolveWMod( \
               Nby2Dprop, turnoff_WKB);
                      
 }
+*/
 
 //
 // constructor 2
@@ -60,7 +62,7 @@ NCPA::SolveWMod::~SolveWMod()
   //printf("SolveModNB destructor done.\n");
 }
 */
-
+/*
 void NCPA::SolveWMod::setParams( \
             double freq1, int Naz1, double azi1, double azi_step1, \
             string atmosfile1, string wind_units1, NCPA::SampledProfile *atm_prof, \
@@ -100,6 +102,7 @@ void NCPA::SolveWMod::setParams( \
   turnoff_WKB        = turnoff_WKB1;	
   
   // get Hgt, zw, mw, T, rho, Pr in SI units; they are freed in computeModes()
+  // @todo why?
   Hgt = new double [Nz_grid];
   zw  = new double [Nz_grid];
   mw  = new double [Nz_grid];
@@ -139,7 +142,7 @@ void NCPA::SolveWMod::setParams( \
       mw[i]  = atm_profile->v(z_min_km + i*dz_km)*kmps2mps;
   }							
 }
-
+*/
 
 // setParams() prototype 2
 void NCPA::SolveWMod::setParams(ProcessOptionsNB *oNB, SampledProfile *atm_prof)
@@ -160,7 +163,7 @@ void NCPA::SolveWMod::setParams(ProcessOptionsNB *oNB, SampledProfile *atm_prof)
   maxheight          = oNB->getMaxheight();
   sourceheight       = oNB->getSourceheight();
   receiverheight     = oNB->getReceiverheight();
-  tol				   			 = oNB->getSlepcTolerance();    
+  tol		     = oNB->getSlepcTolerance();    
   Nz_grid            = oNB->getNz_grid();
   Nrng_steps         = oNB->getNrng_steps();
   Lamb_wave_BC       = oNB->getLamb_wave_BC();
@@ -290,7 +293,7 @@ int NCPA::SolveWMod::computeModes() {
   Mat            A, B;       
   EPS            eps;  		// eigenproblem solver context      
   ST             stx;
-  const EPSType  type;
+  EPSType  type;		// CHH 191028: removed const qualifier
   PetscReal      re, im;
   PetscScalar    kr, ki, *xr_;
   Vec            xr, xi;
@@ -324,7 +327,7 @@ int NCPA::SolveWMod::computeModes() {
   k_min = 0; 
   k_max = 0;
 
-  rng_step = maxrange/Nrng_steps;  						// range step [meters]
+  rng_step = maxrange/Nrng_steps;  		// range step [meters]
   dz       = (maxheight - z_min)/Nz_grid;	// the z-grid spacing
   h2       = dz*dz;
   //dz_km    = dz/1000.0;
@@ -507,8 +510,11 @@ int NCPA::SolveWMod::computeModes() {
     ierr = MatAssemblyBegin(B,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
     ierr = MatAssemblyEnd  (B,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
 
-    ierr = MatGetVecs(A,PETSC_NULL,&xr);CHKERRQ(ierr);
-    ierr = MatGetVecs(A,PETSC_NULL,&xi);CHKERRQ(ierr);
+    // CHH 191028: MatGetVecs is deprecated, changed to MatCreateVecs
+    ierr = MatCreateVecs(A,PETSC_NULL,&xr);CHKERRQ(ierr);
+    ierr = MatCreateVecs(A,PETSC_NULL,&xi);CHKERRQ(ierr);
+    //ierr = MatGetVecs(A,PETSC_NULL,&xr);CHKERRQ(ierr);
+    //ierr = MatGetVecs(A,PETSC_NULL,&xi);CHKERRQ(ierr);
 
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
                   Create the eigensolver and set various options
@@ -1468,7 +1474,7 @@ int NCPA::SolveWMod::writeDispersion(int select_modes, double dz, double z_src, 
   return 0;
 }
 
-
+/*
 int NCPA::SolveWMod::writeDispersion(int select_modes, double dz, double z_src, double z_rcv, double freq, complex<double> *k_pert, double **v_s)
 {
   int i;
@@ -1491,7 +1497,7 @@ int NCPA::SolveWMod::writeDispersion(int select_modes, double dz, double z_src, 
   printf("           file %s created\n", dispersion_file);
   return 0;
 }
-
+*/
 
 int NCPA::SolveWMod::writePhaseSpeeds(int select_modes, double freq, complex<double> *k_pert)
  {

@@ -1,3 +1,8 @@
+#export PETSC_ARCH:=arch-darwin-c-real
+include ${PETSC_DIR}/lib/petsc/conf/variables
+#include ${PETSC_DIR}/lib/petsc/conf/rules
+include ${SLEPC_DIR}/lib/slepc/conf/slepc_common
+
 SOURCES=AtmosphericProfile.cpp AtmosphericSpecification.cpp JetProfile.cpp ProfileGroup.cpp SampledProfile.cpp Slice.cpp Sounding.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 
@@ -16,9 +21,9 @@ libatmosphere.a: $(OBJECTS)
 	cp $@ ../../lib
 
 %.o: %.cpp
-	g++ -fpic -c -ggdb -Wall -I. -I../common -I../atmosphere -I/usr/local/include -o $@ $<
+	$(CXX) -fpic -c -ggdb -Wall -I. -I../common -I../atmosphere -I/usr/local/include -o $@ $<
 
-clean:
+clean::
 	rm -rf *.o $(TARGET) $(OBJECTS)
 
 tidy:

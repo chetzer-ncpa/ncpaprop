@@ -22,7 +22,7 @@ using namespace NCPA;
 using namespace std;
 
 //utility functions
-
+/*
 double **dmatrix(long nr, long nc) {
   // allocate a double matrix
   double **v;
@@ -41,7 +41,7 @@ int free_dmatrix(double**v, long nr, long nc) {
   delete v;
   return 0;
 }
-
+*/
 
 /*
 int plotwGNUplot(double freq, bool write_2D_TLoss) {
@@ -211,7 +211,8 @@ NCPA::SampledProfile * get_RngDepnd_profile(string env_file, double R_meters) {
   atm_prof->setPropagationAzimuth(az*180.0/Pi);
 
   if (1) {
-      saveSampledProfile("./profile.int", atm_prof);
+      //saveSampledProfile("./profile.int", atm_prof);
+	  atm_prof->save_profile( "mpers" );
       //printf("in get_RngDepnd_profile(): saving the interpolated profile\n");
   }
 
@@ -310,7 +311,7 @@ NCPA::SampledProfile * get_RngDepndProfiles_ascii( \
   return atm_prof;
 }
 
-
+/*
 int saveSampledProfile(string filename, SampledProfile *p) {
 
   int i, Nz;
@@ -358,7 +359,7 @@ int saveSampledProfile(string filename, SampledProfile *p) {
 
   return 0;
 } 
-
+*/
 
 int computeTLoss1D(int Nmodes, double r, double RR, int n_zsrc, complex<double> *k_pert, double **v_s, int *signv2, complex<double> *Kintg_atR)
 {

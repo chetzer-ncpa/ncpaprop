@@ -1,0 +1,17 @@
+*.o
+*.a
+bin/
+src/cmodbb/CModBB
+src/cmodess/CModess
+src/common/testing/
+src/modbb/ModBB
+src/modess/Modess
+src/modess_rd_1wcm/ModessRD1WCM
+src/pade_pe/pape
+src/raytrace/raytrace.2d
+src/raytrace/raytrace.3d
+src/tdpape/tdpape
+src/wmod/WMod
+src/wnlrt/wnlrt
+notes.txt
+*.swp

@@ -4,6 +4,11 @@
 #include <string>
 #include <istream>
 #include <vector>
+#include <complex>
+
+#ifndef PI
+#define PI 3.141592653589793
+#endif
 
 namespace NCPA {
 	float min( const float *, int );
@@ -37,6 +42,15 @@ namespace NCPA {
 	std::vector< std::string > split( std::string input, std::string delimiters );
 	bool checkAzimuthLimits( double toCheck, double target, double tolerance );
 	double normalizeAzimuth( double in );
+	
+	// Utility functions
+	double **dmatrix(long nr, long nc);
+	int free_dmatrix(double** v, long nr, long nc);
+	std::complex<double> **cmatrix(long nr, long nc);
+	int free_cmatrix(std::complex<double> **v, long nr, long nc);
+	std::complex<double> ***c3Darray(size_t xlen, size_t ylen, size_t zlen);
+	void free_c3Darray(std::complex<double> ***data, size_t xlen, size_t ylen);
+	
 //	double phase( std::complex< double > );
 	
 	// Constants

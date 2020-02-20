@@ -11,7 +11,9 @@
 
 
 #define GAM 1.4
+#ifndef PI
 #define PI 3.14159
+#endif
 #define R 287.0
 
 
@@ -876,7 +878,7 @@ double NCPA::SampledProfile::ceff( double z, double phi ) {
 }
 
 double NCPA::SampledProfile::z( unsigned int index ) const {
-	if (index < 0 || index >= nz_) {
+	if (index >= nz_) {
 		std::range_error e("Index out of bounds!");
 		throw e;
 	}
@@ -1205,7 +1207,7 @@ double NCPA::SampledProfile::dc0dz( double z ) {
 double NCPA::SampledProfile::ddc0dzdz( double z ) {
 	if ((!good_) ) {
 		return 0;
-	} else if ( (c0_ == 0)) {
+	} else if (c0_ == 0) {
 		std::runtime_error e( "Profile is not ready!" );
 		throw e;
 	} else if (z < minZ_ ) {
@@ -1294,6 +1296,38 @@ void NCPA::SampledProfile::get_ceff( double *target, int nz_requested ) const {
 		target[ i ] = ceff_[ i ];
 	}
 }
+
+
+int NCPA::SampledProfile::save_profile( std::string wind_units ) const {
+  int i, nz;
+  double kmps2mps = 1.0;
+  if (!wind_units.compare("mpersec")) {
+      kmps2mps = 1000.0;
+  }
+  
+  nz  = this->nz();
+  //azi_rad = this->getPropagationAzimuth()*PI/180.0;
+  
+  FILE *fp = fopen("atm_profile.nm", "w");
+  for (i=0; i<nz; i++) {
+	  fprintf( fp, "%9.3f %10.3e %10.3e %10.3e %9.3f %10.3e %9.3f %8.3f %8.3f\n",
+	  this->z_[i], this->u_[i]*kmps2mps, this->v_[i]*kmps2mps, this->w_[i]*kmps2mps,
+	  this->t_[i], this->rho_[i], this->p_[i], this->c0_[i]*1000.0, this->ceff_[i]*1000.0 );
+/*	  
+      z    = this->z(i);
+      u    = this->u(z)*kmps2mps;
+      v    = this->v(z)*kmps2mps;
+      c    = this->c0(z)*1000.0;
+      ceff = c + u*sin(azi_rad) + v*cos(azi_rad);
+      fprintf(fp, "%9.3f %10.3e %10.3e %10.3e %9.3f %10.3e %9.3f %8.3f %8.3f\n",\
+          z, u, v, this->w(z), this->t(z), this->rho(z), this->p(z), this->c0(z)*1000.0, ceff);
+*/
+  }
+  fclose(fp);
+  printf("Interpolated atmospheric profiles (z,u,v,w,t,d,p,c,c_eff) saved in: atm_profile.nm\n");
+  return 0;
+}
+
 
 
 /*

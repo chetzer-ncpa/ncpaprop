@@ -1,10 +1,11 @@
 #include "Atmosphere.h"
 #include <complex>
 #include <list>
+#include "util.h"
 
 
-double **dmatrix(long nr, long nc);
-int free_dmatrix(double**v, long nr, long nc);
+//double **dmatrix(long nr, long nc);
+//int free_dmatrix(double**v, long nr, long nc);
 
 int writeDispersion(int select_modes, double dz, double z_src, double freq, std::complex<double> *k_pert, double **v_s);
 
@@ -91,11 +92,12 @@ int getFile_list(string dir, list<string> &files, string pattern);
 
 complex<double> ***getPz1z2 (int I1, int I2, double r1, double r2, double dr, string dirn, list<string> files, bool zero_attn_flg);
 
-complex<double> **cmatrix(long nr, long nc);
+//complex<double> **cmatrix(long nr, long nc);
 
-int free_cmatrix(complex<double>**v, long nr, long nc);
-complex<double> ***c3Darray(size_t xlen, size_t ylen, size_t zlen);
-void free_c3Darray(complex<double> ***data, size_t xlen, size_t ylen);
+//int free_cmatrix(complex<double>**v, long nr, long nc);
+// @todo Move these to util.c/util.h
+//complex<double> ***c3Darray(size_t xlen, size_t ylen, size_t zlen);
+//void free_c3Darray(complex<double> ***data, size_t xlen, size_t ylen);
 
 // comparison, freq in filename.
 bool compare_freq (string first, string second);
@@ -107,7 +109,7 @@ int process2DPressure(double R_start_km, double width_km, double height_km, \
 
 int saveMatrix2bin(const char *filename, double **M, int nr, int nc);
 
-int saveAtm_profile(NCPA::SampledProfile *p, std::string wind_units);
+//int saveAtm_profile(NCPA::SampledProfile *p, std::string wind_units);
 
 int load_source_pulse_td(std::string srcpulsetdfn, vector<double> &t, vector<double> &tdp );
 

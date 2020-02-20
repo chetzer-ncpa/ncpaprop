@@ -263,7 +263,7 @@ int NCPA::SolveModNB::computeModes() {
   ST             stx;
   KSP            kspx;
   PC             pcx;
-  const EPSType  type;
+  EPSType  type;
   PetscReal      re, im;
   PetscScalar    kr, ki, *xr_;
   Vec            xr, xi;
@@ -370,8 +370,8 @@ int NCPA::SolveModNB::computeModes() {
   ierr = MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
   ierr = MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
 
-  ierr = MatGetVecs(A,PETSC_NULL,&xr);CHKERRQ(ierr);
-  ierr = MatGetVecs(A,PETSC_NULL,&xi);CHKERRQ(ierr);
+  ierr = MatCreateVecs(A,PETSC_NULL,&xr);CHKERRQ(ierr);
+  ierr = MatCreateVecs(A,PETSC_NULL,&xi);CHKERRQ(ierr);
 
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 	              Create the eigensolver and set various options
@@ -450,7 +450,7 @@ int NCPA::SolveModNB::computeModes() {
               v[j][i] = xr_[j]/sqrt(dz);
           }
           ierr = VecRestoreArray(xr,&xr_);CHKERRQ(ierr);
-		  }
+	}
   }		
 
   // select modes and do perturbation

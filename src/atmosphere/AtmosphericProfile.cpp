@@ -1,11 +1,12 @@
 #include <cmath>
 #include "AtmosphericProfile.h"
 #include "util.h"
-//#include "ExceptionWithStack.h"
 #include <stdexcept>
 
 #define GAM 1.4
+#ifndef PI
 #define PI 3.14159
+#endif
 #define R 287.0
 
 NCPA::AtmosphericProfile::~AtmosphericProfile() { }
@@ -39,7 +40,8 @@ double NCPA::AtmosphericProfile::calculate_c0_using_t_( double t ) {
 }
 
 double NCPA::AtmosphericProfile::calculate_c0_using_p_( double p, double rho ) {
-	return 1.0e-3 * sqrt( GAM * p / rho );
+	// Add factor of 0.1 to correct for non-SI units
+	return 1.0e-3 * sqrt( 0.1 * GAM * p / rho );    
 }
 
 double NCPA::AtmosphericProfile::ceff( double z, double phi ) {
@@ -219,10 +221,10 @@ void NCPA::AtmosphericProfile::setOrigin( double lat, double lon ) {
 	origin_ = new Location( lat, lon );
 }
 
-double NCPA::AtmosphericProfile::lat() {
+double NCPA::AtmosphericProfile::lat() const {
 	return origin_->lat();
 }
 
-double NCPA::AtmosphericProfile::lon() {
+double NCPA::AtmosphericProfile::lon() const {
 	return origin_->lon();
 }

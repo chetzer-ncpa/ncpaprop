@@ -63,7 +63,7 @@ public: /* the public interface */
 	 */
 
 	void useCommandArgs( int _argc, char **_argv );
-	void useFiileName( const char *_filename );
+	void useFileName( const char *_filename );
 
 	/* 
          * turn off the POSIX style options 
@@ -96,7 +96,7 @@ public: /* the public interface */
          * the optionfile, or can belong only to either of 
          * commandline and optionfile
          *
-         * following set methods, handle all the aboove 
+         * following set methods, handle all the above 
 	 * cases of options.
          */
 

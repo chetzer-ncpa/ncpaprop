@@ -11,7 +11,7 @@
 #include <sstream>
 #include "util.h"
 
-#define PI 3.14159
+#define PI 3.141592653589793
 
 double NCPA::min( double a, double b ) {
 	return a < b ? a : b;
@@ -217,4 +217,92 @@ double NCPA::normalizeAzimuth( double in ) {
 		out -= 360;
 	}
 	return out;
+}
+
+// Following functions came from various <module>_lib files
+double** NCPA::dmatrix(long nr, long nc) {
+  // allocate a double matrix
+  double **v;
+  v = new double* [nr];
+  for (long i=0; i<nr; i++) {
+      v[i] = new double [nc];
+  }
+  return v;
+}
+
+
+int NCPA::free_dmatrix(double **v, long nr, long nc) {
+  // free a double matrix
+  for (long i=0; i<nr; i++) {
+      delete v[i];
+  }
+  delete v;
+  return 0;
+}
+
+std::complex<double> **NCPA::cmatrix(long nr, long nc) {
+  // allocate a complex<double> matrix
+  std::complex<double> **v;
+  v = new std::complex<double>* [nr];
+  for (long i=0; i<nr; i++) {
+      v[i] = new std::complex<double> [nc];
+  }
+  return v;
+}
+
+int NCPA::free_cmatrix( std::complex<double> **v, long nr, long nc) {
+  // free a complex<double> matrix
+  for (long i=0; i<nr; i++) {
+      delete v[i];
+  }
+  delete v;
+  return 0;
+}
+
+std::complex<double> ***NCPA::c3Darray(size_t xlen, size_t ylen, size_t zlen)
+{
+  std::complex<double> ***p;
+  size_t i, j;
+
+  if ((p = (std::complex<double> ***) calloc(xlen, (sizeof(*p)))) == NULL) {
+      perror("calloc 1");
+      return NULL;
+  }
+
+  for (i=0; i < xlen; ++i)
+      p[i] = NULL;
+
+  for (i=0; i < xlen; ++i)
+      if ((p[i] = (std::complex<double> **) calloc(ylen, (sizeof (*p[i])))) == NULL) {
+          perror("calloc 2");
+          NCPA::free_c3Darray(p, xlen, ylen);
+          return NULL;
+      }
+
+  for (i=0; i < xlen; ++i)
+      for (j=0; j < ylen; ++j)
+          p[i][j] = NULL;
+
+  for (i=0; i < xlen; ++i)
+      for (j=0; j < ylen; ++j)
+          if ((p[i][j] = (std::complex<double> *) calloc(zlen, (sizeof (*p[i][j])))) == NULL) {
+              perror("calloc 3");
+              NCPA::free_c3Darray(p, xlen, ylen);
+              return NULL;
+          }
+  return p;
+}
+
+
+void NCPA::free_c3Darray(std::complex<double> ***data, size_t xlen, size_t ylen)
+{
+  size_t i, j;
+  for (i=0; i < xlen; ++i) {
+      if (data[i] != NULL) {
+          for (j=0; j < ylen; ++j)
+              free(data[i][j]);
+          free(data[i]);
+      }
+  }
+  free(data);
 }

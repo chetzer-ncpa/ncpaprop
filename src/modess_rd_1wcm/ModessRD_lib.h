@@ -7,15 +7,15 @@
 #include <list>
 
 //utility functions
-double **dmatrix(long nr, long nc);
-int      free_dmatrix(double**v, long nr, long nc);
+//double **dmatrix(long nr, long nc);
+//int      free_dmatrix(double**v, long nr, long nc);
 //int      plotwGNUplot(double freq, bool write_2D_TLoss);
 
 NCPA::SampledProfile * get_RngDepnd_profile(std::string env_file, double R_meters);
 
 NCPA::SampledProfile * get_RngDepndProfiles_ascii(int N, std::string atmosfileorder, int skiplines, std::string dirname, std::string pattern);
 
-int saveSampledProfile(std::string filename, NCPA::SampledProfile *p);
+//int saveSampledProfile(std::string filename, NCPA::SampledProfile *p);
 
 int computeTLoss1D(int Nmodes, double rng, double RR, int n_zsrc, std::complex<double> *k_pert, double **v_s, int *signv2, std::complex<double> *Kintg_atR);
 
