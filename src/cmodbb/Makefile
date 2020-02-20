@@ -1,4 +1,4 @@
-export PETSC_ARCH:=arch-darwin-c-complex
+#export PETSC_ARCH:=arch-darwin-c-complex
 include ${PETSC_DIR}/lib/petsc/conf/variables
 #include ${PETSC_DIR}/lib/petsc/conf/rules
 include ${SLEPC_DIR}/lib/slepc/conf/slepc_common
