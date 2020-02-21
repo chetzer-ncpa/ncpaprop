@@ -20,9 +20,11 @@
 # using your system package manager to install these beforehand.  You will need wget to
 # download SLEPc, or change the command to use your command-line downloader of choice.
 #
+# Note: in CentOS, openmpi is currently disabled because of difficulty getting PETSc
+# to play nicely with the system install of openmpi.
+#
 # Note: in CentOS, the prerequisites can be obtained with:
-#   yum install -y blas-devel lapack-devel openmpi-devel gsl-devel fftw-devel gcc-c++ \
-#                  git make
+#   yum install -y blas-devel lapack-devel gsl-devel fftw-devel gcc-c++ git make
 #
 ###### IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT #####
 
@@ -82,12 +84,14 @@ else
 fi
 
 # set up configure commands
-extra_config=""
+extra_config="--with-fc=0"
 if [ "$INSTALL_FBLAS_LAPACK" = "true" ] ; then
 	extra_config="$extra_config --download-fblaslapack"
 fi
 if [ "$INSTALL_MPICH" = "true" ] ; then
 	extra_config="$extra_config --download-mpich"
+else
+	extra_config="$extra_config --with-mpi=0"
 fi
 
 # first, configure and make for the real version
@@ -99,13 +103,23 @@ else
 	debug_config="--with-debugging=0"
 fi
 export PETSC_ARCH="arch-${OS_TYPE}-c-real${debug_str}"
-./configure PETSC_ARCH=${PETSC_ARCH} PETSC_DIR=${PETSC_DIR} ${debug_config} ${extra_config}
-make PETSC_DIR=${PETSC_DIR} PETSC_ARCH=${PETSC_ARCH} all
+
+# see if it's already been made
+if [[ -f "${PETSC_DIR}/${PETSC_ARCH}/include/petscconf.h" ]] ; then
+	echo "PETSc architecture ${PETSC_ARCH} appears to be already built."
+else
+	./configure PETSC_ARCH=${PETSC_ARCH} PETSC_DIR=${PETSC_DIR} ${debug_config} ${extra_config}
+	make PETSC_DIR=${PETSC_DIR} PETSC_ARCH=${PETSC_ARCH} all
+fi
 
 # now for the complex version
 export PETSC_ARCH="arch-${OS_TYPE}-c-complex${debug_str}"
-./configure PETSC_ARCH=${PETSC_ARCH} PETSC_DIR=${PETSC_DIR} ${debug_config} ${extra_config} --with-scalar-type=complex
-make PETSC_DIR=${PETSC_DIR} PETSC_ARCH=${PETSC_ARCH} all
+if [[ -f "${PETSC_DIR}/${PETSC_ARCH}/include/petscconf.h" ]] ; then
+        echo "PETSc architecture ${PETSC_ARCH} appears to be already built."
+else
+	./configure PETSC_ARCH=${PETSC_ARCH} PETSC_DIR=${PETSC_DIR} ${debug_config} ${extra_config} --with-scalar-type=complex
+	make PETSC_DIR=${PETSC_DIR} PETSC_ARCH=${PETSC_ARCH} all
+fi
 
 # create install directory for SLEPc
 if [[ -d "$SLEPC_INSTALL_BASE" ]] ; then
