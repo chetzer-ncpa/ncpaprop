@@ -23,8 +23,8 @@
 
 # Install locations: Where the PETSc libraries should be installed.  These will be
 # created if they do not already exist
-PETSC_INSTALL_BASE=/Users/claus/code/petsc
-SLEPC_INSTALL_BASE=/Users/claus/code/slepc
+PETSC_INSTALL_BASE=${HOME}/code/petsc
+SLEPC_INSTALL_BASE=${HOME}/code/slepc
 
 # Current SLEPc version, which can be checked and updated from http://slepc.upv.es/download/
 SLEPC_VERSION="3.12.0"

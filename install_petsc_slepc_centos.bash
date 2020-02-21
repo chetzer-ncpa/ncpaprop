@@ -12,7 +12,7 @@
 # The safest thing is to use this as guidance but run the commands manually in case of 
 # unexpected error.  No warranty is provided or implied by the provision of this script.
 #
-# GSL, FFTW3, git, make, and g++ are prerequisites of ncpaprop.  You can use your normal
+# GSL, FFTW3, git, make, and g++ are prerequisites of ncpaprop.  You can use your normal 
 # package manager to obtain these.
 #
 # You will need to have git installed to obtain PETSc.  FBLAS-LAPACK and MPICH are also
@@ -20,8 +20,9 @@
 # using your system package manager to install these beforehand.  You will need wget to
 # download SLEPc, or change the command to use your command-line downloader of choice.
 #
-# Note: in Ubuntu, the prerequisites can be obtained with:
-#   sudo apt-get install libblas-dev liblapack-dev libopenmpi-dev libgsl-dev libfftw3-dev g++ make git
+# Note: in CentOS, the prerequisites can be obtained with:
+#   yum install -y blas-devel lapack-devel openmpi-devel gsl-devel fftw-devel gcc-c++ \
+#                  git make
 #
 ###### IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT #####
 
@@ -48,7 +49,7 @@ INSTALL_MPICH="false"
 USE_DEBUG="false"
 
 # Set this to "true" to activate the script
-I_HAVE_FINISHED_SETTING_UP="true"
+I_HAVE_FINISHED_SETTING_UP="false"
 
 ##### Stop Making Changes Here #####
 
