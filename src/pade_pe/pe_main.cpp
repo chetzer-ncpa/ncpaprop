@@ -858,7 +858,11 @@ void load_1DAtm_ascii(string atmosfile, string atmosfileorder, int skiplines, st
   // a little convoluted way to read an ascii profile file
   // using SampledProfile class to allow for any column order
   NCPA::SampledProfile *p;
-  p = new SampledProfile(atmosfile, atmosfileorder.c_str(), skiplines);
+  bool inMPS = 0;
+  if ( strcmp( wind_units.c_str(), "mpersec" ) == 0) {
+    inMPS = 1;
+  }
+  p = new SampledProfile(atmosfile, atmosfileorder.c_str(), skiplines, inMPS);
 
   atm_nz = p->nz();
 
@@ -880,9 +884,9 @@ void load_1DAtm_ascii(string atmosfile, string atmosfileorder, int skiplines, st
 
   // convert to SI units
   double kmps2mps = 1.0;
-  if (!wind_units.compare("kmpersec")) {
+  //if (!wind_units.compare("kmpersec")) {
       kmps2mps = 1000.0;
-  }
+  //}
   //cout << "wind units; kmps2mps=" << kmps2mps << endl;
   
   for (int i = 0; i < atm_nz; i++) {
@@ -977,9 +981,9 @@ void load_NthProfile(int J, string atmosfile, string atmosfileorder, int skiplin
   
   // convert to SI units
   double kmps2mps = 1.0;
-  if (!wind_units.compare("kmpersec")) {
+  //if (!wind_units.compare("kmpersec")) {
       kmps2mps = 1000.0;
-  }
+  //}
   for (int i = 0; i < atm_nz; i++) {
       alt[i] = alt[i]*1000;
       rho[i] = rho[i]*1000;
@@ -1076,7 +1080,11 @@ int load_2DAtm_ascii(vector<double> Rv, string dirname, string pattern, string a
   // get the number of lines in the ASCII profile; needed to properly allocate some globals
   // use the SampledProfile object for convenience - to allow for any column order
   NCPA::SampledProfile *p;
-  p = new SampledProfile(atmosfile, atmosfileorder.c_str(), skiplines);
+  bool inMPS = 0;
+  if ( strcmp( wind_units.c_str(), "mpersec" ) == 0) {
+    inMPS = 1;
+  }
+  p = new SampledProfile(atmosfile, atmosfileorder.c_str(), skiplines, inMPS);
 
   atm_nz = p->nz();
   atm_nr = (int) Rv.size()-1; // number of ranges at which to ingest a new ASCII profile
@@ -1691,7 +1699,7 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
   opt->addUsage( "" );
   opt->addUsage( "    ../bin/pape --g2senvfile g2sgcp2011012606L.jordan.env --atmosfileorder zuvwtdp --skiplines 0 --azimuth 90 --freq 0.3 --sourceheight_km 0 --receiverheight_km 0 --maxheight_km 180 --starter_type gaussian --n_pade 6 --maxrange_km 500" ); 
   opt->addUsage( "" );
-  opt->addUsage( "    ../bin/pape --atmosfile1d NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --azimuth 90 --freq 0.1 --sourceheight_km 0 --receiverheight_km 0 --maxheight_km 180 --starter_type gaussian --n_pade 4 --maxrange_km 500" );  
+  opt->addUsage( "    ../bin/pape --atmosfile1d NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --azimuth 90 --freq 0.1 --sourceheight_km 0 --receiverheight_km 0 --maxheight_km 180 --starter_type gaussian --n_pade 4 --maxrange_km 500 --write_2D_TLoss" );  
   opt->addUsage( "" );  
   opt->addUsage( "    ../bin/pape --use_1D_profiles_from_dir ../samples/profiles --atmosfileorder zuvwtdp --skiplines 1 --azimuth 90 --freq 0.1 --sourceheight_km 0 --receiverheight_km 0 --maxheight_km 180 --starter_type gaussian --n_pade 6 --maxrange_km 1000  --use_profiles_at_steps_km 20" );
   opt->addUsage( "" );
@@ -1702,6 +1710,7 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
   opt->addUsage( " plot './tloss_1d.pe' using 1:(10*log10($2**2 + $3**2))" );  
   opt->addUsage( "" );
   opt->addUsage( "Example to plot 2D TL with gnuplot:" );
+  opt->addUsage( " set cbrange [-200:-100]" );
   opt->addUsage( " splot './tloss_2d.pe' using 1:2:(20*log10(sqrt($3**2 + $4**2)))" );  
   opt->addUsage( "" );   
   opt->addUsage( "--------------------------------------------------------------------" );  

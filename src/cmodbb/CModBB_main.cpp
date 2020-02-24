@@ -122,7 +122,12 @@ int main( int argc, char **argv ) {
       Lamb_wave_BC   = oBB->getLamb_wave_BC();
   
       // create the atmopsheric profile object and set the azimuth
-      atm_profile = new SampledProfile( atmosfile, atmosfileorder.c_str(), skiplines );
+      bool inMPS = 0;
+      if ( strcmp( wind_units.c_str(), "mpersec" ) == 0) {
+        inMPS = 1;
+      }
+
+      atm_profile = new SampledProfile( atmosfile, atmosfileorder.c_str(), skiplines, inMPS );
       atm_profile->setPropagationAzimuth(azi);
 
 

@@ -160,7 +160,11 @@ int main( int argc, char **argv ) {
       atm_profile = get_RngDepnd_profile(atmosfile, 0.0); // the very first profile
   }
   else if (filetype==0) { // get a single ascii file - this will just force a range-independent run
-      atm_profile = new SampledProfile( atmosfile, atmosfileorder.c_str(), skiplines );
+    bool inMPS = 0;
+    if ( strcmp( wind_units.c_str(), "mpersec" ) == 0) {
+      inMPS = 1;
+    }
+    atm_profile = new SampledProfile( atmosfile, atmosfileorder.c_str(), skiplines, inMPS );
   }
   else {
       throw invalid_argument( "Unrecognized atmospheric file type: try --g2senvfile, --use_1D_profiles_from_dir or --atmosfile" );

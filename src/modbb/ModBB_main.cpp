@@ -82,8 +82,12 @@ int main( int argc, char **argv ) {
       // create the atmopsheric profile object and set the azimuth
       atmosfileorder = oBB->getAtmosfileorder();
       //atm_profile = new SampledProfile( atmosfile, atmosfileorder.c_str(), oBB->getSkiplines() );
+      bool inMPS = 0;
+      if ( strcmp( oBB->getWindUnits().c_str(), "mpersec" ) == 0) {
+        inMPS = 1;
+      }
       atm_profile = new SampledProfile( oBB->getAtmosfile(), \
-                        oBB->getAtmosfileorder().c_str(), oBB->getSkiplines() );
+                        oBB->getAtmosfileorder().c_str(), oBB->getSkiplines(), inMPS );
       atm_profile->setPropagationAzimuth(oBB->getAzimuth());
       //cout << "oBB->getAzimuth() = " << oBB->getAzimuth() << endl;
       // cout << "1  atm_profile->getPropagationAzimuth() = " << atm_profile->getPropagationAzimuth() << endl;

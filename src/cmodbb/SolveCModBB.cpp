@@ -103,9 +103,9 @@ void NCPA::SolveCModBB::setParams( \
   double z_min_km = z_min/1000.0;
   double dz_km    = dz/1000.0;
   double kmps2mps = 1.0;
-  if (!wind_units.compare("kmpersec")) {
+  //if (!wind_units.compare("kmpersec")) {
       kmps2mps = 1000.0;
-  }
+  //}
 
   // Note: the rho, Pr, T, zw, mw are computed wrt ground level i.e.
   // the first value is at the ground level e.g. rho[0] = rho(z_min)  
@@ -243,7 +243,7 @@ int NCPA::SolveCModBB::computeCModes() {
   ierr = MPI_Comm_rank(PETSC_COMM_WORLD,&rank); CHKERRQ(ierr);
   ierr = MPI_Comm_size(PETSC_COMM_WORLD,&size); CHKERRQ(ierr);
   
-  FILE *fp;
+  FILE *fp = NULL;
   if (out_disp_src2rcv) {
     // open dispersion file for writing
     fp = fopen(disp_fn.c_str(),"w");

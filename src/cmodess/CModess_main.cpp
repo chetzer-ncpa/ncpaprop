@@ -67,7 +67,11 @@ int main( int argc, char **argv ) {
     
 
   // get atmospheric profile object; the azimuth is set inside SolveCModNB
-  SampledProfile *atm_profile = new SampledProfile( atmosfile, atmosfileorder.c_str(), skiplines );
+  bool inMPS = 0;
+  if ( strcmp( wind_units.c_str(), "mpersec" ) == 0) {
+    inMPS = 1;
+  }
+  SampledProfile *atm_profile = new SampledProfile( atmosfile, atmosfileorder.c_str(), skiplines, inMPS );
 	 
   // get solver object                      
 	SolveCModNB *a = new SolveCModNB(oNB, atm_profile);
@@ -232,7 +236,7 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
   opt->addUsage( "" );  
   opt->addUsage( "    ../bin/CModess --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --azimuth 90 --freq 0.1 --write_2D_TLoss" );
   opt->addUsage( "" );
-  opt->addUsage( "    ../bin/CModess --NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --Nby2Dprop --skiplines 0 --azimuth_start 0 --azimuth_end 360 --azimuth_step 1" );
+  opt->addUsage( "    ../bin/CModess --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --Nby2Dprop --skiplines 0 --freq 0.1 --azimuth_start 0 --azimuth_end 360 --azimuth_step 1" );
   opt->addUsage( "" );  
 
   // Set up the actual flags, etc.

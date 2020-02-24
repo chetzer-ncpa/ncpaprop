@@ -119,9 +119,9 @@ void NCPA::SolveModNB::setParams(ProcessOptionsNB *oNB, SampledProfile *atm_prof
 	double z_min_km = z_min/1000.0;
 	double dz_km    = dz/1000.0;
 	double kmps2mps = 1.0;
-	if (!wind_units.compare("kmpersec")) {
+	//if (!wind_units.compare("kmpersec")) {
 		kmps2mps = 1000.0;
-	}
+	//}
   
 	// Note: the rho, Pr, T, zw, mw are computed wrt ground level i.e.
 	// the first value is at the ground level e.g. rho[0] = rho(z_min)
@@ -281,6 +281,7 @@ int NCPA::SolveModNB::computeModes() {
 		// for a rigid ground a=0; and the BC is the Lamb Wave BC:
 		// admittance = -1/2*dln(rho)/dz
 		//  
+		admittance = 0.0;   // default
 		if ( gnd_imp_model.compare( "rigid" ) == 0) {
 			// Rigid ground, check for Lamb wave BC
 			if (Lamb_wave_BC) {

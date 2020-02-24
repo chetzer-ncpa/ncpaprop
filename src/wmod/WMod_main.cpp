@@ -56,9 +56,15 @@ int main( int argc, char **argv ) {
   wind_units     = oNB->getWindUnits();
   //gnd_imp_model  = oNB->getGnd_imp_model(); 
   skiplines      = oNB->getSkiplines();  
+
+  // get atmospheric profile object; the azimuth is set inside SolveModNB
+  bool inMPS = 0;
+  if ( strcmp( wind_units.c_str(), "mpersec" ) == 0) {
+    inMPS = 1;
+  }
   
   // get atmospheric profile object; the azimuth is set inside SolveWMod
-  SampledProfile *atm_profile = new SampledProfile( atmosfile, atmosfileorder.c_str(), skiplines );
+  SampledProfile *atm_profile = new SampledProfile( atmosfile, atmosfileorder.c_str(), skiplines, inMPS );
 
   // get solver object 
   SolveWMod *a = new SolveWMod(oNB, atm_profile);

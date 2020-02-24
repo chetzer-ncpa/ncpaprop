@@ -116,7 +116,7 @@ int main ( int argc, char **argv )  {
   ProcessOptionsTDPE *oTDPE = new ProcessOptionsTDPE(opt);
   
 
-  int src_flg, NFFT;
+  int src_flg, NFFT, i;
   double max_cel, R_start, DR, R_end, f_center; 
   string waveform_out_file, pape_output_dir;
   string src_file;
@@ -231,7 +231,7 @@ int main ( int argc, char **argv )  {
   for (int i=0; i<Nfreq; i++) {
     cout << fv[i] << endl;
   }
-  }
+}
 
 	// all set to propagate the pulse				
 	
@@ -255,7 +255,7 @@ int main ( int argc, char **argv )  {
     char buffer [256];
     sprintf(buffer, "%s %s", "./xPlotMods.script plotpulse ", waveform_out_file.c_str());
     printf ("Executing command %s\n", buffer);
-    system (buffer);
+    i = system (buffer);
     //printf ("The value returned was: %d.\n",i);
   }									          						                    
                     
@@ -935,7 +935,7 @@ int get_source_spectrum( \
 								complex<double> *arg_vec, int src_flg, string srcfile) 
 {
   int i;
-  double dt, fmx, scale;
+  double dt, fmx, scale = 1.0;
   complex<double> I = complex<double> (0.0, 1.0);
   FILE *f;
   fftw_plan p;

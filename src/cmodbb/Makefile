@@ -22,7 +22,7 @@ $(TARGET): $(OBJS)
 	
 # compile 
 %.o: %.cpp
-	${CXX} ${INCPATHS} -fpic -c -Wall ${CXX_FLAGS} -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -o $@ $<
+	${CXX} ${INCPATHS} -fpic -c -Wall ${CXX_FLAGS} -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -Wno-unused-but-set-variable -o $@ $<
 
 clean::
 	-$(RM) -rf $(OBJS) $(TARGET)
