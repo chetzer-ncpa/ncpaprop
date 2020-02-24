@@ -231,7 +231,7 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
   opt->addUsage( "" );  
   opt->addUsage( "    ../bin/WMod --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --azimuth 90 --freq 0.1 --write_2D_TLoss --sourceheight_km 60 --receiverheight_km 60" );
   opt->addUsage( "" );
-  opt->addUsage( "    ../bin/WMod --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --freq 0.1 --Nby2Dprop --azimuth_start 0 --azimuth_end 360 --azimuth_step 1" );
+  opt->addUsage( "    ../bin/WMod --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --freq 0.1 --Nby2Dprop --azimuth_start 0 --azimuth_end 360 --azimuth_step 1" );
   opt->addUsage( "" );  
   
   // Set up the actual flags, etc.

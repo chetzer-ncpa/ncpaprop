@@ -566,7 +566,7 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
 	opt->addUsage( "" );
         opt->addUsage( "" );
         opt->addUsage( "Examples (run from 'samples' directory):" );
-	opt->addUsage( "../bin/raytrace.3d --azimuth 90 --elev 1 --delev 1 --maxelev 45 --skips 1 --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --maxraylength 800 --maxheight 140" );
+	opt->addUsage( "../bin/raytrace.3d --azimuth 90 --elev 1 --delev 1 --maxelev 45 --skips 1 --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --maxraylength 800 --maxheight 140" );
         opt->addUsage( "cat raypath_az090* > raypaths.3d.dat" );
         opt->addUsage( "rm raypath_az090*" );
         opt->addUsage( "" );
