@@ -1,4 +1,4 @@
-o//  Pade PE (PaPE) using the effective sound speed approximation
+//  Pade PE (PaPE) using the effective sound speed approximation
 //  to be used with a complex ground impedance model
 // 
 //  Author : Jelle Assink
