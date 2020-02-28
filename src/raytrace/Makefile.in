@@ -1,23 +1,34 @@
-.PHONY: clean tidy install raytrace
+include @PETSC_INCLUDE_FILE_GENERIC@
+include @SLEPC_INCLUDE_FILE_GENERIC@
 
-all: raytrace
 
-raytrace: raytrace.2d raytrace.3d
+# the following provides CCPPFLAGS, CLINKER, CC_INCLUDES, SLEPC_INCLUDE, SLEPC_LIB
+#include $(SLEPC_DIR)/conf/slepc_common
 
-raytrace.2d: Acoustic2DEquationSet.o AcousticEquationSet.o AtmosphericBreakConditions.o GeneralBreakConditions.o ODESystemBreakCondition.o ODESystem.o ReflectionCondition2D.o raytrace.2d.o
-	@CXX@ -o $@ $^ @LDFLAGS@ @STATICLIBS@ @LIBS@
+INCPATHS = @INCLUDEFLAGS@ ${PETSC_CC_INCLUDES} ${SLEPC_CC_INCLUDES}
+OBJS_2D=Acoustic2DEquationSet.o AcousticEquationSet.o AtmosphericBreakConditions.o GeneralBreakConditions.o ODESystemBreakCondition.o ODESystem.o ReflectionCondition2D.o raytrace.2d.o
+TARGET_2D=raytrace.2d
+TARGET_3D=raytrace.3d
+OBJS_3D=Acoustic3DEquationSet.o AcousticEquationSet.o AtmosphericBreakConditions.o GeneralBreakConditions.o ODESystemBreakCondition.o ODESystem.o ReflectionCondition3D.o raytrace.3d.o
+
+
+all: $(TARGET_2D) $(TARGET_3D)
+
+.PHONY: clean
+
+# link	
+$(TARGET_2D): $(OBJS_2D)
+	${CXX_LINKER} -o $@ $^  @LDFLAGS@ @STATICLIBS@  @LIBS@
 	cp $@ ../../bin
 
-raytrace.3d: Acoustic3DEquationSet.o AcousticEquationSet.o AtmosphericBreakConditions.o GeneralBreakConditions.o ODESystemBreakCondition.o ODESystem.o ReflectionCondition3D.o raytrace.3d.o
-	@CXX@ -o $@ $^ @LDFLAGS@ @STATICLIBS@ @LIBS@
+$(TARGET_3D): $(OBJS_3D)
+	${CXX_LINKER} -o $@ $^  @LDFLAGS@ @STATICLIBS@  @LIBS@
 	cp $@ ../../bin
-
-
+	
+# compile 
 %.o: %.cpp
-	@CXX@ @CXXFLAGS@ @INCLUDEFLAGS@ -o $@ $<
+	${CXX} ${INCPATHS} @CXXFLAGS@ ${CXX_FLAGS} @WARNINGFLAGS@ -o $@ $<
 
-clean:
-	rm -rf raytrace.2d raytrace.3d Acoustic2DEquationSet.o AcousticEquationSet.o AtmosphericBreakConditions.o GeneralBreakConditions.o ODESystemBreakCondition.o ODESystem.o ReflectionCondition2D.o raytrace.2d.o Acoustic3DEquationSet.o ReflectionCondition3D.o raytrace.2d.o raytrace.3d.o
+clean::
+	-$(RM) -rf $(OBJS_2D) $(TARGET_2D) $(OBJS_3D) $(TARGET_3D)
 
-tidy:
-	rm -rf Acoustic2DEquationSet.o AcousticEquationSet.o AtmosphericBreakConditions.o GeneralBreakConditions.o ODESystemBreakCondition.o ODESystem.o ReflectionCondition2D.o raytrace.2d.o Acoustic3DEquationSet.o ReflectionCondition3D.o raytrace.2d.o raytrace.3d.o
