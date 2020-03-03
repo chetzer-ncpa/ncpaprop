@@ -227,23 +227,23 @@ AS_IF(
 			],[petsc_local_arch_name_real=$local_petsc_arch_real])
 		
 		AC_MSG_NOTICE([petsc_local_arch_name_real = ${petsc_local_arch_name_real}])
+		
+		# See if default PETSc complex arch name is overridden
+		AS_IF([test "x${local_petsc_arch_complex}" = "x"],
+			[
+				AS_IF([test "x${with_localpetscdebug}" = "xyes"],
+					[
+						petsc_local_arch_name_complex="${default_petsc_arch_name_complex}-debug"
+					],
+					[
+						petsc_local_arch_name_complex="${default_petsc_arch_name_complex}"
+					]
+				)
+			],[petsc_local_arch_name_real=$local_petsc_arch_complex])
+
+		AC_MSG_NOTICE([petsc_local_arch_name_complex = ${petsc_local_arch_name_complex}])
 		exit
-#		# See if default PETSc complex arch name is overridden
-#		AS_IF([test "x${local_petsc_arch_complex}" = "x"],
-#			[
-#				AS_IF([test "x${with_localpetscdebug}" = "xyes"],
-#					[
-#						petsc_local_arch_name_complex="${default_petsc_arch_name_complex}-debug"
-#					],
-#					[
-#						petsc_local_arch_name_complex="${default_petsc_arch_name_complex}"
-#					]
-#				)
-#			],[petsc_local_arch_name_real=$local_petsc_arch_complex])
-#
-#		AC_MSG_NOTICE([petsc_local_arch_name_complex = ${petsc_local_arch_name_complex}])
-#		
-#
+
 #		# debug version?
 #		AS_IF([test "x${with_localpetscdebug}" = "xyes"],
 #			[petsc_extra_config="${petsc_extra_config} --with-debugging=1"],
