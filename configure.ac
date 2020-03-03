@@ -242,28 +242,27 @@ AS_IF(
 			],[petsc_local_arch_name_complex=$local_petsc_arch_complex])
 
 		AC_MSG_NOTICE([petsc_local_arch_name_complex = ${petsc_local_arch_name_complex}])
-		exit
 
-#		# debug version?
-#		AS_IF([test "x${with_localpetscdebug}" = "xyes"],
-#			[petsc_extra_config="${petsc_extra_config} --with-debugging=1"],
-#			[petsc_extra_config="${petsc_extra_config} --with-debugging=0"]
-#		)
-#
-#		# Use MPI?
-#		AS_IF([test "x${with_localpetscmpidisabled" = "xyes"],
-#			[$petsc_extra_config="${petsc_extra_config} --with-mpi=0"],
-#			[
-#				AS_IF([test "x${with_localpetscmpi" = "xyes"],
-#					[$petsc_extra_config="${petsc_extra_config} --download-openmpi"])
-#			])
-#	
-#		# Go get FBLAS-LAPACK?
-#		AS_IF([test "x${with_localpetscfblas}" = "xyes"],
-#			[$petsc_extra_config="${petsc_extra_config} --download-fblaslapack"])
-#
-#		AC_MSG_NOTICE([petsc_extra_config = ${petsc_extra_config}])
-#		exit
+		# debug version?
+		AS_IF([test "x${with_localpetscdebug}" = "xyes"],
+			[petsc_extra_config="${petsc_extra_config} --with-debugging=1"],
+			[petsc_extra_config="${petsc_extra_config} --with-debugging=0"]
+		)
+
+		# Use MPI?
+		AS_IF([test "x${with_localpetscmpidisabled" = "xyes"],
+			[$petsc_extra_config="${petsc_extra_config} --with-mpi=0"],
+			[
+				AS_IF([test "x${with_localpetscmpi" = "xyes"],
+					[$petsc_extra_config="${petsc_extra_config} --download-openmpi"])
+			])
+	
+		# Go get FBLAS-LAPACK?
+		AS_IF([test "x${with_localpetscfblas}" = "xyes"],
+			[$petsc_extra_config="${petsc_extra_config} --download-fblaslapack"])
+
+		AC_MSG_NOTICE([petsc_extra_config = ${petsc_extra_config}])
+		exit
 		
 	# make the install dir
 #	mkdir -p ${petsc_build_dir}
