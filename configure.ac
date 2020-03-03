@@ -227,7 +227,7 @@ AS_IF(
 			],[petsc_local_arch_name_real=$local_petsc_arch_real])
 		
 		AC_MSG_NOTICE([petsc_local_arch_name_real = ${petsc_local_arch_name_real}])
-
+		exit
 		# See if default PETSc complex arch name is overridden
 		AS_IF([test "x${local_petsc_arch_complex}" = "x"],
 			[

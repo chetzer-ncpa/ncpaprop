@@ -5072,7 +5072,7 @@ fi
 
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: petsc_local_arch_name_real = ${petsc_local_arch_name_real}" >&5
 $as_echo "$as_me: petsc_local_arch_name_real = ${petsc_local_arch_name_real}" >&6;}
-
+		exit
 		# See if default PETSc complex arch name is overridden
 		if test "x${local_petsc_arch_complex}" = "x"; then :
 
