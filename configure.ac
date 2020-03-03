@@ -182,8 +182,6 @@ AC_CHECK_LIB([gsl], [gsl_blas_dgemm],,[
 	])
 ])
 
-exit
-
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h])
 
@@ -205,6 +203,9 @@ AS_IF([test "x${with_localpetsc" = "xyes"],[
 	AS_IF([test "x${localpetscdir" = "x"],
 		[petsc_build_dir=${localpetscdir}],
 		[petsc_build_dir="${abs_builddir}/extern/petsc"])
+
+	AC_MSG_NOTICE([petsc_build_dir set to ${petsc_build_dir}])
+	exit
 
 	# check for extra configuration options.  First, disable Fortran
 	petsc_extra_config="--with-fc=0"

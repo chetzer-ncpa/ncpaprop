@@ -4355,8 +4355,6 @@ fi
 fi
 
 
-exit
-
 # Checks for header files.
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for grep that handles long lines and -e" >&5
@@ -5044,6 +5042,10 @@ if test "x${with_localpetsc" = "xyes"; then :
 else
   petsc_build_dir="${abs_builddir}/extern/petsc"
 fi
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: petsc_build_dir set to ${petsc_build_dir}" >&5
+$as_echo "$as_me: petsc_build_dir set to ${petsc_build_dir}" >&6;}
+	exit
 
 	# check for extra configuration options.  First, disable Fortran
 	petsc_extra_config="--with-fc=0"
