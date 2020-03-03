@@ -197,15 +197,18 @@ AC_FUNC_STRTOD
 AC_CHECK_FUNCS([floor memset mkdir modf pow sqrt strpbrk])
 
 # Try to install PETSc and/or SLEPc if requested
-AS_IF([test "x${with_localpetsc}" = "xyes"],[
+AS_IF(
+	[test "x${with_localpetsc}" = "xyes"],
+	[
 	
-	# See if default PETSc directory is overridden
-	AS_IF([test "x${localpetscdir" = "x"],
-		[petsc_build_dir=${localpetscdir}],
-		[petsc_build_dir="${abs_builddir}/extern/petsc"])
+		# See if default PETSc directory is overridden
+		AS_IF([test "x${localpetscdir}" = "x"],
+			[petsc_build_dir=${localpetscdir}],
+			[petsc_build_dir="${abs_builddir}/extern/petsc"])
 
-	AC_MSG_NOTICE([petsc_build_dir set to ${petsc_build_dir}])
-	exit
+		AC_MSG_NOTICE([petsc_build_dir set to ${petsc_build_dir}])
+	])
+exit
 
 	# check for extra configuration options.  First, disable Fortran
 	#petsc_extra_config="--with-fc=0"
@@ -333,7 +336,7 @@ AS_IF([test "x${with_localpetsc}" = "xyes"],[
 #	PETSC_DIR=${petsc_build_dir}
 #	PETSC_ARCH_REAL=${petsc_local_arch_name_real}
 #	PETSC_ARCH_COMPLEX=${petsc_local_arch_name_complex}
-])
+#])
 
 
 

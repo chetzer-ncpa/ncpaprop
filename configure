@@ -5035,16 +5035,18 @@ done
 if test "x${with_localpetsc}" = "xyes"; then :
 
 
-	# See if default PETSc directory is overridden
-	if test "x${localpetscdir" = "x"; then :
+		# See if default PETSc directory is overridden
+		if test "x${localpetscdir}" = "x"; then :
   petsc_build_dir=${localpetscdir}
 else
   petsc_build_dir="${abs_builddir}/extern/petsc"
 fi
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: petsc_build_dir set to ${petsc_build_dir}" >&5
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: petsc_build_dir set to ${petsc_build_dir}" >&5
 $as_echo "$as_me: petsc_build_dir set to ${petsc_build_dir}" >&6;}
-	exit
+
+fi
+exit
 
 	# check for extra configuration options.  First, disable Fortran
 	#petsc_extra_config="--with-fc=0"
@@ -5172,8 +5174,7 @@ $as_echo "$as_me: petsc_build_dir set to ${petsc_build_dir}" >&6;}
 #	PETSC_DIR=${petsc_build_dir}
 #	PETSC_ARCH_REAL=${petsc_local_arch_name_real}
 #	PETSC_ARCH_COMPLEX=${petsc_local_arch_name_complex}
-
-fi
+#])
 
 
 
