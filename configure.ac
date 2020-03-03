@@ -262,6 +262,7 @@ AS_IF(
 		AS_IF([test "x${with_localpetscfblas}" = "xyes"],
 			[$petsc_extra_config="${petsc_extra_config} --download-fblaslapack"])
 
+		AC_MSG_NOTICE([petsc_extra_config = ${petsc_extra_config}])
 		exit
 		
 	# make the install dir
