@@ -130,8 +130,6 @@ AC_CHECK_LIB([fftw3], [fftw_plan_dft_1d],,[
 	])
 ])
 
-exit
-
 AC_CHECK_LIB([gslcblas], [cblas_dgemm],,[
 	# Are we going to try to auto-correct?
 	AS_IF([test "x$enable_autodependencies" = "xyes"],[
@@ -184,6 +182,7 @@ AC_CHECK_LIB([gsl], [gsl_blas_dgemm],,[
 	])
 ])
 
+exit
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h])
