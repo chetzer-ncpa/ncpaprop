@@ -5039,7 +5039,7 @@ if test "x${with_localpetsc}" = "xyes"; then :
 		if test "x${localpetscdir}" != "x"; then :
   petsc_build_dir=${localpetscdir}
 else
-  petsc_build_dir="${abs_builddir}/extern/petsc"
+  petsc_build_dir="$(pwd)/extern/petsc"
 fi
 
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: petsc_build_dir set to ${petsc_build_dir}" >&5

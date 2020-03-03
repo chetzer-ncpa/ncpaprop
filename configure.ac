@@ -204,7 +204,7 @@ AS_IF(
 		# See if default PETSc directory is overridden
 		AS_IF([test "x${localpetscdir}" != "x"],
 			[petsc_build_dir=${localpetscdir}],
-			[petsc_build_dir="${abs_builddir}/extern/petsc"])
+			[petsc_build_dir="$(pwd)/extern/petsc"])
 
 		AC_MSG_NOTICE([petsc_build_dir set to ${petsc_build_dir}])
 	])
