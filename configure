@@ -5103,11 +5103,11 @@ else
 fi
 
 		# Use MPI?
-		if test "x${with_localpetscmpidisabled" = "xyes"; then :
+		if test "x${with_localpetscmpidisabled}" = "xyes"; then :
   $petsc_extra_config="${petsc_extra_config} --with-mpi=0"
 else
 
-				if test "x${with_localpetscmpi" = "xyes"; then :
+				if test "x${with_localpetscmpi}" = "xyes"; then :
   $petsc_extra_config="${petsc_extra_config} --download-openmpi"
 fi
 
