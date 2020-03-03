@@ -208,131 +208,131 @@ AS_IF([test "x${with_localpetsc}" = "xyes"],[
 	exit
 
 	# check for extra configuration options.  First, disable Fortran
-	petsc_extra_config="--with-fc=0"
+	#petsc_extra_config="--with-fc=0"
 	
 	# See if default PETSc real arch name is overridden
-	AS_IF([test "x${localpetscarchreal}" = "x"],
-		[
-			AS_IF([test "x${with_localpetscdebug}" = "xyes"],
-				[
-					petsc_local_arch_name_real="${default_petsc_arch_name_real}-debug"
-				],
-				[
-					petsc_local_arch_name_real="${default_petsc_arch_name_real}"
-				]
-			)
-		],[petsc_local_arch_name_real=$localpetscarchreal])
+	#AS_IF([test "x${localpetscarchreal}" = "x"],
+	#	[
+	#		AS_IF([test "x${with_localpetscdebug}" = "xyes"],
+	#			[
+	#				petsc_local_arch_name_real="${default_petsc_arch_name_real}-debug"
+	#			],
+	#			[
+	#				petsc_local_arch_name_real="${default_petsc_arch_name_real}"
+	#			]
+	#		)
+	#	],[petsc_local_arch_name_real=$localpetscarchreal])
 
 	# See if default PETSc complex arch name is overridden
-	AS_IF([test "x${localpetscarchcomplex}" = "x"],
-		[
-			AS_IF([test "x${with_localpetscdebug}" = "xyes"],
-				[
-					petsc_local_arch_name_complex="${default_petsc_arch_name_complex}-debug"
-				],
-				[
-					petsc_local_arch_name_complex="${default_petsc_arch_name_complex}"
-				]
-			)
-		],[petsc_local_arch_name_real=$localpetscarchcomplex])
+	#AS_IF([test "x${localpetscarchcomplex}" = "x"],
+	#	[
+	#		AS_IF([test "x${with_localpetscdebug}" = "xyes"],
+	#			[
+	#				petsc_local_arch_name_complex="${default_petsc_arch_name_complex}-debug"
+	#			],
+	#			[
+	#				petsc_local_arch_name_complex="${default_petsc_arch_name_complex}"
+	#			]
+	#		)
+	#	],[petsc_local_arch_name_real=$localpetscarchcomplex])
 
 	# debug version?
-	AS_IF([test "x${with_localpetscdebug}" = "xyes"],
-		[petsc_extra_config="${petsc_extra_config} --with-debugging=1"],
-		[petsc_extra_config="${petsc_extra_config} --with-debugging=0"]
-	)
+#	AS_IF([test "x${with_localpetscdebug}" = "xyes"],
+#		[petsc_extra_config="${petsc_extra_config} --with-debugging=1"],
+#		[petsc_extra_config="${petsc_extra_config} --with-debugging=0"]
+#	)
 
 	# Use MPI?
-	AS_IF([test "x${with_localpetscmpidisabled" = "xyes"],
-		[$petsc_extra_config="${petsc_extra_config} --with-mpi=0"],
-		[
-			AS_IF([test "x${with_localpetscmpi" = "xyes"],
-				[$petsc_extra_config="${petsc_extra_config} --download-openmpi"])
-		])
+#	AS_IF([test "x${with_localpetscmpidisabled" = "xyes"],
+#		[$petsc_extra_config="${petsc_extra_config} --with-mpi=0"],
+#		[
+#			AS_IF([test "x${with_localpetscmpi" = "xyes"],
+#				[$petsc_extra_config="${petsc_extra_config} --download-openmpi"])
+#		])
 	
 	# Go get FBLAS-LAPACK?
-	AS_IF([test "x${with_localpetscfblas}" = "xyes"],
-		[$petsc_extra_config="${petsc_extra_config} --download-fblaslapack"])
+#	AS_IF([test "x${with_localpetscfblas}" = "xyes"],
+#		[$petsc_extra_config="${petsc_extra_config} --download-fblaslapack"])
 
 	# check downloader
-	downloader=""
-	AC_MSG_CHECKING("command-line downloader")
-	AC_CHECK_PROGS([downloader],[wget curl])
-	AS_IF([test "x${downloader}" = "x"],[AC_MSG_ERROR("Neither wget nor curl detected")],[AC_MSG_RESULT([$downloader])])
+#	downloader=""
+#	AC_MSG_CHECKING("command-line downloader")
+#	AC_CHECK_PROGS([downloader],[wget curl])
+#	AS_IF([test "x${downloader}" = "x"],[AC_MSG_ERROR("Neither wget nor curl detected")],[AC_MSG_RESULT([$downloader])])
 
 	# make the install dir
-	mkdir -p ${petsc_build_dir}
-	AS_IF([test -d "$petsc_build_dir"],,AC_MSG_ERROR(["Error creating PETSc build directory ${petsc_build_dir}"]))
+#	mkdir -p ${petsc_build_dir}
+#	AS_IF([test -d "$petsc_build_dir"],,AC_MSG_ERROR(["Error creating PETSc build directory ${petsc_build_dir}"]))
 
 	# see if it's already been downloaded and/or built
-	cd ${petsc_build_dir}
-	AS_IF([test -f "configure"],
-		[AC_MSG_NOTICE([Configure script exists, using existing download])],
-		[
-			AC_MSG_NOTICE([Downloading PETSc])
-			git clone -b maint https://gitlab.com/petsc/petsc.git .
-		]
-	)
+#	cd ${petsc_build_dir}
+#	AS_IF([test -f "configure"],
+#		[AC_MSG_NOTICE([Configure script exists, using existing download])],
+#		[
+#			AC_MSG_NOTICE([Downloading PETSc])
+#			git clone -b maint https://gitlab.com/petsc/petsc.git .
+#		]
+#	)
 
-	AC_MSG_CHECKING([for existing ${petsc_local_arch_name_real} architecture])
-	AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables,
-		[AC_MSG_RESULT([yes])],
-		[
-			AC_MSG_RESULT([no, building])
+#	AC_MSG_CHECKING([for existing ${petsc_local_arch_name_real} architecture])
+#	AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables,
+#		[AC_MSG_RESULT([yes])],
+#		[
+#			AC_MSG_RESULT([no, building])
+#
+#			# build the real version with indicated options
+#			./configure PETSC_ARCH=${petsc_local_arch_name_real} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config}
+#			AS_IF([test $? != 0],
+#				[AC_MSG_ERROR([Error running configure command: ./configure PETSC_ARCH=${petsc_local_arch_name_real} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config}])]
+#			)
+#			make all
+#			AS_IF([test $? != 0],
+#				[AC_MSG_ERROR([Error running make command for real PETSc: make all])]
+#			)
+#
+#			# see if it made the include file
+#			AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables,
+#				[
+#					AC_MSG_NOTICE([PETSc real version build OK])
+#				],
+#				[
+#					AC_MSG_ERROR([Error building PETSc real version])
+#				]
+#			)
+#		]
+#	)
 
-			# build the real version with indicated options
-			./configure PETSC_ARCH=${petsc_local_arch_name_real} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config}
-			AS_IF([test $? != 0],
-				[AC_MSG_ERROR([Error running configure command: ./configure PETSC_ARCH=${petsc_local_arch_name_real} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config}])]
-			)
-			make all
-			AS_IF([test $? != 0],
-				[AC_MSG_ERROR([Error running make command for real PETSc: make all])]
-			)
-
-			# see if it made the include file
-			AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables,
-				[
-					AC_MSG_NOTICE([PETSc real version build OK])
-				],
-				[
-					AC_MSG_ERROR([Error building PETSc real version])
-				]
-			)
-		]
-	)
-
-	AC_MSG_CHECKING([for existing ${petsc_local_arch_name_complex} architecture])
-	AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables
-		[AC_MSG_RESULT([yes])],
-		[
-			AC_MSG_RESULT([no, building])
-
-			# build the complex version with indicated options
-			./configure PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config} --with-scalar-type=complex
-			AS_IF([test $? != 0],
-				[AC_MSG_ERROR([Error running configure command: ./configure PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config} --with-scalar-type=complex])]
-			)
-			make all
-			AS_IF([test $? != 0],
-				[AC_MSG_ERROR([Error running make command for complex PETSc: make all])]
-			)
-
-			# see if it made the include file
-			AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables,
-				[
-					AC_MSG_NOTICE([PETSc complex version build OK])
-				],
-				[
-					AC_MSG_ERROR([Error building PETSc complex version])
-				]
-			)
-		]
-	)
-
-	PETSC_DIR=${petsc_build_dir}
-	PETSC_ARCH_REAL=${petsc_local_arch_name_real}
-	PETSC_ARCH_COMPLEX=${petsc_local_arch_name_complex}
+#	AC_MSG_CHECKING([for existing ${petsc_local_arch_name_complex} architecture])
+#	AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables
+#		[AC_MSG_RESULT([yes])],
+#		[
+#			AC_MSG_RESULT([no, building])
+#
+#			# build the complex version with indicated options
+#			./configure PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config} --with-scalar-type=complex
+#			AS_IF([test $? != 0],
+#				[AC_MSG_ERROR([Error running configure command: ./configure PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config} --with-scalar-type=complex])]
+#			)
+#			make all
+#			AS_IF([test $? != 0],
+#				[AC_MSG_ERROR([Error running make command for complex PETSc: make all])]
+#			)
+#
+#			# see if it made the include file
+#			AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables,
+#				[
+#					AC_MSG_NOTICE([PETSc complex version build OK])
+#				],
+#				[
+#					AC_MSG_ERROR([Error building PETSc complex version])
+#				]
+#			)
+#		]
+#	)
+#
+#	PETSC_DIR=${petsc_build_dir}
+#	PETSC_ARCH_REAL=${petsc_local_arch_name_real}
+#	PETSC_ARCH_COMPLEX=${petsc_local_arch_name_complex}
 ])
 
 
