@@ -275,10 +275,11 @@ AS_IF(
 
 		# see if it's already been downloaded and/or built
 		cd ${petsc_build_dir}
+		AC_MSG_CHECKING([PETSc download])
 		AS_IF([test -f "configure"],
-			[AC_MSG_NOTICE([Configure script exists, using existing download])],
+			[AC_MSG_RESULT([yes])],
 			[
-				AC_MSG_NOTICE([Downloading PETSc])
+				AC_MSG_RESULT([cloning])
 				git clone -b maint https://gitlab.com/petsc/petsc.git .
 			]
 		)

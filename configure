@@ -5144,13 +5144,15 @@ fi
 
 		# see if it's already been downloaded and/or built
 		cd ${petsc_build_dir}
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking PETSc download" >&5
+$as_echo_n "checking PETSc download... " >&6; }
 		if test -f "configure"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: Configure script exists, using existing download" >&5
-$as_echo "$as_me: Configure script exists, using existing download" >&6;}
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
 else
 
-				{ $as_echo "$as_me:${as_lineno-$LINENO}: Downloading PETSc" >&5
-$as_echo "$as_me: Downloading PETSc" >&6;}
+				{ $as_echo "$as_me:${as_lineno-$LINENO}: result: cloning" >&5
+$as_echo "cloning" >&6; }
 				git clone -b maint https://gitlab.com/petsc/petsc.git .
 
 
