@@ -251,15 +251,15 @@ AS_IF(
 
 		# Use MPI?
 		AS_IF([test "x${with_localpetscmpidisabled}" = "xyes"],
-			[$petsc_extra_config="${petsc_extra_config} --with-mpi=0"],
+			[petsc_extra_config="${petsc_extra_config} --with-mpi=0"],
 			[
 				AS_IF([test "x${with_localpetscmpi}" = "xyes"],
-					[$petsc_extra_config="${petsc_extra_config} --download-openmpi"])
+					[petsc_extra_config="${petsc_extra_config} --download-openmpi"])
 			])
 	
 		# Go get FBLAS-LAPACK?
 		AS_IF([test "x${with_localpetscfblas}" = "xyes"],
-			[$petsc_extra_config="${petsc_extra_config} --download-fblaslapack"])
+			[petsc_extra_config="${petsc_extra_config} --download-fblaslapack"])
 
 		AC_MSG_NOTICE([petsc_extra_config = ${petsc_extra_config}])
 		exit
