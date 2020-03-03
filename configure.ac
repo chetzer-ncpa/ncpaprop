@@ -262,21 +262,21 @@ AS_IF(
 			[petsc_extra_config="${petsc_extra_config} --download-fblaslapack"])
 
 		AC_MSG_NOTICE([petsc_extra_config = ${petsc_extra_config}])
-		exit
 		
-	# make the install dir
-#	mkdir -p ${petsc_build_dir}
-#	AS_IF([test -d "$petsc_build_dir"],,AC_MSG_ERROR(["Error creating PETSc build directory ${petsc_build_dir}"]))
+		# make the install dir
+		mkdir -p ${petsc_build_dir}
+		AS_IF([test -d "$petsc_build_dir"],,AC_MSG_ERROR(["Error creating PETSc build directory ${petsc_build_dir}"]))
 
-	# see if it's already been downloaded and/or built
-#	cd ${petsc_build_dir}
-#	AS_IF([test -f "configure"],
-#		[AC_MSG_NOTICE([Configure script exists, using existing download])],
-#		[
-#			AC_MSG_NOTICE([Downloading PETSc])
-#			git clone -b maint https://gitlab.com/petsc/petsc.git .
-#		]
-#	)
+		# see if it's already been downloaded and/or built
+		cd ${petsc_build_dir}
+		AS_IF([test -f "configure"],
+			[AC_MSG_NOTICE([Configure script exists, using existing download])],
+			[
+				AC_MSG_NOTICE([Downloading PETSc])
+				exit
+				git clone -b maint https://gitlab.com/petsc/petsc.git .
+			]
+		)
 
 #	AC_MSG_CHECKING([for existing ${petsc_local_arch_name_real} architecture])
 #	AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables,

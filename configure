@@ -5120,21 +5120,29 @@ fi
 
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: petsc_extra_config = ${petsc_extra_config}" >&5
 $as_echo "$as_me: petsc_extra_config = ${petsc_extra_config}" >&6;}
-		exit
 
-	# make the install dir
-#	mkdir -p ${petsc_build_dir}
-#	AS_IF([test -d "$petsc_build_dir"],,AC_MSG_ERROR(["Error creating PETSc build directory ${petsc_build_dir}"]))
+		# make the install dir
+		mkdir -p ${petsc_build_dir}
+		if test -d "$petsc_build_dir"; then :
 
-	# see if it's already been downloaded and/or built
-#	cd ${petsc_build_dir}
-#	AS_IF([test -f "configure"],
-#		[AC_MSG_NOTICE([Configure script exists, using existing download])],
-#		[
-#			AC_MSG_NOTICE([Downloading PETSc])
-#			git clone -b maint https://gitlab.com/petsc/petsc.git .
-#		]
-#	)
+else
+  as_fn_error $? "\"Error creating PETSc build directory ${petsc_build_dir}\"" "$LINENO" 5
+fi
+
+		# see if it's already been downloaded and/or built
+		cd ${petsc_build_dir}
+		if test -f "configure"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Configure script exists, using existing download" >&5
+$as_echo "$as_me: Configure script exists, using existing download" >&6;}
+else
+
+				{ $as_echo "$as_me:${as_lineno-$LINENO}: Downloading PETSc" >&5
+$as_echo "$as_me: Downloading PETSc" >&6;}
+				exit
+				git clone -b maint https://gitlab.com/petsc/petsc.git .
+
+
+fi
 
 #	AC_MSG_CHECKING([for existing ${petsc_local_arch_name_real} architecture])
 #	AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables,
