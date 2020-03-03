@@ -5033,7 +5033,7 @@ done
 
 
 # Try to install PETSc and/or SLEPc if requested
-if test "x${with_localpetsc" = "xyes"; then :
+if test "x${with_localpetsc}" = "xyes"; then :
 
 
 	# See if default PETSc directory is overridden

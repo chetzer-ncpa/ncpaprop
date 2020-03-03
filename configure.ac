@@ -197,7 +197,7 @@ AC_FUNC_STRTOD
 AC_CHECK_FUNCS([floor memset mkdir modf pow sqrt strpbrk])
 
 # Try to install PETSc and/or SLEPc if requested
-AS_IF([test "x${with_localpetsc" = "xyes"],[
+AS_IF([test "x${with_localpetsc}" = "xyes"],[
 	
 	# See if default PETSc directory is overridden
 	AS_IF([test "x${localpetscdir" = "x"],
