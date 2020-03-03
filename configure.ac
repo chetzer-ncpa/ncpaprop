@@ -264,8 +264,14 @@ AS_IF(
 		AC_MSG_NOTICE([petsc_extra_config = ${petsc_extra_config}])
 		
 		# make the install dir
-		mkdir -p ${petsc_build_dir}
-		AS_IF([test -d "$petsc_build_dir"],,AC_MSG_ERROR(["Error creating PETSc build directory ${petsc_build_dir}"]))
+		AC_MSG_CHECKING([PETSc build directory])
+		AS_IF([test -d "$petsc_build_dir"],[
+			AC_MSG_RESULT([yes])
+		],[
+			AC_MSG_RESULT([creating])
+			mkdir -p ${petsc_build_dir}
+			AS_IF([test -d "$petsc_build_dir"],,AC_MSG_ERROR(["Error creating PETSc build directory ${petsc_build_dir}"]))
+		])
 
 		# see if it's already been downloaded and/or built
 		cd ${petsc_build_dir}

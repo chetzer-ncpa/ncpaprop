@@ -5122,11 +5122,24 @@ fi
 $as_echo "$as_me: petsc_extra_config = ${petsc_extra_config}" >&6;}
 
 		# make the install dir
-		mkdir -p ${petsc_build_dir}
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking PETSc build directory" >&5
+$as_echo_n "checking PETSc build directory... " >&6; }
 		if test -d "$petsc_build_dir"; then :
+
+			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+else
+
+			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: creating" >&5
+$as_echo "creating" >&6; }
+			mkdir -p ${petsc_build_dir}
+			if test -d "$petsc_build_dir"; then :
 
 else
   as_fn_error $? "\"Error creating PETSc build directory ${petsc_build_dir}\"" "$LINENO" 5
+fi
+
 fi
 
 		# see if it's already been downloaded and/or built
