@@ -5138,7 +5138,6 @@ else
 
 				{ $as_echo "$as_me:${as_lineno-$LINENO}: Downloading PETSc" >&5
 $as_echo "$as_me: Downloading PETSc" >&6;}
-				exit
 				git clone -b maint https://gitlab.com/petsc/petsc.git .
 
 

@@ -273,7 +273,6 @@ AS_IF(
 			[AC_MSG_NOTICE([Configure script exists, using existing download])],
 			[
 				AC_MSG_NOTICE([Downloading PETSc])
-				exit
 				git clone -b maint https://gitlab.com/petsc/petsc.git .
 			]
 		)
