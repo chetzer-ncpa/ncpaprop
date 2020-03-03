@@ -117,7 +117,7 @@ AC_CHECK_LIB([fftw3], [fftw_plan_dft_1d],,[
 						sudo $default_package_manager -y install libfftw3-dev
 					],
 					[*yum],[
-						sudo $default_package_manager install fftw-devel
+						sudo $default_package_manager -y install fftw-devel
 					],[
 						AC_MSG_ERROR([No supported package manager found (apt and yum currently supported)])
 					]
@@ -145,7 +145,7 @@ AC_CHECK_LIB([gslcblas], [cblas_dgemm],,[
 						sudo $default_package_manager -y install libgsl-dev
 					],
 					[*yum],[
-						sudo $default_package_manager install gsl-devel
+						sudo $default_package_manager -y install gsl-devel
 					],[
 						AC_MSG_ERROR([No supported package manager found (apt and yum currently supported)])
 					]

@@ -4021,7 +4021,7 @@ else
 					 ;; #(
   *yum) :
 
-						sudo $default_package_manager install fftw-devel
+						sudo $default_package_manager -y install fftw-devel
 					 ;; #(
   *) :
 
@@ -4155,7 +4155,7 @@ else
 					 ;; #(
   *yum) :
 
-						sudo $default_package_manager install gsl-devel
+						sudo $default_package_manager -y install gsl-devel
 					 ;; #(
   *) :
 
