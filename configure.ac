@@ -23,34 +23,34 @@ default_petsc_arch_name_complex="arch-${os_type}-complex"
 
 
 # Set up options for automatic prerequisite building
-AC_ARG_WITH([local-petsc],
-	AS_HELP_STRING([--with-local-petsc],[Attempt to build a PETSc instance local to the $PACKAGE_NAME installation])
+AC_ARG_WITH([localpetsc],
+	AS_HELP_STRING([--with-localpetsc],[Attempt to build a PETSc instance local to the $PACKAGE_NAME installation])
 )
-AC_ARG_WITH([local-slepc],
-	AS_HELP_STRING([--with-local-slepc],[Attempt to build a SLEPc instance local to the $PACKAGE_NAME installation.  Automatically set to 'yes' if --with-local-petsc is specified])
+AC_ARG_WITH([localslepc],
+	AS_HELP_STRING([--with-localslepc],[Attempt to build a SLEPc instance local to the $PACKAGE_NAME installation.  Automatically set to 'yes' if --with-localpetsc is specified])
 )
-AS_IF([test "x$with_local-petsc" = "xyes"],
-	[with_local-slepc="yes"] )
+AS_IF([test "x$with_localpetsc" = "xyes"],
+	[with_localslepc="yes"] )
 
-AC_ARG_WITH([local-petsc-debug],
-	AS_HELP_STRING([--with-local-petsc-debug],[Build the debug version of PETSc/SLEPc instead of the default optimized version])
+AC_ARG_WITH([localpetscdebug],
+	AS_HELP_STRING([--with-localpetscdebug],[Build the debug version of PETSc/SLEPc instead of the default optimized version])
 )
-AC_ARG_ENABLE([local-petsc-mpi],
-	AS_HELP_STRING([--enable-local-petsc-mpi],[Build PETSc/SLEPc without MPI support])
+AC_ARG_ENABLE([localpetscmpi],
+	AS_HELP_STRING([--enable-localpetscmpi],[Build PETSc/SLEPc without MPI support])
 )
-AC_ARG_WITH([local-petsc-mpi-download],
-	AS_HELP_STRING([--with-local-petsc-mpi-download],[Download and build OpenMPI libraries as part of the PETSc installation process, rather than looking for system-installed libraries])
+AC_ARG_WITH([localpetscmpi],
+	AS_HELP_STRING([--with-localpetscmpi],[Download and build OpenMPI libraries as part of the PETSc installation process, rather than looking for system-installed libraries])
 )
-AC_ARG_WITH([local-petsc-fblas-download],
-	AS_HELP_STRING([--with-local-petsc-fblas-download],[Download and build FBLAS-LAPACK libraries as part of the PETSc installation process, rather than looking for system-installed libraries])
+AC_ARG_WITH([localpetscfblas],
+	AS_HELP_STRING([--with-localpetscfblas],[Download and build FBLAS-LAPACK libraries as part of the PETSc installation process, rather than looking for system-installed libraries])
 )
 
 # These --with options take arguments that must be processed
-AC_ARG_VAR([local-petsc-dir],[Override default local PETSc installation directory (${default_petsc_build_dir})])
-AC_ARG_VAR([local-slepc-dir],[Override default local SLEPc installation directory (${default_slepc_build_dir})])
-AC_ARG_VAR([local-petsc-arch-real],[Override automatic PETSc real architecture name (${default_petsc_arch_name_real} or ${default_petsc_arch_name_real}-debug)])
-AC_ARG_VAR([local-petsc-arch-complex],[Override automatic PETSc complex architecture name (${default_petsc_arch_name_complex} or ${default_petsc_arch_name_complex}-debug)])
-AC_ARG_VAR([local-slepc-version],[Override automatic (or outdated) SLEPc version number (${default_slepc_version})])
+AC_ARG_VAR(localpetscdir,[Override default local PETSc installation directory (${default_petsc_build_dir})])
+AC_ARG_VAR(localslepcdir,[Override default local SLEPc installation directory (${default_slepc_build_dir})])
+AC_ARG_VAR(localpetscarchreal,[Override automatic PETSc real architecture name (${default_petsc_arch_name_real} or ${default_petsc_arch_name_real}-debug)])
+AC_ARG_VAR(localpetscarchcomplex,[Override automatic PETSc complex architecture name (${default_petsc_arch_name_complex} or ${default_petsc_arch_name_complex}-debug)])
+AC_ARG_VAR(localslepcversion,[Override automatic (or outdated) SLEPc version number (${default_slepc_version})])
 
 
 AC_MSG_CHECKING([operating system])
@@ -68,16 +68,15 @@ case $host_os in
 		;;
 	linux* )
 		# For Linux, need to know if apt-get or yum is installed
-		AC_CHECK_PROGS([default-package-manager],[apt-get yum],[])
-		AC_MSG_NOTICE([Detected package manager = ${default-package-manager}])
+		AC_CHECK_PROGS([default_package_manager],[apt-get yum],[])
+		AC_MSG_NOTICE([Detected package manager = ${default_package_manager}])
 		
-		AS_IF([test "x${default-package-manager}" != "x"],[
-			AC_ARG_WITH([auto-dependencies],
-				AS_HELP_STRING([--with-auto-dependencies],[Attempt to install dependencies using ${default-package-manager}]))
+		AS_IF([test "x${default_package_manager}" != "x"],[
+			AC_ARG_ENABLE([autodependencies],
+				AS_HELP_STRING([--enable-autodependencies],[Attempt to install dependencies using ${default_package_manager}]))
 		])
 		
 
-		#AC_SUBST([PETSC_USE_SHARED_LIBRARIES],[--with-shared-libraries])
 		;;
 	*)
 		AC_MSG_ERROR([Your platform is not currently supported])
@@ -107,25 +106,25 @@ AC_CHECK_LIB([m],[cos],,[AC_MSG_ERROR([Missing M library])])
 
 AC_CHECK_LIB([fftw3], [fftw_plan_dft_1d],,[
 	# Are we going to try to auto-correct?
-	AS_IF([test "x$enable_auto_dependencies" = "xyes"],[
+	AS_IF([test "x$enable_autodependencies" = "xyes"],[
 		AS_CASE([$host_os],
 			[darwin*],[
 				AC_MSG_ERROR([Auto dependencies not available for MacOS.  Install FFTW using your package manager of choice.])
 			],
 			[linux*],[
-				AS_CASE([$default-package-manager],
+				AS_CASE([$default_package_manager],
 					[*apt-get],[
-						sudo $default-package-manager -y install libfftw3-dev
+						sudo $default_package_manager -y install libfftw3-dev
 					],
 					[*yum],[
-						sudo $default-package-manager install fftw-devel
+						sudo $default_package_manager install fftw-devel
 					],[
 						AC_MSG_ERROR([No supported package manager found (apt and yum currently supported)])
 					]
 				)
 		])
 		unset ac_cv_lib_fftw3_fftw_plan_dft_1d
-		AC_CHECK_LIB([fftw3], [fftw_plan_dft_1d],,[AC_MSG_ERROR([Could not install FFTW using ${default-package-manager}, please install manually])])
+		AC_CHECK_LIB([fftw3], [fftw_plan_dft_1d],,[AC_MSG_ERROR([Could not install FFTW using ${default_package_manager}, please install manually])])
 	],[
 		AC_MSG_ERROR([Failed to detect FFTW.  Please install the appropriate fftw3 dev package or compile from source.])
 	])
@@ -135,25 +134,25 @@ exit
 
 AC_CHECK_LIB([gslcblas], [cblas_dgemm],,[
 	# Are we going to try to auto-correct?
-	AS_IF([test "x$enable_auto_dependencies" = "xyes"],[
+	AS_IF([test "x$enable_autodependencies" = "xyes"],[
 		AS_CASE([$host_os],
 			[darwin*],[
 				AC_MSG_ERROR([Auto dependencies not available for MacOS.  Install GSL using your package manager of choice.])
 			],
 			[linux*],[
-				AS_CASE([$default-package-manager],
+				AS_CASE([$default_package_manager],
 					[*apt-get],[
-						sudo $default-package-manager -y install libgsl-dev
+						sudo $default_package_manager -y install libgsl-dev
 					],
 					[*yum],[
-						sudo $default-package-manager install gsl-devel
+						sudo $default_package_manager install gsl-devel
 					],[
 						AC_MSG_ERROR([No supported package manager found (apt and yum currently supported)])
 					]
 				)
 		])
 		unset ac_cv_lib_gslcblas_cblas_dgemm
-		AC_CHECK_LIB([gslcblas], [cblas_dgemm],,[AC_MSG_ERROR([Could not install GSL using ${default-package-manager}, please install manually])])
+		AC_CHECK_LIB([gslcblas], [cblas_dgemm],,[AC_MSG_ERROR([Could not install GSL using ${default_package_manager}, please install manually])])
 	],[
 		AC_MSG_ERROR([Failed to detect GSL.  Please install the appropriate gsl dev package or compile from source.])
 	])
@@ -167,19 +166,19 @@ AC_CHECK_LIB([gsl], [gsl_blas_dgemm],,[
 				AC_MSG_ERROR([Auto dependencies not available for MacOS.  Install GSL using your package manager of choice.])
 			],
 			[linux*],[
-				AS_CASE([$default-package-manager],
+				AS_CASE([$default_package_manager],
 					[*apt-get],[
-						sudo $default-package-manager -y install libgsl-dev
+						sudo $default_package_manager -y install libgsl-dev
 					],
 					[*yum],[
-						sudo $default-package-manager install gsl-devel
+						sudo $default_package_manager install gsl-devel
 					],[
 						AC_MSG_ERROR([No supported package manager found (apt and yum currently supported)])
 					]
 				)
 		])
 		unset ac_cv_lib_gsl_gsl_blas_dgemm
-		AC_CHECK_LIB([gsl], [gsl_blas_dgemm],,[AC_MSG_ERROR([Could not install GSL using ${default-package-manager}, please install manually])])
+		AC_CHECK_LIB([gsl], [gsl_blas_dgemm],,[AC_MSG_ERROR([Could not install GSL using ${default_package_manager}, please install manually])])
 	],[
 		AC_MSG_ERROR([Failed to detect GSL.  Please install the appropriate gsl dev package or compile from source.])
 	])
@@ -201,20 +200,20 @@ AC_FUNC_STRTOD
 AC_CHECK_FUNCS([floor memset mkdir modf pow sqrt strpbrk])
 
 # Try to install PETSc and/or SLEPc if requested
-AS_IF([test "x${with_local-petsc" = "xyes"],[
+AS_IF([test "x${with_localpetsc" = "xyes"],[
 	
 	# See if default PETSc directory is overridden
-	AS_IF([test "x${local-petsc-dir" = "x"],
-		[petsc_build_dir=${local-petsc-dir}],
+	AS_IF([test "x${localpetscdir" = "x"],
+		[petsc_build_dir=${localpetscdir}],
 		[petsc_build_dir="${abs_builddir}/extern/petsc"])
 
 	# check for extra configuration options.  First, disable Fortran
 	petsc_extra_config="--with-fc=0"
 	
 	# See if default PETSc real arch name is overridden
-	AS_IF([test "x${local-petsc-arch-real}" = "x"],
+	AS_IF([test "x${localpetscarchreal}" = "x"],
 		[
-			AS_IF([test "x${with_local-petsc-debug}" = "xyes"],
+			AS_IF([test "x${with_localpetscdebug}" = "xyes"],
 				[
 					petsc_local_arch_name_real="${default_petsc_arch_name_real}-debug"
 				],
@@ -222,12 +221,12 @@ AS_IF([test "x${with_local-petsc" = "xyes"],[
 					petsc_local_arch_name_real="${default_petsc_arch_name_real}"
 				]
 			)
-		],[petsc_local_arch_name_real=$local-petsc-arch-real])
+		],[petsc_local_arch_name_real=$localpetscarchreal])
 
 	# See if default PETSc complex arch name is overridden
-	AS_IF([test "x${local-petsc-arch-complex}" = "x"],
+	AS_IF([test "x${localpetscarchcomplex}" = "x"],
 		[
-			AS_IF([test "x${with_local-petsc-debug}" = "xyes"],
+			AS_IF([test "x${with_localpetscdebug}" = "xyes"],
 				[
 					petsc_local_arch_name_complex="${default_petsc_arch_name_complex}-debug"
 				],
@@ -235,31 +234,31 @@ AS_IF([test "x${with_local-petsc" = "xyes"],[
 					petsc_local_arch_name_complex="${default_petsc_arch_name_complex}"
 				]
 			)
-		],[petsc_local_arch_name_real=$local-petsc-arch-complex])
+		],[petsc_local_arch_name_real=$localpetscarchcomplex])
 
 	# debug version?
-	AS_IF([test "x${with_local-petsc-debug}" = "xyes"],
+	AS_IF([test "x${with_localpetscdebug}" = "xyes"],
 		[petsc_extra_config="${petsc_extra_config} --with-debugging=1"],
 		[petsc_extra_config="${petsc_extra_config} --with-debugging=0"]
 	)
 
 	# Use MPI?
-	AS_IF([test "x${with_local-petsc-mpi-disabled" = "xyes"],
+	AS_IF([test "x${with_localpetscmpidisabled" = "xyes"],
 		[$petsc_extra_config="${petsc_extra_config} --with-mpi=0"],
 		[
-			AS_IF([test "x${with_local-petsc-mpi-download" = "xyes"],
+			AS_IF([test "x${with_localpetscmpi" = "xyes"],
 				[$petsc_extra_config="${petsc_extra_config} --download-openmpi"])
 		])
 	
 	# Go get FBLAS-LAPACK?
-	AS_IF([test "x${with_local-petsc-fblas-download}" = "xyes"],
+	AS_IF([test "x${with_localpetscfblas}" = "xyes"],
 		[$petsc_extra_config="${petsc_extra_config} --download-fblaslapack"])
 
 	# check downloader
 	downloader=""
 	AC_MSG_CHECKING("command-line downloader")
 	AC_CHECK_PROGS([downloader],[wget curl])
-	AS_IF([test "x${downloader}" = "x"],[AC_MSG_ERROR("Neither wget nor curl detected")],[AC_MSG_FOUND([$downloader])])
+	AS_IF([test "x${downloader}" = "x"],[AC_MSG_ERROR("Neither wget nor curl detected")],[AC_MSG_RESULT([$downloader])])
 
 	# make the install dir
 	mkdir -p ${petsc_build_dir}

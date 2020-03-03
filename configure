@@ -712,7 +712,7 @@ with_localpetscdebug
 enable_localpetscmpi
 with_localpetscmpi
 with_localpetscfblas
-with_autodependencies
+enable_autodependencies
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1357,6 +1357,9 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-localpetscmpi  Build PETSc/SLEPc without MPI support
 
+  --enable-autodependencies
+                          Attempt to install dependencies using
+                          ${default_package_manager}
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -1379,8 +1382,6 @@ Optional Packages:
                           the PETSc installation process, rather than looking
                           for system-installed libraries
 
-  --with-autodependencies Attempt to install dependencies using
-                          ${default_package_manager}
 
 Some influential environment variables:
   localpetscdir
@@ -2517,10 +2518,9 @@ $as_echo "$as_me: Detected package manager = ${default_package_manager}" >&6;}
 
 		if test "x${default_package_manager}" != "x"; then :
 
-
-# Check whether --with-autodependencies was given.
-if test "${with_autodependencies+set}" = set; then :
-  withval=$with_autodependencies;
+			# Check whether --enable-autodependencies was given.
+if test "${enable_autodependencies+set}" = set; then :
+  enableval=$enable_autodependencies;
 fi
 
 
@@ -4005,7 +4005,7 @@ _ACEOF
 else
 
 	# Are we going to try to auto-correct?
-	if test "x$with_autodependencies" = "xyes"; then :
+	if test "x$enable_autodependencies" = "xyes"; then :
 
 		case $host_os in #(
   darwin*) :
@@ -4139,7 +4139,7 @@ _ACEOF
 else
 
 	# Are we going to try to auto-correct?
-	if test "x$with_autodependencies" = "xyes"; then :
+	if test "x$enable_autodependencies" = "xyes"; then :
 
 		case $host_os in #(
   darwin*) :
