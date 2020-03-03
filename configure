@@ -5088,7 +5088,7 @@ else
 fi
 
 else
-  petsc_local_arch_name_real=$local_petsc_arch_complex
+  petsc_local_arch_name_complex=$local_petsc_arch_complex
 fi
 
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: petsc_local_arch_name_complex = ${petsc_local_arch_name_complex}" >&5
