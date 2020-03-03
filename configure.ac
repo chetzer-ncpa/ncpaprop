@@ -202,7 +202,7 @@ AS_IF(
 	[
 	
 		# See if default PETSc directory is overridden
-		AS_IF([test "x${localpetscdir}" = "x"],
+		AS_IF([test "x${localpetscdir}" != "x"],
 			[petsc_build_dir=${localpetscdir}],
 			[petsc_build_dir="${abs_builddir}/extern/petsc"])
 

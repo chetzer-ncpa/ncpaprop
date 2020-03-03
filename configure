@@ -5036,7 +5036,7 @@ if test "x${with_localpetsc}" = "xyes"; then :
 
 
 		# See if default PETSc directory is overridden
-		if test "x${localpetscdir}" = "x"; then :
+		if test "x${localpetscdir}" != "x"; then :
   petsc_build_dir=${localpetscdir}
 else
   petsc_build_dir="${abs_builddir}/extern/petsc"
