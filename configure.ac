@@ -46,11 +46,11 @@ AC_ARG_WITH([localpetscfblas],
 )
 
 # These --with options take arguments that must be processed
-AC_ARG_VAR(localpetscdir,[Override default local PETSc installation directory (${default_petsc_build_dir})])
-AC_ARG_VAR(localslepcdir,[Override default local SLEPc installation directory (${default_slepc_build_dir})])
-AC_ARG_VAR(localpetscarchreal,[Override automatic PETSc real architecture name (${default_petsc_arch_name_real} or ${default_petsc_arch_name_real}-debug)])
-AC_ARG_VAR(localpetscarchcomplex,[Override automatic PETSc complex architecture name (${default_petsc_arch_name_complex} or ${default_petsc_arch_name_complex}-debug)])
-AC_ARG_VAR(localslepcversion,[Override automatic (or outdated) SLEPc version number (${default_slepc_version})])
+AC_ARG_VAR(local_petsc_dir,[Override default local PETSc installation directory (${default_petsc_build_dir})])
+AC_ARG_VAR(local_slepc_dir,[Override default local SLEPc installation directory (${default_slepc_build_dir})])
+AC_ARG_VAR(local_petsc_arch_real,[Override automatic PETSc real architecture name (${default_petsc_arch_name_real} or ${default_petsc_arch_name_real}-debug)])
+AC_ARG_VAR(local_petsc_arch_complex,[Override automatic PETSc complex architecture name (${default_petsc_arch_name_complex} or ${default_petsc_arch_name_complex}-debug)])
+AC_ARG_VAR(local_slepc_version,[Override automatic (or outdated) SLEPc version number (${default_slepc_version})])
 
 
 AC_MSG_CHECKING([operating system])
@@ -204,8 +204,8 @@ AS_IF(
 		AC_MSG_RESULT([yes])
 
 		# See if default PETSc directory is overridden
-		AS_IF([test "x${localpetscdir}" != "x"],
-			[petsc_build_dir=${localpetscdir}],
+		AS_IF([test "x${local_petsc_dir}" != "x"],
+			[petsc_build_dir=${local_petsc_dir}],
 			[petsc_build_dir="$(pwd)/extern/petsc"])
 
 		AC_MSG_NOTICE([petsc_build_dir = ${petsc_build_dir}])
@@ -214,7 +214,7 @@ AS_IF(
 		petsc_extra_config="--with-fc=0"
 	
 		# See if default PETSc real arch name is overridden
-		AS_IF([test "x${localpetscarchreal}" = "x"],
+		AS_IF([test "x${local_petsc_arch_real}" = "x"],
 			[
 				AS_IF([test "x${with_localpetscdebug}" = "xyes"],
 					[
@@ -224,12 +224,12 @@ AS_IF(
 						petsc_local_arch_name_real="${default_petsc_arch_name_real}"
 					]
 				)
-			],[petsc_local_arch_name_real=$localpetscarchreal])
+			],[petsc_local_arch_name_real=$local_petsc_arch_real])
 		
 		AC_MSG_NOTICE([petsc_local_arch_name_real = ${petsc_local_arch_name_real}])
 
 		# See if default PETSc complex arch name is overridden
-		AS_IF([test "x${localpetscarchcomplex}" = "x"],
+		AS_IF([test "x${local_petsc_arch_complex}" = "x"],
 			[
 				AS_IF([test "x${with_localpetscdebug}" = "xyes"],
 					[
@@ -239,7 +239,7 @@ AS_IF(
 						petsc_local_arch_name_complex="${default_petsc_arch_name_complex}"
 					]
 				)
-			],[petsc_local_arch_name_real=$localpetscarchcomplex])
+			],[petsc_local_arch_name_real=$local_petsc_arch_complex])
 
 		AC_MSG_NOTICE([petsc_local_arch_name_complex = ${petsc_local_arch_name_complex}])
 		
