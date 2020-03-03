@@ -197,72 +197,73 @@ AC_FUNC_STRTOD
 AC_CHECK_FUNCS([floor memset mkdir modf pow sqrt strpbrk])
 
 # Try to install PETSc and/or SLEPc if requested
+AC_MSG_CHECKING([automatic local PETSc installation])
 AS_IF(
 	[test "x${with_localpetsc}" = "xyes"],
 	[
-	
+		AC_MSG_RESULT([yes])
+
 		# See if default PETSc directory is overridden
 		AS_IF([test "x${localpetscdir}" != "x"],
 			[petsc_build_dir=${localpetscdir}],
 			[petsc_build_dir="$(pwd)/extern/petsc"])
 
-		AC_MSG_NOTICE([petsc_build_dir set to ${petsc_build_dir}])
-	])
-exit
+		AC_MSG_NOTICE([petsc_build_dir = ${petsc_build_dir}])
 
-	# check for extra configuration options.  First, disable Fortran
-	#petsc_extra_config="--with-fc=0"
+		# check for extra configuration options.  First, disable Fortran
+		petsc_extra_config="--with-fc=0"
 	
-	# See if default PETSc real arch name is overridden
-	#AS_IF([test "x${localpetscarchreal}" = "x"],
-	#	[
-	#		AS_IF([test "x${with_localpetscdebug}" = "xyes"],
-	#			[
-	#				petsc_local_arch_name_real="${default_petsc_arch_name_real}-debug"
-	#			],
-	#			[
-	#				petsc_local_arch_name_real="${default_petsc_arch_name_real}"
-	#			]
-	#		)
-	#	],[petsc_local_arch_name_real=$localpetscarchreal])
+		# See if default PETSc real arch name is overridden
+		AS_IF([test "x${localpetscarchreal}" = "x"],
+			[
+				AS_IF([test "x${with_localpetscdebug}" = "xyes"],
+					[
+						petsc_local_arch_name_real="${default_petsc_arch_name_real}-debug"
+					],
+					[
+						petsc_local_arch_name_real="${default_petsc_arch_name_real}"
+					]
+				)
+			],[petsc_local_arch_name_real=$localpetscarchreal])
+		
+		AC_MSG_NOTICE([petsc_local_arch_name_real = ${petsc_local_arch_name_real}])
 
-	# See if default PETSc complex arch name is overridden
-	#AS_IF([test "x${localpetscarchcomplex}" = "x"],
-	#	[
-	#		AS_IF([test "x${with_localpetscdebug}" = "xyes"],
-	#			[
-	#				petsc_local_arch_name_complex="${default_petsc_arch_name_complex}-debug"
-	#			],
-	#			[
-	#				petsc_local_arch_name_complex="${default_petsc_arch_name_complex}"
-	#			]
-	#		)
-	#	],[petsc_local_arch_name_real=$localpetscarchcomplex])
+		# See if default PETSc complex arch name is overridden
+		AS_IF([test "x${localpetscarchcomplex}" = "x"],
+			[
+				AS_IF([test "x${with_localpetscdebug}" = "xyes"],
+					[
+						petsc_local_arch_name_complex="${default_petsc_arch_name_complex}-debug"
+					],
+					[
+						petsc_local_arch_name_complex="${default_petsc_arch_name_complex}"
+					]
+				)
+			],[petsc_local_arch_name_real=$localpetscarchcomplex])
 
-	# debug version?
-#	AS_IF([test "x${with_localpetscdebug}" = "xyes"],
-#		[petsc_extra_config="${petsc_extra_config} --with-debugging=1"],
-#		[petsc_extra_config="${petsc_extra_config} --with-debugging=0"]
-#	)
+		AC_MSG_NOTICE([petsc_local_arch_name_complex = ${petsc_local_arch_name_complex}])
+		
 
-	# Use MPI?
-#	AS_IF([test "x${with_localpetscmpidisabled" = "xyes"],
-#		[$petsc_extra_config="${petsc_extra_config} --with-mpi=0"],
-#		[
-#			AS_IF([test "x${with_localpetscmpi" = "xyes"],
-#				[$petsc_extra_config="${petsc_extra_config} --download-openmpi"])
-#		])
+		# debug version?
+		AS_IF([test "x${with_localpetscdebug}" = "xyes"],
+			[petsc_extra_config="${petsc_extra_config} --with-debugging=1"],
+			[petsc_extra_config="${petsc_extra_config} --with-debugging=0"]
+		)
+
+		# Use MPI?
+		AS_IF([test "x${with_localpetscmpidisabled" = "xyes"],
+			[$petsc_extra_config="${petsc_extra_config} --with-mpi=0"],
+			[
+				AS_IF([test "x${with_localpetscmpi" = "xyes"],
+					[$petsc_extra_config="${petsc_extra_config} --download-openmpi"])
+			])
 	
-	# Go get FBLAS-LAPACK?
-#	AS_IF([test "x${with_localpetscfblas}" = "xyes"],
-#		[$petsc_extra_config="${petsc_extra_config} --download-fblaslapack"])
+		# Go get FBLAS-LAPACK?
+		AS_IF([test "x${with_localpetscfblas}" = "xyes"],
+			[$petsc_extra_config="${petsc_extra_config} --download-fblaslapack"])
 
-	# check downloader
-#	downloader=""
-#	AC_MSG_CHECKING("command-line downloader")
-#	AC_CHECK_PROGS([downloader],[wget curl])
-#	AS_IF([test "x${downloader}" = "x"],[AC_MSG_ERROR("Neither wget nor curl detected")],[AC_MSG_RESULT([$downloader])])
-
+		exit
+		
 	# make the install dir
 #	mkdir -p ${petsc_build_dir}
 #	AS_IF([test -d "$petsc_build_dir"],,AC_MSG_ERROR(["Error creating PETSc build directory ${petsc_build_dir}"]))
@@ -336,10 +337,15 @@ exit
 #	PETSC_DIR=${petsc_build_dir}
 #	PETSC_ARCH_REAL=${petsc_local_arch_name_real}
 #	PETSC_ARCH_COMPLEX=${petsc_local_arch_name_complex}
-#])
+],[no])
 
 
 
+# check downloader
+#downloader=""
+#AC_MSG_CHECKING("command-line downloader")
+#AC_CHECK_PROGS([downloader],[wget curl])
+#AS_IF([test "x${downloader}" = "x"],[AC_MSG_ERROR("Neither wget nor curl detected")],[AC_MSG_RESULT([$downloader])])
 
 
 
