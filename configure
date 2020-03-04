@@ -1361,7 +1361,7 @@ Optional Features:
   --disable-option-checking  ignore unrecognized --enable/--with options
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --enable-localpetscmpi  Build PETSc/SLEPc without MPI support
+  --disable-localpetscmpi Build PETSc/SLEPc without MPI support
 
   --enable-autodependencies
                           Attempt to install dependencies using
@@ -2348,8 +2348,8 @@ slepc_url_base="https://slepc.upv.es/download/distrib"
 
 # Need OS name for automatic default architecture name
 os_type=$(uname -s | awk '{print tolower($0)}')
-default_petsc_arch_name_real="arch-${os_type}-real"
-default_petsc_arch_name_complex="arch-${os_type}-complex"
+default_petsc_arch_name_real="arch-${os_type}-c-real"
+default_petsc_arch_name_complex="arch-${os_type}-c-complex"
 
 
 
@@ -2395,7 +2395,7 @@ if test "${with_localpetscfblas+set}" = set; then :
 fi
 
 
-# These --with options take arguments that must be processed
+# Environmental variables
 
 
 
