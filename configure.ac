@@ -410,7 +410,7 @@ AS_IF([test "x${with_localslepc}" = "xyes"],
 			[test "x${downloader}" = "x"],
 			[AC_MSG_ERROR("Neither wget nor curl detected")]
 		)
-	])
+	
 		# See if default SLEPc directory is overridden
 		AS_IF([test "x${local_slepc_dir}" != "x"],
 			[petsc_build_dir=${local_slepc_dir}],
@@ -423,6 +423,7 @@ AS_IF([test "x${with_localslepc}" = "xyes"],
 
 		AC_MSG_NOTICE([slepc_build_dir = ${slepc_build_dir}])
 		AC_MSG_NOTICE([slepc_version = ${slepc_version}])
+	])
 #
 #		# check for extra configuration options.
 #		slepc_extra_config=""

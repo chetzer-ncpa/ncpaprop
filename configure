@@ -5919,7 +5919,6 @@ done
 
 fi
 
-fi
 		# See if default SLEPc directory is overridden
 		if test "x${local_slepc_dir}" != "x"; then :
   petsc_build_dir=${local_slepc_dir}
@@ -5932,12 +5931,14 @@ fi
 else
   slepc_version=$local_slepc_version
 
-]])fi
+fi
 
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: slepc_build_dir = ${slepc_build_dir}" >&5
 $as_echo "$as_me: slepc_build_dir = ${slepc_build_dir}" >&6;}
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: slepc_version = ${slepc_version}" >&5
 $as_echo "$as_me: slepc_version = ${slepc_version}" >&6;}
+
+]])fi
 #
 #		# check for extra configuration options.
 #		slepc_extra_config=""
