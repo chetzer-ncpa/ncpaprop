@@ -458,10 +458,10 @@ AS_IF([test "x${with_localslepc}" = "xyes"],[
 					])
 				])
 				
-#				tar xvzf slepc-${slepc_version}.tar.gz
-#				AS_IF([test $? != 0],[
-#					AC_MSG_ERROR([Error decompressing slepc-${slepc_version}.tar.gz, check download])
-#				])
+				tar xvzf slepc-${slepc_version}.tar.gz
+				AS_IF([test $? != 0],[
+					AC_MSG_ERROR([Error decompressing slepc-${slepc_version}.tar.gz, check download])
+				])
 			]
 		)
 		exit
