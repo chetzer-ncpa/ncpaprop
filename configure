@@ -4201,6 +4201,8 @@ esac
      ;;
 esac
 				unset ac_cv_prog_FC
+				unset ac_cv_fc_compiler_gnu
+				unset ac_cv_prog_fc_g
 				ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
