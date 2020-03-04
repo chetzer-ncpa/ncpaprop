@@ -6011,6 +6011,7 @@ if test "x${with_localslepc}" = "xyes"; then :
 
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
+	basedir=$(pwd)
 
 	downloader=""
 	for ac_prog in wget curl
@@ -6324,6 +6325,8 @@ fi
 
 fi
 
+
+	cd $basedir
 
 else
 

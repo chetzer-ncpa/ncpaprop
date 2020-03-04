@@ -437,6 +437,7 @@ AC_CHECK_FILE( ${PETSC_DIR}/${PETSC_ARCH_COMPLEX}/lib/petsc/conf/petscvariables,
 AC_MSG_CHECKING([automatic local SLEPc installation])
 AS_IF([test "x${with_localslepc}" = "xyes"],[
 	AC_MSG_RESULT([yes])
+	basedir=$(pwd)
 
 	downloader=""
 	AC_CHECK_PROGS(downloader,[wget curl])
@@ -556,6 +557,8 @@ AS_IF([test "x${with_localslepc}" = "xyes"],[
 			AC_MSG_ERROR([Error building complex SLEPc, ${slepc_build_dir}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables not found])
 		])
 	])
+
+	cd $basedir
 ],[
 	AC_MSG_RESULT([no])
 ])
