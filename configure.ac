@@ -499,10 +499,11 @@ AS_IF([test "x${with_localslepc}" = "xyes"],[
 			])
 		]
 	)
-	cd ${slepc_build_dir}
+	SLEPC_DIR=${slepc_build_dir}
+	cd $SLEPC_DIR
 
 		AC_MSG_CHECKING([for existing ${PETSC_ARCH_REAL} SLEPc architecture])
-		AC_CHECK_FILE( ${slepc_build_dir}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables,
+		AC_CHECK_FILE( ${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables,
 			[AC_MSG_RESULT([yes])],
 			[
 				AC_MSG_RESULT([no, building])
@@ -511,26 +512,26 @@ AS_IF([test "x${with_localslepc}" = "xyes"],[
 				./configure
 #				
 #				AS_IF([test $? != 0],
-#					[AC_MSG_ERROR([Error running SLEPc configure command: ./configure PETSC_ARCH=${PETSC_ARCH_REAL} PETSC_DIR=${PETSC_DIR}])]
+#					[AC_MSG_ERROR([Error running SLEPc configure command: ./configure])]
 #				)
 #				exit
-#				make PETSC_ARCH=${PETSC_ARCH_REAL} PETSC_DIR=${PETSC_DIR} all
+#				make all
 #				AS_IF([test $? != 0],
-#					[AC_MSG_ERROR([Error running make command for real SLEPc: make PETSC_ARCH=${PETSC_ARCH_REAL} PETSC_DIR=${PETSC_DIR} all])]
+#					[AC_MSG_ERROR([Error running make command for real SLEPc: make all])]
 #				)
 #
 #				# see if it made the include file
 #				AC_MSG_CHECKING([successful ${PETSC_ARCH_REAL} SLEPc build])
 #
 #				# clear the cached variable
-#				unset `$as_echo "ac_cv_file_${slepc_build_dir}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables" | $as_tr_sh`
+#				unset `$as_echo "ac_cv_file_${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables" | $as_tr_sh`
 #
-#				AC_CHECK_FILE( ${slepc_build_dir}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables,
+#				AC_CHECK_FILE( ${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables,
 #					[
 #						AC_MSG_RESULT([yes])
 #					],
 #					[
-#						AC_MSG_RESULT([${slepc_build_dir}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables not found])
+#						AC_MSG_RESULT([${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables not found])
 #						AC_MSG_ERROR([Error building SLEPc real version])
 #					]
 #				)
