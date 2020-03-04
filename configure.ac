@@ -434,10 +434,6 @@ AC_CHECK_FILE( ${PETSC_DIR}/${PETSC_ARCH_COMPLEX}/lib/petsc/conf/petscvariables,
 	AC_MSG_ERROR([PETSc complex architecture-specific include file ${PETSC_DIR}/${PETSC_ARCH_COMPLEX}/lib/petsc/conf/petscvariables not found.  Check your PETSC_ARCH_COMPLEX variable and your PETSc installation.])
 ])
 
-exit
-
-
-
 AC_MSG_CHECKING([automatic local SLEPc installation])
 AS_IF([test "x${with_localslepc}" = "xyes"],[
 	AC_MSG_RESULT([yes])

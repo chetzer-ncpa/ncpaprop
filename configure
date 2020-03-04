@@ -6005,10 +6005,6 @@ else
 fi
 
 
-exit
-
-
-
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking automatic local SLEPc installation" >&5
 $as_echo_n "checking automatic local SLEPc installation... " >&6; }
 if test "x${with_localslepc}" = "xyes"; then :
