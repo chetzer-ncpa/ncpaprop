@@ -5866,8 +5866,10 @@ fi
 $as_echo_n "checking automatic local SLEPc installation... " >&6; }
 if test "x${with_localslepc}" = "xyes"; then :
 
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
+
+fi
 
 #		downloader=""
 #		AC_MSG_CHECKING([command-line downloader])
@@ -5903,8 +5905,7 @@ $as_echo "yes" >&6; }
 #			mkdir -p "${slepc_build_dir}""
 #			AS_IF([test -d "$slepc_build_dir"],,AC_MSG_ERROR(["Error creating SLEPc build directory ${slepc_build_dir}"]))
 #		])
-#
-fi
+#	])
 #		# see if it's already been downloaded and/or built
 #		cd ${slepc_build_dir}
 #		slepc_build_dir="${slepc_build_dir}/${slepc_version}"

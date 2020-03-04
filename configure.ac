@@ -400,9 +400,9 @@ AS_IF(
 ])
 
 AC_MSG_CHECKING([automatic local SLEPc installation])
-AS_IF([test "x${with_localslepc}" = "xyes"],
-	[
-		AC_MSG_RESULT([yes])
+AS_IF([test "x${with_localslepc}" = "xyes"],[
+	AC_MSG_RESULT([yes])
+])
 
 #		downloader=""
 #		AC_MSG_CHECKING([command-line downloader])
