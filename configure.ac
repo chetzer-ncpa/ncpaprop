@@ -513,13 +513,13 @@ AS_IF([test "x${with_localslepc}" = "xyes"],[
 			[AC_MSG_ERROR([Error running SLEPc configure command: ./configure])]
 		)
 		
-		make PETSC_DIR=${PETSC_DIR} SLEPC_DIR=${SLEPC_DIR} PETSC_ARCH=${PETSC_ARCH_REAL}
+		make PETSC_DIR=${PETSC_DIR} SLEPC_DIR=${SLEPC_DIR} PETSC_ARCH=${PETSC_ARCH}
 		AS_IF([test $? != 0],
-			[AC_MSG_ERROR([Error running make command for real SLEPc: make PETSC_DIR=${PETSC_DIR} SLEPC_DIR=${SLEPC_DIR} PETSC_ARCH=${PETSC_ARCH_REAL}])]
+			[AC_MSG_ERROR([Error running make command for real SLEPc: make PETSC_DIR=${PETSC_DIR} SLEPC_DIR=${SLEPC_DIR} PETSC_ARCH=${PETSC_ARCH}])]
 		)
 
 		# see if it made the include file
-		AC_MSG_CHECKING([successful ${PETSC_ARCH_REAL} SLEPc build])
+		AC_MSG_CHECKING([successful ${PETSC_ARCH} SLEPc build])
 
 		# clear the cached variable
 		unset `$as_echo "ac_cv_file_${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables" | $as_tr_sh`
@@ -540,14 +540,14 @@ AS_IF([test "x${with_localslepc}" = "xyes"],[
 		AS_IF([test $? != 0],
 			[AC_MSG_ERROR([Error running SLEPc configure command: ./configure])]
 		)
-		exit
-		make PETSC_ARCH=${PETSC_ARCH_COMPLEX} PETSC_DIR=${PETSC_DIR} all
+		
+		make PETSC_ARCH=${PETSC_ARCH} PETSC_DIR=${PETSC_DIR} SLEPC_DIR=${SLEPC_DIR}
 		AS_IF([test $? != 0],
-			[AC_MSG_ERROR([Error running make command for complex SLEPc: make PETSC_ARCH=${PETSC_ARCH_COMPLEX} PETSC_DIR=${PETSC_DIR} all])]
+			[AC_MSG_ERROR([Error running make command for complex SLEPc: make PETSC_ARCH=${PETSC_ARCH} PETSC_DIR=${PETSC_DIR} SLEPC_DIR=${SLEPC_DIR}])]
 		)
 
 		# see if it made the include file
-		AC_MSG_CHECKING([successful ${PETSC_ARCH_COMPLEX} SLEPc build])
+		AC_MSG_CHECKING([successful ${PETSC_ARCH} SLEPc build])
 
 		# clear the cached variable
 		unset `$as_echo "ac_cv_file_${slepc_build_dir}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables" | $as_tr_sh`

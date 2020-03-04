@@ -6206,15 +6206,15 @@ $as_echo "no, building" >&6; }
 
 fi
 
-		make PETSC_DIR=${PETSC_DIR} SLEPC_DIR=${SLEPC_DIR} PETSC_ARCH=${PETSC_ARCH_REAL}
+		make PETSC_DIR=${PETSC_DIR} SLEPC_DIR=${SLEPC_DIR} PETSC_ARCH=${PETSC_ARCH}
 		if test $? != 0; then :
-  as_fn_error $? "Error running make command for real SLEPc: make PETSC_DIR=${PETSC_DIR} SLEPC_DIR=${SLEPC_DIR} PETSC_ARCH=${PETSC_ARCH_REAL}" "$LINENO" 5
+  as_fn_error $? "Error running make command for real SLEPc: make PETSC_DIR=${PETSC_DIR} SLEPC_DIR=${SLEPC_DIR} PETSC_ARCH=${PETSC_ARCH}" "$LINENO" 5
 
 fi
 
 		# see if it made the include file
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking successful ${PETSC_ARCH_REAL} SLEPc build" >&5
-$as_echo_n "checking successful ${PETSC_ARCH_REAL} SLEPc build... " >&6; }
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking successful ${PETSC_ARCH} SLEPc build" >&5
+$as_echo_n "checking successful ${PETSC_ARCH} SLEPc build... " >&6; }
 
 		# clear the cached variable
 		unset `$as_echo "ac_cv_file_${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables" | $as_tr_sh`
@@ -6282,16 +6282,16 @@ $as_echo "no, building" >&6; }
   as_fn_error $? "Error running SLEPc configure command: ./configure" "$LINENO" 5
 
 fi
-		exit
-		make PETSC_ARCH=${PETSC_ARCH_COMPLEX} PETSC_DIR=${PETSC_DIR} all
+
+		make PETSC_ARCH=${PETSC_ARCH} PETSC_DIR=${PETSC_DIR} SLEPC_DIR=${SLEPC_DIR}
 		if test $? != 0; then :
-  as_fn_error $? "Error running make command for complex SLEPc: make PETSC_ARCH=${PETSC_ARCH_COMPLEX} PETSC_DIR=${PETSC_DIR} all" "$LINENO" 5
+  as_fn_error $? "Error running make command for complex SLEPc: make PETSC_ARCH=${PETSC_ARCH} PETSC_DIR=${PETSC_DIR} SLEPC_DIR=${SLEPC_DIR}" "$LINENO" 5
 
 fi
 
 		# see if it made the include file
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking successful ${PETSC_ARCH_COMPLEX} SLEPc build" >&5
-$as_echo_n "checking successful ${PETSC_ARCH_COMPLEX} SLEPc build... " >&6; }
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking successful ${PETSC_ARCH} SLEPc build" >&5
+$as_echo_n "checking successful ${PETSC_ARCH} SLEPc build... " >&6; }
 
 		# clear the cached variable
 		unset `$as_echo "ac_cv_file_${slepc_build_dir}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables" | $as_tr_sh`
