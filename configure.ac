@@ -338,8 +338,8 @@ AS_IF(
 				AS_IF([test $? != 0],
 					[AC_MSG_ERROR([Error running configure command: ./configure PETSC_ARCH=${petsc_local_arch_name_real} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config}])]
 				)
-				exit
-				make all
+				
+				make PETSC_ARCH=${petsc_local_arch_name_real} PETSC_DIR=${petsc_build_dir} all
 				AS_IF([test $? != 0],
 					[AC_MSG_ERROR([Error running make command for real PETSc: make all])]
 				)
@@ -370,7 +370,7 @@ AS_IF(
 #			AS_IF([test $? != 0],
 #				[AC_MSG_ERROR([Error running configure command: ./configure PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config} --with-scalar-type=complex])]
 #			)
-#			make all
+#			make PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} all
 #			AS_IF([test $? != 0],
 #				[AC_MSG_ERROR([Error running make command for complex PETSc: make all])]
 #			)
