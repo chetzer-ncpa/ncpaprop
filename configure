@@ -5192,6 +5192,7 @@ $as_echo "no, building" >&6; }
   as_fn_error $? "Error running configure command: ./configure PETSC_ARCH=${petsc_local_arch_name_real} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config}" "$LINENO" 5
 
 fi
+				exit
 				make all
 				if test $? != 0; then :
   as_fn_error $? "Error running make command for real PETSc: make all" "$LINENO" 5
