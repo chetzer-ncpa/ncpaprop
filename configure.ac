@@ -344,7 +344,7 @@ AS_IF(
 					[AC_MSG_ERROR([Error running make command for real PETSc: make all])]
 				)
 
-				# see if it made the include file (line 5738)
+				# see if it made the include file
 				AC_MSG_CHECKING([successful ${petsc_local_arch_name_real} build])
 
 				# clear the cached variable
@@ -361,43 +361,50 @@ AS_IF(
 				)
 			]
 		)
-		exit
+		
+		AC_MSG_CHECKING([for existing ${petsc_local_arch_name_complex} architecture])
+		AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables,
+			[AC_MSG_RESULT([yes])],
+			[
+				AC_MSG_RESULT([no, building])
 
-#	AC_MSG_CHECKING([for existing ${petsc_local_arch_name_complex} architecture])
-#	AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables
-#		[AC_MSG_RESULT([yes])],
-#		[
-#			AC_MSG_RESULT([no, building])
-#
-#			# build the complex version with indicated options
-#			./configure PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config} --with-scalar-type=complex
-#			AS_IF([test $? != 0],
-#				[AC_MSG_ERROR([Error running configure command: ./configure PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config} --with-scalar-type=complex])]
-#			)
-#			make PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} all
-#			AS_IF([test $? != 0],
-#				[AC_MSG_ERROR([Error running make command for complex PETSc: make all])]
-#			)
-#
-#			# see if it made the include file
-#			AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables,
-#				[
-#					AC_MSG_NOTICE([PETSc complex version build OK])
-#				],
-#				[
-#					AC_MSG_ERROR([Error building PETSc complex version])
-#				]
-#			)
-#		]
-#	)
-#
-#	PETSC_DIR=${petsc_build_dir}
-#	PETSC_ARCH_REAL=${petsc_local_arch_name_real}
-#	PETSC_ARCH_COMPLEX=${petsc_local_arch_name_complex}
+				# build the real version with indicated options
+				./configure PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config} --with-scalar-type=complex
+				
+				AS_IF([test $? != 0],
+					[AC_MSG_ERROR([Error running configure command: ./configure PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config} --with-scalar-type=complex])]
+				)
+				
+				make PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} all
+				AS_IF([test $? != 0],
+					[AC_MSG_ERROR([Error running make command for complex PETSc: make all])]
+				)
+
+				# see if it made the include file
+				AC_MSG_CHECKING([successful ${petsc_local_arch_name_complex} build])
+
+				# clear the cached variable
+				unset `$as_echo "ac_cv_file_${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables" | $as_tr_sh`
+
+				AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables,
+					[
+						AC_MSG_RESULT([yes])
+					],
+					[
+						AC_MSG_RESULT([${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables not found])
+						AC_MSG_ERROR([Error building PETSc complex version])
+					]
+				)
+			]
+		)
+
+		PETSC_DIR=${petsc_build_dir}
+		PETSC_ARCH_REAL=${petsc_local_arch_name_real}
+		PETSC_ARCH_COMPLEX=${petsc_local_arch_name_complex}
 	],[AC_MSG_RESULT([no])
 ])
 
-
+exit
 
 # check downloader
 #downloader=""

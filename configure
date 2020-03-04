@@ -5732,7 +5732,7 @@ fi
 
 fi
 
-				# see if it made the include file (line 5738)
+				# see if it made the include file
 				{ $as_echo "$as_me:${as_lineno-$LINENO}: checking successful ${petsc_local_arch_name_real} build" >&5
 $as_echo_n "checking successful ${petsc_local_arch_name_real} build... " >&6; }
 
@@ -5774,39 +5774,94 @@ fi
 
 fi
 
-		exit
 
-#	AC_MSG_CHECKING([for existing ${petsc_local_arch_name_complex} architecture])
-#	AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables
-#		[AC_MSG_RESULT([yes])],
-#		[
-#			AC_MSG_RESULT([no, building])
-#
-#			# build the complex version with indicated options
-#			./configure PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config} --with-scalar-type=complex
-#			AS_IF([test $? != 0],
-#				[AC_MSG_ERROR([Error running configure command: ./configure PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config} --with-scalar-type=complex])]
-#			)
-#			make PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} all
-#			AS_IF([test $? != 0],
-#				[AC_MSG_ERROR([Error running make command for complex PETSc: make all])]
-#			)
-#
-#			# see if it made the include file
-#			AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables,
-#				[
-#					AC_MSG_NOTICE([PETSc complex version build OK])
-#				],
-#				[
-#					AC_MSG_ERROR([Error building PETSc complex version])
-#				]
-#			)
-#		]
-#	)
-#
-#	PETSC_DIR=${petsc_build_dir}
-#	PETSC_ARCH_REAL=${petsc_local_arch_name_real}
-#	PETSC_ARCH_COMPLEX=${petsc_local_arch_name_complex}
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for existing ${petsc_local_arch_name_complex} architecture" >&5
+$as_echo_n "checking for existing ${petsc_local_arch_name_complex} architecture... " >&6; }
+		as_ac_File=`$as_echo "ac_cv_file_${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables" >&5
+$as_echo_n "checking for ${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+
+				{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no, building" >&5
+$as_echo "no, building" >&6; }
+
+				# build the real version with indicated options
+				./configure PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config} --with-scalar-type=complex
+
+				if test $? != 0; then :
+  as_fn_error $? "Error running configure command: ./configure PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config} --with-scalar-type=complex" "$LINENO" 5
+
+fi
+
+				make PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} all
+				if test $? != 0; then :
+  as_fn_error $? "Error running make command for complex PETSc: make all" "$LINENO" 5
+
+fi
+
+				# see if it made the include file
+				{ $as_echo "$as_me:${as_lineno-$LINENO}: checking successful ${petsc_local_arch_name_complex} build" >&5
+$as_echo_n "checking successful ${petsc_local_arch_name_complex} build... " >&6; }
+
+				# clear the cached variable
+				unset `$as_echo "ac_cv_file_${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables" | $as_tr_sh`
+
+				as_ac_File=`$as_echo "ac_cv_file_${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables" >&5
+$as_echo_n "checking for ${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+
+						{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+else
+
+						{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables not found" >&5
+$as_echo "${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables not found" >&6; }
+						as_fn_error $? "Error building PETSc complex version" "$LINENO" 5
+
+
+fi
+
+
+
+fi
+
+
+		PETSC_DIR=${petsc_build_dir}
+		PETSC_ARCH_REAL=${petsc_local_arch_name_real}
+		PETSC_ARCH_COMPLEX=${petsc_local_arch_name_complex}
 
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
@@ -5814,7 +5869,7 @@ $as_echo "no" >&6; }
 
 fi
 
-
+exit
 
 # check downloader
 #downloader=""
