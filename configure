@@ -5678,6 +5678,7 @@ fi
 fi
 
 		# see if it's already been downloaded and/or built
+		basedir=$(pwd)
 		cd ${petsc_build_dir}
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking PETSc download" >&5
 $as_echo_n "checking PETSc download... " >&6; }
@@ -5864,6 +5865,7 @@ fi
 		PETSC_DIR=${petsc_build_dir}
 		PETSC_ARCH_REAL=${petsc_local_arch_name_real}
 		PETSC_ARCH_COMPLEX=${petsc_local_arch_name_complex}
+		cd $basedir
 
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
@@ -5922,8 +5924,6 @@ fi
   test -n "$downloader" && break
 done
 
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $downloader" >&5
-$as_echo "$downloader" >&6; }
 		if test "x${downloader}" = "x"; then :
   as_fn_error $? "\"Neither wget nor curl detected\"" "$LINENO" 5
 else
@@ -5932,81 +5932,52 @@ $as_echo "$downloader" >&6; }
 
 fi
 
-		# See if default SLEPc directory is overridden
-		if test "x${local_slepc_dir}" != "x"; then :
-  petsc_build_dir=${local_slepc_dir}
-else
-  petsc_build_dir="$(pwd)/extern/slepc"
-
 fi
-		if test "x$local_slepc_version" = "x"; then :
-  slepc_version=$default_slepc_version
-elif slepc_version=$local_slepc_version
-
-fi
-
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: slepc_build_dir = ${slepc_build_dir}" >&5
-$as_echo "$as_me: slepc_build_dir = ${slepc_build_dir}" >&6;}
-
-		# check for extra configuration options.
-		slepc_extra_config=""
-
-		# make the install dir
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking SLEPc build directory" >&5
-$as_echo_n "checking SLEPc build directory... " >&6; }
-		if test -d "$slepc_build_dir"; then :
-
-			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-
-else
-
-			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no; then :
-  creating" >&5
-$as_echo "no
-elif creating" >&6; }
-			mkdir -p ${spelc_build_dir}
-			if test -d "$slepc_build_dir"; then :
-
-else
-  as_fn_error $? "\"Error creating SLEPc build directory ${slepc_build_dir}\"" "$LINENO" 5
-fi
-
-fi
-
-		# see if it's already been downloaded and/or built
-		cd ${slepc_build_dir}
-		slepc_build_dir="${slepc_build_dir}/${slepc_version}"
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking SLEPc download" >&5
-$as_echo_n "checking SLEPc download... " >&6; }
-		if test -f "${slepc_build_dir}/configure"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-
-				{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no; then :
-  downloading" >&5
-$as_echo "no
-elif downloading" >&6; }
-				slepc_url="${slepc_url_base}/slepc-${slepc_version}.tar.gz"
-				$downloader ${slepc_url}
-				if test $? != 0; then :
-
-					as_fn_error $? "Error downloading ${slepc_url}; then :
-  check internet connection and version number" "$LINENO" 5
-
-fi
-				tar xvzf slepc-${slepc_version}.tar.gz
-				if test $? != 0; then :
-
-					as_fn_error $? "Error decompressing slepc-${slepc_version}.tar.gz
-elif check download" "$LINENO" 5
-
-fi
-
-
-fi
-		exit
+#		# See if default SLEPc directory is overridden
+#		AS_IF([test "x${local_slepc_dir}" != "x"],
+#			[petsc_build_dir=${local_slepc_dir}],
+#			[petsc_build_dir="$(pwd)/extern/slepc"]
+#		)
+#		AS_IF([test "x$local_slepc_version" = "x"],
+#			[slepc_version=$default_slepc_version],
+#			[slepc_version=$local_slepc_version]
+#		])
+#
+#		AC_MSG_NOTICE([slepc_build_dir = ${slepc_build_dir}])
+#
+#		# check for extra configuration options.
+#		slepc_extra_config=""
+#
+#		# make the install dir
+#		AC_MSG_CHECKING([SLEPc build directory])
+#		AS_IF([test -d "$slepc_build_dir"],[
+#			AC_MSG_RESULT([yes])
+#		],[
+#			AC_MSG_RESULT([no, creating])
+#			mkdir -p ${spelc_build_dir}
+#			AS_IF([test -d "$slepc_build_dir"],,AC_MSG_ERROR(["Error creating SLEPc build directory ${slepc_build_dir}"]))
+#		])
+#
+#		# see if it's already been downloaded and/or built
+#		cd ${slepc_build_dir}
+#		slepc_build_dir="${slepc_build_dir}/${slepc_version}"
+#		AC_MSG_CHECKING([SLEPc download])
+#		AS_IF([test -f "${slepc_build_dir}/configure"],
+#			[AC_MSG_RESULT([yes])],
+#			[
+#				AC_MSG_RESULT([no, downloading])
+#				slepc_url="${slepc_url_base}/slepc-${slepc_version}.tar.gz"
+#				$downloader ${slepc_url}
+#				AS_IF([test $? != 0],[
+#					AC_MSG_ERROR([Error downloading ${slepc_url}, check internet connection and version number])
+#				])
+#				tar xvzf slepc-${slepc_version}.tar.gz
+#				AS_IF([test $? != 0],[
+#					AC_MSG_ERROR([Error decompressing slepc-${slepc_version}.tar.gz, check download])
+#				])
+#			]
+#		)
+#		exit
 #		AC_MSG_CHECKING([for existing ${PETSC_ARCH_REAL} SLEPc architecture])
 #		AC_CHECK_FILE( ${slepc_build_dir}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables,
 #			[AC_MSG_RESULT([yes])],
@@ -6080,11 +6051,8 @@ fi
 #		)
 #
 #		SLEPC_DIR=${slepc_build_dir}
-#	; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-]
-fi
+#	],[AC_MSG_RESULT([no])
+#])
 
 
 exit
