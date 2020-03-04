@@ -20,67 +20,67 @@ all: $(package-parts)
 
 # build general utility libraries
 common:
-	$(MAKE) -C src/common all PETSC_ARCH=@PETSC_ARCH_REAL@
+	$(MAKE) -C src/common all PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 
 # build atmospheric utility libraries
 atmosphere:
-	$(MAKE) -C src/atmosphere all PETSC_ARCH=@PETSC_ARCH_REAL@
+	$(MAKE) -C src/atmosphere all PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 
 # ray tracing routines
 raytrace:
-	$(MAKE) -C src/raytrace all PETSC_ARCH=@PETSC_ARCH_REAL@
+	$(MAKE) -C src/raytrace all PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 
 # Normal modes, single frequency, effective sound speed approximation
 modess:
-	$(MAKE) -C src/modess all PETSC_ARCH=@PETSC_ARCH_REAL@
+	$(MAKE) -C src/modess all PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 
 # Normal modes, broadband
 modbb:
-	$(MAKE) -C src/modbb all PETSC_ARCH=@PETSC_ARCH_REAL@
+	$(MAKE) -C src/modbb all PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 
 # Normal modes, range-dependent, one-way coupled modes
 modess_rd_1wcm:
-	$(MAKE) -C src/modess_rd_1wcm all PETSC_ARCH=@PETSC_ARCH_REAL@
+	$(MAKE) -C src/modess_rd_1wcm all PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 
 # High-angle high-mach parabolic equation
 pade_pe:
-	$(MAKE) -C src/pade_pe all PETSC_ARCH=@PETSC_ARCH_REAL@
+	$(MAKE) -C src/pade_pe all PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 
 # Wide-angle high-mach number normal modes, single frequency
 wmod:
-	$(MAKE) -C src/wmod all PETSC_ARCH=@PETSC_ARCH_REAL@
+	$(MAKE) -C src/wmod all PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 	
 # Complex normal modes, single frequency, effective sound speed
 cmodess:
-	$(MAKE) -C src/cmodess all PETSC_ARCH=@PETSC_ARCH_COMPLEX@
+	$(MAKE) -C src/cmodess all PETSC_ARCH=@PETSC_ARCH_COMPLEX@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 
 # Complex normal modes, broadband
 cmodbb:
-	$(MAKE) -C src/cmodbb all PETSC_ARCH=@PETSC_ARCH_COMPLEX@
+	$(MAKE) -C src/cmodbb all PETSC_ARCH=@PETSC_ARCH_COMPLEX@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 
 wnlrt:
-	$(MAKE) -C src/wnlrt all PETSC_ARCH=@PETSC_ARCH_REAL@
+	$(MAKE) -C src/wnlrt all PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 
 tdpape:
-	$(MAKE) -C src/tdpape all PETSC_ARCH=@PETSC_ARCH_REAL@
+	$(MAKE) -C src/tdpape all PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 	
 #modess_rd_2wcm:
 #	$(MAKE) -C src/modess_rd_2wcm ModessRD2WCM PETSC_ARCH=@PETSC_ARCH_COMPLEX@
 
 # clean everything up, including external libraries
 clean:
-	-$(MAKE) -C src/common clean  PETSC_ARCH=@PETSC_ARCH_REAL@
-	-$(MAKE) -C src/atmosphere clean  PETSC_ARCH=@PETSC_ARCH_REAL@
-	-$(MAKE) -C src/raytrace clean  PETSC_ARCH=@PETSC_ARCH_REAL@
-	-$(MAKE) -C src/modess clean  PETSC_ARCH=@PETSC_ARCH_REAL@
-	-$(MAKE) -C src/modbb clean  PETSC_ARCH=@PETSC_ARCH_REAL@
-	-$(MAKE) -C src/modess_rd_1wcm clean  PETSC_ARCH=@PETSC_ARCH_REAL@
-	-$(MAKE) -C src/pade_pe clean  PETSC_ARCH=@PETSC_ARCH_REAL@
-	-$(MAKE) -C src/wmod clean  PETSC_ARCH=@PETSC_ARCH_REAL@
-	-$(MAKE) -C src/cmodess clean  PETSC_ARCH=@PETSC_ARCH_COMPLEX@
-	-$(MAKE) -C src/cmodbb clean  PETSC_ARCH=@PETSC_ARCH_COMPLEX@
-	-$(MAKE) -C src/tdpape clean  PETSC_ARCH=@PETSC_ARCH_REAL@
-	-$(MAKE) -C src/wnlrt clean  PETSC_ARCH=@PETSC_ARCH_REAL@
+	-$(MAKE) -C src/common clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
+	-$(MAKE) -C src/atmosphere clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
+	-$(MAKE) -C src/raytrace clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
+	-$(MAKE) -C src/modess clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
+	-$(MAKE) -C src/modbb clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
+	-$(MAKE) -C src/modess_rd_1wcm clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
+	-$(MAKE) -C src/pade_pe clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
+	-$(MAKE) -C src/wmod clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
+	-$(MAKE) -C src/cmodess clean  PETSC_ARCH=@PETSC_ARCH_COMPLEX@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
+	-$(MAKE) -C src/cmodbb clean  PETSC_ARCH=@PETSC_ARCH_COMPLEX@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
+	-$(MAKE) -C src/tdpape clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
+	-$(MAKE) -C src/wnlrt clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 #	-$(MAKE) -C src/modess_rd_2wcm clean  PETSC_ARCH=@PETSC_ARCH_COMPLEX@
 	-rm bin/CModBB  bin/CModess  bin/ModBB  bin/Modess  bin/ModessRD1WCM  bin/pape  bin/raytrace.2d  bin/raytrace.3d  bin/WMod lib/libatmosphere.a lib/libcommon.a bin/tdpape bin/wnlrt
 
