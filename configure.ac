@@ -104,7 +104,7 @@ AS_IF([test "x${with_localpetsc}" = "xyes"],[
 		AC_PROG_FC
 		AC_MSG_NOTICE([FC = ${FC}])
 		exit
-	]
+	])
 ])
 dnl AC_PROG_INSTALL
 
