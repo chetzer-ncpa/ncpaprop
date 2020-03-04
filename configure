@@ -631,6 +631,7 @@ PETSC_DIR
 STATICLIBS
 WARNINGFLAGS
 INCLUDEFLAGS
+downloader
 POW_LIB
 LIBOBJS
 EGREP
@@ -2342,6 +2343,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 default_petsc_build_dir="${abs_builddir}/extern/petsc"
 default_slepc_build_dir="${abs_builddir}/extern/slepc"
 default_slepc_version="3.12.2"
+slepc_url_base="https://slepc.upv.es/download/distrib"
 
 # Need OS name for automatic default architecture name
 os_type=$(uname -s | awk '{print tolower($0)}')
@@ -5722,19 +5724,19 @@ $as_echo "no, building" >&6; }
 				./configure PETSC_ARCH=${petsc_local_arch_name_real} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config}
 
 				if test $? != 0; then :
-  as_fn_error $? "Error running configure command: ./configure PETSC_ARCH=${petsc_local_arch_name_real} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config}" "$LINENO" 5
+  as_fn_error $? "Error running PETSc configure command: ./configure PETSC_ARCH=${petsc_local_arch_name_real} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config}" "$LINENO" 5
 
 fi
 
 				make PETSC_ARCH=${petsc_local_arch_name_real} PETSC_DIR=${petsc_build_dir} all
 				if test $? != 0; then :
-  as_fn_error $? "Error running make command for real PETSc: make all" "$LINENO" 5
+  as_fn_error $? "Error running make command for real PETSc: make PETSC_ARCH=${petsc_local_arch_name_real} PETSC_DIR=${petsc_build_dir} all" "$LINENO" 5
 
 fi
 
 				# see if it made the include file
-				{ $as_echo "$as_me:${as_lineno-$LINENO}: checking successful ${petsc_local_arch_name_real} build" >&5
-$as_echo_n "checking successful ${petsc_local_arch_name_real} build... " >&6; }
+				{ $as_echo "$as_me:${as_lineno-$LINENO}: checking successful ${petsc_local_arch_name_real} PETSc build" >&5
+$as_echo_n "checking successful ${petsc_local_arch_name_real} PETSc build... " >&6; }
 
 				# clear the cached variable
 				unset `$as_echo "ac_cv_file_${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables" | $as_tr_sh`
@@ -5806,19 +5808,19 @@ $as_echo "no, building" >&6; }
 				./configure PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config} --with-scalar-type=complex
 
 				if test $? != 0; then :
-  as_fn_error $? "Error running configure command: ./configure PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config} --with-scalar-type=complex" "$LINENO" 5
+  as_fn_error $? "Error running PETSc configure command: ./configure PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config} --with-scalar-type=complex" "$LINENO" 5
 
 fi
 
 				make PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} all
 				if test $? != 0; then :
-  as_fn_error $? "Error running make command for complex PETSc: make all" "$LINENO" 5
+  as_fn_error $? "Error running make command for complex PETSc: make PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} all" "$LINENO" 5
 
 fi
 
 				# see if it made the include file
-				{ $as_echo "$as_me:${as_lineno-$LINENO}: checking successful ${petsc_local_arch_name_complex} build" >&5
-$as_echo_n "checking successful ${petsc_local_arch_name_complex} build... " >&6; }
+				{ $as_echo "$as_me:${as_lineno-$LINENO}: checking successful ${petsc_local_arch_name_complex} PETSc build" >&5
+$as_echo_n "checking successful ${petsc_local_arch_name_complex} PETSc build... " >&6; }
 
 				# clear the cached variable
 				unset `$as_echo "ac_cv_file_${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables" | $as_tr_sh`
@@ -5869,13 +5871,228 @@ $as_echo "no" >&6; }
 
 fi
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking automatic local SLEPc installation" >&5
+$as_echo_n "checking automatic local SLEPc installation... " >&6; }
+if test "x${with_localslepc}" = "xyes"; then :
+
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+		downloader=""
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking command-line downloader" >&5
+$as_echo_n "checking command-line downloader... " >&6; }
+		for ac_prog in wget curl
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_downloader+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$downloader"; then
+  ac_cv_prog_downloader="$downloader" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_downloader="$ac_prog"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+downloader=$ac_cv_prog_downloader
+if test -n "$downloader"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $downloader" >&5
+$as_echo "$downloader" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$downloader" && break
+done
+
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $downloader" >&5
+$as_echo "$downloader" >&6; }
+		if test "x${downloader}" = "x"; then :
+  as_fn_error $? "\"Neither wget nor curl detected\"" "$LINENO" 5
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $downloader" >&5
+$as_echo "$downloader" >&6; }
+
+fi
+
+		# See if default SLEPc directory is overridden
+		if test "x${local_slepc_dir}" != "x"; then :
+  petsc_build_dir=${local_slepc_dir}
+else
+  petsc_build_dir="$(pwd)/extern/slepc"
+
+fi
+		if test "x$local_slepc_version" = "x"; then :
+  slepc_version=$default_slepc_version
+elif slepc_version=$local_slepc_version
+
+fi
+
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: slepc_build_dir = ${slepc_build_dir}" >&5
+$as_echo "$as_me: slepc_build_dir = ${slepc_build_dir}" >&6;}
+
+		# check for extra configuration options.
+		slepc_extra_config=""
+
+		# make the install dir
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking SLEPc build directory" >&5
+$as_echo_n "checking SLEPc build directory... " >&6; }
+		if test -d "$slepc_build_dir"; then :
+
+			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+else
+
+			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no; then :
+  creating" >&5
+$as_echo "no
+elif creating" >&6; }
+			mkdir -p ${spelc_build_dir}
+			if test -d "$slepc_build_dir"; then :
+
+else
+  as_fn_error $? "\"Error creating SLEPc build directory ${slepc_build_dir}\"" "$LINENO" 5
+fi
+
+fi
+
+		# see if it's already been downloaded and/or built
+		cd ${slepc_build_dir}
+		slepc_build_dir="${slepc_build_dir}/${slepc_version}"
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking SLEPc download" >&5
+$as_echo_n "checking SLEPc download... " >&6; }
+		if test -f "${slepc_build_dir}/configure"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+
+				{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no; then :
+  downloading" >&5
+$as_echo "no
+elif downloading" >&6; }
+				slepc_url="${slepc_url_base}/slepc-${slepc_version}.tar.gz"
+				$downloader ${slepc_url}
+				if test $? != 0; then :
+
+					as_fn_error $? "Error downloading ${slepc_url}; then :
+  check internet connection and version number" "$LINENO" 5
+
+fi
+				tar xvzf slepc-${slepc_version}.tar.gz
+				if test $? != 0; then :
+
+					as_fn_error $? "Error decompressing slepc-${slepc_version}.tar.gz
+elif check download" "$LINENO" 5
+
+fi
+
+
+fi
+		exit
+#		AC_MSG_CHECKING([for existing ${PETSC_ARCH_REAL} SLEPc architecture])
+#		AC_CHECK_FILE( ${slepc_build_dir}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables,
+#			[AC_MSG_RESULT([yes])],
+#			[
+#				AC_MSG_RESULT([no, building])
+#
+#				# build the real version with indicated options
+#				./configure PETSC_ARCH=${PETSC_ARCH_REAL} PETSC_DIR=${PETSC_DIR}
+#
+#				AS_IF([test $? != 0],
+#					[AC_MSG_ERROR([Error running SLEPc configure command: ./configure PETSC_ARCH=${PETSC_ARCH_REAL} PETSC_DIR=${PETSC_DIR}])]
+#				)
+#				exit
+#				make PETSC_ARCH=${PETSC_ARCH_REAL} PETSC_DIR=${PETSC_DIR} all
+#				AS_IF([test $? != 0],
+#					[AC_MSG_ERROR([Error running make command for real SLEPc: make PETSC_ARCH=${PETSC_ARCH_REAL} PETSC_DIR=${PETSC_DIR} all])]
+#				)
+#
+#				# see if it made the include file
+#				AC_MSG_CHECKING([successful ${PETSC_ARCH_REAL} SLEPc build])
+#
+#				# clear the cached variable
+#				unset `$as_echo "ac_cv_file_${slepc_build_dir}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables" | $as_tr_sh`
+#
+#				AC_CHECK_FILE( ${slepc_build_dir}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables,
+#					[
+#						AC_MSG_RESULT([yes])
+#					],
+#					[
+#						AC_MSG_RESULT([${slepc_build_dir}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables not found])
+#						AC_MSG_ERROR([Error building SLEPc real version])
+#					]
+#				)
+#			]
+#		)
+#		exit
+#		AC_MSG_CHECKING([for existing ${PETSC_ARCH_COMPLEX} SLEPc architecture])
+#		AC_CHECK_FILE( ${slepc_build_dir}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables,
+#			[AC_MSG_RESULT([yes])],
+#			[
+#				AC_MSG_RESULT([no, building])
+#
+#				# build the complex version with indicated options
+#				./configure PETSC_ARCH=${PETSC_ARCH_COMPLEX} PETSC_DIR=${PETSC_DIR}
+#
+#				AS_IF([test $? != 0],
+#					[AC_MSG_ERROR([Error running SLEPc configure command: ./configure PETSC_ARCH=${PETSC_ARCH_COMPLEX} PETSC_DIR=${PETSC_DIR}])]
+#				)
+#				exit
+#				make PETSC_ARCH=${PETSC_ARCH_COMPLEX} PETSC_DIR=${PETSC_DIR} all
+#				AS_IF([test $? != 0],
+#					[AC_MSG_ERROR([Error running make command for complex SLEPc: make PETSC_ARCH=${PETSC_ARCH_COMPLEX} PETSC_DIR=${PETSC_DIR} all])]
+#				)
+#
+#				# see if it made the include file
+#				AC_MSG_CHECKING([successful ${PETSC_ARCH_COMPLEX} SLEPc build])
+#
+#				# clear the cached variable
+#				unset `$as_echo "ac_cv_file_${slepc_build_dir}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables" | $as_tr_sh`
+#
+#				AC_CHECK_FILE( ${slepc_build_dir}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables,
+#					[
+#						AC_MSG_RESULT([yes])
+#					],
+#					[
+#						AC_MSG_RESULT([${slepc_build_dir}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables not found])
+#						AC_MSG_ERROR([Error building SLEPc complex version])
+#					]
+#				)
+#			]
+#		)
+#
+#		SLEPC_DIR=${slepc_build_dir}
+#	; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+]
+fi
+
+
 exit
 
-# check downloader
-#downloader=""
-#AC_MSG_CHECKING("command-line downloader")
-#AC_CHECK_PROGS([downloader],[wget curl])
-#AS_IF([test "x${downloader}" = "x"],[AC_MSG_ERROR("Neither wget nor curl detected")],[AC_MSG_RESULT([$downloader])])
+
+
+
+
 
 
 
