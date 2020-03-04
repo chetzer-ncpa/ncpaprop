@@ -42,7 +42,7 @@ AC_ARG_WITH([localpetscmpi],
 	AS_HELP_STRING([--with-localpetscmpi],[Download and build OpenMPI libraries as part of the PETSc installation process, rather than looking for system-installed libraries])
 )
 AC_ARG_WITH([localpetscfblas],
-	AS_HELP_STRING([--with-localpetscfblas],[Download and build FBLAS-LAPACK libraries as part of the PETSc installation process, rather than looking for system-installed libraries])
+	AS_HELP_STRING([--with-localpetscfblas],[Download and build FBLAS-LAPACK libraries as part of the PETSc installation process, rather than looking for system-installed libraries.  Note that this option also requires a Fortran compiler.])
 )
 
 # These --with options take arguments that must be processed
@@ -99,6 +99,13 @@ AC_PROG_RANLIB
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_CPP
+AS_IF([test "x${with_localpetsc}" = "xyes"],[
+	AS_IF([test "x${with_localpetscfblas}" = "xyes"],[
+		AC_PROG_FC
+		AC_MSG_NOTICE([FC = ${FC}])
+		exit
+	]
+])
 dnl AC_PROG_INSTALL
 
 # Checks for libraries.
@@ -210,8 +217,8 @@ AS_IF(
 
 		AC_MSG_NOTICE([petsc_build_dir = ${petsc_build_dir}])
 
-		# check for extra configuration options.  First, disable Fortran
-		petsc_extra_config="--with-fc=0"
+		# check for extra configuration options.
+		petsc_extra_config=""
 	
 		# See if default PETSc real arch name is overridden
 		AS_IF([test "x${local_petsc_arch_real}" = "x"],
@@ -257,9 +264,14 @@ AS_IF(
 					[petsc_extra_config="${petsc_extra_config} --download-openmpi"])
 			])
 	
-		# Go get FBLAS-LAPACK?
+		# Go get FBLAS-LAPACK?  If not, disable Fortran
 		AS_IF([test "x${with_localpetscfblas}" = "xyes"],
-			[petsc_extra_config="${petsc_extra_config} --download-fblaslapack"])
+			[
+
+				petsc_extra_config="${petsc_extra_config} --download-fblaslapack"
+			],[
+				petsc_extra_config="${petsc_extra_config} --with-fc=0"
+			])
 
 		AC_MSG_NOTICE([petsc_extra_config = ${petsc_extra_config}])
 		
