@@ -434,7 +434,7 @@ AS_IF([test "x${with_localslepc}" = "xyes"],
 			AC_MSG_RESULT([yes])
 		],[
 			AC_MSG_RESULT([no, creating])
-			mkdir -p ${spelc_build_dir}
+			mkdir -p ${slepc_build_dir}
 			AS_IF([test -d "$slepc_build_dir"],,AC_MSG_ERROR(["Error creating SLEPc build directory ${slepc_build_dir}"]))
 		])
 	])
