@@ -99,6 +99,8 @@ AC_PROG_RANLIB
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_CPP
+
+# If we want to auto-install fblas-lapack, we need a Fortran compiler
 AS_IF([test "x${with_localpetsc}" = "xyes"],[
 	AS_IF([test "x${with_localpetscfblas}" = "xyes"],[
 		AC_PROG_FC
@@ -132,7 +134,6 @@ AS_IF([test "x${with_localpetsc}" = "xyes"],[
 				AC_MSG_ERROR([Failed to detect a Fortran compiler.  Please install the appropriate package or compile from source.])
 			])
 		])
-		exit
 	])
 ])
 dnl AC_PROG_INSTALL

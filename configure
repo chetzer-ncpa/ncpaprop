@@ -3953,6 +3953,8 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
+
+# If we want to auto-install fblas-lapack, we need a Fortran compiler
 if test "x${with_localpetsc}" = "xyes"; then :
 
 	if test "x${with_localpetscfblas}" = "xyes"; then :
@@ -4427,7 +4429,6 @@ else
 fi
 
 fi
-		exit
 
 fi
 
