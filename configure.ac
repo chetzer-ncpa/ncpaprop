@@ -121,6 +121,7 @@ AS_IF([test "x${with_localpetsc}" = "xyes"],[
 							]
 						)
 				])
+				unset ac_cv_prog_FC
 				AC_PROG_FC
 				AS_IF([test "x${FC}" = "x"],[
 					AC_MSG_ERROR("Unable to install Fortran compiler.  Please install manually and retry.")
