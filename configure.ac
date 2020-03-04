@@ -412,20 +412,20 @@ AS_IF([test "x${with_localslepc}" = "xyes"],[
 	],[
 		AC_MSG_RESULT([$downloader])
 	])
+
+		# See if default SLEPc directory is overridden
+		AS_IF([test "x${local_slepc_dir}" != "x"],
+			[slepc_build_dir=${local_slepc_dir}],
+			[slepc_build_dir="$(pwd)/extern/slepc"]
+		)
+		AS_IF([test "x$local_slepc_version" = "x"],
+			[slepc_version=$default_slepc_version],
+			[slepc_version=$local_slepc_version]
+		)
+
+		AC_MSG_NOTICE([slepc_build_dir = ${slepc_build_dir}])
+		AC_MSG_NOTICE([slepc_version = ${slepc_version}])
 ])	
-#		# See if default SLEPc directory is overridden
-#		AS_IF([test "x${local_slepc_dir}" != "x"],
-#			[slepc_build_dir=${local_slepc_dir}],
-#			[slepc_build_dir="$(pwd)/extern/slepc"]
-#		)
-#		AS_IF([test "x$local_slepc_version" = "x"],
-#			[slepc_version=$default_slepc_version],
-#			[slepc_version=$local_slepc_version]
-#		)
-#
-#		AC_MSG_NOTICE([slepc_build_dir = ${slepc_build_dir}])
-#		AC_MSG_NOTICE([slepc_version = ${slepc_version}])
-#	
 #
 #		# check for extra configuration options.
 #		slepc_extra_config=""

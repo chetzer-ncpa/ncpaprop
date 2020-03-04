@@ -5928,20 +5928,26 @@ $as_echo "$downloader" >&6; }
 
 fi
 
+		# See if default SLEPc directory is overridden
+		if test "x${local_slepc_dir}" != "x"; then :
+  slepc_build_dir=${local_slepc_dir}
+else
+  slepc_build_dir="$(pwd)/extern/slepc"
+
 fi
-#		# See if default SLEPc directory is overridden
-#		AS_IF([test "x${local_slepc_dir}" != "x"],
-#			[slepc_build_dir=${local_slepc_dir}],
-#			[slepc_build_dir="$(pwd)/extern/slepc"]
-#		)
-#		AS_IF([test "x$local_slepc_version" = "x"],
-#			[slepc_version=$default_slepc_version],
-#			[slepc_version=$local_slepc_version]
-#		)
-#
-#		AC_MSG_NOTICE([slepc_build_dir = ${slepc_build_dir}])
-#		AC_MSG_NOTICE([slepc_version = ${slepc_version}])
-#
+		if test "x$local_slepc_version" = "x"; then :
+  slepc_version=$default_slepc_version
+else
+  slepc_version=$local_slepc_version
+
+fi
+
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: slepc_build_dir = ${slepc_build_dir}" >&5
+$as_echo "$as_me: slepc_build_dir = ${slepc_build_dir}" >&6;}
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: slepc_version = ${slepc_version}" >&5
+$as_echo "$as_me: slepc_version = ${slepc_version}" >&6;}
+
+fi
 #
 #		# check for extra configuration options.
 #		slepc_extra_config=""
