@@ -5938,7 +5938,7 @@ $as_echo "$as_me: slepc_build_dir = ${slepc_build_dir}" >&6;}
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: slepc_version = ${slepc_version}" >&5
 $as_echo "$as_me: slepc_version = ${slepc_version}" >&6;}
 
-]])fi
+fi
 #
 #		# check for extra configuration options.
 #		slepc_extra_config=""

@@ -419,7 +419,7 @@ AS_IF([test "x${with_localslepc}" = "xyes"],
 		AS_IF([test "x$local_slepc_version" = "x"],
 			[slepc_version=$default_slepc_version],
 			[slepc_version=$local_slepc_version]
-		])
+		)
 
 		AC_MSG_NOTICE([slepc_build_dir = ${slepc_build_dir}])
 		AC_MSG_NOTICE([slepc_version = ${slepc_version}])
