@@ -102,7 +102,33 @@ AC_PROG_CPP
 AS_IF([test "x${with_localpetsc}" = "xyes"],[
 	AS_IF([test "x${with_localpetscfblas}" = "xyes"],[
 		AC_PROG_FC
-		AC_MSG_NOTICE([FC = ${FC}])
+		AS_IF([test "x${FC}" = "x"],[
+			AC_MSG_NOTICE([Local installation of fblas-lapack requires a Fortran compiler.])
+			AS_IF([test "x$enable_autodependencies" = "xyes"],[
+				AS_CASE([$host_os],
+					[darwin*],[
+						AC_MSG_ERROR([Auto dependencies not available for MacOS.  Install gfortran using your package manager of choice.])
+					],
+					[linux*],[
+						AS_CASE([$default_package_manager],
+							[*apt-get],[
+								sudo $default_package_manager -y install gfortran
+							],
+							[*yum],[
+								sudo $default_package_manager -y install gcc-gfortran
+							],[
+								AC_MSG_ERROR([No supported package manager found (apt and yum currently supported)])
+							]
+						)
+				])
+				AC_PROG_FC
+				AS_IF([test "x${FC}" = "x"],[
+					AC_MSG_ERROR("Unable to install Fortran compiler.  Please install manually and retry.")
+				])
+			],[
+				AC_MSG_ERROR([Failed to detect a Fortran compiler.  Please install the appropriate package or compile from source.])
+			])
+		])
 		exit
 	])
 ])
