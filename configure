@@ -6203,36 +6203,56 @@ $as_echo "no, building" >&6; }
 				# build the real version with indicated options
 				export PETSC_ARCH=${PETSC_ARCH_REAL}
 				./configure
-#
-#				AS_IF([test $? != 0],
-#					[AC_MSG_ERROR([Error running SLEPc configure command: ./configure])]
-#				)
-#				exit
-#				make all
-#				AS_IF([test $? != 0],
-#					[AC_MSG_ERROR([Error running make command for real SLEPc: make all])]
-#				)
-#
-#				# see if it made the include file
-#				AC_MSG_CHECKING([successful ${PETSC_ARCH_REAL} SLEPc build])
-#
-#				# clear the cached variable
-#				unset `$as_echo "ac_cv_file_${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables" | $as_tr_sh`
-#
-#				AC_CHECK_FILE( ${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables,
-#					[
-#						AC_MSG_RESULT([yes])
-#					],
-#					[
-#						AC_MSG_RESULT([${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables not found])
-#						AC_MSG_ERROR([Error building SLEPc real version])
-#					]
-#				)
+
+				if test $? != 0; then :
+  as_fn_error $? "Error running SLEPc configure command: ./configure" "$LINENO" 5
+
+fi
+
+				make PETSC_DIR=${PETSC_DIR} SLEPC_DIR=${SLEPC_DIR} PETSC_ARCH=${PETSC_ARCH_REAL}
+				if test $? != 0; then :
+  as_fn_error $? "Error running make command for real SLEPc: make PETSC_DIR=${PETSC_DIR} SLEPC_DIR=${SLEPC_DIR} PETSC_ARCH=${PETSC_ARCH_REAL}" "$LINENO" 5
+
+fi
+
+				# see if it made the include file
+				{ $as_echo "$as_me:${as_lineno-$LINENO}: checking successful ${PETSC_ARCH_REAL} SLEPc build" >&5
+$as_echo_n "checking successful ${PETSC_ARCH_REAL} SLEPc build... " >&6; }
+
+				# clear the cached variable
+				unset `$as_echo "ac_cv_file_${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables" | $as_tr_sh`
+
+				as_ac_File=`$as_echo "ac_cv_file_${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables" >&5
+$as_echo_n "checking for ${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+
+else
+
+					{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables not found" >&5
+$as_echo "${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables not found" >&6; }
+					as_fn_error $? "Error building SLEPc real version" "$LINENO" 5
+
+fi
+
 
 
 fi
 
-		exit
 
 fi
 
