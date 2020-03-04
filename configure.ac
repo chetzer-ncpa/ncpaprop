@@ -268,7 +268,7 @@ AS_IF(
 		AS_IF([test -d "$petsc_build_dir"],[
 			AC_MSG_RESULT([yes])
 		],[
-			AC_MSG_RESULT([creating])
+			AC_MSG_RESULT([no, creating])
 			mkdir -p ${petsc_build_dir}
 			AS_IF([test -d "$petsc_build_dir"],,AC_MSG_ERROR(["Error creating PETSc build directory ${petsc_build_dir}"]))
 		])
@@ -279,38 +279,40 @@ AS_IF(
 		AS_IF([test -f "configure"],
 			[AC_MSG_RESULT([yes])],
 			[
-				AC_MSG_RESULT([cloning])
+				AC_MSG_RESULT([no, cloning])
 				git clone -b maint https://gitlab.com/petsc/petsc.git .
 			]
 		)
 
-#	AC_MSG_CHECKING([for existing ${petsc_local_arch_name_real} architecture])
-#	AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables,
-#		[AC_MSG_RESULT([yes])],
-#		[
-#			AC_MSG_RESULT([no, building])
-#
-#			# build the real version with indicated options
-#			./configure PETSC_ARCH=${petsc_local_arch_name_real} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config}
-#			AS_IF([test $? != 0],
-#				[AC_MSG_ERROR([Error running configure command: ./configure PETSC_ARCH=${petsc_local_arch_name_real} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config}])]
-#			)
-#			make all
-#			AS_IF([test $? != 0],
-#				[AC_MSG_ERROR([Error running make command for real PETSc: make all])]
-#			)
-#
-#			# see if it made the include file
-#			AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables,
-#				[
-#					AC_MSG_NOTICE([PETSc real version build OK])
-#				],
-#				[
-#					AC_MSG_ERROR([Error building PETSc real version])
-#				]
-#			)
-#		]
-#	)
+		AC_MSG_CHECKING([for existing ${petsc_local_arch_name_real} architecture])
+		AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables,
+			[AC_MSG_RESULT([yes])],
+			[
+				AC_MSG_RESULT([no, building])
+
+				# build the real version with indicated options
+				AC_MSG_NOTICE([./configure PETSC_ARCH=${petsc_local_arch_name_real} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config}])
+				exit
+				AS_IF([test $? != 0],
+					[AC_MSG_ERROR([Error running configure command: ./configure PETSC_ARCH=${petsc_local_arch_name_real} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config}])]
+				)
+				make all
+				AS_IF([test $? != 0],
+					[AC_MSG_ERROR([Error running make command for real PETSc: make all])]
+				)
+
+				# see if it made the include file
+				AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables,
+					[
+						AC_MSG_NOTICE([PETSc real version build OK])
+					],
+					[
+						AC_MSG_ERROR([Error building PETSc real version])
+					]
+				)
+			]
+		)
+		exit
 
 #	AC_MSG_CHECKING([for existing ${petsc_local_arch_name_complex} architecture])
 #	AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables

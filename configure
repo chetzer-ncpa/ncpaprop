@@ -5131,8 +5131,8 @@ $as_echo "yes" >&6; }
 
 else
 
-			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: creating" >&5
-$as_echo "creating" >&6; }
+			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no, creating" >&5
+$as_echo "no, creating" >&6; }
 			mkdir -p ${petsc_build_dir}
 			if test -d "$petsc_build_dir"; then :
 
@@ -5151,40 +5151,89 @@ $as_echo_n "checking PETSc download... " >&6; }
 $as_echo "yes" >&6; }
 else
 
-				{ $as_echo "$as_me:${as_lineno-$LINENO}: result: cloning" >&5
-$as_echo "cloning" >&6; }
+				{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no, cloning" >&5
+$as_echo "no, cloning" >&6; }
 				git clone -b maint https://gitlab.com/petsc/petsc.git .
 
 
 fi
 
-#	AC_MSG_CHECKING([for existing ${petsc_local_arch_name_real} architecture])
-#	AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables,
-#		[AC_MSG_RESULT([yes])],
-#		[
-#			AC_MSG_RESULT([no, building])
-#
-#			# build the real version with indicated options
-#			./configure PETSC_ARCH=${petsc_local_arch_name_real} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config}
-#			AS_IF([test $? != 0],
-#				[AC_MSG_ERROR([Error running configure command: ./configure PETSC_ARCH=${petsc_local_arch_name_real} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config}])]
-#			)
-#			make all
-#			AS_IF([test $? != 0],
-#				[AC_MSG_ERROR([Error running make command for real PETSc: make all])]
-#			)
-#
-#			# see if it made the include file
-#			AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables,
-#				[
-#					AC_MSG_NOTICE([PETSc real version build OK])
-#				],
-#				[
-#					AC_MSG_ERROR([Error building PETSc real version])
-#				]
-#			)
-#		]
-#	)
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for existing ${petsc_local_arch_name_real} architecture" >&5
+$as_echo_n "checking for existing ${petsc_local_arch_name_real} architecture... " >&6; }
+		as_ac_File=`$as_echo "ac_cv_file_${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables" >&5
+$as_echo_n "checking for ${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+
+				{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no, building" >&5
+$as_echo "no, building" >&6; }
+
+				# build the real version with indicated options
+				{ $as_echo "$as_me:${as_lineno-$LINENO}: ./configure PETSC_ARCH=${petsc_local_arch_name_real} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config}" >&5
+$as_echo "$as_me: ./configure PETSC_ARCH=${petsc_local_arch_name_real} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config}" >&6;}
+				exit
+				if test $? != 0; then :
+  as_fn_error $? "Error running configure command: ./configure PETSC_ARCH=${petsc_local_arch_name_real} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config}" "$LINENO" 5
+
+fi
+				make all
+				if test $? != 0; then :
+  as_fn_error $? "Error running make command for real PETSc: make all" "$LINENO" 5
+
+fi
+
+				# see if it made the include file
+				as_ac_File=`$as_echo "ac_cv_file_${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables" >&5
+$as_echo_n "checking for ${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+
+						{ $as_echo "$as_me:${as_lineno-$LINENO}: PETSc real version build OK" >&5
+$as_echo "$as_me: PETSc real version build OK" >&6;}
+
+else
+
+						as_fn_error $? "Error building PETSc real version" "$LINENO" 5
+
+
+fi
+
+
+
+fi
+
+		exit
 
 #	AC_MSG_CHECKING([for existing ${petsc_local_arch_name_complex} architecture])
 #	AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables
