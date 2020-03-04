@@ -5732,9 +5732,13 @@ fi
 
 fi
 
-				# see if it made the include file
+				# see if it made the include file (line 5738)
 				{ $as_echo "$as_me:${as_lineno-$LINENO}: checking successful ${petsc_local_arch_name_real} build" >&5
 $as_echo_n "checking successful ${petsc_local_arch_name_real} build... " >&6; }
+
+				# clear the cached variable
+				unset `$as_echo "ac_cv_file_${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables" | $as_tr_sh`
+
 				as_ac_File=`$as_echo "ac_cv_file_${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables" >&5
 $as_echo_n "checking for ${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables... " >&6; }

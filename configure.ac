@@ -344,8 +344,12 @@ AS_IF(
 					[AC_MSG_ERROR([Error running make command for real PETSc: make all])]
 				)
 
-				# see if it made the include file
+				# see if it made the include file (line 5738)
 				AC_MSG_CHECKING([successful ${petsc_local_arch_name_real} build])
+
+				# clear the cached variable
+				unset `$as_echo "ac_cv_file_${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables" | $as_tr_sh`
+
 				AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables,
 					[
 						AC_MSG_RESULT([yes])
