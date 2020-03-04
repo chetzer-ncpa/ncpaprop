@@ -426,54 +426,53 @@ AS_IF([test "x${with_localslepc}" = "xyes"],[
 	AC_MSG_NOTICE([slepc_build_dir = ${slepc_build_dir}])
 	AC_MSG_NOTICE([slepc_version = ${slepc_version}])
 
-		# check for extra configuration options.
-		slepc_extra_config=""
-	
-		# make the install dir
-		AC_MSG_CHECKING([SLEPc build directory])
-		AS_IF([test -d "$slepc_build_dir"],[
+	# check for extra configuration options.
+	slepc_extra_config=""
+
+	# make the install dir
+	AC_MSG_CHECKING([SLEPc build directory])
+	AS_IF([test -d "$slepc_build_dir"],[
+		AC_MSG_RESULT([yes])
+	],[
+		AC_MSG_RESULT([no, creating])
+		mkdir -p "${slepc_build_dir}"
+		AS_IF([test -d "$slepc_build_dir"],,[
+			AC_MSG_ERROR(["Error creating SLEPc build directory ${slepc_build_dir}"])
+		])
+	])
+
+	# see if it's already been downloaded and/or built
+	cd ${slepc_build_dir}
+	slepc_build_dir="${slepc_build_dir}/slepc-${slepc_version}"
+	AC_MSG_CHECKING([SLEPc download])
+	AS_IF([test -f "${slepc_build_dir}/configure"],
+		[
 			AC_MSG_RESULT([yes])
 		],[
-			AC_MSG_RESULT([no, creating])
-			mkdir -p "${slepc_build_dir}"
-			AS_IF([test -d "$slepc_build_dir"],,[
-				AC_MSG_ERROR(["Error creating SLEPc build directory ${slepc_build_dir}"])
-			])
-		])
-	
-		# see if it's already been downloaded and/or built
-		cd ${slepc_build_dir}
-		slepc_build_dir="${slepc_build_dir}/${slepc_version}"
-		AC_MSG_CHECKING([SLEPc download])
-		AS_IF([test -f "${slepc_build_dir}/configure"],
-			[
-				AC_MSG_RESULT([yes])
-			],[
-				AC_MSG_RESULT([no, installing])
-				AC_CHECK_FILE([slepc-${slepc_version}.tar.gz],,[
-					slepc_url="${slepc_url_base}/slepc-${slepc_version}.tar.gz"
-					$downloader ${slepc_url}
-					AS_IF([test $? != 0],[
-						AC_MSG_ERROR([Error downloading ${slepc_url}, check internet connection and version number])
-					])
-				])
-				
-				tar xvzf slepc-${slepc_version}.tar.gz
+			AC_MSG_RESULT([no, installing])
+			AC_CHECK_FILE([slepc-${slepc_version}.tar.gz],,[
+				slepc_url="${slepc_url_base}/slepc-${slepc_version}.tar.gz"
+				$downloader ${slepc_url}
 				AS_IF([test $? != 0],[
-					AC_MSG_ERROR([Error decompressing slepc-${slepc_version}.tar.gz, check download])
+					AC_MSG_ERROR([Error downloading ${slepc_url}, check internet connection and version number])
 				])
-			]
-		)
-		exit
-	])
-#		AC_MSG_CHECKING([for existing ${PETSC_ARCH_REAL} SLEPc architecture])
-#		AC_CHECK_FILE( ${slepc_build_dir}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables,
-#			[AC_MSG_RESULT([yes])],
-#			[
-#				AC_MSG_RESULT([no, building])
-#
-#				# build the real version with indicated options
-#				./configure PETSC_ARCH=${PETSC_ARCH_REAL} PETSC_DIR=${PETSC_DIR}
+			])
+			
+			tar xvzf slepc-${slepc_version}.tar.gz
+			AS_IF([test $? != 0],[
+				AC_MSG_ERROR([Error decompressing slepc-${slepc_version}.tar.gz, check download])
+			])
+		]
+	)
+
+		AC_MSG_CHECKING([for existing ${PETSC_ARCH_REAL} SLEPc architecture])
+		AC_CHECK_FILE( ${slepc_build_dir}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables,
+			[AC_MSG_RESULT([yes])],
+			[
+				AC_MSG_RESULT([no, building])
+
+				# build the real version with indicated options
+				./configure PETSC_ARCH=${PETSC_ARCH_REAL} PETSC_DIR=${PETSC_DIR}
 #				
 #				AS_IF([test $? != 0],
 #					[AC_MSG_ERROR([Error running SLEPc configure command: ./configure PETSC_ARCH=${PETSC_ARCH_REAL} PETSC_DIR=${PETSC_DIR}])]
@@ -499,9 +498,11 @@ AS_IF([test "x${with_localslepc}" = "xyes"],[
 #						AC_MSG_ERROR([Error building SLEPc real version])
 #					]
 #				)
-#			]
-#		)
-#		exit
+			]
+		)
+		exit
+])
+
 #		AC_MSG_CHECKING([for existing ${PETSC_ARCH_COMPLEX} SLEPc architecture])
 #		AC_CHECK_FILE( ${slepc_build_dir}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables,
 #			[AC_MSG_RESULT([yes])],

@@ -5947,47 +5947,47 @@ $as_echo "$as_me: slepc_build_dir = ${slepc_build_dir}" >&6;}
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: slepc_version = ${slepc_version}" >&5
 $as_echo "$as_me: slepc_version = ${slepc_version}" >&6;}
 
-		# check for extra configuration options.
-		slepc_extra_config=""
+	# check for extra configuration options.
+	slepc_extra_config=""
 
-		# make the install dir
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking SLEPc build directory" >&5
+	# make the install dir
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking SLEPc build directory" >&5
 $as_echo_n "checking SLEPc build directory... " >&6; }
+	if test -d "$slepc_build_dir"; then :
+
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+else
+
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no, creating" >&5
+$as_echo "no, creating" >&6; }
+		mkdir -p "${slepc_build_dir}"
 		if test -d "$slepc_build_dir"; then :
+
+else
+
+			as_fn_error $? "\"Error creating SLEPc build directory ${slepc_build_dir}\"" "$LINENO" 5
+
+fi
+
+fi
+
+	# see if it's already been downloaded and/or built
+	cd ${slepc_build_dir}
+	slepc_build_dir="${slepc_build_dir}/slepc-${slepc_version}"
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking SLEPc download" >&5
+$as_echo_n "checking SLEPc download... " >&6; }
+	if test -f "${slepc_build_dir}/configure"; then :
 
 			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 
 else
 
-			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no, creating" >&5
-$as_echo "no, creating" >&6; }
-			mkdir -p "${slepc_build_dir}"
-			if test -d "$slepc_build_dir"; then :
-
-else
-
-				as_fn_error $? "\"Error creating SLEPc build directory ${slepc_build_dir}\"" "$LINENO" 5
-
-fi
-
-fi
-
-		# see if it's already been downloaded and/or built
-		cd ${slepc_build_dir}
-		slepc_build_dir="${slepc_build_dir}/${slepc_version}"
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking SLEPc download" >&5
-$as_echo_n "checking SLEPc download... " >&6; }
-		if test -f "${slepc_build_dir}/configure"; then :
-
-				{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-
-else
-
-				{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no, installing" >&5
+			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no, installing" >&5
 $as_echo "no, installing" >&6; }
-				as_ac_File=`$as_echo "ac_cv_file_slepc-${slepc_version}.tar.gz" | $as_tr_sh`
+			as_ac_File=`$as_echo "ac_cv_file_slepc-${slepc_version}.tar.gz" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for slepc-${slepc_version}.tar.gz" >&5
 $as_echo_n "checking for slepc-${slepc_version}.tar.gz... " >&6; }
 if eval \${$as_ac_File+:} false; then :
@@ -6008,37 +6008,56 @@ if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
 
 else
 
-					slepc_url="${slepc_url_base}/slepc-${slepc_version}.tar.gz"
-					$downloader ${slepc_url}
-					if test $? != 0; then :
-
-						as_fn_error $? "Error downloading ${slepc_url}, check internet connection and version number" "$LINENO" 5
-
-fi
-
-fi
-
-
-				tar xvzf slepc-${slepc_version}.tar.gz
+				slepc_url="${slepc_url_base}/slepc-${slepc_version}.tar.gz"
+				$downloader ${slepc_url}
 				if test $? != 0; then :
 
-					as_fn_error $? "Error decompressing slepc-${slepc_version}.tar.gz, check download" "$LINENO" 5
+					as_fn_error $? "Error downloading ${slepc_url}, check internet connection and version number" "$LINENO" 5
+
+fi
+
+fi
+
+
+			tar xvzf slepc-${slepc_version}.tar.gz
+			if test $? != 0; then :
+
+				as_fn_error $? "Error decompressing slepc-${slepc_version}.tar.gz, check download" "$LINENO" 5
 
 fi
 
 
 fi
-		exit
 
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for existing ${PETSC_ARCH_REAL} SLEPc architecture" >&5
+$as_echo_n "checking for existing ${PETSC_ARCH_REAL} SLEPc architecture... " >&6; }
+		as_ac_File=`$as_echo "ac_cv_file_${slepc_build_dir}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${slepc_build_dir}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables" >&5
+$as_echo_n "checking for ${slepc_build_dir}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${slepc_build_dir}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
 fi
-#		AC_MSG_CHECKING([for existing ${PETSC_ARCH_REAL} SLEPc architecture])
-#		AC_CHECK_FILE( ${slepc_build_dir}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables,
-#			[AC_MSG_RESULT([yes])],
-#			[
-#				AC_MSG_RESULT([no, building])
-#
-#				# build the real version with indicated options
-#				./configure PETSC_ARCH=${PETSC_ARCH_REAL} PETSC_DIR=${PETSC_DIR}
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+
+				{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no, building" >&5
+$as_echo "no, building" >&6; }
+
+				# build the real version with indicated options
+				./configure PETSC_ARCH=${PETSC_ARCH_REAL} PETSC_DIR=${PETSC_DIR}
 #
 #				AS_IF([test $? != 0],
 #					[AC_MSG_ERROR([Error running SLEPc configure command: ./configure PETSC_ARCH=${PETSC_ARCH_REAL} PETSC_DIR=${PETSC_DIR}])]
@@ -6064,9 +6083,14 @@ fi
 #						AC_MSG_ERROR([Error building SLEPc real version])
 #					]
 #				)
-#			]
-#		)
-#		exit
+
+
+fi
+
+		exit
+
+fi
+
 #		AC_MSG_CHECKING([for existing ${PETSC_ARCH_COMPLEX} SLEPc architecture])
 #		AC_CHECK_FILE( ${slepc_build_dir}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables,
 #			[AC_MSG_RESULT([yes])],
