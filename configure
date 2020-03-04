@@ -5938,21 +5938,32 @@ $as_echo "$as_me: slepc_build_dir = ${slepc_build_dir}" >&6;}
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: slepc_version = ${slepc_version}" >&5
 $as_echo "$as_me: slepc_version = ${slepc_version}" >&6;}
 
+
+		# check for extra configuration options.
+		slepc_extra_config=""
+
+		# make the install dir
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking SLEPc build directory" >&5
+$as_echo_n "checking SLEPc build directory... " >&6; }
+		if test -d "$slepc_build_dir"; then :
+
+			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+else
+
+			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no, creating" >&5
+$as_echo "no, creating" >&6; }
+			mkdir -p ${spelc_build_dir}
+			if test -d "$slepc_build_dir"; then :
+
+else
+  as_fn_error $? "\"Error creating SLEPc build directory ${slepc_build_dir}\"" "$LINENO" 5
 fi
-#
-#		# check for extra configuration options.
-#		slepc_extra_config=""
-#
-#		# make the install dir
-#		AC_MSG_CHECKING([SLEPc build directory])
-#		AS_IF([test -d "$slepc_build_dir"],[
-#			AC_MSG_RESULT([yes])
-#		],[
-#			AC_MSG_RESULT([no, creating])
-#			mkdir -p ${spelc_build_dir}
-#			AS_IF([test -d "$slepc_build_dir"],,AC_MSG_ERROR(["Error creating SLEPc build directory ${slepc_build_dir}"]))
-#		])
-#
+
+fi
+
+fi
 #		# see if it's already been downloaded and/or built
 #		cd ${slepc_build_dir}
 #		slepc_build_dir="${slepc_build_dir}/${slepc_version}"

@@ -423,21 +423,21 @@ AS_IF([test "x${with_localslepc}" = "xyes"],
 
 		AC_MSG_NOTICE([slepc_build_dir = ${slepc_build_dir}])
 		AC_MSG_NOTICE([slepc_version = ${slepc_version}])
+	
+
+		# check for extra configuration options.
+		slepc_extra_config=""
+	
+		# make the install dir
+		AC_MSG_CHECKING([SLEPc build directory])
+		AS_IF([test -d "$slepc_build_dir"],[
+			AC_MSG_RESULT([yes])
+		],[
+			AC_MSG_RESULT([no, creating])
+			mkdir -p ${spelc_build_dir}
+			AS_IF([test -d "$slepc_build_dir"],,AC_MSG_ERROR(["Error creating SLEPc build directory ${slepc_build_dir}"]))
+		])
 	])
-#
-#		# check for extra configuration options.
-#		slepc_extra_config=""
-#	
-#		# make the install dir
-#		AC_MSG_CHECKING([SLEPc build directory])
-#		AS_IF([test -d "$slepc_build_dir"],[
-#			AC_MSG_RESULT([yes])
-#		],[
-#			AC_MSG_RESULT([no, creating])
-#			mkdir -p ${spelc_build_dir}
-#			AS_IF([test -d "$slepc_build_dir"],,AC_MSG_ERROR(["Error creating SLEPc build directory ${slepc_build_dir}"]))
-#		])
-#
 #		# see if it's already been downloaded and/or built
 #		cd ${slepc_build_dir}
 #		slepc_build_dir="${slepc_build_dir}/${slepc_version}"
