@@ -5921,9 +5921,9 @@ fi
 
 		# See if default SLEPc directory is overridden
 		if test "x${local_slepc_dir}" != "x"; then :
-  petsc_build_dir=${local_slepc_dir}
+  slepc_build_dir=${local_slepc_dir}
 else
-  petsc_build_dir="$(pwd)/extern/slepc"
+  slepc_build_dir="$(pwd)/extern/slepc"
 
 fi
 		if test "x$local_slepc_version" = "x"; then :
@@ -5954,7 +5954,7 @@ else
 
 			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no, creating" >&5
 $as_echo "no, creating" >&6; }
-			mkdir -p ${slepc_build_dir}
+			mkdir -p "${slepc_build_dir}""
 			if test -d "$slepc_build_dir"; then :
 
 else

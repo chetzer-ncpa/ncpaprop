@@ -413,8 +413,8 @@ AS_IF([test "x${with_localslepc}" = "xyes"],
 	
 		# See if default SLEPc directory is overridden
 		AS_IF([test "x${local_slepc_dir}" != "x"],
-			[petsc_build_dir=${local_slepc_dir}],
-			[petsc_build_dir="$(pwd)/extern/slepc"]
+			[slepc_build_dir=${local_slepc_dir}],
+			[slepc_build_dir="$(pwd)/extern/slepc"]
 		)
 		AS_IF([test "x$local_slepc_version" = "x"],
 			[slepc_version=$default_slepc_version],
@@ -434,7 +434,7 @@ AS_IF([test "x${with_localslepc}" = "xyes"],
 			AC_MSG_RESULT([yes])
 		],[
 			AC_MSG_RESULT([no, creating])
-			mkdir -p ${slepc_build_dir}
+			mkdir -p "${slepc_build_dir}""
 			AS_IF([test -d "$slepc_build_dir"],,AC_MSG_ERROR(["Error creating SLEPc build directory ${slepc_build_dir}"]))
 		])
 	])
