@@ -5863,6 +5863,152 @@ $as_echo "no" >&6; }
 
 fi
 
+# check validity of PETSc installation
+# first, environmental variables
+if test "x$PETSC_DIR" = "x"; then :
+
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "No value provided for PETSC_DIR!
+See \`config.log' for more details" "$LINENO" 5; }
+
+fi
+if test "x$PETSC_ARCH_REAL" = "x"; then :
+
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "No value provided for PETSC_ARCH_REAL!
+See \`config.log' for more details" "$LINENO" 5; }
+
+fi
+if test "x$PETSC_ARCH_COMPLEX" = "x"; then :
+
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "No value provided for PETSC_ARCH_COMPLEX!
+See \`config.log' for more details" "$LINENO" 5; }
+
+fi
+
+# check directories
+as_ac_File=`$as_echo "ac_cv_file_$PETSC_DIR" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $PETSC_DIR" >&5
+$as_echo_n "checking for $PETSC_DIR... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "$PETSC_DIR"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: PETSc directory $PETSC_DIR OK." >&5
+$as_echo "$as_me: PETSc directory $PETSC_DIR OK." >&6;}
+
+else
+
+	as_fn_error $? "PETSc directory $PETSC_DIR not found.  Check your PETSC_DIR variable." "$LINENO" 5
+
+fi
+
+if test -d $PETSC_DIR; then :
+
+else
+
+	as_fn_error $? "Specified PETSc directory ${PETSC_DIR} is not a directory!" "$LINENO" 5
+
+fi
+
+# Now see if the various include files are present
+PETSC_INCLUDE_FILE_GENERIC="${PETSC_DIR}/lib/petsc/conf/variables"
+as_ac_File=`$as_echo "ac_cv_file_$PETSC_INCLUDE_FILE_GENERIC" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $PETSC_INCLUDE_FILE_GENERIC" >&5
+$as_echo_n "checking for $PETSC_INCLUDE_FILE_GENERIC... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "$PETSC_INCLUDE_FILE_GENERIC"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+
+else
+
+	as_fn_error $? "PETSc generic include file $PETSC_INCLUDE_FILE_GENERIC not found.  Your PETSc build may be incomplete.\"" "$LINENO" 5
+
+fi
+
+as_ac_File=`$as_echo "ac_cv_file_${PETSC_DIR}/${PETSC_ARCH_REAL}/lib/petsc/conf/petscvariables" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${PETSC_DIR}/${PETSC_ARCH_REAL}/lib/petsc/conf/petscvariables" >&5
+$as_echo_n "checking for ${PETSC_DIR}/${PETSC_ARCH_REAL}/lib/petsc/conf/petscvariables... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${PETSC_DIR}/${PETSC_ARCH_REAL}/lib/petsc/conf/petscvariables"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+
+else
+
+	as_fn_error $? "PETSc real architecture-specific include file ${PETSC_DIR}/${PETSC_ARCH_REAL}/lib/petsc/conf/petscvariables not found.  Check your PETSC_ARCH_REAL variable and your PETSc installation." "$LINENO" 5
+
+fi
+
+as_ac_File=`$as_echo "ac_cv_file_${PETSC_DIR}/${PETSC_ARCH_COMPLEX}/lib/petsc/conf/petscvariables" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${PETSC_DIR}/${PETSC_ARCH_COMPLEX}/lib/petsc/conf/petscvariables" >&5
+$as_echo_n "checking for ${PETSC_DIR}/${PETSC_ARCH_COMPLEX}/lib/petsc/conf/petscvariables... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${PETSC_DIR}/${PETSC_ARCH_COMPLEX}/lib/petsc/conf/petscvariables"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+
+else
+
+	as_fn_error $? "PETSc complex architecture-specific include file ${PETSC_DIR}/${PETSC_ARCH_COMPLEX}/lib/petsc/conf/petscvariables not found.  Check your PETSC_ARCH_COMPLEX variable and your PETSc installation." "$LINENO" 5
+
+fi
+
+
+exit
+
+
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking automatic local SLEPc installation" >&5
 $as_echo_n "checking automatic local SLEPc installation... " >&6; }
 if test "x${with_localslepc}" = "xyes"; then :
@@ -6058,7 +6204,7 @@ else
 $as_echo "no, building" >&6; }
 
 				# build the real version with indicated options
-				./configure PETSC_ARCH=${PETSC_ARCH_REAL} PETSC_DIR=${PETSC_DIR}
+				./configure
 #
 #				AS_IF([test $? != 0],
 #					[AC_MSG_ERROR([Error running SLEPc configure command: ./configure PETSC_ARCH=${PETSC_ARCH_REAL} PETSC_DIR=${PETSC_DIR}])]
@@ -6146,14 +6292,6 @@ exit
 
 
 # Checks for environmental variables
-if test "x$PETSC_DIR" = "x"; then :
-
-	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "No value provided for PETSC_DIR!
-See \`config.log' for more details" "$LINENO" 5; }
-
-fi
 if test "x$SLEPC_DIR" = "x"; then :
 
 	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
@@ -6162,56 +6300,9 @@ as_fn_error $? "No value provided for SLEPC_DIR!
 See \`config.log' for more details" "$LINENO" 5; }
 
 fi
-if test "x$PETSC_ARCH_REAL" = "x"; then :
-
-	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "No value provided for PETSC_DIR!
-See \`config.log' for more details" "$LINENO" 5; }
-
-fi
-if test "x$PETSC_ARCH_COMPLEX" = "x"; then :
-
-	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "No value provided for PETSC_DIR!
-See \`config.log' for more details" "$LINENO" 5; }
-
-fi
 
 # Check the PETSc and SLEPc installations
 # First, check that the directories exist
-as_ac_File=`$as_echo "ac_cv_file_$PETSC_DIR" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $PETSC_DIR" >&5
-$as_echo_n "checking for $PETSC_DIR... " >&6; }
-if eval \${$as_ac_File+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  test "$cross_compiling" = yes &&
-  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "$PETSC_DIR"; then
-  eval "$as_ac_File=yes"
-else
-  eval "$as_ac_File=no"
-fi
-fi
-eval ac_res=\$$as_ac_File
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
-
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: PETSc directory $PETSC_DIR OK." >&5
-$as_echo "$as_me: PETSc directory $PETSC_DIR OK." >&6;}
-
-else
-
-		{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "PETSc directory $PETSC_DIR not found.  Check your PETSC_DIR variable.
-See \`config.log' for more details" "$LINENO" 5; }
-
-
-fi
 
 as_ac_File=`$as_echo "ac_cv_file_$SLEPC_DIR" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $SLEPC_DIR" >&5
@@ -6244,14 +6335,7 @@ See \`config.log' for more details" "$LINENO" 5; }
 
 fi
 
-if test ! -d $PETSC_DIR; then :
 
-	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "Specified PETSc directory ${PETSC_DIR} is not a directory!
-See \`config.log' for more details" "$LINENO" 5; }
-
-fi
 if test ! -d $SLEPC_DIR; then :
 
 	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
@@ -6262,39 +6346,7 @@ See \`config.log' for more details" "$LINENO" 5; }
 fi
 
 # Now see if the generic include files are present
-PETSC_INCLUDE_FILE_GENERIC="${PETSC_DIR}/lib/petsc/conf/variables"
 SLEPC_INCLUDE_FILE_GENERIC="${SLEPC_DIR}/lib/slepc/conf/slepc_common"
-as_ac_File=`$as_echo "ac_cv_file_$PETSC_INCLUDE_FILE_GENERIC" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $PETSC_INCLUDE_FILE_GENERIC" >&5
-$as_echo_n "checking for $PETSC_INCLUDE_FILE_GENERIC... " >&6; }
-if eval \${$as_ac_File+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  test "$cross_compiling" = yes &&
-  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "$PETSC_INCLUDE_FILE_GENERIC"; then
-  eval "$as_ac_File=yes"
-else
-  eval "$as_ac_File=no"
-fi
-fi
-eval ac_res=\$$as_ac_File
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
-
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: PETSc generic include file OK" >&5
-$as_echo "$as_me: PETSc generic include file OK" >&6;}
-
-else
-
-		{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "PETSc generic include file $PETSC_INCLUDE_FILE_GENERIC not found.  Your PETSc build may be incomplete.\"
-See \`config.log' for more details" "$LINENO" 5; }
-
-fi
-
 as_ac_File=`$as_echo "ac_cv_file_$SLEPC_INCLUDE_FILE_GENERIC" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $SLEPC_INCLUDE_FILE_GENERIC" >&5
 $as_echo_n "checking for $SLEPC_INCLUDE_FILE_GENERIC... " >&6; }
@@ -6328,70 +6380,6 @@ fi
 
 
 # Finally check the architecture-specific files
-as_ac_File=`$as_echo "ac_cv_file_${PETSC_DIR}/${PETSC_ARCH_REAL}/lib/petsc/conf/petscvariables" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${PETSC_DIR}/${PETSC_ARCH_REAL}/lib/petsc/conf/petscvariables" >&5
-$as_echo_n "checking for ${PETSC_DIR}/${PETSC_ARCH_REAL}/lib/petsc/conf/petscvariables... " >&6; }
-if eval \${$as_ac_File+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  test "$cross_compiling" = yes &&
-  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "${PETSC_DIR}/${PETSC_ARCH_REAL}/lib/petsc/conf/petscvariables"; then
-  eval "$as_ac_File=yes"
-else
-  eval "$as_ac_File=no"
-fi
-fi
-eval ac_res=\$$as_ac_File
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
-
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: PETSc real architecture-specific include file OK" >&5
-$as_echo "$as_me: PETSc real architecture-specific include file OK" >&6;}
-
-else
-
-		{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "PETSc real architecture-specific include file ${PETSC_DIR}/${PETSC_ARCH_REAL}/lib/petsc/conf/petscvariables not found.  Check your PETSC_ARCH_REAL variable and your PETSc installation.
-See \`config.log' for more details" "$LINENO" 5; }
-
-
-fi
-
-as_ac_File=`$as_echo "ac_cv_file_${PETSC_DIR}/${PETSC_ARCH_COMPLEX}/lib/petsc/conf/petscvariables" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${PETSC_DIR}/${PETSC_ARCH_COMPLEX}/lib/petsc/conf/petscvariables" >&5
-$as_echo_n "checking for ${PETSC_DIR}/${PETSC_ARCH_COMPLEX}/lib/petsc/conf/petscvariables... " >&6; }
-if eval \${$as_ac_File+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  test "$cross_compiling" = yes &&
-  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "${PETSC_DIR}/${PETSC_ARCH_COMPLEX}/lib/petsc/conf/petscvariables"; then
-  eval "$as_ac_File=yes"
-else
-  eval "$as_ac_File=no"
-fi
-fi
-eval ac_res=\$$as_ac_File
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
-
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: PETSc complex architecture-specific include file OK\"" >&5
-$as_echo "$as_me: PETSc complex architecture-specific include file OK\"" >&6;}
-
-else
-
-		{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "PETSc complex architecture-specific include file ${PETSC_DIR}/${PETSC_ARCH_COMPLEX}/lib/petsc/conf/petscvariables not found.  Check your PETSC_ARCH_COMPLEX variable and your PETSc installation.
-See \`config.log' for more details" "$LINENO" 5; }
-
-
-fi
-
 as_ac_File=`$as_echo "ac_cv_file_${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables" >&5
 $as_echo_n "checking for ${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables... " >&6; }

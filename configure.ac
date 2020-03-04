@@ -399,6 +399,45 @@ AS_IF(
 	],[AC_MSG_RESULT([no])
 ])
 
+# check validity of PETSc installation
+# first, environmental variables
+AS_IF([test "x$PETSC_DIR" = "x"],[
+	AC_MSG_FAILURE([No value provided for PETSC_DIR!])
+])
+AS_IF([test "x$PETSC_ARCH_REAL" = "x"],[
+	AC_MSG_FAILURE([No value provided for PETSC_ARCH_REAL!])
+])
+AS_IF([test "x$PETSC_ARCH_COMPLEX" = "x"],[
+	AC_MSG_FAILURE([No value provided for PETSC_ARCH_COMPLEX!])
+])
+
+# check directories
+AC_CHECK_FILE( $PETSC_DIR,[
+	AC_MSG_NOTICE([PETSc directory $PETSC_DIR OK.])
+],[
+	AC_MSG_ERROR([PETSc directory $PETSC_DIR not found.  Check your PETSC_DIR variable.])
+])
+AS_IF([test -d $PETSC_DIR],,[
+	AC_MSG_ERROR([Specified PETSc directory ${PETSC_DIR} is not a directory!])
+])
+
+# Now see if the various include files are present
+PETSC_INCLUDE_FILE_GENERIC="${PETSC_DIR}/lib/petsc/conf/variables"
+AC_CHECK_FILE( $PETSC_INCLUDE_FILE_GENERIC,,[
+	AC_MSG_ERROR([PETSc generic include file $PETSC_INCLUDE_FILE_GENERIC not found.  Your PETSc build may be incomplete."])
+])
+AC_CHECK_FILE( ${PETSC_DIR}/${PETSC_ARCH_REAL}/lib/petsc/conf/petscvariables,,[
+	AC_MSG_ERROR([PETSc real architecture-specific include file ${PETSC_DIR}/${PETSC_ARCH_REAL}/lib/petsc/conf/petscvariables not found.  Check your PETSC_ARCH_REAL variable and your PETSc installation.])
+])
+AC_CHECK_FILE( ${PETSC_DIR}/${PETSC_ARCH_COMPLEX}/lib/petsc/conf/petscvariables,,
+[
+	AC_MSG_ERROR([PETSc complex architecture-specific include file ${PETSC_DIR}/${PETSC_ARCH_COMPLEX}/lib/petsc/conf/petscvariables not found.  Check your PETSC_ARCH_COMPLEX variable and your PETSc installation.])
+])
+
+exit
+
+
+
 AC_MSG_CHECKING([automatic local SLEPc installation])
 AS_IF([test "x${with_localslepc}" = "xyes"],[
 	AC_MSG_RESULT([yes])
@@ -473,7 +512,7 @@ AS_IF([test "x${with_localslepc}" = "xyes"],[
 				AC_MSG_RESULT([no, building])
 
 				# build the real version with indicated options
-				./configure PETSC_ARCH=${PETSC_ARCH_REAL} PETSC_DIR=${PETSC_DIR}
+				./configure
 #				
 #				AS_IF([test $? != 0],
 #					[AC_MSG_ERROR([Error running SLEPc configure command: ./configure PETSC_ARCH=${PETSC_ARCH_REAL} PETSC_DIR=${PETSC_DIR}])]
@@ -558,29 +597,13 @@ exit
 
 
 # Checks for environmental variables
-AS_IF([test "x$PETSC_DIR" = "x"],[
-	AC_MSG_FAILURE([No value provided for PETSC_DIR!])
-])
 AS_IF([test "x$SLEPC_DIR" = "x"],[
 	AC_MSG_FAILURE([No value provided for SLEPC_DIR!])
-])
-AS_IF([test "x$PETSC_ARCH_REAL" = "x"],[
-	AC_MSG_FAILURE([No value provided for PETSC_DIR!])
-])
-AS_IF([test "x$PETSC_ARCH_COMPLEX" = "x"],[
-	AC_MSG_FAILURE([No value provided for PETSC_DIR!])
 ])
 
 # Check the PETSc and SLEPc installations
 # First, check that the directories exist
-AC_CHECK_FILE( $PETSC_DIR,
-	[
-		AC_MSG_NOTICE([PETSc directory $PETSC_DIR OK.])
-	],
-	[
-		AC_MSG_FAILURE([PETSc directory $PETSC_DIR not found.  Check your PETSC_DIR variable.])
-	]
-)
+
 AC_CHECK_FILE( $SLEPC_DIR,
 	[
 		AC_MSG_NOTICE([SLEPc directory $SLEPC_DIR OK])
@@ -589,23 +612,13 @@ AC_CHECK_FILE( $SLEPC_DIR,
 		AC_MSG_FAILURE([SLEPc directory $SLEPC_DIR not found.  Check your SLEPC_DIR variable.])
 	],
 )
-AS_IF([test ! -d $PETSC_DIR],[
-	AC_MSG_FAILURE([Specified PETSc directory ${PETSC_DIR} is not a directory!])
-])
+
 AS_IF([test ! -d $SLEPC_DIR],[
 	AC_MSG_FAILURE([Specified PETSc directory ${PETSC_DIR} is not a directory!])
 ])
 
 # Now see if the generic include files are present
-PETSC_INCLUDE_FILE_GENERIC="${PETSC_DIR}/lib/petsc/conf/variables"
 SLEPC_INCLUDE_FILE_GENERIC="${SLEPC_DIR}/lib/slepc/conf/slepc_common"
-AC_CHECK_FILE( $PETSC_INCLUDE_FILE_GENERIC,
-	[
-		AC_MSG_NOTICE([PETSc generic include file OK])
-	],
-	[
-		AC_MSG_FAILURE([PETSc generic include file $PETSC_INCLUDE_FILE_GENERIC not found.  Your PETSc build may be incomplete."])
-	])
 AC_CHECK_FILE( $SLEPC_INCLUDE_FILE_GENERIC,
 	[
 		AC_MSG_NOTICE([SLEPc generic include file OK])
@@ -615,22 +628,6 @@ AC_CHECK_FILE( $SLEPC_INCLUDE_FILE_GENERIC,
 	])
 
 # Finally check the architecture-specific files
-AC_CHECK_FILE( ${PETSC_DIR}/${PETSC_ARCH_REAL}/lib/petsc/conf/petscvariables,
-	[
-		AC_MSG_NOTICE([PETSc real architecture-specific include file OK])
-	],
-	[
-		AC_MSG_FAILURE([PETSc real architecture-specific include file ${PETSC_DIR}/${PETSC_ARCH_REAL}/lib/petsc/conf/petscvariables not found.  Check your PETSC_ARCH_REAL variable and your PETSc installation.])
-	]
-	)
-AC_CHECK_FILE( ${PETSC_DIR}/${PETSC_ARCH_COMPLEX}/lib/petsc/conf/petscvariables,
-	[
-		AC_MSG_NOTICE([PETSc complex architecture-specific include file OK"])
-	],
-	[
-		AC_MSG_FAILURE([PETSc complex architecture-specific include file ${PETSC_DIR}/${PETSC_ARCH_COMPLEX}/lib/petsc/conf/petscvariables not found.  Check your PETSC_ARCH_COMPLEX variable and your PETSc installation.])
-	]
-	)
 AC_CHECK_FILE( ${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables,
 	[
 		AC_MSG_NOTICE([SLEPc real architecture-specific include file OK])
