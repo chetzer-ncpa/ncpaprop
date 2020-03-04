@@ -37,7 +37,7 @@ AC_ARG_WITH([localpetscdebug],
 	AS_HELP_STRING([--with-localpetscdebug],[Build the debug version of PETSc/SLEPc instead of the default optimized version])
 )
 AC_ARG_ENABLE([localpetscmpi],
-	AS_HELP_STRING([--enable-localpetscmpi],[Build PETSc/SLEPc without MPI support])
+	AS_HELP_STRING([--disable-localpetscmpi],[Build PETSc/SLEPc without MPI support])
 )
 AC_ARG_WITH([localpetscmpi],
 	AS_HELP_STRING([--with-localpetscmpi],[Download and build OpenMPI libraries as part of the PETSc installation process, rather than looking for system-installed libraries])
@@ -46,7 +46,7 @@ AC_ARG_WITH([localpetscfblas],
 	AS_HELP_STRING([--with-localpetscfblas],[Download and build FBLAS-LAPACK libraries as part of the PETSc installation process, rather than looking for system-installed libraries.  Note that this option also requires a Fortran compiler.])
 )
 
-# These --with options take arguments that must be processed
+# Environmental variables
 AC_ARG_VAR(local_petsc_dir,[Override default local PETSc installation directory (${default_petsc_build_dir})])
 AC_ARG_VAR(local_slepc_dir,[Override default local SLEPc installation directory (${default_slepc_build_dir})])
 AC_ARG_VAR(local_petsc_arch_real,[Override automatic PETSc real architecture name (${default_petsc_arch_name_real} or ${default_petsc_arch_name_real}-debug)])
