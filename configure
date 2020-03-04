@@ -6333,31 +6333,15 @@ $as_echo "no" >&6; }
 fi
 
 
-exit
-
-
-
-
-
-
-
-
-
-
-
 # Checks for environmental variables
 if test "x$SLEPC_DIR" = "x"; then :
 
-	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "No value provided for SLEPC_DIR!
-See \`config.log' for more details" "$LINENO" 5; }
+	as_fn_error $? "No value provided for SLEPC_DIR!" "$LINENO" 5
 
 fi
 
-# Check the PETSc and SLEPc installations
+# Check the SLEPc installation
 # First, check that the directories exist
-
 as_ac_File=`$as_echo "ac_cv_file_$SLEPC_DIR" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $SLEPC_DIR" >&5
 $as_echo_n "checking for $SLEPC_DIR... " >&6; }
@@ -6377,25 +6361,19 @@ eval ac_res=\$$as_ac_File
 $as_echo "$ac_res" >&6; }
 if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
 
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: SLEPc directory $SLEPC_DIR OK" >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: SLEPc directory $SLEPC_DIR OK" >&5
 $as_echo "$as_me: SLEPc directory $SLEPC_DIR OK" >&6;}
 
 else
 
-		{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "SLEPc directory $SLEPC_DIR not found.  Check your SLEPC_DIR variable.
-See \`config.log' for more details" "$LINENO" 5; }
+	as_fn_error $? "SLEPc directory $SLEPC_DIR not found.  Check your SLEPC_DIR variable." "$LINENO" 5
 
 fi
 
 
 if test ! -d $SLEPC_DIR; then :
 
-	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "Specified PETSc directory ${PETSC_DIR} is not a directory!
-See \`config.log' for more details" "$LINENO" 5; }
+	as_fn_error $? "Specified PETSc directory ${PETSC_DIR} is not a directory!" "$LINENO" 5
 
 fi
 
@@ -6420,15 +6398,12 @@ eval ac_res=\$$as_ac_File
 $as_echo "$ac_res" >&6; }
 if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
 
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: SLEPc generic include file OK" >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: SLEPc generic include file OK" >&5
 $as_echo "$as_me: SLEPc generic include file OK" >&6;}
 
 else
 
-		{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "SLEPc generic include file $SLEPC_INCLUDE_FILE_GENERIC not found.  Your SLEPc build may be incomplete.
-See \`config.log' for more details" "$LINENO" 5; }
+	as_fn_error $? "SLEPc generic include file $SLEPC_INCLUDE_FILE_GENERIC not found.  Your SLEPc build may be incomplete." "$LINENO" 5
 
 fi
 
@@ -6453,16 +6428,12 @@ eval ac_res=\$$as_ac_File
 $as_echo "$ac_res" >&6; }
 if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
 
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: SLEPc real architecture-specific include file OK" >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: SLEPc real architecture-specific include file OK" >&5
 $as_echo "$as_me: SLEPc real architecture-specific include file OK" >&6;}
 
 else
 
-		{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "SLEPc real architecture-specific include file ${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables not found.  Check your PETSC_ARCH_REAL variable and your SLEPc installation.
-See \`config.log' for more details" "$LINENO" 5; }
-
+	as_fn_error $? "SLEPc real architecture-specific include file ${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables not found.  Check your PETSC_ARCH_REAL variable and your SLEPc installation." "$LINENO" 5
 
 fi
 
@@ -6485,20 +6456,14 @@ eval ac_res=\$$as_ac_File
 $as_echo "$ac_res" >&6; }
 if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
 
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: SLEPc complex architecture-specific include file OK" >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: SLEPc complex architecture-specific include file OK" >&5
 $as_echo "$as_me: SLEPc complex architecture-specific include file OK" >&6;}
 
 else
 
-		{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "SLEPc complex architecture-specific include file ${SLEPC_DIR}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables not found.  Check your PETSC_ARCH_COMPLEX variable and your SLEPc installation.
-See \`config.log' for more details" "$LINENO" 5; }
-
+	as_fn_error $? "SLEPc complex architecture-specific include file ${SLEPC_DIR}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables not found.  Check your PETSC_ARCH_COMPLEX variable and your SLEPc installation." "$LINENO" 5
 
 fi
-
-
 
 
 
@@ -6518,9 +6483,9 @@ LDFLAGS=$LDFLAGS
 
 PETSC_DIR=$PETSC_DIR
 
-PETSC_INCLUDE_FILE_GENERIC="$PETSC_INCLUDE_FILE_GENERIC"
+PETSC_INCLUDE_FILE_GENERIC=$PETSC_INCLUDE_FILE_GENERIC
 
-SLEPC_INCLUDE_FILE_GENERIC="$SLEPC_INCLUDE_FILE_GENERIC"
+SLEPC_INCLUDE_FILE_GENERIC=$SLEPC_INCLUDE_FILE_GENERIC
 
 
 PETSC_ARCH_REAL=$PETSC_ARCH_REAL

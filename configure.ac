@@ -561,68 +561,42 @@ AS_IF([test "x${with_localslepc}" = "xyes"],[
 ])
 
 
-exit
-
-
-
-
-
-
-
-
-
-
-
 # Checks for environmental variables
 AS_IF([test "x$SLEPC_DIR" = "x"],[
-	AC_MSG_FAILURE([No value provided for SLEPC_DIR!])
+	AC_MSG_ERROR([No value provided for SLEPC_DIR!])
 ])
 
-# Check the PETSc and SLEPc installations
+# Check the SLEPc installation
 # First, check that the directories exist
-
-AC_CHECK_FILE( $SLEPC_DIR,
-	[
-		AC_MSG_NOTICE([SLEPc directory $SLEPC_DIR OK])
-	],
-	[
-		AC_MSG_FAILURE([SLEPc directory $SLEPC_DIR not found.  Check your SLEPC_DIR variable.])
-	],
-)
+AC_CHECK_FILE( $SLEPC_DIR,[
+	AC_MSG_NOTICE([SLEPc directory $SLEPC_DIR OK])
+],[
+	AC_MSG_ERROR([SLEPc directory $SLEPC_DIR not found.  Check your SLEPC_DIR variable.])
+])
 
 AS_IF([test ! -d $SLEPC_DIR],[
-	AC_MSG_FAILURE([Specified PETSc directory ${PETSC_DIR} is not a directory!])
+	AC_MSG_ERROR([Specified PETSc directory ${PETSC_DIR} is not a directory!])
 ])
 
 # Now see if the generic include files are present
 SLEPC_INCLUDE_FILE_GENERIC="${SLEPC_DIR}/lib/slepc/conf/slepc_common"
-AC_CHECK_FILE( $SLEPC_INCLUDE_FILE_GENERIC,
-	[
-		AC_MSG_NOTICE([SLEPc generic include file OK])
-	],
-	[
-		AC_MSG_FAILURE([SLEPc generic include file $SLEPC_INCLUDE_FILE_GENERIC not found.  Your SLEPc build may be incomplete.])
-	])
+AC_CHECK_FILE( $SLEPC_INCLUDE_FILE_GENERIC,[
+	AC_MSG_NOTICE([SLEPc generic include file OK])
+],[
+	AC_MSG_ERROR([SLEPc generic include file $SLEPC_INCLUDE_FILE_GENERIC not found.  Your SLEPc build may be incomplete.])
+])
 
 # Finally check the architecture-specific files
-AC_CHECK_FILE( ${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables,
-	[
-		AC_MSG_NOTICE([SLEPc real architecture-specific include file OK])
-	],
-	[
-		AC_MSG_FAILURE([SLEPc real architecture-specific include file ${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables not found.  Check your PETSC_ARCH_REAL variable and your SLEPc installation.])
-	]
-	)
-AC_CHECK_FILE( ${SLEPC_DIR}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables,
-	[
-		AC_MSG_NOTICE([SLEPc complex architecture-specific include file OK])
-	],
-	[
-		AC_MSG_FAILURE([SLEPc complex architecture-specific include file ${SLEPC_DIR}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables not found.  Check your PETSC_ARCH_COMPLEX variable and your SLEPc installation.])
-	]
-	)
-
-
+AC_CHECK_FILE( ${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables,[
+	AC_MSG_NOTICE([SLEPc real architecture-specific include file OK])
+],[
+	AC_MSG_ERROR([SLEPc real architecture-specific include file ${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables not found.  Check your PETSC_ARCH_REAL variable and your SLEPc installation.])
+])
+AC_CHECK_FILE( ${SLEPC_DIR}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables,[
+	AC_MSG_NOTICE([SLEPc complex architecture-specific include file OK])
+],[
+	AC_MSG_ERROR([SLEPc complex architecture-specific include file ${SLEPC_DIR}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables not found.  Check your PETSC_ARCH_COMPLEX variable and your SLEPc installation.])
+])
 
 
 # Set output variables to propagate into Makefiles
@@ -634,8 +608,8 @@ LDFLAGS="${LDFLAGS} -L/usr/lib"
 AC_SUBST([STATICLIBS],"../../lib/libatmosphere.a ../../lib/libcommon.a")
 AC_SUBST([LDFLAGS],$LDFLAGS)
 AC_SUBST([PETSC_DIR],$PETSC_DIR)
-AC_SUBST([PETSC_INCLUDE_FILE_GENERIC],"$PETSC_INCLUDE_FILE_GENERIC")
-AC_SUBST([SLEPC_INCLUDE_FILE_GENERIC],"$SLEPC_INCLUDE_FILE_GENERIC")
+AC_SUBST([PETSC_INCLUDE_FILE_GENERIC],$PETSC_INCLUDE_FILE_GENERIC)
+AC_SUBST([SLEPC_INCLUDE_FILE_GENERIC],$SLEPC_INCLUDE_FILE_GENERIC)
 
 AC_SUBST([PETSC_ARCH_REAL],$PETSC_ARCH_REAL)
 AC_SUBST([PETSC_ARCH_COMPLEX],$PETSC_ARCH_COMPLEX)
