@@ -525,51 +525,40 @@ AS_IF([test "x${with_localslepc}" = "xyes"],[
 		unset `$as_echo "ac_cv_file_${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables" | $as_tr_sh`
 
 		AC_CHECK_FILE( ${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables,,[
-			AC_MSG_RESULT([${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables not found])
-			AC_MSG_ERROR([Error building SLEPc real version])
+			AC_MSG_ERROR([Error building real SLEPc, ${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables not found])
 		])
 	])
-])
 
-#		AC_MSG_CHECKING([for existing ${PETSC_ARCH_COMPLEX} SLEPc architecture])
-#		AC_CHECK_FILE( ${slepc_build_dir}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables,
-#			[AC_MSG_RESULT([yes])],
-#			[
-#				AC_MSG_RESULT([no, building])
-#
-#				# build the complex version with indicated options
-#				./configure PETSC_ARCH=${PETSC_ARCH_COMPLEX} PETSC_DIR=${PETSC_DIR}
-#				
-#				AS_IF([test $? != 0],
-#					[AC_MSG_ERROR([Error running SLEPc configure command: ./configure PETSC_ARCH=${PETSC_ARCH_COMPLEX} PETSC_DIR=${PETSC_DIR}])]
-#				)
-#				exit
-#				make PETSC_ARCH=${PETSC_ARCH_COMPLEX} PETSC_DIR=${PETSC_DIR} all
-#				AS_IF([test $? != 0],
-#					[AC_MSG_ERROR([Error running make command for complex SLEPc: make PETSC_ARCH=${PETSC_ARCH_COMPLEX} PETSC_DIR=${PETSC_DIR} all])]
-#				)
-#
-#				# see if it made the include file
-#				AC_MSG_CHECKING([successful ${PETSC_ARCH_COMPLEX} SLEPc build])
-#
-#				# clear the cached variable
-#				unset `$as_echo "ac_cv_file_${slepc_build_dir}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables" | $as_tr_sh`
-#
-#				AC_CHECK_FILE( ${slepc_build_dir}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables,
-#					[
-#						AC_MSG_RESULT([yes])
-#					],
-#					[
-#						AC_MSG_RESULT([${slepc_build_dir}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables not found])
-#						AC_MSG_ERROR([Error building SLEPc complex version])
-#					]
-#				)
-#			]
-#		)
-#
-#		SLEPC_DIR=${slepc_build_dir}
-#	],[AC_MSG_RESULT([no])
-#])
+	AC_MSG_CHECKING([for existing ${PETSC_ARCH_COMPLEX} SLEPc architecture])
+	AC_CHECK_FILE( ${slepc_build_dir}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables,,[
+		AC_MSG_RESULT([no, building])
+
+		# build the complex version with indicated options
+		export PETSC_ARCH=${PETSC_ARCH_COMPLEX}
+		./configure
+		
+		AS_IF([test $? != 0],
+			[AC_MSG_ERROR([Error running SLEPc configure command: ./configure])]
+		)
+		exit
+		make PETSC_ARCH=${PETSC_ARCH_COMPLEX} PETSC_DIR=${PETSC_DIR} all
+		AS_IF([test $? != 0],
+			[AC_MSG_ERROR([Error running make command for complex SLEPc: make PETSC_ARCH=${PETSC_ARCH_COMPLEX} PETSC_DIR=${PETSC_DIR} all])]
+		)
+
+		# see if it made the include file
+		AC_MSG_CHECKING([successful ${PETSC_ARCH_COMPLEX} SLEPc build])
+
+		# clear the cached variable
+		unset `$as_echo "ac_cv_file_${slepc_build_dir}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables" | $as_tr_sh`
+
+		AC_CHECK_FILE( ${slepc_build_dir}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables,,[
+			AC_MSG_ERROR([Error building complex SLEPc, ${slepc_build_dir}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables not found])
+		])
+	])
+],[
+	AC_MSG_RESULT([no])
+])
 
 
 exit
