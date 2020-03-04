@@ -509,7 +509,7 @@ AS_IF([test "x${with_localslepc}" = "xyes"],[
 				AC_MSG_RESULT([no, building])
 
 				# build the real version with indicated options
-				PETSC_ARCH=${PETSC_ARCH_REAL}
+				export PETSC_ARCH=${PETSC_ARCH_REAL}
 				./configure
 #				
 #				AS_IF([test $? != 0],
