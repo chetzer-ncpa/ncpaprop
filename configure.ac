@@ -402,16 +402,17 @@ AS_IF(
 AC_MSG_CHECKING([automatic local SLEPc installation])
 AS_IF([test "x${with_localslepc}" = "xyes"],[
 	AC_MSG_RESULT([yes])
-])
 
-#		downloader=""
-#		AC_MSG_CHECKING([command-line downloader])
-#		AC_CHECK_PROGS(downloader,[wget curl])
-#		AS_IF(
-#			[test "x${downloader}" = "x"],
-#			[AC_MSG_ERROR("Neither wget nor curl detected")]
-#		)
-#	
+	downloader=""
+	AC_CHECK_PROGS(downloader,[wget curl])
+	AC_MSG_CHECKING([command-line downloader])
+	AS_IF([test "x${downloader}" = "x"],[
+		AC_MSG_RESULT([no])
+		AC_MSG_ERROR("Neither wget nor curl detected")
+	],[
+		AC_MSG_RESULT([$downloader])
+	])
+])	
 #		# See if default SLEPc directory is overridden
 #		AS_IF([test "x${local_slepc_dir}" != "x"],
 #			[slepc_build_dir=${local_slepc_dir}],
