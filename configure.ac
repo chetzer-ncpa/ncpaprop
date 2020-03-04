@@ -352,13 +352,9 @@ AS_IF(
 				# clear the cached variable
 				unset `$as_echo "ac_cv_file_${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables" | $as_tr_sh`
 
-				AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables,
+				AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables,,
 					[
-						AC_MSG_RESULT([yes])
-					],
-					[
-						AC_MSG_RESULT([${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables not found])
-						AC_MSG_ERROR([Error building PETSc real version])
+						AC_MSG_ERROR([Error building real PETSc, ${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables not found])
 					]
 				)
 			]
@@ -388,13 +384,9 @@ AS_IF(
 				# clear the cached variable
 				unset `$as_echo "ac_cv_file_${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables" | $as_tr_sh`
 
-				AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables,
+				AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables,,
 					[
-						AC_MSG_RESULT([yes])
-					],
-					[
-						AC_MSG_RESULT([${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables not found])
-						AC_MSG_ERROR([Error building PETSc complex version])
+						AC_MSG_ERROR([Error building complex PETSc, ${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables not found])
 					]
 				)
 			]
@@ -416,21 +408,21 @@ AS_IF([test "x${with_localslepc}" = "xyes"],
 		AC_CHECK_PROGS(downloader,[wget curl])
 		AS_IF(
 			[test "x${downloader}" = "x"],
-			[AC_MSG_ERROR("Neither wget nor curl detected")],
-			[AC_MSG_RESULT([$downloader])]
+			[AC_MSG_ERROR("Neither wget nor curl detected")]
 		)
 	])
-#		# See if default SLEPc directory is overridden
-#		AS_IF([test "x${local_slepc_dir}" != "x"],
-#			[petsc_build_dir=${local_slepc_dir}],
-#			[petsc_build_dir="$(pwd)/extern/slepc"]
-#		)
-#		AS_IF([test "x$local_slepc_version" = "x"],
-#			[slepc_version=$default_slepc_version],
-#			[slepc_version=$local_slepc_version]
-#		])
-#
-#		AC_MSG_NOTICE([slepc_build_dir = ${slepc_build_dir}])
+		# See if default SLEPc directory is overridden
+		AS_IF([test "x${local_slepc_dir}" != "x"],
+			[petsc_build_dir=${local_slepc_dir}],
+			[petsc_build_dir="$(pwd)/extern/slepc"]
+		)
+		AS_IF([test "x$local_slepc_version" = "x"],
+			[slepc_version=$default_slepc_version],
+			[slepc_version=$local_slepc_version]
+		])
+
+		AC_MSG_NOTICE([slepc_build_dir = ${slepc_build_dir}])
+		AC_MSG_NOTICE([slepc_version = ${slepc_version}])
 #
 #		# check for extra configuration options.
 #		slepc_extra_config=""
