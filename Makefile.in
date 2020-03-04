@@ -67,7 +67,7 @@ tdpape:
 #modess_rd_2wcm:
 #	$(MAKE) -C src/modess_rd_2wcm ModessRD2WCM PETSC_ARCH=@PETSC_ARCH_COMPLEX@
 
-# clean everything up, including external libraries
+# clean everything up
 clean:
 	-$(MAKE) -C src/common clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 	-$(MAKE) -C src/atmosphere clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@

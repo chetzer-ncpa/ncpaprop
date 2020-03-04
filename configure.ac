@@ -17,8 +17,8 @@ slepc_url_base="https://slepc.upv.es/download/distrib"
 
 # Need OS name for automatic default architecture name
 os_type=$(uname -s | awk '{print tolower($0)}')
-default_petsc_arch_name_real="arch-${os_type}-real"
-default_petsc_arch_name_complex="arch-${os_type}-complex"
+default_petsc_arch_name_real="arch-${os_type}-c-real"
+default_petsc_arch_name_complex="arch-${os_type}-c-complex"
 
 
 
