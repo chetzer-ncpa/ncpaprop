@@ -6028,6 +6028,7 @@ fi
 
 
 fi
+	cd ${slepc_build_dir}
 
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for existing ${PETSC_ARCH_REAL} SLEPc architecture" >&5
 $as_echo_n "checking for existing ${PETSC_ARCH_REAL} SLEPc architecture... " >&6; }

@@ -464,6 +464,7 @@ AS_IF([test "x${with_localslepc}" = "xyes"],[
 			])
 		]
 	)
+	cd ${slepc_build_dir}
 
 		AC_MSG_CHECKING([for existing ${PETSC_ARCH_REAL} SLEPc architecture])
 		AC_CHECK_FILE( ${slepc_build_dir}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables,
