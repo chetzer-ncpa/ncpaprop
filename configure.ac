@@ -695,3 +695,7 @@ AC_CONFIG_FILES([
 #		test/Makefile
 
 AC_OUTPUT
+
+AC_MSG_NOTICE([
+	Configuration complete.  Run 'make' to finish building $PACKAGE_TARNAME.
+])

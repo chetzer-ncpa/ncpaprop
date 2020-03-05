@@ -10011,3 +10011,10 @@ if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
 $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
 
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}:
+	Configuration complete.  Run 'make' to finish building $PACKAGE_TARNAME.
+" >&5
+$as_echo "$as_me:
+	Configuration complete.  Run 'make' to finish building $PACKAGE_TARNAME.
+" >&6;}
