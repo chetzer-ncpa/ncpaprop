@@ -449,9 +449,9 @@ AS_IF(
 		)
 
 		AC_LANG_POP
-		PETSC_DIR=${petsc_build_dir}
-		PETSC_ARCH_REAL=${petsc_local_arch_name_real}
-		PETSC_ARCH_COMPLEX=${petsc_local_arch_name_complex}
+		export PETSC_DIR=${petsc_build_dir}
+		export PETSC_ARCH_REAL=${petsc_local_arch_name_real}
+		export PETSC_ARCH_COMPLEX=${petsc_local_arch_name_complex}
 		cd $basedir
 	],[AC_MSG_RESULT([no])
 ])
@@ -557,7 +557,7 @@ AS_IF([test "x${with_localslepc}" = "xyes"],[
 			])
 		]
 	)
-	SLEPC_DIR=${slepc_build_dir}
+	export SLEPC_DIR=${slepc_build_dir}
 	cd $SLEPC_DIR
 
 	AC_CHECK_FILE( ${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables,,[
