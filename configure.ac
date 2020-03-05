@@ -8,6 +8,7 @@ AC_INIT([NCPA Propagation Modeling Suite], [1.4.0], [claus@olemiss.edu], ncpapro
 AC_CONFIG_SRCDIR([src/atmosphere/Atmosphere.h])
 #AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
+AC_LANG([C++])
 
 # set default variables
 default_petsc_build_dir="${abs_builddir}/extern/petsc"
@@ -36,12 +37,12 @@ AC_ARG_WITH([localpetscdebug],
 AC_ARG_ENABLE([localpetscmpi],
 	AS_HELP_STRING([--disable-localpetscmpi],[Build PETSc/SLEPc without MPI support])
 )
-dnl AC_ARG_WITH([localpetscmpi],
-dnl 	AS_HELP_STRING([--with-localpetscmpi],[Download and build OpenMPI libraries as part of the PETSc installation process, rather than looking for system-installed libraries])
-dnl )
-dnl AC_ARG_WITH([localpetscfblas],
-dnl 	AS_HELP_STRING([--with-localpetscfblas],[Download and build F2CBLAS-LAPACK libraries as part of the PETSc installation process, rather than looking for system-installed libraries.])
-dnl )
+#AC_ARG_WITH([localpetscmpi],
+#	AS_HELP_STRING([--with-localpetscmpi],[Download and build OpenMPI libraries as part of the PETSc installation process, rather than looking for system-installed libraries])
+#)
+#AC_ARG_WITH([localpetscfblas],
+#	AS_HELP_STRING([--with-localpetscfblas],[Download and build F2CBLAS-LAPACK libraries as part of the PETSc installation process, rather than looking for system-installed libraries.])
+#)
 
 # Environmental variables
 AC_ARG_VAR(local_petsc_dir,[Override default local PETSc installation directory (${default_petsc_build_dir})])
@@ -291,6 +292,7 @@ AS_IF(
 	[test "x${with_localpetsc}" = "xyes"],
 	[
 		AC_MSG_RESULT([yes])
+		AC_LANG_PUSH([C])
 
 		# See if default PETSc directory is overridden
 		AS_IF([test "x${local_petsc_dir}" != "x"],
@@ -342,14 +344,14 @@ AS_IF(
 		AS_IF([test "x${with_localpetscmpidisabled}" = "xyes"],[
 			petsc_extra_config="${petsc_extra_config} --with-mpi=0"
 		],[
-			ACX_MPI([
+			AC_CXX_MPI([
 				AC_DEFINE(HAVE_MPI,1,[Define if you have the MPI library.])
 			],[
 				petsc_extra_config="${petsc_extra_config} --download-openmpi"
 			])
 
-				dnl AS_IF([test "x${with_localpetscmpi}" = "xyes"],
-				dnl 	[petsc_extra_config="${petsc_extra_config} --download-openmpi"])
+				#AS_IF([test "x${with_localpetscmpi}" = "xyes"],
+				#	[petsc_extra_config="${petsc_extra_config} --download-openmpi"])
 		])
 	
 		# Go get F2CBLAS-LAPACK?
@@ -455,6 +457,7 @@ AS_IF(
 			]
 		)
 
+		AC_LANG_POP
 		PETSC_DIR=${petsc_build_dir}
 		PETSC_ARCH_REAL=${petsc_local_arch_name_real}
 		PETSC_ARCH_COMPLEX=${petsc_local_arch_name_complex}
