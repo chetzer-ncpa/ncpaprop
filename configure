@@ -7989,7 +7989,6 @@ fi
 
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: petsc_extra_config = ${petsc_extra_config}" >&5
 $as_echo "$as_me: petsc_extra_config = ${petsc_extra_config}" >&6;}
-		exit
 
 		# make the install dir
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking PETSc build directory" >&5
