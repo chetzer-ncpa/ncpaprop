@@ -60,12 +60,7 @@ AC_MSG_RESULT([$host_os])
 # check host OS for support
 case $host_os in
 	darwin* )
-		# for MacOS, need to know if port or fink is installed
-		#AS_IF([test "x$PACKMAN" = "x"],[
-		#	AC_CHECK_PROGS([PACKMAN],[brew port fink],)
-		#])
-		#AC_MSG_NOTICE([Detected package manager = ${PACKMAN}])
-		#AC_SUBST([PETSC_USE_SHARED_LIBRARIES],[--with-shared-libraries=0])
+		# currently nothing special to do for macs
 		;;
 	linux* )
 		# For Linux, need to know if apt-get or yum is installed
@@ -98,7 +93,66 @@ AS_IF([test "x$PERLPATH" = "x"],[
 
 AC_PROG_RANLIB
 AC_PROG_CXX
+AS_IF([test "x$CXX" = "x"],[
+	AS_IF([test "x$enable_autodependencies" = "xyes"],[
+		AS_CASE([$host_os],
+			[darwin*],[
+				AC_MSG_ERROR([Auto dependencies not available for MacOS.  Install g++ using your package manager of choice.])
+			],
+			[linux*],[
+				AS_CASE([$default_package_manager],
+					[*apt-get],[
+						sudo $default_package_manager -y install g++
+					],
+					[*yum],[
+						sudo $default_package_manager -y install gcc-c++
+					],[
+						AC_MSG_ERROR([No supported package manager found (apt and yum currently supported)])
+					]
+				)
+		])
+		unset ac_cv_prog_CXX
+		unset ac_cv_cxx_compiler_gnu
+		unset ac_cv_prog_cxx_g
+		AC_PROG_CXX
+		AS_IF([test "x${CXX}" = "x"],[
+			AC_MSG_ERROR("Unable to install C++ compiler.  Please install manually and retry.")
+		])
+	],[
+		AC_MSG_ERROR([Failed to detect a C++ compiler.  Please install the appropriate package or compile from source.])
+	])
+])
 AC_PROG_CC
+AS_IF([test "x$CC" = "x"],[
+	AS_IF([test "x$enable_autodependencies" = "xyes"],[
+		AS_CASE([$host_os],
+			[darwin*],[
+				AC_MSG_ERROR([Auto dependencies not available for MacOS.  Install gcc using your package manager of choice.])
+			],
+			[linux*],[
+				AS_CASE([$default_package_manager],
+					[*apt-get],[
+						sudo $default_package_manager -y install gcc
+					],
+					[*yum],[
+						sudo $default_package_manager -y install gcc
+					],[
+						AC_MSG_ERROR([No supported package manager found (apt and yum currently supported)])
+					]
+				)
+		])
+		unset ac_cv_prog_CC
+		unset ac_cv_cc_compiler_gnu
+		unset ac_cv_prog_cc_g
+		AC_PROG_CC
+		AS_IF([test "x${CC}" = "x"],[
+			AC_MSG_ERROR("Unable to install C compiler.  Please install manually and retry.")
+		])
+	],[
+		AC_MSG_ERROR([Failed to detect a C compiler.  Please install the appropriate package or compile from source.])
+	])
+])
+
 AC_PROG_CPP
 
 # If we want to auto-install fblas-lapack, we need a Fortran compiler
