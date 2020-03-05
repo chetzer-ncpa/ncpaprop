@@ -367,6 +367,7 @@ AS_IF(
 		dnl 	])
 
 		AC_MSG_NOTICE([petsc_extra_config = ${petsc_extra_config}])
+		exit
 		
 		# make the install dir
 		AC_MSG_CHECKING([PETSc build directory])
