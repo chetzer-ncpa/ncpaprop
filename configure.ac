@@ -355,11 +355,11 @@ AS_IF(
 		#])
 	
 		# Go get F2CBLAS-LAPACK?
-		#AX_BLAS([
-		#	AC_DEFINE(HAVE_BLAS,1,[Define if you have a BLAS library.])
-		#],[
-		#	petsc_extra_config="${petsc_extra_config} --download-f2cblaslapack=1"
-		#])
+		AX_BLAS([
+			AC_DEFINE(HAVE_BLAS,1,[Define if you have a BLAS library.])
+		],[
+			petsc_extra_config="${petsc_extra_config} --download-f2cblaslapack=1"
+		])
 
 		dnl AS_IF([test "x${with_localpetscfblas}" = "xyes"],
 		dnl 	[
