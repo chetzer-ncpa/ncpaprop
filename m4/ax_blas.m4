@@ -68,7 +68,7 @@
 AU_ALIAS([ACX_BLAS], [AX_BLAS])
 AC_DEFUN([AX_BLAS], [
 AC_PREREQ(2.50)
-#AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
+AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
 AC_REQUIRE([AC_CANONICAL_HOST])
 ax_blas_ok=no
 
@@ -84,8 +84,8 @@ esac
 # Get fortran linker names of BLAS functions to check for.
 #AC_F77_FUNC(sgemm)
 #AC_F77_FUNC(dgemm)
-sgemm="_sgemm"
-dgemm="_dgemm"
+sgemm="sgemm_"
+dgemm="dgemm_"
 
 ax_blas_save_LIBS="$LIBS"
 LIBS="$LIBS $FLIBS"
