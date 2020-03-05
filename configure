@@ -6917,6 +6917,8 @@ case $with_blas in
 	*) BLAS_LIBS="-l$with_blas" ;;
 esac
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: Checking for BLAS" >&5
+$as_echo "$as_me: Checking for BLAS" >&6;}
 # Get fortran linker names of BLAS functions to check for.
 #AC_F77_FUNC(sgemm)
 #AC_F77_FUNC(dgemm)
@@ -7977,6 +7979,8 @@ if test x"$ax_blas_ok" = xyes; then
 $as_echo "#define HAVE_BLAS 1" >>confdefs.h
 
 
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Found BLAS" >&5
+$as_echo "$as_me: Found BLAS" >&6;}
         :
 else
         ax_blas_ok=no
