@@ -638,6 +638,7 @@ FLIBS
 ac_ct_F77
 FFLAGS
 F77
+MPI_FOUND
 POW_LIB
 LIBOBJS
 EGREP
@@ -6848,18 +6849,53 @@ else
 fi
 
 		# Use MPI?
-		#AS_IF([test "x${with_localpetscmpidisabled}" = "xyes"],[
-		#	petsc_extra_config="${petsc_extra_config} --with-mpi=0"
-		#],[
-			#AC_CXX_MPI([
-			#	AC_DEFINE(HAVE_MPI,1,[Define if you have the MPI library.])
-			#],[
-			#	petsc_extra_config="${petsc_extra_config} --download-openmpi"
-			#])
+		for ac_prog in mpic++ mpicxx mpiCC hcp mpxlC_r mpxlC mpCC cmpic++
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_MPI_FOUND+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$MPI_FOUND"; then
+  ac_cv_prog_MPI_FOUND="$MPI_FOUND" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_MPI_FOUND="$ac_prog"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
 
-				#AS_IF([test "x${with_localpetscmpi}" = "xyes"],
-				#	[petsc_extra_config="${petsc_extra_config} --download-openmpi"])
-		#])
+fi
+fi
+MPI_FOUND=$ac_cv_prog_MPI_FOUND
+if test -n "$MPI_FOUND"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MPI_FOUND" >&5
+$as_echo "$MPI_FOUND" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$MPI_FOUND" && break
+done
+
+		if test "x$MPI_FOUND" = "x"; then :
+
+			petsc_extra_config="${petsc_extra_config} --download-openmpi"
+
+fi
 
 		# Go get F2CBLAS-LAPACK?
 
