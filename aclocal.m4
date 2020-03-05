@@ -12,5 +12,7 @@
 # PARTICULAR PURPOSE.
 
 m4_ifndef([AC_CONFIG_MACRO_DIRS], [m4_defun([_AM_CONFIG_MACRO_DIRS], [])m4_defun([AC_CONFIG_MACRO_DIRS], [_AM_CONFIG_MACRO_DIRS($@)])])
-m4_include([m4/ax_compare_version.m4])
-m4_include([m4/ax_ncpa_messages.m4])
+#m4_include([m4/ax_compare_version.m4])
+#m4_include([m4/ax_ncpa_messages.m4])
+m4_include([m4/ax_blas.m4])
+m4_include([m4/acx_mpi.m4])

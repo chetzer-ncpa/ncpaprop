@@ -20,9 +20,6 @@ os_type=$(uname -s | awk '{print tolower($0)}')
 default_petsc_arch_name_real="arch-${os_type}-c-real"
 default_petsc_arch_name_complex="arch-${os_type}-c-complex"
 
-
-
-
 # Set up options for automatic prerequisite building
 AC_ARG_WITH([localpetsc],
 	AS_HELP_STRING([--with-localpetsc],[Attempt to build a PETSc instance local to the $PACKAGE_NAME installation])
@@ -39,12 +36,12 @@ AC_ARG_WITH([localpetscdebug],
 AC_ARG_ENABLE([localpetscmpi],
 	AS_HELP_STRING([--disable-localpetscmpi],[Build PETSc/SLEPc without MPI support])
 )
-AC_ARG_WITH([localpetscmpi],
-	AS_HELP_STRING([--with-localpetscmpi],[Download and build OpenMPI libraries as part of the PETSc installation process, rather than looking for system-installed libraries])
-)
-AC_ARG_WITH([localpetscfblas],
-	AS_HELP_STRING([--with-localpetscfblas],[Download and build FBLAS-LAPACK libraries as part of the PETSc installation process, rather than looking for system-installed libraries.  Note that this option also requires a Fortran compiler.])
-)
+dnl AC_ARG_WITH([localpetscmpi],
+dnl 	AS_HELP_STRING([--with-localpetscmpi],[Download and build OpenMPI libraries as part of the PETSc installation process, rather than looking for system-installed libraries])
+dnl )
+dnl AC_ARG_WITH([localpetscfblas],
+dnl 	AS_HELP_STRING([--with-localpetscfblas],[Download and build F2CBLAS-LAPACK libraries as part of the PETSc installation process, rather than looking for system-installed libraries.])
+dnl )
 
 # Environmental variables
 AC_ARG_VAR(local_petsc_dir,[Override default local PETSc installation directory (${default_petsc_build_dir})])
@@ -303,7 +300,7 @@ AS_IF(
 		AC_MSG_NOTICE([petsc_build_dir = ${petsc_build_dir}])
 
 		# check for extra configuration options.
-		petsc_extra_config=""
+		petsc_extra_config="--with-fc=0"
 	
 		# See if default PETSc real arch name is overridden
 		AS_IF([test "x${local_petsc_arch_real}" = "x"],
@@ -342,21 +339,32 @@ AS_IF(
 		)
 
 		# Use MPI?
-		AS_IF([test "x${with_localpetscmpidisabled}" = "xyes"],
-			[petsc_extra_config="${petsc_extra_config} --with-mpi=0"],
-			[
-				AS_IF([test "x${with_localpetscmpi}" = "xyes"],
-					[petsc_extra_config="${petsc_extra_config} --download-openmpi"])
-			])
-	
-		# Go get FBLAS-LAPACK?  If not, disable Fortran
-		AS_IF([test "x${with_localpetscfblas}" = "xyes"],
-			[
-
-				petsc_extra_config="${petsc_extra_config} --download-fblaslapack"
+		AS_IF([test "x${with_localpetscmpidisabled}" = "xyes"],[
+			petsc_extra_config="${petsc_extra_config} --with-mpi=0"
+		],[
+			ACX_MPI([
+				AC_DEFINE(HAVE_MPI,1,[Define if you have the MPI library.])
 			],[
-				petsc_extra_config="${petsc_extra_config} --with-fc=0"
+				petsc_extra_config="${petsc_extra_config} --download-openmpi"
 			])
+
+				dnl AS_IF([test "x${with_localpetscmpi}" = "xyes"],
+				dnl 	[petsc_extra_config="${petsc_extra_config} --download-openmpi"])
+		])
+	
+		# Go get F2CBLAS-LAPACK?
+		AX_BLAS([
+			AC_DEFINE(HAVE_BLAS,1,[Define if you have a BLAS library.])
+		],[
+			petsc_extra_config="${petsc_extra_config} --download-f2cblaslapack=1"
+		])
+
+		dnl AS_IF([test "x${with_localpetscfblas}" = "xyes"],
+		dnl 	[
+		dnl 		petsc_extra_config="${petsc_extra_config} --download-f2cblaslapack=1"
+		dnl 	],[
+		dnl 		petsc_extra_config="${petsc_extra_config} --with-fc=0"
+		dnl 	])
 
 		AC_MSG_NOTICE([petsc_extra_config = ${petsc_extra_config}])
 		
