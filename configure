@@ -7632,12 +7632,16 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 if test "x${FC}" = "x"; then :
 
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: No Fortran compiler found, using name mangling hack" >&5
+$as_echo "$as_me: No Fortran compiler found, using name mangling hack" >&6;}
 	# hack to get around no FC present
 	sgemm="_sgemm"
 	dgemm="_dgemm"
 
 else
 
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: FC is defined as ${FC}, checking mangling" >&5
+$as_echo "$as_me: FC is defined as ${FC}, checking mangling" >&6;}
 	ac_ext=f
 ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
 ac_link='$F77 -o conftest$ac_exeext $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
