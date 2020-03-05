@@ -344,22 +344,22 @@ AS_IF(
 		AS_IF([test "x${with_localpetscmpidisabled}" = "xyes"],[
 			petsc_extra_config="${petsc_extra_config} --with-mpi=0"
 		],[
-			AC_CXX_MPI([
-				AC_DEFINE(HAVE_MPI,1,[Define if you have the MPI library.])
-			],[
-				petsc_extra_config="${petsc_extra_config} --download-openmpi"
-			])
+			#AC_CXX_MPI([
+			#	AC_DEFINE(HAVE_MPI,1,[Define if you have the MPI library.])
+			#],[
+			#	petsc_extra_config="${petsc_extra_config} --download-openmpi"
+			#])
 
 				#AS_IF([test "x${with_localpetscmpi}" = "xyes"],
 				#	[petsc_extra_config="${petsc_extra_config} --download-openmpi"])
 		])
 	
 		# Go get F2CBLAS-LAPACK?
-		AX_BLAS([
-			AC_DEFINE(HAVE_BLAS,1,[Define if you have a BLAS library.])
-		],[
-			petsc_extra_config="${petsc_extra_config} --download-f2cblaslapack=1"
-		])
+		#AX_BLAS([
+		#	AC_DEFINE(HAVE_BLAS,1,[Define if you have a BLAS library.])
+		#],[
+		#	petsc_extra_config="${petsc_extra_config} --download-f2cblaslapack=1"
+		#])
 
 		dnl AS_IF([test "x${with_localpetscfblas}" = "xyes"],
 		dnl 	[
