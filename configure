@@ -6196,7 +6196,7 @@ fi
 		if test "x${with_localpetscmpidisabled}" = "xyes"; then :
 
 			petsc_extra_config="${petsc_extra_config} --with-mpi=0"
-
+		#
 else
 
 			#AC_CXX_MPI([
