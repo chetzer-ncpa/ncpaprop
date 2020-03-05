@@ -6193,12 +6193,9 @@ else
 fi
 
 		# Use MPI?
-		if test "x${with_localpetscmpidisabled}" = "xyes"; then :
-
-			petsc_extra_config="${petsc_extra_config} --with-mpi=0"
-		#
-else
-
+		#AS_IF([test "x${with_localpetscmpidisabled}" = "xyes"],[
+		#	petsc_extra_config="${petsc_extra_config} --with-mpi=0"
+		#],[
 			#AC_CXX_MPI([
 			#	AC_DEFINE(HAVE_MPI,1,[Define if you have the MPI library.])
 			#],[
@@ -6207,8 +6204,7 @@ else
 
 				#AS_IF([test "x${with_localpetscmpi}" = "xyes"],
 				#	[petsc_extra_config="${petsc_extra_config} --download-openmpi"])
-
-fi
+		#])
 
 		# Go get F2CBLAS-LAPACK?
 		#AX_BLAS([
