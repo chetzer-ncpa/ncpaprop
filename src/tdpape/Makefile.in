@@ -1,27 +1,28 @@
-#SLEPC_DIR=@abs_top_builddir@/src/extern/slepc-@SLEPC_VERSION@
-export PETSC_VERSION:=@PETSC_VERSION@
-export SLEPC_VERSION:=@SLEPC_VERSION@
-export PETSC_DIR:=@abs_top_builddir@/src/extern/petsc-@PETSC_VERSION@
-export SLEPC_DIR:=@abs_top_builddir@/src/extern/slepc-@SLEPC_VERSION@
-export PETSC_ARCH:=@PETSC_ARCH_REAL@
+include @PETSC_INCLUDE_FILE_GENERIC@
+include @SLEPC_INCLUDE_FILE_GENERIC@
+
 
 # the following provides CCPPFLAGS, CLINKER, CC_INCLUDES, SLEPC_INCLUDE, SLEPC_LIB
-include $(SLEPC_DIR)/conf/slepc_common
+#include $(SLEPC_DIR)/conf/slepc_common
 
+INCPATHS = @INCLUDEFLAGS@ ${PETSC_CC_INCLUDES} ${SLEPC_CC_INCLUDES}
 OBJS=ProcessOptionsTDPE.o tdpape_main.o
 TARGET=tdpape
-INCPATHS=-I. -I../common -I../atmosphere -I/usr/local/include -I/usr/include ${CCPPFLAGS}
+
 
 all: $(TARGET)
 
 .PHONY: clean
 
+# link	
 $(TARGET): $(OBJS)
-	@CXX@ -o $@ $^ @LDFLAGS@ @STATICLIBS@ @LIBS@
+	${CXX_LINKER} -o $@ $^  @LDFLAGS@ @STATICLIBS@  ${CXX_LINKER_FLAGS} ${SLEPC_LIB} ${PETSC_LIB} @LIBS@
 	cp $@ ../../bin
-
+	
+# compile 
 %.o: %.cpp
-	@CXX@ @CXXFLAGS@ @INCLUDEFLAGS@ -o $@ $<
+	${CXX} ${INCPATHS} @CXXFLAGS@ ${CXX_FLAGS} @WARNINGFLAGS@ -o $@ $<
 
 clean::
 	-$(RM) -rf $(OBJS) $(TARGET)
+

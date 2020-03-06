@@ -2,307 +2,275 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([NCPA Propagation Modeling Suite], [1.3.20], [claus@olemiss.edu], ncpaprop)
+AC_INIT([NCPA Propagation Modeling Suite], [1.4.0], [claus@olemiss.edu], ncpaprop)
 #AM_INIT_AUTOMAKE
 
 AC_CONFIG_SRCDIR([src/atmosphere/Atmosphere.h])
 #AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
+AC_LANG([C++])
 
-# Look for bash and perl.  If not found, check with the user, cause
-# that's unusual for a Linux-like system
-AC_PATH_PROG([BASHPATH],[bash],)
-AS_IF([test "x$BASHPATH" = "x"],[
-	AC_MSG_FAILURE(["No bash interpreter found on your path!  Please check this.])
-])
-AC_PATH_PROG([PERLPATH],[perl],)
-AS_IF([test "x$PERLPATH" = "x"],[
-	AC_MSG_FAILURE(["No perl interpreter found on your path!  Please check this.])
-])
+# set default variables
+default_petsc_build_dir="${abs_builddir}/extern/petsc"
+default_slepc_build_dir="${abs_builddir}/extern/slepc"
+default_slepc_version="3.12.2"
+slepc_url_base="https://slepc.upv.es/download/distrib"
 
-# Check to see if auto-prereqs are enabled
-AC_ARG_ENABLE([auto-dependencies],
-	AS_HELP_STRING([--enable-auto-dependencies],
-		[Attempt to satisfy missing dependencies automatically]
-	)
+# Need OS name for automatic default architecture name
+os_type=$(uname -s | awk '{print tolower($0)}')
+default_petsc_arch_name_real="arch-${os_type}-c-real"
+default_petsc_arch_name_complex="arch-${os_type}-c-complex"
+
+# Set up options for automatic prerequisite building
+AC_ARG_WITH([localpetsc],
+	AS_HELP_STRING([--with-localpetsc],[Attempt to build a PETSc instance local to the $PACKAGE_NAME installation])
 )
-AC_ARG_ENABLE([library-guess],
-	AS_HELP_STRING([--disable-library-guess],
-		[Disable guesswork for Fink-installed library path]
-	)
+AC_ARG_WITH([localslepc],
+	AS_HELP_STRING([--with-localslepc],[Attempt to build a SLEPc instance local to the $PACKAGE_NAME installation.  Automatically set to 'yes' if --with-localpetsc is specified])
 )
+AS_IF([test "x$with_localpetsc" = "xyes"],
+	[with_localslepc="yes"] )
 
-AC_PROG_RANLIB
+AC_ARG_WITH([localpetscdebug],
+	AS_HELP_STRING([--with-localpetscdebug],[Build the debug version of PETSc/SLEPc instead of the default optimized version])
+)
+AC_ARG_ENABLE([localpetscmpi],
+	AS_HELP_STRING([--disable-localpetscmpi],[Build PETSc/SLEPc without MPI support])
+)
+#AC_ARG_WITH([localpetscmpi],
+#	AS_HELP_STRING([--with-localpetscmpi],[Download and build OpenMPI libraries as part of the PETSc installation process, rather than looking for system-installed libraries])
+#)
+#AC_ARG_WITH([localpetscfblas],
+#	AS_HELP_STRING([--with-localpetscfblas],[Download and build F2CBLAS-LAPACK libraries as part of the PETSc installation process, rather than looking for system-installed libraries.])
+#)
 
+# Environmental variables
+AC_ARG_VAR(local_petsc_dir,[Override default local PETSc installation directory (${default_petsc_build_dir})])
+AC_ARG_VAR(local_slepc_dir,[Override default local SLEPc installation directory (${default_slepc_build_dir})])
+AC_ARG_VAR(local_petsc_arch_real,[Override automatic PETSc real architecture name (${default_petsc_arch_name_real} or ${default_petsc_arch_name_real}-debug)])
+AC_ARG_VAR(local_petsc_arch_complex,[Override automatic PETSc complex architecture name (${default_petsc_arch_name_complex} or ${default_petsc_arch_name_complex}-debug)])
+AC_ARG_VAR(local_slepc_version,[Override automatic (or outdated) SLEPc version number (${default_slepc_version})])
+
+
+AC_MSG_CHECKING([operating system])
 AC_CANONICAL_HOST
+AC_MSG_RESULT([$host_os])
 # check host OS for support
 case $host_os in
 	darwin* )
-		# for MacOS, need to know if port or fink is installed
-		AS_IF([test "x$PACKMAN" = "x"],[
-			AC_CHECK_PROGS([PACKMAN],[port fink],)
-		])
-		AC_SUBST([PETSC_USE_SHARED_LIBRARIES],[--with-shared-libraries=0])
+		# currently nothing special to do for macs
 		;;
 	linux* )
-	
 		# For Linux, need to know if apt-get or yum is installed
-		AS_IF([test "x$PACKMAN" = "x"],[
-			AC_CHECK_PROGS([PACKMAN],[apt-get yum],)
+		AC_CHECK_PROGS([default_package_manager],[apt-get yum],[])
+		AC_MSG_NOTICE([Detected package manager = ${default_package_manager}])
+		
+		AS_IF([test "x${default_package_manager}" != "x"],[
+			AC_ARG_ENABLE([autodependencies],
+				AS_HELP_STRING([--enable-autodependencies],[Attempt to install dependencies using ${default_package_manager}]))
 		])
 		
-		AC_SUBST([PETSC_USE_SHARED_LIBRARIES],[--with-shared-libraries])
+
 		;;
 	*)
 		AC_MSG_ERROR([Your platform is not currently supported])
 		;;
 esac
-AC_MSG_NOTICE([enable-auto-dependencies = ${enable_auto_dependencies}])
-AC_MSG_NOTICE([enable-library-guess = ${enable_library_guess}])
 
-# check to see if auto-dependencies are enabled and we have a package manager
-AS_IF([test "x$enable_auto_dependencies" = "xyes"],[
-#	AS_CASE(["x$PACKMAN"],
-#		["x"],[
-#			AX_NCPA_MESSAGES_PACKMAN_NOT_FOUND
-#			AC_MSG_FAILURE([No package manager found])
-#		]
-#	)
-	AC_MSG_NOTICE([Using ${PACKMAN} as package manager])
+
+# Look for bash and perl.  If not found, check with the user, cause
+# that's unusual for a Linux-like system
+AC_PATH_PROG([BASHPATH],[bash],)
+AS_IF([test "x$BASHPATH" = "x"],[
+	AC_MSG_FAILURE(["No bash interpreter found on your path!  Please check this."])
 ])
-AS_IF([test "x$PACKMAN" = "xfink"],[
-	fullfink=$(which fink)
-	AC_MSG_NOTICE([Full path of fink is $fullfink])
-	finkbase=$(echo $fullfink | perl -e 'while(<>) { print $1 if m#(.+)/bin/fink$#; }')
-	AC_MSG_NOTICE([Using fink at $finkbase])
+AC_PATH_PROG([PERLPATH],[perl],)
+AS_IF([test "x$PERLPATH" = "x"],[
+	AC_MSG_FAILURE(["No perl interpreter found on your path!  Please check this."])
 ])
 
-# Checks for programs.  First, the g++ C++ compiler
-AC_CHECK_PROGS([CXX_TEST],[g++-4 g++],)
-AS_IF([test "x${CXX_TEST}" = "x"], [
-	# Are we going to try to auto-correct?
-	AS_IF([test "x$enable_auto_dependencies" = "xyes"],[
-		AS_CASE([$PACKMAN],
-			[*port],[
-				sudo $PACKMAN install gcc48
-				sudo $PACKMAN select --set gcc mp-gcc48
+AC_PROG_RANLIB
+AC_PROG_CXX
+AS_IF([test "x$CXX" = "x"],[
+	AS_IF([test "x$enable_autodependencies" = "xyes"],[
+		AS_CASE([$host_os],
+			[darwin*],[
+				AC_MSG_ERROR([Auto dependencies not available for MacOS.  Install g++ using your package manager of choice.])
 			],
-			[*fink],[
-				sudo $PACKMAN install gcc48
-			],
-			[*apt-get],[
-				sudo $PACKMAN -y install g++
-			],
-			[*yum],[
-				sudo $PACKMAN install gcc-c++
-			],[
-				AX_NCPA_MESSAGES_PACKMAN_NOT_FOUND
-				AC_MSG_FAILURE([No package manager found])
-			]
-		)
+			[linux*],[
+				AS_CASE([$default_package_manager],
+					[*apt-get],[
+						sudo $default_package_manager -y install g++
+					],
+					[*yum],[
+						sudo $default_package_manager -y install gcc-c++
+					],[
+						AC_MSG_ERROR([No supported package manager found (apt and yum currently supported)])
+					]
+				)
+		])
+		unset ac_cv_prog_CXX
+		unset ac_cv_cxx_compiler_gnu
+		unset ac_cv_prog_cxx_g
+		AC_PROG_CXX
+		AS_IF([test "x${CXX}" = "x"],[
+			AC_MSG_ERROR("Unable to install C++ compiler.  Please install manually and retry.")
+		])
 	],[
-		AX_NCPA_MESSAGES_GXX_NOT_FOUND
+		AC_MSG_ERROR([Failed to detect a C++ compiler.  Please install the appropriate package or compile from source.])
+	])
+])
+AC_PROG_CC
+AS_IF([test "x$CC" = "x"],[
+	AS_IF([test "x$enable_autodependencies" = "xyes"],[
+		AS_CASE([$host_os],
+			[darwin*],[
+				AC_MSG_ERROR([Auto dependencies not available for MacOS.  Install gcc using your package manager of choice.])
+			],
+			[linux*],[
+				AS_CASE([$default_package_manager],
+					[*apt-get],[
+						sudo $default_package_manager -y install gcc
+					],
+					[*yum],[
+						sudo $default_package_manager -y install gcc
+					],[
+						AC_MSG_ERROR([No supported package manager found (apt and yum currently supported)])
+					]
+				)
+		])
+		unset ac_cv_prog_CC
+		unset ac_cv_cc_compiler_gnu
+		unset ac_cv_prog_cc_g
+		AC_PROG_CC
+		AS_IF([test "x${CC}" = "x"],[
+			AC_MSG_ERROR("Unable to install C compiler.  Please install manually and retry.")
+		])
+	],[
+		AC_MSG_ERROR([Failed to detect a C compiler.  Please install the appropriate package or compile from source.])
 	])
 ])
 
-# Now fortran compiler
-AC_CHECK_PROGS([FC_TEST],[gfortran],)
-AS_IF([test "x${FC_TEST}" = "x"], [
-	# Are we going to try to auto-correct?
-	AS_IF([test "x$enable_auto_dependencies" = "xyes"],[
-		AS_CASE([$PACKMAN],
-			[*port],[
-				sudo $PACKMAN install gcc48
-				sudo $PACKMAN select --set gcc mp-gcc48
-			],
-			[*fink],[
-				sudo $PACKMAN install gcc48
-			],
-			[*apt-get],[
-				sudo $PACKMAN -y install gfortran
-			],
-			[*yum],[
-				sudo $PACKMAN install gcc-gfortran
-			],[
-				AX_NCPA_MESSAGES_PACKMAN_NOT_FOUND
-				AC_MSG_FAILURE([No package manager found])
-			]
-		)
-	],[
-		AX_NCPA_MESSAGES_GFORTRAN_NOT_FOUND
-	])
-])
-
-
-
-
-AC_PROG_CXX([g++-4 g++])
-AC_PROG_CC([gcc-4 gcc])
-AC_PROG_FC([gfortran])
 AC_PROG_CPP
+
+# If we want to auto-install fblas-lapack, we need a Fortran compiler
+#AS_IF([test "x${with_localpetsc}" = "xyes"],[
+#	AS_IF([test "x${with_localpetscfblas}" = "xyes"],[
+#		AC_PROG_FC
+#		AS_IF([test "x${FC}" = "x"],[
+#			AC_MSG_NOTICE([Local installation of fblas-lapack requires a Fortran compiler.])
+#			AS_IF([test "x$enable_autodependencies" = "xyes"],[
+#				AS_CASE([$host_os],
+#					[darwin*],[
+#						AC_MSG_ERROR([Auto dependencies not available for MacOS.  Install gfortran using your package manager of choice.])
+#					],
+#					[linux*],[
+#						AS_CASE([$default_package_manager],
+#							[*apt-get],[
+#								sudo $default_package_manager -y install gfortran
+#							],
+#							[*yum],[
+#								sudo $default_package_manager -y install gcc-gfortran
+#							],[
+#								AC_MSG_ERROR([No supported package manager found (apt and yum currently supported)])
+#							]
+#						)
+#				])
+#				unset ac_cv_prog_FC
+#				unset ac_cv_fc_compiler_gnu
+#				unset ac_cv_prog_fc_g
+#				AC_PROG_FC
+#				AS_IF([test "x${FC}" = "x"],[
+#					AC_MSG_ERROR("Unable to install Fortran compiler.  Please install manually and retry.")
+#				])
+#			],[
+#				AC_MSG_ERROR([Failed to detect a Fortran compiler.  Please install the appropriate package or compile from source.])
+#			])
+#		])
+#	])
+#])
 dnl AC_PROG_INSTALL
 
-# Check for versions of compilers to be in agreement
-# This is mostly a concern for g++ and gfortran to agree
-# get the g++ version
-AS_VAR_SET(GXX_VERSION,$(${CXX} -dumpversion | head -1 | perl -e '$v=<>; if ($v=~/(\d+\.\d+(?:\.\d+)?)/) { print $1; }'))
-if test "x$GXX_VERSION" = "x" ; then
-	AC_MSG_FAILURE([g++ version cannot be determined])
-else
-	AC_MSG_NOTICE([g++ version ${GXX_VERSION}])
-fi
-
-# do the same check for gcc
-AS_VAR_SET(GCC_VERSION,$(${CC} -dumpversion | head -1 | perl -e '$v=<>; if ($v=~/(\d+\.\d+(?:\.\d+)?)/) { print $1; }'))
-if test "x$GCC_VERSION" = "x" ; then
-        AC_MSG_FAILURE([gcc version cannot be determined])
-else
-        AC_MSG_NOTICE([gcc version ${GCC_VERSION}])
-fi
-
-# do the same check for gfortran
-AS_VAR_SET(GFORTRAN_VERSION,$(${FC} -dumpversion | head -1 | perl -e '$v=<>; if ($v=~/(\d+\.\d+(?:\.\d+)?)/) { print $1; }'))
-if test "x$GFORTRAN_VERSION" = "x" ; then
-        AC_MSG_FAILURE([gfortran version cannot be determined])
-else
-        AC_MSG_NOTICE([gfortran version ${GFORTRAN_VERSION}])
-fi
-
-# check for version equality
-AX_COMPARE_VERSION([$GCC_VERSION],[eq],[$GXX_VERSION])
-if test "x$ax_compare_version" = "xtrue" ; then
-	AC_MSG_NOTICE([gcc and g++ versions are equal])
-else
-	AC_MSG_FAILURE([gcc and g++ versions not equal!])
-fi
-AX_COMPARE_VERSION([$GCC_VERSION],[eq],[$GFORTRAN_VERSION])
-if test "x$ax_compare_version" = "xtrue" ; then
-	AC_MSG_NOTICE([gcc and gfortran versions are equal])
-else
-	AC_MSG_FAILURE([gcc and gfortran versions not equal!])
-fi
-
-
 # Checks for libraries.
+AC_CHECK_LIB([m],[cos],,[AC_MSG_ERROR([Missing M library])])
+
 AC_CHECK_LIB([fftw3], [fftw_plan_dft_1d],,[
 	# Are we going to try to auto-correct?
-	AS_IF([test "x$enable_auto_dependencies" = "xyes"],[
+	AS_IF([test "x$enable_autodependencies" = "xyes"],[
 		AS_CASE([$host_os],
 			[darwin*],[
-				mkdir prereq
-				cd prereq
-				curl -O http://www.fftw.org/fftw-3.3.4.tar.gz
-				tar xvzf fftw-3.3.4.tar.gz
-				cd fftw-3.3.4
-				./configure
-				make
-				sudo make install
-				cd ../..
-				rm -r prereq
+				AC_MSG_ERROR([Auto dependencies not available for MacOS.  Install FFTW using your package manager of choice.])
 			],
 			[linux*],[
-				AS_CASE([$PACKMAN],
+				AS_CASE([$default_package_manager],
 					[*apt-get],[
-						sudo $PACKMAN -y install libfftw3-dev
+						sudo $default_package_manager -y install libfftw3-dev
 					],
 					[*yum],[
-						sudo $PACKMAN install fftw-devel
+						sudo $default_package_manager -y install fftw-devel
 					],[
-						AX_NCPA_MESSAGES_PACKMAN_NOT_FOUND
-						AC_MSG_FAILURE([No package manager found])
-				])
+						AC_MSG_ERROR([No supported package manager found (apt and yum currently supported)])
+					]
+				)
 		])
 		unset ac_cv_lib_fftw3_fftw_plan_dft_1d
-		AC_CHECK_LIB([fftw3], [fftw_plan_dft_1d],,[AX_NCPA_MESSAGES_LFFTW3_NOT_FOUND])
+		AC_CHECK_LIB([fftw3], [fftw_plan_dft_1d],,[AC_MSG_ERROR([Could not install FFTW using ${default_package_manager}, please install manually])])
 	],[
-		AX_NCPA_MESSAGES_LFFTW3_NOT_FOUND
+		AC_MSG_ERROR([Failed to detect FFTW.  Please install the appropriate fftw3 dev package or compile from source.])
 	])
 ])
 
-AC_CHECK_LIB([m],[cos],,[AC_MSG_ERROR([Missing M library])])
-AC_CHECK_LIB([gslcblas],[cblas_dgemm],,[
+AC_CHECK_LIB([gslcblas], [cblas_dgemm],,[
 	# Are we going to try to auto-correct?
-	AS_IF([test "x$enable_auto_dependencies" = "xyes"],[
+	AS_IF([test "x$enable_autodependencies" = "xyes"],[
 		AS_CASE([$host_os],
 			[darwin*],[
-				mkdir prereq
-				cd prereq
-				curl -O ftp://ftp.gnu.org/gnu/gsl/gsl-1.16.tar.gz
-				tar xvzf gsl-1.16.tar.gz
-				cd gsl-1.16
-				./configure --disable-shared --disable-dependency-tracking
-				make
-				sudo make install
-				cd ../..
-				rm -r prereq
+				AC_MSG_ERROR([Auto dependencies not available for MacOS.  Install GSL using your package manager of choice.])
 			],
 			[linux*],[
-				AS_CASE([$PACKMAN],
+				AS_CASE([$default_package_manager],
 					[*apt-get],[
-						sudo $PACKMAN -y install libgsl0-dev
+						sudo $default_package_manager -y install libgsl-dev
 					],
 					[*yum],[
-						sudo $PACKMAN install gsl-devel
+						sudo $default_package_manager -y install gsl-devel
 					],[
-                                                AX_NCPA_MESSAGES_PACKMAN_NOT_FOUND
-                                                AC_MSG_FAILURE([No package manager found])
-                                ])
-			],[
-				AC_MSG_ERROR([OS not supported])
+						AC_MSG_ERROR([No supported package manager found (apt and yum currently supported)])
+					]
+				)
 		])
 		unset ac_cv_lib_gslcblas_cblas_dgemm
-		AC_CHECK_LIB([gslcblas],[cblas_dgemm],,[AX_NCPA_MESSAGES_LGSL_NOT_FOUND])
+		AC_CHECK_LIB([gslcblas], [cblas_dgemm],,[AC_MSG_ERROR([Could not install GSL using ${default_package_manager}, please install manually])])
 	],[
-		AX_NCPA_MESSAGES_LGSL_NOT_FOUND
+		AC_MSG_ERROR([Failed to detect GSL.  Please install the appropriate gsl dev package or compile from source.])
 	])
 ])
-AC_CHECK_LIB([gsl],[gsl_blas_dgemm],,[
+
+AC_CHECK_LIB([gsl], [gsl_blas_dgemm],,[
 	# Are we going to try to auto-correct?
 	AS_IF([test "x$enable_auto_dependencies" = "xyes"],[
 		AS_CASE([$host_os],
 			[darwin*],[
-				mkdir prereq
-				cd prereq
-				curl -O ftp://ftp.gnu.org/gnu/gsl/gsl-1.16.tar.gz
-				tar xvzf gsl-1.16.tar.gz
-				cd gsl-1.16
-				./configure --disable-shared --disable-dependency-tracking
-				make
-				sudo make install
-				cd ..
-				rm -r prereq
+				AC_MSG_ERROR([Auto dependencies not available for MacOS.  Install GSL using your package manager of choice.])
 			],
 			[linux*],[
-				AS_CASE([$PACKMAN],
+				AS_CASE([$default_package_manager],
 					[*apt-get],[
-						sudo $PACKMAN -y install libgsl0-dev
+						sudo $default_package_manager -y install libgsl-dev
 					],
 					[*yum],[
-						sudo $PACKMAN install gsl-devel
+						sudo $default_package_manager install gsl-devel
 					],[
-                                                AX_NCPA_MESSAGES_PACKMAN_NOT_FOUND
-                                                AC_MSG_FAILURE([No package manager found])
-                                ])
-			],[
-				AC_MSG_ERROR([OS not supported])
+						AC_MSG_ERROR([No supported package manager found (apt and yum currently supported)])
+					]
+				)
 		])
 		unset ac_cv_lib_gsl_gsl_blas_dgemm
-		AC_CHECK_LIB([gsl],[gsl_blas_dgemm],,[AX_NCPA_MESSAGES_LGSL_NOT_FOUND])
+		AC_CHECK_LIB([gsl], [gsl_blas_dgemm],,[AC_MSG_ERROR([Could not install GSL using ${default_package_manager}, please install manually])])
 	],[
-		AX_NCPA_MESSAGES_LGSL_NOT_FOUND
+		AC_MSG_ERROR([Failed to detect GSL.  Please install the appropriate gsl dev package or compile from source.])
 	])
 ])
-
-# If MacPorts is used and the selected g++ version is 4.8, try to guess the
-# library path.  For some reason it doesn't get set properly when linking
-# things to the PETSc libraries
-AS_IF([test "x$PACKMAN" = "xport"],[
-	AS_VAR_SET(GXX_VERSION_SHORT,$(echo ${GXX_VERSION} | perl -e '$v=<>; if ($v=~/^(\d+\.\d+)/) { print $1; }'))
-	AS_IF([test "x$GXX_VERSION_SHORT" = "x4.8"],[
-		LDFLAGS="${LDFLAGS} -L/opt/local/lib/gcc48"
-	])
-])
-
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h])
@@ -318,47 +286,398 @@ AC_FUNC_REALLOC
 AC_FUNC_STRTOD
 AC_CHECK_FUNCS([floor memset mkdir modf pow sqrt strpbrk])
 
-# Set output variables to propagate into Makefiles
-AC_SUBST([PETSC_OS], [$host_os])
-AC_SUBST([PETSC_VERSION],[3.2-p5])
-AC_SUBST([SLEPC_VERSION],[3.2-p3])
-AC_SUBST([PETSC_ARCH_REAL],[arch-${host_os}-c-debug])
-AC_SUBST([PETSC_ARCH_COMPLEX],[arch-${host_os}-c-complex])
-AC_SUBST([PETSC_DIR],[${abs_top_builddir}/src/extern/petsc-${PETSC_VERSION}])
-AC_SUBST([SLEPC_DIR],[${abs_top_builddir}/src/extern/slepc-${SLEPC_VERSION}])
-AC_SUBST([CXXFLAGS], "-fpic -c -ggdb -Wall")
-AC_SUBST([DORUFLAGS],"-Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas")
-#AC_SUBST([INCLUDEFLAGS],"-I. -I../common -I../atmosphere -I/usr/local/include")
-#AC_SUBST([LDFLAGS],$LDFLAGS)
+# Try to install PETSc and/or SLEPc if requested
+AC_MSG_CHECKING([automatic local PETSc installation])
+AS_IF(
+	[test "x${with_localpetsc}" = "xyes"],
+	[
+		AC_MSG_RESULT([yes])
+		AC_LANG_PUSH([C])
 
-AS_IF([test "x$PACKMAN" = "xfink"],[
-	#AC_SUBST([LIBS], "${LIBS} -L${finkbase}/lib/gcc4.8/lib -L${finkbase}/lib")
-	#AC_SUBST([LDFLAGS], "${LDFLAGS} -L${finkbase}/lib/gcc4.8/lib -L${finkbase}/lib")
-	AS_IF([test "x$CXX" = "xg++-4"],[
-		AS_IF([test "x$enable_library_guess" != "xno"],[
-			fink_gcc_ver=$(echo $GXX_VERSION | perl -e '$v=<>; if ($v =~ /(\d+\.\d+)(?:\.\d+)?/) { print $1; }')
-			AC_MSG_NOTICE([Guessing Fink library path as ${finkbase}/lib/gcc${fink_gcc_ver}/lib])
-			LDFLAGS="${LDFLAGS} -L${finkbase}/lib/gcc${fink_gcc_ver}/lib"
+		# See if default PETSc directory is overridden
+		AS_IF([test "x${local_petsc_dir}" != "x"],
+			[petsc_build_dir=${local_petsc_dir}],
+			[petsc_build_dir="$(pwd)/extern/petsc"])
+
+		AC_MSG_NOTICE([petsc_build_dir = ${petsc_build_dir}])
+
+		# check for extra configuration options.
+		petsc_extra_config="--with-fc=0"
+	
+		# See if default PETSc real arch name is overridden
+		AS_IF([test "x${local_petsc_arch_real}" = "x"],
+			[
+				AS_IF([test "x${with_localpetscdebug}" = "xyes"],
+					[
+						petsc_local_arch_name_real="${default_petsc_arch_name_real}-debug"
+					],
+					[
+						petsc_local_arch_name_real="${default_petsc_arch_name_real}"
+					]
+				)
+			],[petsc_local_arch_name_real=$local_petsc_arch_real])
+		
+		AC_MSG_NOTICE([petsc_local_arch_name_real = ${petsc_local_arch_name_real}])
+		
+		# See if default PETSc complex arch name is overridden
+		AS_IF([test "x${local_petsc_arch_complex}" = "x"],
+			[
+				AS_IF([test "x${with_localpetscdebug}" = "xyes"],
+					[
+						petsc_local_arch_name_complex="${default_petsc_arch_name_complex}-debug"
+					],
+					[
+						petsc_local_arch_name_complex="${default_petsc_arch_name_complex}"
+					]
+				)
+			],[petsc_local_arch_name_complex=$local_petsc_arch_complex])
+
+		AC_MSG_NOTICE([petsc_local_arch_name_complex = ${petsc_local_arch_name_complex}])
+
+		# debug version?
+		AS_IF([test "x${with_localpetscdebug}" = "xyes"],
+			[petsc_extra_config="${petsc_extra_config} --with-debugging=1"],
+			[petsc_extra_config="${petsc_extra_config} --with-debugging=0"]
+		)
+
+		# Use MPI?
+		AC_CHECK_PROGS(MPI_FOUND, [mpic++ mpicxx mpiCC hcp mpxlC_r mpxlC mpCC cmpic++])
+		AS_IF([test "x$MPI_FOUND" = "x"],[
+			petsc_extra_config="${petsc_extra_config} --download-openmpi"
+		])
+	
+		# Go get F2CBLAS-LAPACK?
+		AX_BLAS([
+			AC_DEFINE(HAVE_BLAS,1,[Define if you have a BLAS library.])
+		],[
+			petsc_extra_config="${petsc_extra_config} --download-f2cblaslapack=1"
+		])
+
+		dnl AS_IF([test "x${with_localpetscfblas}" = "xyes"],
+		dnl 	[
+		dnl 		petsc_extra_config="${petsc_extra_config} --download-f2cblaslapack=1"
+		dnl 	],[
+		dnl 		petsc_extra_config="${petsc_extra_config} --with-fc=0"
+		dnl 	])
+
+		AC_MSG_NOTICE([petsc_extra_config = ${petsc_extra_config}])
+		
+		# make the install dir
+		AC_MSG_CHECKING([PETSc build directory])
+		AS_IF([test -d "$petsc_build_dir"],[
+			AC_MSG_RESULT([yes])
+		],[
+			AC_MSG_RESULT([no, creating])
+			mkdir -p ${petsc_build_dir}
+			AS_IF([test -d "$petsc_build_dir"],,AC_MSG_ERROR(["Error creating PETSc build directory ${petsc_build_dir}"]))
+		])
+
+		# see if it's already been downloaded and/or built
+		basedir=$(pwd)
+		cd ${petsc_build_dir}
+		AC_MSG_CHECKING([PETSc download])
+		AS_IF([test -f "configure"],
+			[AC_MSG_RESULT([yes])],
+			[
+				AC_MSG_RESULT([no, cloning])
+				git clone -b maint https://gitlab.com/petsc/petsc.git .
+			]
+		)
+
+		AC_MSG_CHECKING([for existing ${petsc_local_arch_name_real} architecture])
+		AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables,
+			[AC_MSG_RESULT([yes])],
+			[
+				AC_MSG_RESULT([no, building])
+
+				# build the real version with indicated options
+				./configure PETSC_ARCH=${petsc_local_arch_name_real} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config}
+				
+				AS_IF([test $? != 0],
+					[AC_MSG_ERROR([Error running PETSc configure command: ./configure PETSC_ARCH=${petsc_local_arch_name_real} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config}])]
+				)
+				
+				make PETSC_ARCH=${petsc_local_arch_name_real} PETSC_DIR=${petsc_build_dir} all
+				AS_IF([test $? != 0],
+					[AC_MSG_ERROR([Error running make command for real PETSc: make PETSC_ARCH=${petsc_local_arch_name_real} PETSC_DIR=${petsc_build_dir} all])]
+				)
+
+				# see if it made the include file
+				AC_MSG_CHECKING([successful ${petsc_local_arch_name_real} PETSc build])
+
+				# clear the cached variable
+				unset `$as_echo "ac_cv_file_${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables" | $as_tr_sh`
+
+				AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables,,
+					[
+						AC_MSG_ERROR([Error building real PETSc, ${petsc_build_dir}/${petsc_local_arch_name_real}/lib/petsc/conf/petscvariables not found])
+					]
+				)
+			]
+		)
+		
+		AC_MSG_CHECKING([for existing ${petsc_local_arch_name_complex} architecture])
+		AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables,
+			[AC_MSG_RESULT([yes])],
+			[
+				AC_MSG_RESULT([no, building])
+
+				# build the real version with indicated options
+				./configure PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config} --with-scalar-type=complex
+				
+				AS_IF([test $? != 0],
+					[AC_MSG_ERROR([Error running PETSc configure command: ./configure PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} ${petsc_extra_config} --with-scalar-type=complex])]
+				)
+				
+				make PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} all
+				AS_IF([test $? != 0],
+					[AC_MSG_ERROR([Error running make command for complex PETSc: make PETSC_ARCH=${petsc_local_arch_name_complex} PETSC_DIR=${petsc_build_dir} all])]
+				)
+
+				# see if it made the include file
+				AC_MSG_CHECKING([successful ${petsc_local_arch_name_complex} PETSc build])
+
+				# clear the cached variable
+				unset `$as_echo "ac_cv_file_${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables" | $as_tr_sh`
+
+				AC_CHECK_FILE( ${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables,,
+					[
+						AC_MSG_ERROR([Error building complex PETSc, ${petsc_build_dir}/${petsc_local_arch_name_complex}/lib/petsc/conf/petscvariables not found])
+					]
+				)
+			]
+		)
+
+		AC_LANG_POP
+		export PETSC_DIR=${petsc_build_dir}
+		export PETSC_ARCH_REAL=${petsc_local_arch_name_real}
+		export PETSC_ARCH_COMPLEX=${petsc_local_arch_name_complex}
+		cd $basedir
+	],[AC_MSG_RESULT([no])
+])
+
+# check validity of PETSc installation
+# first, environmental variables
+AS_IF([test "x$PETSC_DIR" = "x"],[
+	AC_MSG_FAILURE([No value provided for PETSC_DIR!])
+])
+AS_IF([test "x$PETSC_ARCH_REAL" = "x"],[
+	AC_MSG_FAILURE([No value provided for PETSC_ARCH_REAL!])
+])
+AS_IF([test "x$PETSC_ARCH_COMPLEX" = "x"],[
+	AC_MSG_FAILURE([No value provided for PETSC_ARCH_COMPLEX!])
+])
+
+# check directories
+AC_CHECK_FILE( $PETSC_DIR,[
+	AC_MSG_NOTICE([PETSc directory $PETSC_DIR OK.])
+],[
+	AC_MSG_ERROR([PETSc directory $PETSC_DIR not found.  Check your PETSC_DIR variable.])
+])
+AS_IF([test -d $PETSC_DIR],,[
+	AC_MSG_ERROR([Specified PETSc directory ${PETSC_DIR} is not a directory!])
+])
+
+# Now see if the various include files are present
+PETSC_INCLUDE_FILE_GENERIC="${PETSC_DIR}/lib/petsc/conf/variables"
+AC_CHECK_FILE( $PETSC_INCLUDE_FILE_GENERIC,,[
+	AC_MSG_ERROR([PETSc generic include file $PETSC_INCLUDE_FILE_GENERIC not found.  Your PETSc build may be incomplete."])
+])
+AC_CHECK_FILE( ${PETSC_DIR}/${PETSC_ARCH_REAL}/lib/petsc/conf/petscvariables,,[
+	AC_MSG_ERROR([PETSc real architecture-specific include file ${PETSC_DIR}/${PETSC_ARCH_REAL}/lib/petsc/conf/petscvariables not found.  Check your PETSC_ARCH_REAL variable and your PETSc installation.])
+])
+AC_CHECK_FILE( ${PETSC_DIR}/${PETSC_ARCH_COMPLEX}/lib/petsc/conf/petscvariables,,
+[
+	AC_MSG_ERROR([PETSc complex architecture-specific include file ${PETSC_DIR}/${PETSC_ARCH_COMPLEX}/lib/petsc/conf/petscvariables not found.  Check your PETSC_ARCH_COMPLEX variable and your PETSc installation.])
+])
+
+AC_MSG_CHECKING([automatic local SLEPc installation])
+AS_IF([test "x${with_localslepc}" = "xyes"],[
+	AC_MSG_RESULT([yes])
+	basedir=$(pwd)
+
+	downloader=""
+	AC_CHECK_PROGS(downloader,[wget curl])
+	AC_MSG_CHECKING([command-line downloader])
+	AS_IF([test "x${downloader}" = "x"],[
+		AC_MSG_RESULT([no])
+		AC_MSG_ERROR("Neither wget nor curl detected")
+	],[
+		AC_MSG_RESULT([$downloader])
+	])
+
+	# See if default SLEPc directory is overridden
+	AS_IF([test "x${local_slepc_dir}" != "x"],
+		[slepc_build_dir=${local_slepc_dir}],
+		[slepc_build_dir="$(pwd)/extern/slepc"]
+	)
+	AS_IF([test "x$local_slepc_version" = "x"],
+		[slepc_version=$default_slepc_version],
+		[slepc_version=$local_slepc_version]
+	)
+
+	AC_MSG_NOTICE([slepc_build_dir = ${slepc_build_dir}])
+	AC_MSG_NOTICE([slepc_version = ${slepc_version}])
+
+	# check for extra configuration options.
+	slepc_extra_config=""
+
+	# make the install dir
+	AC_MSG_CHECKING([SLEPc build directory])
+	AS_IF([test -d "$slepc_build_dir"],[
+		AC_MSG_RESULT([yes])
+	],[
+		AC_MSG_RESULT([no, creating])
+		mkdir -p "${slepc_build_dir}"
+		AS_IF([test -d "$slepc_build_dir"],,[
+			AC_MSG_ERROR(["Error creating SLEPc build directory ${slepc_build_dir}"])
 		])
 	])
-	LDFLAGS="${LDFLAGS} -L${finkbase}/lib"
-	AC_SUBST([INCLUDEFLAGS],"-I. -I../common -I../atmosphere -I/usr/local/include -I/sw/include")
+
+	# see if it's already been downloaded and/or built
+	cd ${slepc_build_dir}
+	slepc_build_dir="${slepc_build_dir}/slepc-${slepc_version}"
+	AC_MSG_CHECKING([SLEPc download])
+	AS_IF([test -f "${slepc_build_dir}/configure"],
+		[
+			AC_MSG_RESULT([yes])
+		],[
+			AC_MSG_RESULT([no, installing])
+			AC_CHECK_FILE([slepc-${slepc_version}.tar.gz],,[
+				slepc_url="${slepc_url_base}/slepc-${slepc_version}.tar.gz"
+				$downloader ${slepc_url}
+				AS_IF([test $? != 0],[
+					AC_MSG_ERROR([Error downloading ${slepc_url}, check internet connection and version number])
+				])
+			])
+			
+			tar xvzf slepc-${slepc_version}.tar.gz
+			AS_IF([test $? != 0],[
+				AC_MSG_ERROR([Error decompressing slepc-${slepc_version}.tar.gz, check download])
+			])
+		]
+	)
+	export SLEPC_DIR=${slepc_build_dir}
+	cd $SLEPC_DIR
+
+	AC_CHECK_FILE( ${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables,,[
+		AC_MSG_RESULT([no, building])
+
+		# build the real version with indicated options
+		export PETSC_ARCH=${PETSC_ARCH_REAL}
+		./configure
+		
+		AS_IF([test $? != 0],
+			[AC_MSG_ERROR([Error running SLEPc configure command: ./configure])]
+		)
+		
+		make PETSC_DIR=${PETSC_DIR} SLEPC_DIR=${SLEPC_DIR} PETSC_ARCH=${PETSC_ARCH}
+		AS_IF([test $? != 0],
+			[AC_MSG_ERROR([Error running make command for real SLEPc: make PETSC_DIR=${PETSC_DIR} SLEPC_DIR=${SLEPC_DIR} PETSC_ARCH=${PETSC_ARCH}])]
+		)
+
+		# see if it made the include file
+		AC_MSG_CHECKING([successful ${PETSC_ARCH} SLEPc build])
+
+		# clear the cached variable
+		unset `$as_echo "ac_cv_file_${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables" | $as_tr_sh`
+
+		AC_CHECK_FILE( ${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables,,[
+			AC_MSG_ERROR([Error building real SLEPc, ${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables not found])
+		])
+	])
+
+	AC_MSG_CHECKING([for existing ${PETSC_ARCH_COMPLEX} SLEPc architecture])
+	AC_CHECK_FILE( ${slepc_build_dir}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables,,[
+		AC_MSG_RESULT([no, building])
+
+		# build the complex version with indicated options
+		export PETSC_ARCH=${PETSC_ARCH_COMPLEX}
+		./configure
+		
+		AS_IF([test $? != 0],
+			[AC_MSG_ERROR([Error running SLEPc configure command: ./configure])]
+		)
+		
+		make PETSC_ARCH=${PETSC_ARCH} PETSC_DIR=${PETSC_DIR} SLEPC_DIR=${SLEPC_DIR}
+		AS_IF([test $? != 0],
+			[AC_MSG_ERROR([Error running make command for complex SLEPc: make PETSC_ARCH=${PETSC_ARCH} PETSC_DIR=${PETSC_DIR} SLEPC_DIR=${SLEPC_DIR}])]
+		)
+
+		# see if it made the include file
+		AC_MSG_CHECKING([successful ${PETSC_ARCH} SLEPc build])
+
+		# clear the cached variable
+		unset `$as_echo "ac_cv_file_${slepc_build_dir}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables" | $as_tr_sh`
+
+		AC_CHECK_FILE( ${slepc_build_dir}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables,,[
+			AC_MSG_ERROR([Error building complex SLEPc, ${slepc_build_dir}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables not found])
+		])
+	])
+
+	cd $basedir
 ],[
-	#AC_SUBST([LDFLAGS], "${LDFLAGS} -L/usr/lib")
-	LDFLAGS="${LDFLAGS} -L/usr/lib"
-	AC_SUBST([INCLUDEFLAGS],"-I. -I../common -I../atmosphere -I/usr/local/include")
+	AC_MSG_RESULT([no])
 ])
+
+
+# Checks for environmental variables
+AS_IF([test "x$SLEPC_DIR" = "x"],[
+	AC_MSG_ERROR([No value provided for SLEPC_DIR!])
+])
+
+# Check the SLEPc installation
+# First, check that the directories exist
+AC_CHECK_FILE( $SLEPC_DIR,[
+	AC_MSG_NOTICE([SLEPc directory $SLEPC_DIR OK])
+],[
+	AC_MSG_ERROR([SLEPc directory $SLEPC_DIR not found.  Check your SLEPC_DIR variable.])
+])
+
+AS_IF([test ! -d $SLEPC_DIR],[
+	AC_MSG_ERROR([Specified PETSc directory ${PETSC_DIR} is not a directory!])
+])
+
+# Now see if the generic include files are present
+SLEPC_INCLUDE_FILE_GENERIC="${SLEPC_DIR}/lib/slepc/conf/slepc_common"
+AC_CHECK_FILE( $SLEPC_INCLUDE_FILE_GENERIC,[
+	AC_MSG_NOTICE([SLEPc generic include file OK])
+],[
+	AC_MSG_ERROR([SLEPc generic include file $SLEPC_INCLUDE_FILE_GENERIC not found.  Your SLEPc build may be incomplete.])
+])
+
+# Finally check the architecture-specific files
+AC_CHECK_FILE( ${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables,[
+	AC_MSG_NOTICE([SLEPc real architecture-specific include file OK])
+],[
+	AC_MSG_ERROR([SLEPc real architecture-specific include file ${SLEPC_DIR}/${PETSC_ARCH_REAL}/lib/slepc/conf/slepcvariables not found.  Check your PETSC_ARCH_REAL variable and your SLEPc installation.])
+])
+AC_CHECK_FILE( ${SLEPC_DIR}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables,[
+	AC_MSG_NOTICE([SLEPc complex architecture-specific include file OK])
+],[
+	AC_MSG_ERROR([SLEPc complex architecture-specific include file ${SLEPC_DIR}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables not found.  Check your PETSC_ARCH_COMPLEX variable and your SLEPc installation.])
+])
+
+
+# Set output variables to propagate into Makefiles
+AC_SUBST([INCLUDEFLAGS],"-I. -I../common -I../atmosphere -I/usr/local/include -I/usr/include")
+AC_SUBST([LIBS],"-lgsl -lgslcblas -lm -lfftw3")
+AC_SUBST([WARNINGFLAGS],"-Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas")
+AC_SUBST([CXXFLAGS], "-fpic -c -Wall")
+LDFLAGS="${LDFLAGS} -L/usr/lib"
 AC_SUBST([STATICLIBS],"../../lib/libatmosphere.a ../../lib/libcommon.a")
 AC_SUBST([LDFLAGS],$LDFLAGS)
+AC_SUBST([PETSC_DIR],$PETSC_DIR)
+AC_SUBST([SLEPC_DIR],$SLEPC_DIR)
+AC_SUBST([PETSC_INCLUDE_FILE_GENERIC],$PETSC_INCLUDE_FILE_GENERIC)
+AC_SUBST([SLEPC_INCLUDE_FILE_GENERIC],$SLEPC_INCLUDE_FILE_GENERIC)
 
-# todo: Make this user-configurable
-AC_SUBST([PETSC_USE_MPI],[--with-mpi=0])
-AC_SUBST([SLEPC_USE_MPI],[--with-mpi=0])
-AC_SUBST([MPICXX],$CXX)
+AC_SUBST([PETSC_ARCH_REAL],$PETSC_ARCH_REAL)
+AC_SUBST([PETSC_ARCH_COMPLEX],$PETSC_ARCH_COMPLEX)
+
 
 AC_CONFIG_FILES([
 		Makefile
-		src/extern/Makefile
 		src/common/Makefile
 		src/atmosphere/Makefile
 		src/raytrace/Makefile
@@ -371,7 +690,12 @@ AC_CONFIG_FILES([
 		src/cmodbb/Makefile
 		src/tdpape/Makefile
 		src/wnlrt/Makefile
-		test/Makefile
 ])
 
+#		test/Makefile
+
 AC_OUTPUT
+
+AC_MSG_NOTICE([
+	Configuration complete.  Run 'make' to finish building $PACKAGE_TARNAME.
+])

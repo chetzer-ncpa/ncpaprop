@@ -2,32 +2,18 @@
 
 # Installation
 
-The automake installation system is under revision and will not currently work.  To
-install manually:
+1. Run ./configure with appropriate parameters.  Examples:
 
-1. Ensure the PETSc and SLEPc packages are installed and the environment is correctly
-set up (i.e. set the PETSC_DIR and SLEPC_DIR variables).  Both the real and complex
-versions of PETSc and SLEPc should be built.  An example process to do this can be
-found in ./install_petsc_slepc.bash.  You may edit the variables in the header of this
-file and run it, but be sure to read it carefully first to understand what it is
-doing.  The script is meant as a guide and error checking is minimal, so it may fail
-partway through without notice.  If directories are created matching your selected
-architecture names in $PETSC_DIR and $SLEPC_DIR, the build likely succeeded.  You can
-double-check this by running (using architecture names arch-linux-c-real and
-arch-linux-c-complex):
+To link to an existing PETSc/SLEPc installation:
 
-  * cd $PETSC_DIR  
-  * make PETSC_ARCH=arch-linux-c-real check  
-  * make PETSC_ARCH=arch-linuc-c-complex check  
-  * cd $SLEPC_DIR  
-  * make PETSC_ARCH=arch-linux-c-real check  
-  * make PETSC_ARCH=arch-linuc-c-complex check  
+	./configure PETSC_DIR=/code/petsc SLEPC_DIR=/code/slepc PETSC_ARCH_REAL=arch-linux-c-real PETSC_ARCH_COMPLEX=arch-linux-c-complex --with-autodependencies
 
-2. Edit the master Makefile in this directory and set the PETSC_ARCH_REAL and
-PETSC_ARCH_COMPLEX variables to the values selected when they were built.  These
-correspond to directory names in $PETSC_DIR.
+To download and install PETSc and SLEPc locally to the ncpaprop installation:
 
-3.  Run 'make'.
+	./configure --with-localpetsc --with-autodependencies
 
-If build is successful, executables will be placed in bin/.  Refer to the documentation
-for instructions on example model runs.
+See the manual for detailed information on additional parameters.
+
+2. Run 
+
+	make

@@ -6,54 +6,47 @@
 \contentsline {subsubsection}{\numberline {2.1.3}Compilers}{6}
 \contentsline {subsection}{\numberline {2.2}Procedure}{6}
 \contentsline {subsubsection}{\numberline {2.2.1}Installation Overview}{6}
-\contentsline {subsubsection}{\numberline {2.2.2}Shells and Interpreters}{7}
-\contentsline {subsubsection}{\numberline {2.2.3}Package Managers}{7}
-\contentsline {subsubsection}{\numberline {2.2.4}g++}{7}
-\contentsline {subsubsection}{\numberline {2.2.5}gfortran}{7}
-\contentsline {subsubsection}{\numberline {2.2.6}Compiler Versions}{8}
-\contentsline {subsubsection}{\numberline {2.2.7}FFTW}{8}
-\contentsline {subsubsection}{\numberline {2.2.8}GSL}{8}
-\contentsline {subsubsection}{\numberline {2.2.9}Compilation}{9}
-\contentsline {subsubsection}{\numberline {2.2.10}Testing}{9}
-\contentsline {subsection}{\numberline {2.3}Typesetting this Manual}{10}
-\contentsline {section}{\numberline {3}General notes}{11}
-\contentsline {subsection}{\numberline {3.1}Running the codes - general rules}{11}
-\contentsline {subsection}{\numberline {3.2}Atmospheric specifications}{11}
-\contentsline {section}{\numberline {4}Modess - Modal Effective Sound Speed}{13}
-\contentsline {subsection}{\numberline {4.1}Mathematical Background}{13}
-\contentsline {subsection}{\numberline {4.2}Running Modess}{15}
-\contentsline {subsection}{\numberline {4.3}Running Modess: examples}{18}
-\contentsline {section}{\numberline {5}WMod - Wide-Angle High-Mach Modal Code}{22}
-\contentsline {subsection}{\numberline {5.1}Mathematical Background}{22}
-\contentsline {subsection}{\numberline {5.2}Running WMod}{23}
-\contentsline {subsection}{\numberline {5.3}Running WMod: examples}{25}
-\contentsline {section}{\numberline {6}CModess - Complex Modal Effective Sound Speed}{28}
-\contentsline {subsection}{\numberline {6.1}Mathematical Background}{28}
-\contentsline {subsection}{\numberline {6.2}Running CModess}{29}
-\contentsline {subsection}{\numberline {6.3}Running CModess: examples}{31}
-\contentsline {section}{\numberline {7}ModBB - Broad-band (pulse) propagation from Normal Modes}{34}
-\contentsline {subsection}{\numberline {7.1}Mathematical Background}{34}
-\contentsline {subsection}{\numberline {7.2}Running ModBB}{35}
-\contentsline {subsection}{\numberline {7.3}Running ModBB: examples}{41}
-\contentsline {section}{\numberline {8}ModessRD1WCM - Modal Effective Sound Speed \newline Range-Dependent One-Way Coupled Modes}{43}
-\contentsline {subsection}{\numberline {8.1}Mathematical Background}{43}
-\contentsline {subsection}{\numberline {8.2}Running ModessRD1WCM}{43}
-\contentsline {subsection}{\numberline {8.3}Running ModessRD1WCM: examples}{46}
-\contentsline {section}{\numberline {9}pape - Wide-Angle Pade Parabolic Equation Code}{48}
-\contentsline {subsection}{\numberline {9.1}Mathematical Background}{48}
-\contentsline {subsection}{\numberline {9.2}Running pape}{49}
-\contentsline {subsection}{\numberline {9.3}Running pape: examples}{52}
-\contentsline {subsection}{\numberline {9.4}tdpape - Time Domain Pade Parabolic Equation}{52}
-\contentsline {subsection}{\numberline {9.5}Running tdpape}{53}
-\contentsline {subsection}{\numberline {9.6}Running tdpape: example}{55}
-\contentsline {section}{\numberline {10}raytrace.2d and raytrace.3d - Geometric Acoustics}{56}
-\contentsline {subsection}{\numberline {10.1}Mathematical Background: 2-D}{56}
-\contentsline {subsection}{\numberline {10.2}Running raytrace.2d}{56}
-\contentsline {subsection}{\numberline {10.3}Running raytrace.2d: examples}{57}
-\contentsline {subsection}{\numberline {10.4}Mathematical Background: 3-D}{58}
-\contentsline {subsection}{\numberline {10.5}Running raytrace.3d}{59}
-\contentsline {subsection}{\numberline {10.6}Running raytrace.3d: examples}{60}
-\contentsline {section}{\numberline {11}wnlrt -Weakly Non Linear Ray Tracing}{61}
-\contentsline {subsection}{\numberline {11.1}Mathematical Background}{61}
-\contentsline {subsection}{\numberline {11.2}Running wnlrt}{61}
-\contentsline {subsection}{\numberline {11.3}Running wnrt: example}{62}
+\contentsline {subsubsection}{\numberline {2.2.2}Compilation}{8}
+\contentsline {subsubsection}{\numberline {2.2.3}Testing}{8}
+\contentsline {subsection}{\numberline {2.3}Typesetting this Manual}{9}
+\contentsline {section}{\numberline {3}General notes}{10}
+\contentsline {subsection}{\numberline {3.1}Running the codes - general rules}{10}
+\contentsline {subsection}{\numberline {3.2}Atmospheric specifications}{10}
+\contentsline {section}{\numberline {4}Modess - Modal Effective Sound Speed}{12}
+\contentsline {subsection}{\numberline {4.1}Mathematical Background}{12}
+\contentsline {subsection}{\numberline {4.2}Running Modess}{14}
+\contentsline {subsection}{\numberline {4.3}Running Modess: examples}{17}
+\contentsline {section}{\numberline {5}WMod - Wide-Angle High-Mach Modal Code}{21}
+\contentsline {subsection}{\numberline {5.1}Mathematical Background}{21}
+\contentsline {subsection}{\numberline {5.2}Running WMod}{22}
+\contentsline {subsection}{\numberline {5.3}Running WMod: examples}{24}
+\contentsline {section}{\numberline {6}CModess - Complex Modal Effective Sound Speed}{27}
+\contentsline {subsection}{\numberline {6.1}Mathematical Background}{27}
+\contentsline {subsection}{\numberline {6.2}Running CModess}{28}
+\contentsline {subsection}{\numberline {6.3}Running CModess: examples}{30}
+\contentsline {section}{\numberline {7}ModBB - Broad-band (pulse) propagation from Normal Modes}{33}
+\contentsline {subsection}{\numberline {7.1}Mathematical Background}{33}
+\contentsline {subsection}{\numberline {7.2}Running ModBB}{34}
+\contentsline {subsection}{\numberline {7.3}Running ModBB: examples}{40}
+\contentsline {section}{\numberline {8}ModessRD1WCM - Modal Effective Sound Speed \newline Range-Dependent One-Way Coupled Modes}{42}
+\contentsline {subsection}{\numberline {8.1}Mathematical Background}{42}
+\contentsline {subsection}{\numberline {8.2}Running ModessRD1WCM}{42}
+\contentsline {subsection}{\numberline {8.3}Running ModessRD1WCM: examples}{45}
+\contentsline {section}{\numberline {9}pape - Wide-Angle Pade Parabolic Equation Code}{47}
+\contentsline {subsection}{\numberline {9.1}Mathematical Background}{47}
+\contentsline {subsection}{\numberline {9.2}Running pape}{48}
+\contentsline {subsection}{\numberline {9.3}Running pape: examples}{51}
+\contentsline {subsection}{\numberline {9.4}tdpape - Time Domain Pade Parabolic Equation}{51}
+\contentsline {subsection}{\numberline {9.5}Running tdpape}{52}
+\contentsline {subsection}{\numberline {9.6}Running tdpape: example}{54}
+\contentsline {section}{\numberline {10}raytrace.2d and raytrace.3d - Geometric Acoustics}{55}
+\contentsline {subsection}{\numberline {10.1}Mathematical Background: 2-D}{55}
+\contentsline {subsection}{\numberline {10.2}Running raytrace.2d}{55}
+\contentsline {subsection}{\numberline {10.3}Running raytrace.2d: examples}{56}
+\contentsline {subsection}{\numberline {10.4}Mathematical Background: 3-D}{57}
+\contentsline {subsection}{\numberline {10.5}Running raytrace.3d}{58}
+\contentsline {subsection}{\numberline {10.6}Running raytrace.3d: examples}{59}
+\contentsline {section}{\numberline {11}wnlrt -Weakly Non Linear Ray Tracing}{60}
+\contentsline {subsection}{\numberline {11.1}Mathematical Background}{60}
+\contentsline {subsection}{\numberline {11.2}Running wnlrt}{60}
+\contentsline {subsection}{\numberline {11.3}Running wnrt: example}{61}

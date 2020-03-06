@@ -4,167 +4,109 @@
 
 \subsubsection{Operating System}
 
-\textbf{ncpaprop} is designed to run in a UNIX environment. It has been tested on Ubuntu and Fedora Linux operating systems, and MacOS Mountain Lion and Yosemite (10.8-10.10). 
+\textbf{ncpaprop} is designed to run in a UNIX environment. It has been tested on Ubuntu, Red Hat, and CentOS Linux operating systems, and MacOS Mojave (10.14). 
 
 \subsubsection{Libraries}
 
-Fourier transforms are performed in \textbf{ncpaprop} using the \textbf{FFTW} libraries, http://www.fftw.org. The \textbf{GSL} libraries, http://www.gnu.org/software/gsl/, are used for interpolation and splining. The \textbf{SLEPc} library, http://www.slepc.upv.es/, is used to solve the large dimensional eigenvalue problems required for the normal mode models. \textbf{SLEPc} requires the \textbf{PETSc} libraries, http://www.mcs.anl.gov/petsc/, to which it can be seen as a submodule. The current version of \textbf{ncpaprop} is designed to use, and has been tested with, versions 3.2-p3 of \textbf{SLEPc} and 3.2-p5 of \textbf{PETSc}. As these are not the current versions of \textbf{SLEPc} and \textbf{PETSc} they are packaged with the \textbf{ncpaprop} distribution. 
+Fourier transforms are performed in \textbf{ncpaprop} using the \textbf{FFTW} libraries, http://www.fftw.org. The \textbf{GSL} libraries, http://www.gnu.org/software/gsl/, are used for interpolation and splining. The \textbf{SLEPc} library, http://www.slepc.upv.es/, is used to solve the large dimensional eigenvalue problems required for the normal mode models. \textbf{SLEPc} requires the \textbf{PETSc} libraries, http://www.mcs.anl.gov/petsc/, to which it can be seen as a submodule. 
 
 \subsubsection{Compilers}
 
-\textbf{ncpaprop} is written in C++ and was built and tested using the GNU C++ compiler \textbf{G++}.  The \textbf{PETSc} and \textbf{SLEPc} libraries are partially written in Fortran and were built and tested using the GNU Fortran compiler \textbf{gfortran}.  Both of these are required, and they must be of the same version.  
+\textbf{ncpaprop} is written in C++ and was built and tested using the GNU C++ compiler \textbf{g++}, and will also compile under the MacOS native \textbf{clang} compiler.  The \textbf{PETSc} and \textbf{SLEPc} libraries require a corresponding C compiler.
 
 \subsection{Procedure}
 
-\textbf{ncpaprop} uses a standard GNU-style configure script to detect and locate the above prerequisites and generate appropriate makefiles.  The \texttt{configure} script will search the standard library locations, plus if Fink is detected it will search /sw/lib. An additional flag can be invoked to allow the installer to automatically download and install the prerequisites in system-standard locations if desired. The details of this process are explained below.
+\textbf{ncpaprop} uses a standard GNU-style configure script to detect and locate the above prerequisites and generate appropriate makefiles.  The \texttt{configure} script will search the standard library locations. An additional flag can be invoked (for Linux installations only) to allow the installer to automatically download and install the prerequisites using the native package manager. The details of this process are explained below.
 
 \subsubsection{Installation Overview}
 
-To begin installation, uncompress the distribution with 
+To begin installation, select an installation location for the \textbf{ncpaprop} directory to reside.  Clone the GitHub repository's master branch with
 
-\texttt{tar xvzf ncpaprop-{\version}.tar.gz}
+\texttt{git clone https://github.com/chetzer-ncpa/ncpaprop.git ncpaprop}
 
 \noindent
-and cd into \texttt{ncpaprop-\version}.  Then run
+and cd into \texttt{ncpaprop}.  Then run
 
 \texttt{./configure}
 
 \noindent
-to have the installer search for prerequisites and exit with an explanatory message if one is missing.  Optional flags that can be used by the \texttt{configure} script include:
+to set up the build environment and make sure all prerequisites are met.  Optional flags that can be used by the \texttt{configure} script include:
 
 \begin{description}
-\item[\texttt{--enable-auto-dependencies}]\hfill \\
+\item[\texttt{--enable-autodependencies}]\hfill \\
 \noindent
-Attempt to download and install missing prerequisites automatically. Use this option only if installation in the default installation locations is satisfactory. The \textbf{ncpaprop} installer supports the \textbf{apt-get} and \textbf{yum} package managers on Linux, and \textbf{port} and \textbf{fink} on MacOS.  The exact commands run by each package manager are detailed in later sections.
-
-\item[\texttt{--disable-library-guess}]\hfill \\
-\noindent
-If the detected MacOS package manager is Fink, the standard C++ libraries are often not placed in a default-searched location.  To handle this, the installer will attempt to guess the location of the libraries and add that guess to the linker's search path.  Use this flag to disable this behavior.
+Attempt to download and install missing prerequisites automatically. Use this option only if installation in the default installation locations is satisfactory. The \textbf{ncpaprop} installer currently supports the \textbf{apt-get} and \textbf{yum} package managers on Linux.  MacOS users should install \textbf{FFTW} and \textbf{GSL} using their method of choice.
 
 \item[\texttt{LDFLAGS="-L/path/to/library"}]\hfill \\
 \noindent
-The user can also specify additional library search paths using this syntax, often in conjunction with \texttt{--disable-library-guess}. For example if the \textbf{GSL} or \textbf{FFTW} libraries are placed in a non-standard location this option can be used to provide the correct path. 
+The user can also specify additional library search paths using this syntax.
 \end{description}
 
-\noindent The following tests are run by the \texttt{configure} script:
+\noindent In addition, the user must specify whether to use an existing \textbf{PETSc}/\textbf{SLEPc} installation (that has had both real and complex architectures built) or to allow the installer to download and build a set of libraries local to the \textbf{ncpaprop} installation.  To link to an existing installation, the user must provide the following, either as environmental variables or as \texttt{key=value} pairs on the \texttt{./configure} command:
 
-\subsubsection{Shells and Interpreters}
-
-The configuration script begins by checking for the existence of \texttt{bash} and \texttt{perl} executables.  If these are not both found, the installer exits with an error message.  This should never happen on a properly functioning system, but is included as a sanity check.
-
-\subsubsection{Package Managers}
-
-Depending on whether the host OS is Linux or MacOS, the installer searches for a known package manager.  On Linux, the installer will search for \texttt{apt-get} or \texttt{yum}, in that order, while on MacOS the installer will search for \texttt{port} or \texttt{fink}, in that order.  If no package manager is found, and the \texttt{--enable-auto-dependencies} flag is set, the installer will exit with an error message.
-
-\subsubsection{g++}
-
-The installer will search for either \texttt{g++-4} or \texttt{g++} on its path, using the first one it finds.  (\texttt{g++-4} is preferred because its presence indicates that Fink is in use, and Fink does not override the default XCode version of \texttt{g++}).  If neither of these is found, and the \texttt{--enable-auto-dependencies} flag is set, the following commands will be run using \texttt{sudo}:
-
-\begin{table}[h]
-\begin{tabular}{r|l}
-\textbf{Manager} & \textbf{Command(s)} \\ 
-\hline
-\textbf{apt-get} & \texttt{apt-get -y install g++} \\
-\rowcolor[HTML]{C0C0C0} 
-\textbf{yum} & \texttt{yum install gcc-c++} \\
-\textbf{port} & \begin{tabular}[c]{@{}l@{}}\texttt{port install gcc48}\\ \texttt{port select --set gcc mp-gcc48}\end{tabular} \\
-\rowcolor[HTML]{C0C0C0} 
-\textbf{fink} & \texttt{fink install gcc48}
-\end{tabular}
-\end{table}
-
-MacPorts users should note that the 'port select' command will create symlinks in /opt/local/bin that will take precedence over previously installed versions of gcc, g++, and gfortran.  This can be undone, if desired, using:
-
-\begin{verbatim}
-sudo port select --set gcc none
-hash -r
-\end{verbatim}
-
-Depending on your system setup, you may have to manually add /opt/local/lib/gcc48 to the library search path using \verb%./configure LDFLAGS=-L/opt/local/lib/gcc48%.  The installer will attempt to do this automatically for MacPorts users.
-
-\subsubsection{gfortran}
-
-The installer will search for \texttt{gfortran} on its path.  If this is not found, and the \texttt{--enable-auto-dependencies} flag is set, the following commands will be run using \texttt{sudo}:
-
-\begin{table}[h]
-\begin{tabular}{r|l}
-\textbf{Manager} & \textbf{Command(s)} \\ 
-\hline
-\textbf{apt-get} & \texttt{apt-get -y install gfortran} \\
-\rowcolor[HTML]{C0C0C0} 
-\textbf{yum} & \texttt{yum install gcc-gfortran} \\
-\textbf{port} & \begin{tabular}[c]{@{}l@{}}\texttt{port install gcc48}\\ \texttt{port select --set gcc mp-gcc48}\end{tabular} \\
-\rowcolor[HTML]{C0C0C0} 
-\textbf{fink} & \texttt{fink install gcc48}
-\end{tabular}
-\end{table}
-
+\begin{description}
+\item[\texttt{PETSC\_DIR}]\hfill \\
 \noindent
-Note that the \texttt{port} and \texttt{fink} commands are identical to those for \texttt{g++}; \texttt{port} and \texttt{fink} install a suite of compilers at once, so installing the package for one compiler should install the others at the same time.
+The root directory of the \textbf{PETSc} installation.
 
-\subsubsection{Compiler Versions}
-
-The installer will then check that the \texttt{g++} and \texttt{gfortran} versions are identical, and issue an error message if they are not.  This possibility is not easily solved automatically, so it is left to the user to determine how it should be solved.
-
-\subsubsection{FFTW}
-
-The installer will then check for the presence of libraries for FFTW version 3.  If they are not found, and the \texttt{--enable-auto-dependencies} flag is set, the following commands are issued on Linux hosts using \texttt{sudo}:
-
-\begin{table}[h]
-\begin{tabular}{r|l}
-\textbf{Manager} & \textbf{Command(s)} \\ 
-\hline
-\textbf{apt-get} & \texttt{apt-get -y install libfftw3-dev} \\
-\rowcolor[HTML]{C0C0C0} 
-\textbf{yum} & \texttt{yum install fftw-devel}
-\end{tabular}
-\end{table}
-
+\item[\texttt{SLEPC\_DIR}]\hfill \\
 \noindent
-On MacOS hosts, FFTW is downloaded and installed from source:
+The root directory of the \textbf{SLEPc} installation.
 
-\begin{verbatim}
-mkdir prereq
-cd prereq
-curl -O http://www.fftw.org/fftw-3.3.4.tar.gz
-tar xvzf fftw-3.3.4.tar.gz
-cd fftw-3.3.4
-./configure
-make
-sudo make install
-cd ../..
-rm -r prereq
-\end{verbatim}
-
-\subsubsection{GSL}
-
-The installer will then check for the presence of libraries for the GSL scientific library.  If they are not found, and the \texttt{--enable-auto-dependencies} flag is set, the following commands are issued on Linux hosts using \texttt{sudo}:
-
-\begin{table}[h]
-\begin{tabular}{r|l}
-\textbf{Manager} & \textbf{Command(s)} \\ 
-\hline
-\textbf{apt-get} & \texttt{apt-get -y install libgsl0} \\
-\rowcolor[HTML]{C0C0C0} 
-\textbf{yum} & \texttt{yum install gsl-devel}
-\end{tabular}
-\end{table}
-
+\item[\texttt{PETSC\_ARCH\_REAL}]\hfill \\
 \noindent
-On MacOS hosts, the GSL is downloaded and installed from source:
+The architecture name selected for the (default) \texttt{--with-scalar-type=real} \textbf{PETSc} build.  This generally defaults to \texttt{arch-\$OS-c-debug} or \texttt{arch-\$OS-c-debug} if the user does not specify, where \texttt{\$OS} represents the operating system.  It will appear as a subdirectory of \texttt{\$PETSC\_DIR} and \texttt{\$SLEPC\_DIR}.
 
-\begin{verbatim}
-mkdir prereq
-cd prereq
-curl -O ftp://ftp.gnu.org/gnu/gsl/gsl-1.16.tar.gz
-tar xvzf gsl-1.16.tar.gz
-cd gsl-1.16
-./configure --disable-shared --disable-dependency-tracking
-make
-sudo make install
-cd ../..
-rm -r prereq
-\end{verbatim}
+\item[\texttt{PETSC\_ARCH\_COMPLEX}]\hfill \\
+\noindent
+The architecture name selected for the \texttt{--with-scalar-type=complex} \textbf{PETSc} build.  This generally defaults to \texttt{arch-\$OS-c-complex} or \texttt{arch-\$OS-c-complex} if the user does not specify, where \texttt{\$OS} represents the operating system.  It will appear as a subdirectory of \texttt{\$PETSC\_DIR} and \texttt{\$SLEPC\_DIR}.
+\end{description}
+
+\noindent For example:
+
+\noindent \texttt{./configure --enable-autodependencies PETSC\_DIR=/code/petsc SLEPC\_DIR=/code/slepc/slepc-3.12.2 PETSC\_ARCH\_REAL=arch-linux-real PETSC\_ARCH\_COMPLEX=arch-linux-complex}
+
+\noindent To have the installer download and build \textbf{PETSc} and \textbf{SLEPc} local to \textbf{ncpaprop}, use approriate flags and options from the following:
+
+\begin{description}
+\item[\texttt{--with-localpetsc}]\hfill \\
+\noindent
+Download and build the current \texttt{maint} branch of \textbf{PETSc}.  Use of this flag also sets \texttt{--with-localslepc}.
+
+\item[\texttt{--with-localslepc}]\hfill \\
+\noindent
+Download and build the latest version of \textbf{SLEPc}, which at the time of release is \textbf{3.12.2}.
+
+\item[\texttt{--with-localpetscdebug}]\hfill \\
+\noindent
+Build the \texttt{debug} version of \textbf{PETSc} rather than the optimized version.
+
+\item[\texttt{--disable-localpetscmpi}]\hfill \\
+\noindent
+Build \textbf{PETSc} without MPI support.  If this flag is not set, the installer will attempt to use a system-installed MPI library.
+
+\item[\texttt{local\_petsc\_dir=VALUE}]\hfill \\
+\noindent
+Override the default \textbf{PETSc} installation location (defaults to \texttt{\$NCPAPROP\_ROOT/extern/petsc}).
+
+\item[\texttt{local\_slepc\_dir=VALUE}]\hfill \\
+\noindent
+Override the default \textbf{SLEPc} installation location (defaults to \texttt{\$NCPAPROP\_ROOT/extern/slepc/slepc-\$VERSION)}.
+
+\item[\texttt{local\_petsc\_arch\_real=VALUE}]\hfill \\
+\noindent
+Override the default \textbf{PETSc} real architecture name (defaults to \texttt{arch-\$OS-real} or \texttt{arch-\$OS-real}).
+
+\item[\texttt{local\_petsc\_arch\_complex=VALUE}]\hfill \\
+\noindent
+Override the default \textbf{PETSc} complex architecture name (defaults to \texttt{arch-\$OS-complex} or \texttt{arch-\$OS-complex}).
+
+\item[\texttt{local\_slepc\_version=VALUE}]\hfill \\
+\noindent
+Override the default \textbf{SLEPc} version number for determining the download filename.  This will generally be kept up-to-date by the \textbf{ncpaprop} maintainers, but is provided in the event of maintenance lag.
+\end{description}
+
+\noindent The installation process will check the system for the presence of BLAS libraries and MPI executables; whatever is not found will be automatically downloaded and installed locally by the \textbf{PETSc} installer.  This process is independent of the \texttt{--with-autodependencies} flag, which applies only to the direct prerequisites of \textbf{ncpaprop}.  If this is undesirable, \textbf{PETSc} and \textbf{SLEPc} should be installed manually.
 
 \subsubsection{Compilation}
 
@@ -172,17 +114,9 @@ Once the configuration script has successfully run, the package can be built sim
 
 \texttt{make}
 
-\noindent
-This will unpack and build the included versions of \textbf{PETSc} and \textbf{SLEPc} locally. This can take some time. It will then compile the libraries and executables that make up \textbf{ncpaprop}.  If the Fink \texttt{g++-4} is the selected compiler, the installer will try to guess the location of the Fink-installed standard C++ libraries (unless the \texttt{--disable-library-guess} flag was set).  The guess uses the reported \texttt{g++-4} version to calculate its path under the Fink path, so for example if Fink is installed in its default \texttt{/sw} location and \texttt{g++-4} is version 4.8.4, the guessed library path will be \texttt{/sw/lib/gcc4.8/lib}.
-
-One common failure mode is for the linker to attempt to use the standard C++ libraries from a different version than the compiler that was used.  This has been more common of a problem for MacOS systems than for Linux systems.  The problem is generally indicated by multiple error messages indicating that various common C++ library functions cannot be found. If this occurs, the user should re-run \texttt{./configure} with the \texttt{--disable-library-guess} flag and, if known, the 
-
-\texttt{LDFLAGS="-L/path/to/C++/libraries"} 
-
-\noindent
-instruction.
-
 \subsubsection{Testing}
+
+\noindent TEST SCRIPTS ARE STILL UNDER REVISION AND MAY NOT PROVIDE ACCURATE RESULTS
 
 To check proper functionality, a suite of test scripts have been written to compare the output of the simpler tools with that generated on the development machine.  This allows a sanity check to make sure that identical commands give identical results (within reasonable rounding errors).  To confirm that the compilation has been successful, run
 
@@ -252,4 +186,4 @@ make[1]: Leaving directory `/home/claus/ncpaprop/v1.3/test'
 
 \subsection{Typesetting this Manual}
 
-This manual was produced with LaTeX. The required \verb+.tex+ and graphics files are archived in the \textbf{ncpaprop} package in the \verb+manual+ directory. The main \verb+.tex+ file, \verb+NCPA_prop_manual.tex+, is contained in the subdirectory \verb+ncpaprop_run_manual_TeX+ alomg with a utitlity script \verb+runtex.sh+. Entering \verb+. runtex.sh+ produces the manual as a pdf file and moves it to the \verb+manual+ directory. Entering \verb+. runtex.sh bib+ produces the bibliography using bibtex. 
+This manual was produced with LaTeX. The required \verb+.tex+ and graphics files are archived in the \textbf{ncpaprop} package in the \verb+manual+ directory. The main \verb+.tex+ file, \verb+NCPA_prop_manual.tex+, is contained in the subdirectory \verb+ncpaprop_run_manual_TeX+ along with a utitlity script \verb+runtex.sh+. Entering \verb+. runtex.sh+ produces the manual as a pdf file and moves it to the \verb+manual+ directory. Entering \verb+. runtex.sh bib+ produces the bibliography using bibtex. 

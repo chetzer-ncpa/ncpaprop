@@ -1,1 +1,0 @@
-g++ -o wnlrt wnlrt.cpp  anyoption.cpp ProcessOptionsNRT.cpp nonlinearRay.cpp linearRay3DStrat.cpp  -lfftw3 -lgsl -lgslcblas

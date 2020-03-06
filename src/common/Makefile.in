@@ -1,26 +1,28 @@
+include @PETSC_INCLUDE_FILE_GENERIC@
+include @SLEPC_INCLUDE_FILE_GENERIC@
+
+
+# the following provides CCPPFLAGS, CLINKER, CC_INCLUDES, SLEPC_INCLUDE, SLEPC_LIB
+#include $(SLEPC_DIR)/conf/slepc_common
+
+INCPATHS = @INCLUDEFLAGS@ ${PETSC_CC_INCLUDES} ${SLEPC_CC_INCLUDES}
 SOURCES=anyoption.cpp binaryreader.cpp geographic.cpp util.cpp
-OBJECTS=$(SOURCES:.cpp=.o)
-
-# Set default values for compiler and flags
+OBJS=$(SOURCES:.cpp=.o)
 TARGET=libcommon.a
-LINKCOMMAND=ar curv 
 
-.PHONY: clean tidy common
 
-all: common
+all: $(TARGET)
 
-common: libcommon.a
+.PHONY: clean
 
-libcommon.a: $(OBJECTS)
+# link	
+$(TARGET): $(OBJS)
 	ar curv $@ $^
-	cp $@ ../../lib/
-
+	cp $@ ../../lib
+	
+# compile 
 %.o: %.cpp
-	@CXX@ @CXXFLAGS@ @INCLUDEFLAGS@ -o $@ $<
+	${CXX} ${INCPATHS} @CXXFLAGS@ ${CXX_FLAGS} @WARNINGFLAGS@ -o $@ $<
 
-clean:
-	rm -rf *.o $(TARGET) $(OBJECTS)
-
-tidy:
-	rm -rf *.o
-
+clean::
+	-$(RM) -rf $(OBJS) $(TARGET)
