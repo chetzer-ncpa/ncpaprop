@@ -9,6 +9,7 @@
 #include <cstring>
 #include <vector>
 #include <sstream>
+#include <cstdlib>
 #include "util.h"
 
 #define PI 3.141592653589793
