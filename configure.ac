@@ -699,3 +699,17 @@ AC_OUTPUT
 AC_MSG_NOTICE([
 	Configuration complete.  Run 'make' to finish building $PACKAGE_TARNAME.
 ])
+AC_MSG_NOTICE
+
+cat <<EOF
+
+Configuration complete.  Run 'make' to finish building $PACKAGE_TARNAME.
+
+Add the following lines to your .bashrc, .bash_profile, or .profile login file:
+
+export PETSC_DIR=${PETSC_DIR}
+export SLEPC_DIR=${SLEPC_DIR}
+export PETSC_ARCH_REAL=${PETSC_ARCH_REAL}
+export PETSC_ARCH_COMPLEX=${PETSC_ARCH_COMPLEX}
+
+EOF
