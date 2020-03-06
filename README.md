@@ -10,7 +10,7 @@ To link to an existing PETSc/SLEPc installation:
 
 To download and install PETSc and SLEPc locally to the ncpaprop installation:
 
-	./configure --with-localpetsc --with-autodependencies
+	./configure --with-localpetsc --enable-autodependencies
 
 See the manual for detailed information on additional parameters.
 
