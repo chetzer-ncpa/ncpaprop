@@ -78,3 +78,7 @@ Created options files for raytrace.2d and raytrace.3d
 
 1.3.16: 2015/10/09
 Minor tweak to error message in raytrace.2d and raytrace.3d
+
+1.4.0: 2020/03/06
+Revamped code to bring up to modern compiler standards.  Rewrote configure script to decouple from specific PETSc/SLEPc versions and instead download and install most recent versions.  Generally rewrote configure script from scratch.
+
