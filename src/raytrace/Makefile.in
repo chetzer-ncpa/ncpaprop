@@ -17,11 +17,11 @@ all: $(TARGET_2D) $(TARGET_3D)
 .PHONY: clean
 
 # link	
-$(TARGET_2D): $(OBJS_2D)
+$(TARGET_2D): $(OBJS_2D) @STATICLIBS@
 	${CXX_LINKER} -o $@ $^  @LDFLAGS@ @STATICLIBS@  @LIBS@
 	cp $@ ../../bin
 
-$(TARGET_3D): $(OBJS_3D)
+$(TARGET_3D): $(OBJS_3D) @STATICLIBS@
 	${CXX_LINKER} -o $@ $^  @LDFLAGS@ @STATICLIBS@  @LIBS@
 	cp $@ ../../bin
 	

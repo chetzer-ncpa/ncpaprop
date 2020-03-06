@@ -15,7 +15,7 @@ all: $(TARGET)
 .PHONY: clean
 
 # link	
-$(TARGET): $(OBJS)
+$(TARGET): $(OBJS) @STATICLIBS@
 	${CXX_LINKER} -o $@ $^  @LDFLAGS@ @STATICLIBS@  ${CXX_LINKER_FLAGS} ${SLEPC_LIB} ${PETSC_LIB} @LIBS@
 	cp $@ ../../bin
 	
