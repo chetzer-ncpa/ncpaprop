@@ -35,7 +35,7 @@ to set up the build environment and make sure all prerequisites are met.  Option
 \begin{description}
 \item[\texttt{--enable-autodependencies}]\hfill \\
 \noindent
-Attempt to download and install missing prerequisites automatically. Use this option only if installation in the default installation locations is satisfactory. The \textbf{ncpaprop} installer currently supports the \textbf{apt-get} and \textbf{yum} package managers on Linux.  MacOS users should install \textbf{FFTW} and \textbf{GSL} using their method of choice.
+Attempt to download and install missing prerequisites automatically. Use this option only if installation in the default installation locations is satisfactory. The \textbf{ncpaprop} installer currently supports the \textbf{apt-get} and \textbf{yum} package managers on Linux.  MacOS users should install \textbf{FFTW} and \textbf{GSL} using their method of choice.  Use of this option on an unsupported system will result in an error.
 
 \item[\texttt{LDFLAGS="-L/path/to/library"}]\hfill \\
 \noindent
@@ -55,11 +55,11 @@ The root directory of the \textbf{SLEPc} installation.
 
 \item[\texttt{PETSC\_ARCH\_REAL}]\hfill \\
 \noindent
-The architecture name selected for the (default) \texttt{--with-scalar-type=real} \textbf{PETSc} build.  This generally defaults to \texttt{arch-\$OS-c-debug} or \texttt{arch-\$OS-c-debug} if the user does not specify, where \texttt{\$OS} represents the operating system.  It will appear as a subdirectory of \texttt{\$PETSC\_DIR} and \texttt{\$SLEPC\_DIR}.
+The architecture name selected for the (default) \texttt{--with-scalar-type=real} \textbf{PETSc} build.  This frequently defaults to \texttt{arch-\$OS-c-debug} or \texttt{arch-\$OS-c-debug} if the user does not specify, where \texttt{\$OS} represents the operating system, and will appear as a subdirectory of \texttt{\$PETSC\_DIR} and \texttt{\$SLEPC\_DIR}.
 
 \item[\texttt{PETSC\_ARCH\_COMPLEX}]\hfill \\
 \noindent
-The architecture name selected for the \texttt{--with-scalar-type=complex} \textbf{PETSc} build.  This generally defaults to \texttt{arch-\$OS-c-complex} or \texttt{arch-\$OS-c-complex} if the user does not specify, where \texttt{\$OS} represents the operating system.  It will appear as a subdirectory of \texttt{\$PETSC\_DIR} and \texttt{\$SLEPC\_DIR}.
+The architecture name selected for the \texttt{--with-scalar-type=complex} \textbf{PETSc} build.  This frequently defaults to \texttt{arch-\$OS-c-complex} or \texttt{arch-\$OS-c-complex} if the user does not specify, where \texttt{\$OS} represents the operating system, and will appear as a subdirectory of \texttt{\$PETSC\_DIR} and \texttt{\$SLEPC\_DIR}.
 \end{description}
 
 \noindent For example:

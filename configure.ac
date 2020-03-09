@@ -15,6 +15,7 @@ default_petsc_build_dir="${abs_builddir}/extern/petsc"
 default_slepc_build_dir="${abs_builddir}/extern/slepc"
 default_slepc_version="3.12.2"
 slepc_url_base="https://slepc.upv.es/download/distrib"
+warning_compiler_flags="-Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas"
 
 # Need OS name for automatic default architecture name
 os_type=$(uname -s | awk '{print tolower($0)}')
@@ -37,12 +38,13 @@ AC_ARG_WITH([localpetscdebug],
 AC_ARG_ENABLE([localpetscmpi],
 	AS_HELP_STRING([--disable-localpetscmpi],[Build PETSc/SLEPc without MPI support])
 )
-#AC_ARG_WITH([localpetscmpi],
-#	AS_HELP_STRING([--with-localpetscmpi],[Download and build OpenMPI libraries as part of the PETSc installation process, rather than looking for system-installed libraries])
-#)
-#AC_ARG_WITH([localpetscfblas],
-#	AS_HELP_STRING([--with-localpetscfblas],[Download and build F2CBLAS-LAPACK libraries as part of the PETSc installation process, rather than looking for system-installed libraries.])
-#)
+AC_ARG_ENABLE([autodependencies],
+	AS_HELP_STRING([--enable-autodependencies],[Attempt to install dependencies using the default package manager (Linux only).  Currently supported package managers: apt, yum])
+)
+AC_ARG_ENABLE([compilerwarnings],
+	AS_HELP_STRING([--enable-compilerwarnings],[Don't suppress additional compiler warnings (development only)])
+)
+
 
 # Environmental variables
 AC_ARG_VAR(local_petsc_dir,[Override default local PETSc installation directory (${default_petsc_build_dir})])
@@ -52,13 +54,15 @@ AC_ARG_VAR(local_petsc_arch_complex,[Override automatic PETSc complex architectu
 AC_ARG_VAR(local_slepc_version,[Override automatic (or outdated) SLEPc version number (${default_slepc_version})])
 
 
-AC_MSG_CHECKING([operating system])
 AC_CANONICAL_HOST
+AC_MSG_CHECKING([operating system])
 AC_MSG_RESULT([$host_os])
 # check host OS for support
 case $host_os in
 	darwin* )
-		# currently nothing special to do for macs
+		AS_IF([test "x$enable_autodependencies" = "xyes"],[
+			AC_MSG_ERROR([Option --enable-autodependencies is not supported on MacOS.])
+		])
 		;;
 	linux* )
 		# For Linux, need to know if apt-get or yum is installed
@@ -66,11 +70,14 @@ case $host_os in
 		AC_MSG_NOTICE([Detected package manager = ${default_package_manager}])
 		
 		AS_IF([test "x${default_package_manager}" != "x"],[
-			AC_ARG_ENABLE([autodependencies],
-				AS_HELP_STRING([--enable-autodependencies],[Attempt to install dependencies using ${default_package_manager}]))
+			AS_IF([test "x$enable_autodependencies" = "xyes"],[
+				AC_MSG_ERROR([No supported package manager detected.  Option --enable-autodependencies supports apt-get and yum.])
+			])
+		])
+		AS_IF([test "x${enable_compilerwarnings}" != "xyes"],[
+			warning_compiler_flags="${warning_compiler_flags} -Wno-unused-but-set-variable -Wno-maybe-uninitialized -Wno-unused-result"
 		])
 		
-
 		;;
 	*)
 		AC_MSG_ERROR([Your platform is not currently supported])
@@ -152,44 +159,6 @@ AS_IF([test "x$CC" = "x"],[
 ])
 
 AC_PROG_CPP
-
-# If we want to auto-install fblas-lapack, we need a Fortran compiler
-#AS_IF([test "x${with_localpetsc}" = "xyes"],[
-#	AS_IF([test "x${with_localpetscfblas}" = "xyes"],[
-#		AC_PROG_FC
-#		AS_IF([test "x${FC}" = "x"],[
-#			AC_MSG_NOTICE([Local installation of fblas-lapack requires a Fortran compiler.])
-#			AS_IF([test "x$enable_autodependencies" = "xyes"],[
-#				AS_CASE([$host_os],
-#					[darwin*],[
-#						AC_MSG_ERROR([Auto dependencies not available for MacOS.  Install gfortran using your package manager of choice.])
-#					],
-#					[linux*],[
-#						AS_CASE([$default_package_manager],
-#							[*apt-get],[
-#								sudo $default_package_manager -y install gfortran
-#							],
-#							[*yum],[
-#								sudo $default_package_manager -y install gcc-gfortran
-#							],[
-#								AC_MSG_ERROR([No supported package manager found (apt and yum currently supported)])
-#							]
-#						)
-#				])
-#				unset ac_cv_prog_FC
-#				unset ac_cv_fc_compiler_gnu
-#				unset ac_cv_prog_fc_g
-#				AC_PROG_FC
-#				AS_IF([test "x${FC}" = "x"],[
-#					AC_MSG_ERROR("Unable to install Fortran compiler.  Please install manually and retry.")
-#				])
-#			],[
-#				AC_MSG_ERROR([Failed to detect a Fortran compiler.  Please install the appropriate package or compile from source.])
-#			])
-#		])
-#	])
-#])
-dnl AC_PROG_INSTALL
 
 # Checks for libraries.
 AC_CHECK_LIB([m],[cos],,[AC_MSG_ERROR([Missing M library])])
@@ -662,7 +631,7 @@ AC_CHECK_FILE( ${SLEPC_DIR}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables,
 # Set output variables to propagate into Makefiles
 AC_SUBST([INCLUDEFLAGS],"-I. -I../common -I../atmosphere -I/usr/local/include -I/usr/include")
 AC_SUBST([LIBS],"-lgsl -lgslcblas -lm -lfftw3")
-AC_SUBST([WARNINGFLAGS],"-Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas")
+AC_SUBST([WARNINGFLAGS],${warning_compiler_flags})
 AC_SUBST([CXXFLAGS], "-fpic -c -Wall")
 LDFLAGS="${LDFLAGS} -L/usr/lib"
 AC_SUBST([STATICLIBS],"../../lib/libatmosphere.a ../../lib/libcommon.a")
