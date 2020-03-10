@@ -2653,7 +2653,7 @@ done
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: Detected package manager = ${default_package_manager}" >&5
 $as_echo "$as_me: Detected package manager = ${default_package_manager}" >&6;}
 
-		if test "x${default_package_manager}" != "x"; then :
+		if test "x${default_package_manager}" = "x"; then :
 
 			if test "x$enable_autodependencies" = "xyes"; then :
 
@@ -2664,7 +2664,7 @@ fi
 fi
 		if test "x${enable_compilerwarnings}" != "xyes"; then :
 
-			warning_compiler_flags="${warning_compiler_flags} -Wno-unused-but-set-variable -Wno-maybe-uninitialized"
+			warning_compiler_flags="${warning_compiler_flags} -Wno-unused-but-set-variable -Wno-maybe-uninitialized -Wno-unused-result"
 
 fi
 
