@@ -69,7 +69,7 @@ case $host_os in
 		AC_CHECK_PROGS([default_package_manager],[apt-get yum],[])
 		AC_MSG_NOTICE([Detected package manager = ${default_package_manager}])
 		
-		AS_IF([test "x${default_package_manager}" != "x"],[
+		AS_IF([test "x${default_package_manager}" = "x"],[
 			AS_IF([test "x$enable_autodependencies" = "xyes"],[
 				AC_MSG_ERROR([No supported package manager detected.  Option --enable-autodependencies supports apt-get and yum.])
 			])
