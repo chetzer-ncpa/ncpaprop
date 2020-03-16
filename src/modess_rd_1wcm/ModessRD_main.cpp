@@ -77,6 +77,10 @@ int main( int argc, char **argv ) {
   wind_units      = oNB->getWindUnits();
   //gnd_imp_model  = oNB->getGnd_imp_model(); 
   atm_profile_dir = oNB->getAtm_profile_dir();
+  bool inMPS = 0;
+  if ( strcmp( wind_units.c_str(), "mpersec" ) == 0) {
+    inMPS = 1;
+  }
     
   
   int    Nz_grid        = oNB->getNz_grid();        // number of points on the z-grid [20000]
@@ -154,16 +158,12 @@ int main( int argc, char **argv ) {
   // Process Region 1 - r in [0, R1]
   // 
   if (!atm_profile_dir.empty()) { // get ascii 1D profiles from files in directory 'atm_profile_dir'
-      atm_profile = get_RngDepndProfiles_ascii(1, atmosfileorder, skiplines, atm_profile_dir, "profile");
+      atm_profile = get_RngDepndProfiles_ascii(1, atmosfileorder, skiplines, atm_profile_dir, "profile", inMPS );
   }
   else if (filetype==1){ // get profiles from the .env file
       atm_profile = get_RngDepnd_profile(atmosfile, 0.0); // the very first profile
   }
   else if (filetype==0) { // get a single ascii file - this will just force a range-independent run
-    bool inMPS = 0;
-    if ( strcmp( wind_units.c_str(), "mpersec" ) == 0) {
-      inMPS = 1;
-    }
     atm_profile = new SampledProfile( atmosfile, atmosfileorder.c_str(), skiplines, inMPS );
   }
   else {
@@ -311,13 +311,13 @@ int main( int argc, char **argv ) {
       printf("\nRegion %d (%g to %g km)\n", i, Rv[i-1]/1000.0, Rv[i]/1000.0);
       
       if (!atm_profile_dir.empty()) { // get ascii 1D profiles from files in directory 'atm_profile_dir'
-          atm_profile = get_RngDepndProfiles_ascii(i, atmosfileorder, skiplines, atm_profile_dir, "profile");
+          atm_profile = get_RngDepndProfiles_ascii(i, atmosfileorder, skiplines, atm_profile_dir, "profile", inMPS );
       }
       else if (filetype==1) { // get profiles from the .env file
           atm_profile = get_RngDepnd_profile(atmosfile, RR); //get left-closest profile in the .env file
       }
       else if (filetype==0) { // get a single ascii file - this will just force a range-independent run
-          atm_profile = new SampledProfile( atmosfile, atmosfileorder.c_str(), skiplines );
+          atm_profile = new SampledProfile( atmosfile, atmosfileorder.c_str(), skiplines, inMPS );
       }
       else {
           throw invalid_argument( "Unrecognized atmospheric file type: try --g2senvfile, --use_1D_profiles_from_dir or --atmosfile" );

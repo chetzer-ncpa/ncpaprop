@@ -992,7 +992,7 @@ int NCPA::SolveModNB::getModalTrace(\
   windz    = zw[top+1]*sin(azi_rad) + mw[top+1]*cos(azi_rad);
   cefftop = cz + windz;
   *k_min  = omega/cefftop;
-  
+
   // check if duct is not formed and modes exist
   if (cefftop<ceff_grnd) {
       printf(" --------------------------------------------------------------\n");

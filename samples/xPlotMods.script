@@ -22,7 +22,7 @@ then
   gnuplot -persist \
     -e "set grid; show grid; set xlabel 'Range [km]'; set ylabel 'TL [dB]';" \
     -e "set title 'ModessRD1WCM: 1D transmission loss; freq = $2 Hz';" \
-    -e "plot './tloss_1d.lossless.nm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 3 title 'lossless', './tloss_1d.nm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 1 title 'lossy';"
+    -e "plot './tloss_rd_1d.lossless.nm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 3 title 'lossless', './tloss_rd_1d.nm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 1 title 'lossy';"
    
   echo $1 $2
 fi

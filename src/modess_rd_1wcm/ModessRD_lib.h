@@ -13,7 +13,7 @@
 
 NCPA::SampledProfile * get_RngDepnd_profile(std::string env_file, double R_meters);
 
-NCPA::SampledProfile * get_RngDepndProfiles_ascii(int N, std::string atmosfileorder, int skiplines, std::string dirname, std::string pattern);
+NCPA::SampledProfile * get_RngDepndProfiles_ascii(int N, std::string atmosfileorder, int skiplines, std::string dirname, std::string pattern, bool inMPS);
 
 //int saveSampledProfile(std::string filename, NCPA::SampledProfile *p);
 
