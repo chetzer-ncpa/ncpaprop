@@ -264,7 +264,7 @@ int getFile_list(std::string dir, std::list<string> &files, std::string pattern)
 
 NCPA::SampledProfile * get_RngDepndProfiles_ascii( \
               int N, string atmosfileorder, int skiplines, \
-              string dirname, string pattern) {
+              string dirname, string pattern, bool inMPS ) {
               
 // get the Nth profile stored in a file named "profile000M" residing in a specified
 // directory. If N is greater than the number of files found then the last file
@@ -306,7 +306,7 @@ NCPA::SampledProfile * get_RngDepndProfiles_ascii( \
   cout << "Making SampledProfile object from " << atmosfile << endl;
 
   SampledProfile *atm_prof;
-  atm_prof = new SampledProfile(atmosfile, atmosfileorder.c_str(), skiplines);
+  atm_prof = new SampledProfile(atmosfile, atmosfileorder.c_str(), skiplines, inMPS);
 
   return atm_prof;
 }
