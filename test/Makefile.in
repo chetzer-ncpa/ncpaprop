@@ -24,11 +24,13 @@ testlong: calculate.long compare.long
 
 .PHONY: test all testclean calculate compare calculate.raytrace.2d calculate.raytrace.3d calculate.modess calculate.cmodess calculate.modessrd1wcm calculate.wmod calculate.pape calculate.modbb calculate.cmodbb compare.raytrace.2d compare.raytrace.3d compare.modess compare.cmodess compare.modessrd1wcm compare.wmod compare.pape compare.modbb compare.cmodbb testlong compare.long calculate.long cleanlog
 
-calculate: calculate.raytrace.2d calculate.raytrace.3d calculate.modess calculate.cmodess calculate.modessrd1wcm calculate.wmod
+#calculate: calculate.raytrace.2d calculate.raytrace.3d calculate.modess calculate.cmodess calculate.modessrd1wcm calculate.wmod
+calculate: calculate.modess calculate.cmodess calculate.modessrd1wcm calculate.wmod
 
 calculate.long: calculate.pape calculate.modbb calculate.cmodbb
 
-compare: compare.raytrace.2d compare.raytrace.3d compare.modess compare.cmodess compare.modessrd1wcm compare.wmod
+compare: compare.modess compare.cmodess compare.modessrd1wcm compare.wmod
+#compare: compare.raytrace.2d compare.raytrace.3d compare.modess compare.cmodess compare.modessrd1wcm compare.wmod
 
 compare.long: compare.pape compare.modbb compare.cmodbb
 
