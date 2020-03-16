@@ -659,9 +659,9 @@ AC_CONFIG_FILES([
 		src/cmodbb/Makefile
 		src/tdpape/Makefile
 		src/wnlrt/Makefile
+		test/Makefile
 ])
 
-#		test/Makefile
 
 AC_OUTPUT
 
