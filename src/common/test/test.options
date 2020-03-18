@@ -1,0 +1,11 @@
+#testval : 15
+atmosfile = atmos.dat
+
+
+testfloat : 12.55
+flagone
+#flagtwo
+#flagthree
+
+int_positive: 1
+int_not_negative: 0
