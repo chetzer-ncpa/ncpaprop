@@ -484,9 +484,10 @@ AS_IF([test "x${with_localslepc}" = "xyes"],[
 		[slepc_version=$default_slepc_version],
 		[slepc_version=$local_slepc_version]
 	)
-
+	slepc_tarfile="slepc-${slepc_version}.tar.gz"
 	AC_MSG_NOTICE([slepc_build_dir = ${slepc_build_dir}])
 	AC_MSG_NOTICE([slepc_version = ${slepc_version}])
+	AC_MSG_NOTICE([slepc_tarfile = ${slepc_tarfile}])
 
 	# check for extra configuration options.
 	slepc_extra_config=""
@@ -512,9 +513,13 @@ AS_IF([test "x${with_localslepc}" = "xyes"],[
 			AC_MSG_RESULT([yes])
 		],[
 			AC_MSG_RESULT([no, installing])
-			AC_CHECK_FILE([slepc-${slepc_version}.tar.gz],,[
-				slepc_url="${slepc_url_base}/slepc-${slepc_version}.tar.gz"
-				$downloader ${slepc_url}
+			AC_CHECK_FILE([${slepc_tarfile}],,[
+				slepc_url="${slepc_url_base}/${slepc_tarfile}"
+				downloader_flags=""
+				AS_IF([test "$xdownloader" = "xcurl"],[
+					downloader_flags="--output ${slepc_tarfile}"
+				])
+				$downloader ${slepc_url} ${downloader_flags}
 				AS_IF([test $? != 0],[
 					AC_MSG_ERROR([Error downloading ${slepc_url}, check internet connection and version number])
 				])

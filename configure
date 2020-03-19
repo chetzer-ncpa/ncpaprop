@@ -8408,11 +8408,13 @@ else
   slepc_version=$local_slepc_version
 
 fi
-
+	slepc_tarfile="slepc-${slepc_version}.tar.gz"
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: slepc_build_dir = ${slepc_build_dir}" >&5
 $as_echo "$as_me: slepc_build_dir = ${slepc_build_dir}" >&6;}
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: slepc_version = ${slepc_version}" >&5
 $as_echo "$as_me: slepc_version = ${slepc_version}" >&6;}
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: slepc_tarfile = ${slepc_tarfile}" >&5
+$as_echo "$as_me: slepc_tarfile = ${slepc_tarfile}" >&6;}
 
 	# check for extra configuration options.
 	slepc_extra_config=""
@@ -8454,15 +8456,15 @@ else
 
 			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no, installing" >&5
 $as_echo "no, installing" >&6; }
-			as_ac_File=`$as_echo "ac_cv_file_slepc-${slepc_version}.tar.gz" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for slepc-${slepc_version}.tar.gz" >&5
-$as_echo_n "checking for slepc-${slepc_version}.tar.gz... " >&6; }
+			as_ac_File=`$as_echo "ac_cv_file_${slepc_tarfile}" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${slepc_tarfile}" >&5
+$as_echo_n "checking for ${slepc_tarfile}... " >&6; }
 if eval \${$as_ac_File+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   test "$cross_compiling" = yes &&
   as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "slepc-${slepc_version}.tar.gz"; then
+if test -r "${slepc_tarfile}"; then
   eval "$as_ac_File=yes"
 else
   eval "$as_ac_File=no"
@@ -8475,8 +8477,14 @@ if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
 
 else
 
-				slepc_url="${slepc_url_base}/slepc-${slepc_version}.tar.gz"
-				$downloader ${slepc_url}
+				slepc_url="${slepc_url_base}/${slepc_tarfile}"
+				downloader_flags=""
+				if test "$xdownloader" = "xcurl"; then :
+
+					downloader_flags="--output ${slepc_tarfile}"
+
+fi
+				$downloader ${slepc_url} ${downloader_flags}
 				if test $? != 0; then :
 
 					as_fn_error $? "Error downloading ${slepc_url}, check internet connection and version number" "$LINENO" 5
