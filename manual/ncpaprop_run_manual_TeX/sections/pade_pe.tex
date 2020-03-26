@@ -214,7 +214,7 @@ Examples to run with various options (from the 'samples' directory):
                 --atmosfileorder zuvwtdp --skiplines 1 --azimuth 90 --freq 0.1 
                 --sourceheight_km 0 --receiverheight_km 0 --maxheight_km 180 
                 --starter_type gaussian --n_pade 6 --maxrange_km 1000  
-                --use_profile_ranges_km 0_20_60_400
+                --use_profile_ranges_km 0_20_60_400 --write_2D_TLoss
 \end{verbatim}
 
 The functionality of {\bf pape} is much like that of {\bf ModessRD1WCM}, see section~\ref{sec:running modbb}. In particular, the input of atmospheric profiles is much the same, with the exception that {\bf pape} has a flag for the use of the NCPA toy model. Further, if a G2S {\tt .env} file is used as input the set of atmospheric profiles are read in order from the {\tt .env} file itself; \verb+--use_profile_ranges_km+ and \verb+--use_profiles_at_steps_km+ have no effect. The two programs share the same options and flags with some exceptions. Like all PE models, {\bf pape} requires the use of a starter to simulate a near field source function. {\bf pape} supports the use of a Gaussian starter, a Greens function starter and a modal starter. The Modal starter requires that there be a modal starter file that can be created with {\bf Modess}. The option \verb+--rng_step+ sets the step size in the PE's marching scheme in fractions of a wavelength. One may use \verb+--n_pade+ to set the order of the Pade approximation to use. In addition, to run {\bf pape} without attenuation requires the use of the flag \verb+--do_lossless+. 
@@ -227,11 +227,11 @@ The functionality of {\bf pape} is much like that of {\bf ModessRD1WCM}, see sec
 \includegraphics[scale=0.60]{figs/pade_ex1_1d}
 \includegraphics[scale=0.45,trim = 20 20 110 140,clip]{figs/pade_ex1_2d.png}
 \end{center}
-\caption{1D transmission loss magnitude at 0.3 Hz obtained with {\bf pade} for eastward ground-to-ground propagation in the range dependant profiles provided by a G2S {\tt .env} binary file. Shown are the 1D lossless transmission loss magnitude and lossy transmission loss magnitude and the 2D lossy transmission loss magnitude.}
+\caption{1D transmission loss magnitude at 0.3 Hz obtained with {\bf pape} for eastward ground-to-ground propagation in the range dependant profiles provided by a G2S {\tt .env} binary file. Shown are the 1D lossless transmission loss magnitude and lossy transmission loss magnitude and the 2D lossy transmission loss magnitude.}
 \label{fig: pade ex1}
 \end{figure}
 
-The following example illustrates the functionality and inputs of ModessRD1WCM using a user-provided G2S {\tt .env} file. 
+The following example illustrates the functionality and inputs of {\bf pape} using a user-provided G2S {\tt .env} file. 
 \begin{verbatim}
     ../bin/pape --g2senvfile g2sgcp2011012606L.jordan.env 
                 --atmosfileorder zuvwtdp --skiplines 0 --azimuth 90 
@@ -246,13 +246,13 @@ The resulting data files are plotted in Figure \ref{fig: pade ex1}.
 \includegraphics[scale=0.60]{figs/pade_ex2_1d}
 \includegraphics[scale=0.45,trim = 20 20 110 140,clip]{figs/pade_ex2_2d.png}
 \end{center}
-\caption{1D transmission loss magnitude at 0.1 Hz obtained with {\bf pade} for eastward ground-to-ground propagation in the range dependant profiles provided in the directory {\tt profiles}. Shown are the 1D lossless transmission loss magnitude and lossy transmission loss magnitude and the 2D lossy transmission loss magnitude.}
+\caption{1D transmission loss magnitude at 0.1 Hz obtained with {\bf pape} for eastward ground-to-ground propagation in the range dependant profiles provided in the directory {\tt profiles}. Shown are the 1D lossless transmission loss magnitude and lossy transmission loss magnitude and the 2D lossy transmission loss magnitude.}
 \label{fig: pade ex2}
 \end{figure}
 
-The following example illustrates the functionality and inputs of ModessRD1WCM using user-provided range dependant atmospheric profiles provided by a directory of one-dimensional ascii files. 
+The following example illustrates the functionality and inputs of {\bf pape} using user-provided range dependant atmospheric profiles provided by a directory of one-dimensional ascii files. 
 \begin{verbatim}
-    ../bin/pape --use_1D_profiles_from_dir profiles 
+    ../bin/pape --use_1D_profiles_from_dir profiles --write_2D_TLoss
                 --atmosfileorder zuvwtdp --skiplines 1 --azimuth 90 --freq 0.1 
                 --sourceheight_km 0 --receiverheight_km 0 --maxheight_km 180 
                 --starter_type gaussian --n_pade 6 --maxrange_km 1000  

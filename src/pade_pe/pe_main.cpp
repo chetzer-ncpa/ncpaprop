@@ -962,7 +962,13 @@ void load_NthProfile(int J, string atmosfile, string atmosfileorder, int skiplin
   // use the SampledProfile object for convenience - to allow for any column order
   int i;
   NCPA::SampledProfile *p;
-  p = new SampledProfile(atmosfile, atmosfileorder.c_str(), skiplines);
+
+  bool inMPS = 0;
+  if (strcmp( wind_units.c_str(), "mpersec" ) == 0) {
+    inMPS = 1;
+  }
+
+  p = new SampledProfile(atmosfile, atmosfileorder.c_str(), skiplines, inMPS );
 
   atm_nz = p->nz();
   
@@ -1703,13 +1709,14 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
   opt->addUsage( "" );  
   opt->addUsage( "    ../bin/pape --use_1D_profiles_from_dir ../samples/profiles --atmosfileorder zuvwtdp --skiplines 1 --azimuth 90 --freq 0.1 --sourceheight_km 0 --receiverheight_km 0 --maxheight_km 180 --starter_type gaussian --n_pade 6 --maxrange_km 1000  --use_profiles_at_steps_km 20" );
   opt->addUsage( "" );
-  opt->addUsage( "    ../bin/pape --use_1D_profiles_from_dir ../samples/profiles --atmosfileorder zuvwtdp --skiplines 1 --azimuth 90 --freq 0.1 --sourceheight_km 0 --receiverheight_km 0 --maxheight_km 180 --starter_type gaussian --n_pade 6 --maxrange_km 1000  --use_profile_ranges_km 0_20_60_400" );  
+  opt->addUsage( "    ../bin/pape --use_1D_profiles_from_dir ../samples/profiles --atmosfileorder zuvwtdp --skiplines 1 --azimuth 90 --freq 0.1 --sourceheight_km 0 --receiverheight_km 0 --maxheight_km 180 --starter_type gaussian --n_pade 6 --maxrange_km 1000  --use_profile_ranges_km 0_20_60_400 --write_2D_TLoss" );  
   opt->addUsage( "" );
   opt->addUsage( "--------------------------------------------------------------------" );  
   opt->addUsage( "Example to plot 1D TL with gnuplot:" );
   opt->addUsage( " plot './tloss_1d.pe' using 1:(10*log10($2**2 + $3**2))" );  
   opt->addUsage( "" );
   opt->addUsage( "Example to plot 2D TL with gnuplot:" );
+  opt->addUsage( " set pm3d map")
   opt->addUsage( " set cbrange [-200:-100]" );
   opt->addUsage( " splot './tloss_2d.pe' using 1:2:(20*log10(sqrt($3**2 + $4**2)))" );  
   opt->addUsage( "" );   
