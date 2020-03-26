@@ -1716,7 +1716,7 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
   opt->addUsage( " plot './tloss_1d.pe' using 1:(10*log10($2**2 + $3**2))" );  
   opt->addUsage( "" );
   opt->addUsage( "Example to plot 2D TL with gnuplot:" );
-  opt->addUsage( " set pm3d map")
+  opt->addUsage( " set pm3d map" );
   opt->addUsage( " set cbrange [-200:-100]" );
   opt->addUsage( " splot './tloss_2d.pe' using 1:2:(20*log10(sqrt($3**2 + $4**2)))" );  
   opt->addUsage( "" );   
