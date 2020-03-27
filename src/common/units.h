@@ -42,13 +42,10 @@ Examples:
 
 To add a unit and its associated conversions, the following should be done:
 1. Add symbol(s) to the units_t enum in this file
-2. Add cases to toString() and toStr() functions.
-3. Add all appropriate inline static double conversion functions to the 
-   protected section of the UnitConverter class in this file
-4. Map the conversion functions to the appropriate unit pairs in the body 
-   of the UnitConverter constructor in units.cpp
-5. Add units full and abbreviated names to toString() and toStr() functions
-   in units.cpp.
+2. In units.cpp, add:
+	* Unit conversion lambda functions to map_ variable
+	* String to/from enum conversions to string_to_enum_map_, enum_to_string_map_, and 
+	  enum_to_abbr_map_ variables
 */
 
 #ifndef NCPAPROP_UNITS_H_INCLUDED
@@ -56,6 +53,7 @@ To add a unit and its associated conversions, the following should be done:
 
 #include <map>
 #include <utility>
+#include <iostream>
 
 #ifndef PI
 #define PI 3.141592653589793
@@ -92,30 +90,14 @@ namespace NCPA {
 		UNITS_ANGLE_DEGREES,					/**< Angles in degrees */
 		UNITS_ANGLE_RADIANS					/**< Angles in radians */
 	} units_t;
-	
-	/**
-	 * Returns the string identification of the units type.
-	 *
-	 * @param type		The units constant to translate
-	 * @return		The string identifying the constant
-	 * @throws out_of_bounds if the constant is not recognized
-	 */
-	std::string toString( units_t type );
-	
-	/**
-	 * Returns the abbreviated string identification of the units type.
-	 *
-	 * @param type		The units constant to translate
-	 * @return		The abbreviation identifying the constant
-	 * @throws out_of_bounds if the constant is not recognized
-	 */
-	std::string toStr( units_t type );
 }
 
 
 typedef std::pair< NCPA::units_t, NCPA::units_t > conversion_pair;
 typedef double (*conversion_function)(double);
-typedef std::map< conversion_pair, conversion_function > conversion_map;
+typedef std::map< conversion_pair, conversion_function > conversion_map_t;
+typedef std::map< std::string, NCPA::units_t > string_to_units_map_t;
+typedef std::map< NCPA::units_t, std::string > units_to_string_map_t;
 
 namespace NCPA {
 	
@@ -137,27 +119,63 @@ namespace NCPA {
 		 */
 		static void convert( const double *in, unsigned int nSamples, 
 			units_t type_in, units_t type_out, double *out );
-		static void convert_first_derivative( const double *in, unsigned int nSamples,
-			units_t type_in, units_t type_out, double *out );
-		static void convert_second_derivative( const double *in, unsigned int nSamples,
-			units_t type_in, units_t type_out, double *out );
+		// static void convert_first_derivative( const double *in, unsigned int nSamples,
+		// 	units_t type_in, units_t type_out, double *out );
+		// static void convert_second_derivative( const double *in, unsigned int nSamples,
+		// 	units_t type_in, units_t type_out, double *out );
 	
 		/**
 		 * Convert a single double value from one unit to another.
 		 * @param in		A double value to convert.
 		 * @param type_in	The units to convert from
 		 * @param type_out	The units to convert to
-		 * @return 		The converted value
+		 * @return 			The converted value
 		 * @throws out_of_range	if an undefined conversion is requested.
 		 */
 		static double convert( double in, units_t type_in, units_t type_out );
-		static double convert_first_derivative( double in, units_t type_in, units_t type_out );
-		static double convert_second_derivative( double in, units_t type_in, units_t type_out );
+		// static double convert_first_derivative( double in, units_t type_in, units_t type_out );
+		// static double convert_second_derivative( double in, units_t type_in, units_t type_out );
 		
+		/**
+		 * Returns the string identification of the units type.
+		 *
+		 * @param type	The units constant to translate
+		 * @return		The string identifying the constant
+		 * @throws out_of_bounds if the constant is not recognized
+		 */
+		static std::string toString( units_t type );
+		
+		/**
+		 * Returns the abbreviated string identification of the units type.
+		 *
+		 * @param type	The units constant to translate
+		 * @return		The abbreviation identifying the constant
+		 * @throws out_of_bounds if the constant is not recognized
+		 */
+		static std::string toStr( units_t type );
+
+		/**
+		 * Returns the units_t enum value associated with the supplied string.
+		 *
+		 * @param s 	The string to attempt to parse
+		 * @return 		The enum value associated with the string
+		 * @throws out_of_bounds if the string is not recognized
+		 */
+		static units_t fromString( std::string s );
+
+		/**
+		 * Prints a list of the recognized strings that can be translated to units_t 
+		 * values.
+		 *
+		 * @param o 	The ostream object to print the list to
+		 */
+		static void list_recognized_strings( std::ostream& o = std::cout );
 	
 	protected:
 		
-		static conversion_map map_, map_d1_, map_d2_; 
+		static conversion_map_t map_;    
+		static string_to_units_map_t string_to_enum_map_;
+		static units_to_string_map_t enum_to_string_map_, enum_to_abbr_map_;
 
 		/**
 		 * Generates a pair object associating the two units to be converted.
@@ -172,98 +190,98 @@ namespace NCPA {
 
 		// These functions are for specific unit conversions 
 		// Fahrenheit to Celsius
-		inline static double convert_temperature_f_to_c_( double in ) { return ( in - 32.0 ) * 5.0 / 9.0; }
-		inline static double convert_temperature_f_to_c_deriv_( double in ) { return in * 5.0 / 9.0; }    // derivatives ignore constant
-		inline static double convert_temperature_f_to_c_deriv2_( double in ) { return in * 5.0 / 9.0; }    // derivatives ignore constant
+		// inline static double convert_temperature_f_to_c_( double in ) { return ( in - 32.0 ) * 5.0 / 9.0; }
+		// inline static double convert_temperature_f_to_c_deriv_( double in ) { return in * 5.0 / 9.0; }    // derivatives ignore constant
+		// inline static double convert_temperature_f_to_c_deriv2_( double in ) { return in * 5.0 / 9.0; }    // derivatives ignore constant
 
-		// Fahrenheit to Kelvin
-		inline static double convert_temperature_f_to_k_( double in ) { return convert_temperature_c_to_k_( convert_temperature_f_to_c_( in ) ); }
-		inline static double convert_temperature_f_to_k_deriv_( double in ) { return in * 5.0 / 9.0; }
-		inline static double convert_temperature_f_to_k_deriv2_( double in ) { return in * 5.0 / 9.0; }
+		// // Fahrenheit to Kelvin
+		// inline static double convert_temperature_f_to_k_( double in ) { return convert_temperature_c_to_k_( convert_temperature_f_to_c_( in ) ); }
+		// inline static double convert_temperature_f_to_k_deriv_( double in ) { return in * 5.0 / 9.0; }
+		// inline static double convert_temperature_f_to_k_deriv2_( double in ) { return in * 5.0 / 9.0; }
 
-		// Celsius to Fahrenheit
-		inline static double convert_temperature_c_to_f_( double in ) { return (in * 9.0 / 5.0 ) + 32.0; }
-		inline static double convert_temperature_c_to_f_deriv_( double in ) { return in * 9.0 / 5.0; }
-		inline static double convert_temperature_c_to_f_deriv2_( double in ) { return in * 9.0 / 5.0; }
+		// // Celsius to Fahrenheit
+		// inline static double convert_temperature_c_to_f_( double in ) { return (in * 9.0 / 5.0 ) + 32.0; }
+		// inline static double convert_temperature_c_to_f_deriv_( double in ) { return in * 9.0 / 5.0; }
+		// inline static double convert_temperature_c_to_f_deriv2_( double in ) { return in * 9.0 / 5.0; }
 
-		// Celsius to Kelvin
-		inline static double convert_temperature_c_to_k_( double in ) { return in + 273.15; }
-		inline static double convert_temperature_c_to_k_deriv_( double in ) { return in; }
-		inline static double convert_temperature_c_to_k_deriv2_( double in ) { return in; }
+		// // Celsius to Kelvin
+		// inline static double convert_temperature_c_to_k_( double in ) { return in + 273.15; }
+		// inline static double convert_temperature_c_to_k_deriv_( double in ) { return in; }
+		// inline static double convert_temperature_c_to_k_deriv2_( double in ) { return in; }
 
-		// Kelvin to Celsius
-		inline static double convert_temperature_k_to_c_( double in ) { return in - 273.15; }
-		inline static double convert_temperature_k_to_c_deriv_( double in ) { return in; }
-		inline static double convert_temperature_k_to_c_deriv2_( double in ) { return in; }
+		// // Kelvin to Celsius
+		// inline static double convert_temperature_k_to_c_( double in ) { return in - 273.15; }
+		// inline static double convert_temperature_k_to_c_deriv_( double in ) { return in; }
+		// inline static double convert_temperature_k_to_c_deriv2_( double in ) { return in; }
 
-		// Kelvin to Fahrenheit
-		inline static double convert_temperature_k_to_f_( double in ) {
-			return convert_temperature_c_to_f_( convert_temperature_k_to_c_( in ) );
-		}
-		inline static double convert_temperature_k_to_f_deriv_( double in ) { return in * 9.0 / 5.0; }
-		inline static double convert_temperature_k_to_f_deriv2_( double in ) { return in * 9.0 / 5.0; }
+		// // Kelvin to Fahrenheit
+		// inline static double convert_temperature_k_to_f_( double in ) {
+		// 	return convert_temperature_c_to_f_( convert_temperature_k_to_c_( in ) );
+		// }
+		// inline static double convert_temperature_k_to_f_deriv_( double in ) { return in * 9.0 / 5.0; }
+		// inline static double convert_temperature_k_to_f_deriv2_( double in ) { return in * 9.0 / 5.0; }
 	
-		// meters to/from kilometers
-		inline static double convert_distance_m_to_km_( double in ) { return in * 0.001; }
-		inline static double convert_distance_m_to_km_deriv_( double in ) { return in * 0.001; }
-		inline static double convert_distance_m_to_km_deriv2_( double in ) { return in * 0.001; }
-		inline static double convert_distance_km_to_m_( double in ) { return in * 1000.0; }
-		inline static double convert_distance_km_to_m_deriv_( double in ) { return in * 1000.0; }
-		inline static double convert_distance_km_to_m_deriv2_( double in ) { return in * 1000.0; }
+		// // meters to/from kilometers
+		// inline static double convert_distance_m_to_km_( double in ) { return in * 0.001; }
+		// inline static double convert_distance_m_to_km_deriv_( double in ) { return in * 0.001; }
+		// inline static double convert_distance_m_to_km_deriv2_( double in ) { return in * 0.001; }
+		// inline static double convert_distance_km_to_m_( double in ) { return in * 1000.0; }
+		// inline static double convert_distance_km_to_m_deriv_( double in ) { return in * 1000.0; }
+		// inline static double convert_distance_km_to_m_deriv2_( double in ) { return in * 1000.0; }
 	
-		// m/s to/from km/s
-		inline static double convert_speed_mps_to_kmps_( double in ) { return in * 0.001; }
-		inline static double convert_speed_mps_to_kmps_deriv_( double in ) { return in * 0.001; }
-		inline static double convert_speed_mps_to_kmps_deriv2_( double in ) { return in * 0.001; }
-		inline static double convert_speed_kmps_to_mps_( double in ) { return in * 1000.0; }
-		inline static double convert_speed_kmps_to_mps_deriv_( double in ) { return in * 1000.0; }
-		inline static double convert_speed_kmps_to_mps_deriv2_( double in ) { return in * 1000.0; }
+		// // m/s to/from km/s
+		// inline static double convert_speed_mps_to_kmps_( double in ) { return in * 0.001; }
+		// inline static double convert_speed_mps_to_kmps_deriv_( double in ) { return in * 0.001; }
+		// inline static double convert_speed_mps_to_kmps_deriv2_( double in ) { return in * 0.001; }
+		// inline static double convert_speed_kmps_to_mps_( double in ) { return in * 1000.0; }
+		// inline static double convert_speed_kmps_to_mps_deriv_( double in ) { return in * 1000.0; }
+		// inline static double convert_speed_kmps_to_mps_deriv2_( double in ) { return in * 1000.0; }
 	
-		// Pascals to/from mbar
-		inline static double convert_pressure_pa_to_mbar_( double in ) { return in * 0.01; }
-		inline static double convert_pressure_pa_to_mbar_deriv_( double in ) { return in * 0.01; }
-		inline static double convert_pressure_pa_to_mbar_deriv2_( double in ) { return in * 0.01; }
-		inline static double convert_pressure_mbar_to_pa_( double in ) { return in * 100.0; }
-		inline static double convert_pressure_mbar_to_pa_deriv_( double in ) { return in * 100.0; }
-		inline static double convert_pressure_mbar_to_pa_deriv2_( double in ) { return in * 100.0; }
+		// // Pascals to/from mbar
+		// inline static double convert_pressure_pa_to_mbar_( double in ) { return in * 0.01; }
+		// inline static double convert_pressure_pa_to_mbar_deriv_( double in ) { return in * 0.01; }
+		// inline static double convert_pressure_pa_to_mbar_deriv2_( double in ) { return in * 0.01; }
+		// inline static double convert_pressure_mbar_to_pa_( double in ) { return in * 100.0; }
+		// inline static double convert_pressure_mbar_to_pa_deriv_( double in ) { return in * 100.0; }
+		// inline static double convert_pressure_mbar_to_pa_deriv2_( double in ) { return in * 100.0; }
 	
-		// kg/m3 to/from g/cm3
-		inline static double convert_density_kgpm3_to_gpcm3_( double in ) { return in * 0.001; }
-		inline static double convert_density_kgpm3_to_gpcm3_deriv_( double in ) { return in * 0.001; }
-		inline static double convert_density_kgpm3_to_gpcm3_deriv2_( double in ) { return in * 0.001; }
-		inline static double convert_density_gpcm3_to_kgpm3_( double in ) { return in * 1000.0; }
-		inline static double convert_density_gpcm3_to_kgpm3_deriv_( double in ) { return in * 1000.0; }
-		inline static double convert_density_gpcm3_to_kgpm3_deriv2_( double in ) { return in * 1000.0; }
+		// // kg/m3 to/from g/cm3
+		// inline static double convert_density_kgpm3_to_gpcm3_( double in ) { return in * 0.001; }
+		// inline static double convert_density_kgpm3_to_gpcm3_deriv_( double in ) { return in * 0.001; }
+		// inline static double convert_density_kgpm3_to_gpcm3_deriv2_( double in ) { return in * 0.001; }
+		// inline static double convert_density_gpcm3_to_kgpm3_( double in ) { return in * 1000.0; }
+		// inline static double convert_density_gpcm3_to_kgpm3_deriv_( double in ) { return in * 1000.0; }
+		// inline static double convert_density_gpcm3_to_kgpm3_deriv2_( double in ) { return in * 1000.0; }
 		
-		// degrees to/from radians
-		inline static double convert_angle_degrees_to_radians_( double in ) { return in * PI / 180.0; }
-		inline static double convert_angle_degrees_to_radians_deriv_( double in ) { return in * PI / 180.0; }
-		inline static double convert_angle_degrees_to_radians_deriv2_( double in ) { return in * PI / 180.0; }
-		inline static double convert_angle_radians_to_degrees_( double in ) { return in * 180.0 / PI; }
-		inline static double convert_angle_radians_to_degrees_deriv_( double in ) { return in * 180.0 / PI; }
-		inline static double convert_angle_radians_to_degrees_deriv2_( double in ) { return in * 180.0 / PI; }
+		// // degrees to/from radians
+		// inline static double convert_angle_degrees_to_radians_( double in ) { return in * PI / 180.0; }
+		// inline static double convert_angle_degrees_to_radians_deriv_( double in ) { return in * PI / 180.0; }
+		// inline static double convert_angle_degrees_to_radians_deriv2_( double in ) { return in * PI / 180.0; }
+		// inline static double convert_angle_radians_to_degrees_( double in ) { return in * 180.0 / PI; }
+		// inline static double convert_angle_radians_to_degrees_deriv_( double in ) { return in * 180.0 / PI; }
+		// inline static double convert_angle_radians_to_degrees_deriv2_( double in ) { return in * 180.0 / PI; }
 		
-		// geometric to/from math directions.  Derivatives may be meaningless but we'll put them in anyway
-		static double convert_direction_geo_to_math_( double in ) {
-			double out = 90.0 - in;
-			while (out < 0) {
-				out += 360.0;
-			}
-			while (out >= 360.0) {
-				out -= 360.0;
-			}
-			return out;
-		}
-		static double convert_direction_geo_to_math_deriv_( double in ) { return -in; }
-		static double convert_direction_geo_to_math_deriv2_( double in ) { return in; }
-		static double convert_direction_math_to_geo_( double in ) {
-			// the same calculation works in both directions
-			return convert_direction_geo_to_math_( in );
-		}
-		static double convert_direction_math_to_geo_deriv_( double in ) { return -in; }
-		static double convert_direction_math_to_geo_deriv2_( double in ) { return in; }
+		// // geometric to/from math directions.  Derivatives may be meaningless but we'll put them in anyway
+		// static double convert_direction_geo_to_math_( double in ) {
+		// 	double out = 90.0 - in;
+		// 	while (out < 0) {
+		// 		out += 360.0;
+		// 	}
+		// 	while (out >= 360.0) {
+		// 		out -= 360.0;
+		// 	}
+		// 	return out;
+		// }
+		// static double convert_direction_geo_to_math_deriv_( double in ) { return -in; }
+		// static double convert_direction_geo_to_math_deriv2_( double in ) { return in; }
+		// static double convert_direction_math_to_geo_( double in ) {
+		// 	// the same calculation works in both directions
+		// 	return convert_direction_geo_to_math_( in );
+		// }
+		// static double convert_direction_math_to_geo_deriv_( double in ) { return -in; }
+		// static double convert_direction_math_to_geo_deriv2_( double in ) { return in; }
 	
-		inline static double convert_no_conversion( double in ) { return in; }
+		// inline static double convert_no_conversion( double in ) { return in; }
 	};
 
 

@@ -189,20 +189,33 @@ std::string NCPA::toUpperCase( const std::string in ) {
 }
 
 std::vector< std::string > NCPA::split( std::string input, std::string delimiters ) {
-	// lean on strtok for this functionality
-	char *holder = new char[ input.size() + 1 ];
-	std::memset( holder, '\0', input.size() + 1 );
-	std::strcpy( holder, input.c_str() );
-	char *tmp = strtok( holder, delimiters.c_str() );
+	// // lean on strtok for this functionality
+	// char *holder = new char[ input.size() + 1 ];
+	// std::memset( holder, '\0', input.size() + 1 );
+	// std::strcpy( holder, input.c_str() );
+	// char *tmp = strtok( holder, delimiters.c_str() );
+	// std::vector< std::string > tokens;
+	// tokens.clear();
+	// while (tmp != NULL) {
+	// 	std::string s( tmp );
+	// 	tokens.push_back( s );
+	// 	tmp = strtok(NULL,delimiters.c_str());
+	// }
+	// delete [] holder;
+	// return tokens;
+
 	std::vector< std::string > tokens;
 	tokens.clear();
-	while (tmp != NULL) {
-		std::string s( tmp );
-		tokens.push_back( s );
-		tmp = strtok(NULL,delimiters.c_str());
+	size_t firstind, lastind;
+	firstind = input.find_first_not_of( delimiters );
+	lastind = input.find_first_of( delimiters, firstind );
+	while( firstind != std::string::npos ) {
+		tokens.push_back( input.substr( firstind, lastind - firstind ) );
+		firstind = input.find_first_not_of( delimiters, lastind );
+		lastind = input.find_first_of( delimiters, firstind );
 	}
-	delete [] holder;
 	return tokens;
+
 }
 
 bool NCPA::checkAzimuthLimits( double toCheck, double target, double tolerance ) {
