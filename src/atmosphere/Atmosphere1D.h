@@ -45,8 +45,8 @@ namespace NCPA {
 		// double get_second_derivative( std::string key, units_t quantity_units, double altitude, units_t altitude_units ) const;
 
 		size_t get_basis_length() const;
-		void get_altitude_basis( double *buffer, units_t *buffer_units ) const;
-		void get_property_basis( std::string key, double *buffer, units_t *buffer_units ) const;
+		void get_altitude_vector( double *buffer, units_t *buffer_units ) const;
+		void get_property_vector( std::string key, double *buffer, units_t *buffer_units ) const;
 
 		units_t get_altitude_units() const;
 		units_t get_property_units( std::string key ) const;

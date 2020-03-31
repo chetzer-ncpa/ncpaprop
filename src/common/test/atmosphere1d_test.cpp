@@ -1,6 +1,6 @@
 /* Compile with
 
-g++ -o atmosphere1d_test -ggdb -I.. -I../../atmosphere ../../atmosphere/Atmosphere1D.cpp ../../atmosphere/Atmosphere.cpp ../util.cpp ../units.cpp atmosphere1d_test.cpp
+g++ -o atmosphere1d_test -ggdb -I.. -I../../atmosphere ../../atmosphere/Atmosphere1D.cpp ../../atmosphere/Atmosphere.cpp ../VectorWithUnits.cpp ../util.cpp ../units.cpp atmosphere1d_test.cpp
 
 */
 #include "Atmosphere1D.h"
@@ -153,11 +153,11 @@ int main( int argc, char **argv ) {
 	double *z = new double[ nz ], *u = new double[ nz ], *t = new double[ nz ], *c_t = new double[ nz ], *c_p = new double[ nz ];
 	units_t z_units, u_units, t_units, c_t_units, c_p_units;
 	atm->convert_altitude_units( Units::fromString( "m" ) );
-	atm->get_altitude_basis( z, &z_units );
-	atm->get_property_basis( "U", u, &u_units );
-	atm->get_property_basis( "T", t, &t_units );
-	atm->get_property_basis( "C_T", c_t, &c_t_units );
-	atm->get_property_basis( "C_P", c_p, &c_p_units );
+	atm->get_altitude_vector( z, &z_units );
+	atm->get_property_vector( "U", u, &u_units );
+	atm->get_property_vector( "T", t, &t_units );
+	atm->get_property_vector( "C_T", c_t, &c_t_units );
+	atm->get_property_vector( "C_P", c_p, &c_p_units );
 
 	// convert z to meters
 	//Units::convert( z, nz, z_units, Units::fromString("m"), z );
@@ -169,7 +169,7 @@ int main( int argc, char **argv ) {
 	os.close();
 
 	atm->revert_altitude_units();
-	atm->get_altitude_basis( z, &z_units );
+	atm->get_altitude_vector( z, &z_units );
 	os = ofstream( "atm_out_km.dat" );
 	for (i = 0; i < nz; i += 5) {
 		os << z[ i ] << "  " << t[ i ] << "  " << u[ i ] << "  " << c_t[ i ] << "  " << c_p[ i ] << endl;

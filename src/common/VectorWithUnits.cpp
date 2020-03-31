@@ -4,12 +4,16 @@
 #include <cstring>
 #include <stdexcept>
 #include <sstream>
+#include <iostream>
 
 
+NCPA::VectorWithUnits::VectorWithUnits() {
+	values_ = NULL;
+	n_ = 0;
+}
 
 
 NCPA::VectorWithUnits::VectorWithUnits( size_t n_points, double *property_values, units_t property_units ) {
-
 	values_ = new double[ n_points ];
 	//units_ = property_units;
 	//units_last_ = property_units;
@@ -22,12 +26,14 @@ NCPA::VectorWithUnits::VectorWithUnits( const NCPA::VectorWithUnits &source ) {
 	n_ = source.size();
 	NCPA::units_t u;
 	values_ = new double[ n_ ];
-	source.get( values_, &u );
+	source.get_vector( values_, &u );
 	units_.push( u );
 }
 
 NCPA::VectorWithUnits::~VectorWithUnits() {
-	delete [] values_;
+	if (values_ != NULL) {
+		delete [] values_;
+	}
 }
 
 NCPA::units_t NCPA::VectorWithUnits::get_units() const {
@@ -83,7 +89,7 @@ size_t NCPA::VectorWithUnits::size() const {
 	return n_;
 }
 
-void NCPA::VectorWithUnits::get( double *buffer, units_t *buffer_units ) const {
+void NCPA::VectorWithUnits::get_vector( double *buffer, units_t *buffer_units ) const {
 	*buffer_units = units_.top();
 	std::memcpy( buffer, values_, n_ * sizeof( double ) );
 }

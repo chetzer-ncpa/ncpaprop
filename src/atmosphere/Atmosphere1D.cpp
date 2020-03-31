@@ -32,14 +32,14 @@ size_t NCPA::Atmosphere1D::get_basis_length() const {
 	return nz_;
 }
 
-void NCPA::Atmosphere1D::get_altitude_basis( double *buffer, units_t *buffer_units ) const {
+void NCPA::Atmosphere1D::get_altitude_vector( double *buffer, units_t *buffer_units ) const {
 	*buffer_units = z_units_.top();
 	std::memcpy( buffer, z_, nz_* sizeof( double ) );
 }
 
-void NCPA::Atmosphere1D::get_property_basis( std::string key, double *buffer, units_t *buffer_units ) const {
+void NCPA::Atmosphere1D::get_property_vector( std::string key, double *buffer, units_t *buffer_units ) const {
 	NCPA::AtmosphericProperty1D *prop = contents_.at( key );
-	prop->get_property_basis( buffer, buffer_units );
+	prop->get_vector( buffer, buffer_units );
 }
 
 

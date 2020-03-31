@@ -18,6 +18,7 @@ namespace NCPA {
 			NCPA::units_t fromUnits, NCPA::units_t toUnits );
 
 	public:
+		VectorWithUnits();
 		VectorWithUnits( size_t n_points, double *values, units_t units );
 		VectorWithUnits( const VectorWithUnits &source );
 		~VectorWithUnits();
@@ -27,7 +28,7 @@ namespace NCPA {
 		void revert_units();
 
 		size_t size() const;
-		void get( double *buffer, units_t *buffer_units ) const;
+		void get_vector( double *buffer, units_t *buffer_units ) const;
 	};
 
 }
