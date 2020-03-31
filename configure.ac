@@ -13,7 +13,7 @@ AC_LANG([C++])
 # set default variables
 default_petsc_build_dir="${abs_builddir}/extern/petsc"
 default_slepc_build_dir="${abs_builddir}/extern/slepc"
-default_slepc_version="3.12.2"
+default_slepc_version="3.13.0"
 slepc_url_base="https://slepc.upv.es/download/distrib"
 warning_compiler_flags="-Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas"
 
