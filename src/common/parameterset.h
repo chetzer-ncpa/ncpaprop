@@ -1,5 +1,6 @@
 /*
 parameterset.h
+@version 1.0
 
 The NCPA Parameter Set library.
 This library contains objects and methods for parsing, storing, retrieving, and
@@ -138,7 +139,6 @@ int main( int argc, char **argv ) {
 		cout << "Azimuth has default value of "
 			 << ps->getParameter( "azimuth" )->getStringValue() << endl;
 	}
-
 */
 
 #ifndef _NCPA_PARAMETERSET_H_

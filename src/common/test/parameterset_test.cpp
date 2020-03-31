@@ -1,6 +1,3 @@
-
-
-
 #include "parameterset.h"
 #include <iostream>
 
@@ -87,6 +84,4 @@ int main( int argc, char **argv ) {
 	} else {
 		ps->printFailedTests( cout );
 	}
-
-
 }

@@ -1,7 +1,7 @@
 #ifndef NCPAPROP_ATMOSPHERE1D_H_INCLUDED
 #define NCPAPROP_ATMOSPHERE1D_H_INCLUDED
 
-#include "Atmosphere.h"
+#include "AtmosphericModel.h"
 #include "AtmosphericProperty1D.h"
 #include "geographic.h"
 #include "units.h"
@@ -11,7 +11,7 @@
 
 namespace NCPA {
 
-	class Atmosphere1D : public Atmosphere {
+	class Atmosphere1D : public AtmosphericModel {
 
 	public:
 		Atmosphere1D( size_t n_altitude_points, double *altitude_points, units_t altitude_units );
