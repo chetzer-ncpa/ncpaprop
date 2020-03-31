@@ -3,6 +3,7 @@
 
 #include "AtmosphericModel.h"
 #include "AtmosphericProperty1D.h"
+#include "ScalarWithUnits.h"
 #include "geographic.h"
 #include "units.h"
 #include <string>
@@ -17,7 +18,8 @@ namespace NCPA {
 		Atmosphere1D( size_t n_altitude_points, double *altitude_points, units_t altitude_units );
 		~Atmosphere1D();
 
-		void add_quantity( std::string key, size_t n_points, double *quantity_points, units_t quantity_units );
+		void add_property( std::string key, size_t n_points, double *quantity_points, units_t quantity_units );
+		void add_property( std::string key, double value, units_t units );    // scalar quantity
 
 		double get_minimum_altitude() const;
 		double get_maximum_altitude() const;
@@ -28,6 +30,7 @@ namespace NCPA {
 		void calculate_sound_speed_from_temperature( std::string new_key, std::string temperature_key );
 		void calculate_sound_speed_from_pressure_and_density( std::string new_key, std::string pressure_key, std::string density_key );
 
+		double get( std::string key ) const;    // scalars
 		double get( std::string key, double altitude ) const;
 		double get_first_derivative( std::string key, double altitude ) const;
 		double get_second_derivative( std::string key, double altitude ) const;
@@ -53,6 +56,7 @@ namespace NCPA {
 	protected:
 		// internal storage
 		std::map< std::string, NCPA::AtmosphericProperty1D * > contents_;
+		std::map< std::string, NCPA::ScalarWithUnits * > scalar_contents_;
 		double *z_;
 		size_t nz_;
 		std::stack< units_t > z_units_;

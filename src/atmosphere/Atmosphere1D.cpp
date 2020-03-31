@@ -53,7 +53,7 @@ double NCPA::Atmosphere1D::get_maximum_altitude() const {
 	//return NCPA::Units::convert( z_[ nz_-1 ], z_units_, altitude_units );
 }
 
-void NCPA::Atmosphere1D::add_quantity( std::string key, size_t n_points, double *quantity_points, units_t quantity_units ) {
+void NCPA::Atmosphere1D::add_property( std::string key, size_t n_points, double *quantity_points, units_t quantity_units ) {
 
 	// see if we already have one with that key
 	NCPA::AtmosphericProperty1D *prop;
@@ -118,7 +118,7 @@ void NCPA::Atmosphere1D::calculate_sound_speed_from_temperature( std::string new
 	}
 	t_prop->revert_units();
 
-	add_quantity( new_key, nz_, c, NCPA::UNITS_SPEED_METERS_PER_SECOND );
+	add_property( new_key, nz_, c, NCPA::UNITS_SPEED_METERS_PER_SECOND );
 }
 
 void NCPA::Atmosphere1D::calculate_sound_speed_from_pressure_and_density( std::string new_key, 
@@ -144,7 +144,7 @@ void NCPA::Atmosphere1D::calculate_sound_speed_from_pressure_and_density( std::s
 
 	p_prop->revert_units();
 	r_prop->revert_units();
-	add_quantity( new_key, nz_, c, NCPA::UNITS_SPEED_METERS_PER_SECOND );
+	add_property( new_key, nz_, c, NCPA::UNITS_SPEED_METERS_PER_SECOND );
 }
 
 void NCPA::Atmosphere1D::convert_altitude_units( units_t new_units ) {

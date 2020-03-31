@@ -140,7 +140,7 @@ int main( int argc, char **argv ) {
 
 	Atmosphere1D *atm = new Atmosphere1D( nlines, columns[ 0 ], Units::fromString( units[ 0 ] ) );
 	for (i = 1; i < ncols; i++) {
-		atm->add_quantity( keys[ i ], nlines, columns[ i ], Units::fromString( units[ i ] ) );
+		atm->add_property( keys[ i ], nlines, columns[ i ], Units::fromString( units[ i ] ) );
 	}
 	for ( i = 0; i < ncols; i++ ) {
 		delete [] columns[ i ];

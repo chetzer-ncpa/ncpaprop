@@ -76,7 +76,7 @@ void NCPA::AtmosphericProperty1D::convert_units( NCPA::units_t new_units ) {
 	// will throw out_of_range and leave original units unchanged if there's an error
 	// if there's no change in units, don't bother with the calculation, just push another
 	// one onto the stack so reversion can happen properly
-	if (new_units != z_units_.top()) {
+	if (new_units != _units_.top()) {
 		do_units_conversion_( nz_, values_, units_.top(), new_units );
 	}
 	units_.push( new_units );
