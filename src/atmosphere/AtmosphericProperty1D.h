@@ -4,7 +4,6 @@
 #include <map>
 #include <stack>
 #include "units.h"
-#include "VectorWithUnits.h"
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_spline.h"
 

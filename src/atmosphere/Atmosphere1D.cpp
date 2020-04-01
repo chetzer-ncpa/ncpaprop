@@ -73,14 +73,59 @@ void NCPA::Atmosphere1D::add_property( std::string key, size_t n_points, double 
 
 	prop = new AtmosphericProperty1D( n_points, z_, z_units_.top(), quantity_points, quantity_units );
 	contents_[ key ] = prop;
+}
 
+void NCPA::Atmosphere1D::add_property( std::string key, double value, NCPA::units_t units ) {
+	NCPA::ScalarWithUnits *scalar;
+	try {
+		scalar = scalar_contents_.at( key );
+		throw std::runtime_error( "Requested key " + key + " already exists in atmosphere" );
+	} catch (const std::out_of_range& oor) { }
+
+	scalar = new ScalarWithUnits( value, units );
+	scalar_contents_[ key ] = scalar;
 }
 
 double NCPA::Atmosphere1D::get( std::string key, double altitude ) const {
 	
 	// if it's not there it'll throw an out_of_range exception
-	NCPA::AtmosphericProperty1D *prop = contents_.at( key );  
+	NCPA::AtmosphericProperty1D *prop;
+	try {
+		prop = contents_.at( key );
+	} catch (std::out_of_range& oor) {
+		throw std::out_of_range( "No vector quantity \"" + key + "\" found" );
+	}
 	return prop->get( altitude );
+}
+
+double NCPA::Atmosphere1D::get( std::string key ) const {
+	NCPA::ScalarWithUnits *prop;
+	try {
+		prop = scalar_contents_.at( key );
+	} catch (std::out_of_range& oor) {
+		throw std::out_of_range( "No scalar quantity \"" + key + "\" found" );
+	}
+	return prop->get();
+}
+
+bool NCPA::Atmosphere1D::contains_vector( std::string key ) const {
+	NCPA::AtmosphericProperty1D *prop;
+	try {
+		prop = contents_.at( key );
+	} catch (std::out_of_range& oor) {
+		return false;
+	}
+	return true;
+}
+
+bool NCPA::Atmosphere1D::contains_scalar( std::string key ) const {
+	NCPA::ScalarWithUnits *prop;
+	try {
+		prop = scalar_contents_.at( key );
+	} catch (std::out_of_range& oor) {
+		return false;
+	}
+	return true;
 }
 
 double NCPA::Atmosphere1D::get_first_derivative( std::string key, double altitude ) const {

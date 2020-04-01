@@ -3,7 +3,6 @@
 
 #include "AtmosphericModel.h"
 #include "AtmosphericProperty1D.h"
-#include "ScalarWithUnits.h"
 #include "geographic.h"
 #include "units.h"
 #include <string>
@@ -18,7 +17,7 @@ namespace NCPA {
 		Atmosphere1D( size_t n_altitude_points, double *altitude_points, units_t altitude_units );
 		~Atmosphere1D();
 
-		void add_property( std::string key, size_t n_points, double *quantity_points, units_t quantity_units );
+		void add_property( std::string key, size_t n_points, double *quantity_points, units_t quantity_units );    // vector quantity
 		void add_property( std::string key, double value, units_t units );    // scalar quantity
 
 		double get_minimum_altitude() const;
@@ -52,6 +51,8 @@ namespace NCPA {
 		units_t get_property_units( std::string key ) const;
 
 		std::vector< std::string > get_keys() const;
+		bool contains_scalar( std::string key ) const;
+		bool contains_vector( std::string key ) const;
 
 	protected:
 		// internal storage
