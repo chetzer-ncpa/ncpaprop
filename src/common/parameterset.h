@@ -150,6 +150,10 @@ int main( int argc, char **argv ) {
 #define HELP_TEXT_WIDTH 80
 #endif
 
+#ifndef DEFAULT_PARAMETER_FIRST_COLUMN_WIDTH
+#define DEFAULT_PARAMETER_FIRST_COLUMN_WIDTH 24
+#endif
+
 #ifndef DEFAULT_HEADER_INDENT
 #define DEFAULT_HEADER_INDENT 0
 #endif
@@ -162,9 +166,8 @@ int main( int argc, char **argv ) {
 #define DEFAULT_PARAMETER_INDENT 2
 #endif
 
-#ifndef DEFAULT_PARAMETER_FIRST_COLUMN_WIDTH
-#define DEFAULT_PARAMETER_FIRST_COLUMN_WIDTH 24
-#endif
+
+
 
 
 
@@ -538,12 +541,27 @@ namespace NCPA {
 		void setStrict( bool tf );
 
 		// Messages to output to the user
-		void addUsageLine( const std::string& line );
-		void addHeaderText( const std::string& text, unsigned int indent = DEFAULT_HEADER_INDENT, unsigned int maxwidth = HELP_TEXT_WIDTH );
-		void addFooterText( const std::string& text, unsigned int indent = DEFAULT_FOOTER_INDENT, unsigned int maxwidth = HELP_TEXT_WIDTH );
+		//void addUsageLine( const std::string& line );
+		void setHeaderIndent( unsigned int newindent );
+		void resetHeaderIndent();
+		void setHeaderHangingIndent( unsigned int newindent );
+		void addBlankHeaderLine();
+		void addHeaderText( const std::string& text, unsigned int maxwidth = HELP_TEXT_WIDTH );
+		void addHeaderTextVerbatim( const std::string& text );
+
+		void setFooterIndent( unsigned int newindent );
+		void resetFooterIndent();
+		void setFooterHangingIndent( unsigned int newindent );
+		void addBlankFooterLine();
+		void addFooterText( const std::string& text, unsigned int maxwidth = HELP_TEXT_WIDTH );
+		void addFooterTextVerbatim( const std::string& text );
+		
+		void setParameterIndent( unsigned int newindent );
+		void resetParameterIndent();
 		void addParameterDescription( const std::string& section, const std::string& param, 
-			const std::string &description, unsigned int indent = DEFAULT_PARAMETER_INDENT, unsigned int firstcolumnwidth = DEFAULT_PARAMETER_FIRST_COLUMN_WIDTH, 
+			const std::string &description, unsigned int firstcolumnwidth = DEFAULT_PARAMETER_FIRST_COLUMN_WIDTH, 
 			unsigned int maxwidth = HELP_TEXT_WIDTH );
+		
 		void printUsage( std::ostream& os = std::cout ) const;
 
 		// Ingest from command line or file
@@ -558,16 +576,21 @@ namespace NCPA {
 		void printFailedTests( std::ostream& os = std::cerr ) const;
 		std::vector< ParameterTest * > getTests( std::string key ) const;
 		
-		void printParameters( std::ostream& os = std::cout ) const;
+		void printParameters( bool printTests = false, std::ostream& os = std::cout ) const;
 
 		GenericParameter *getParameter( std::string key );
+		int getInteger( std::string key ) const;
+		double getFloat( std::string key ) const;
+		std::string getString( std::string key ) const;
+		bool getBool( std::string key ) const;     // returns bool version of parameter
+		bool wasFound( std::string key ) const;    // returns true if the value was specified, not left default
 
 		
 	protected:
 		ParameterVector _params;
 		std::string _delims, _comments;
 		std::vector< std::string > _unparsed;
-		std::vector< std::string > _usage;
+		//std::vector< std::string > _usage;
 		std::vector< std::string > _headerLines, _footerLines, _sections;
 		std::map< std::string, std::ostringstream * > _descriptionLines;
 		//NullParameter *_PARAM_NOT_FOUND;
@@ -583,8 +606,10 @@ namespace NCPA {
 		void processDoubleOption_( std::string key, std::string value );
 
 		void formatText_( std::vector< std::string > &holder, const std::string& text, 
-			unsigned int indent, unsigned int maxwidth );
+			unsigned int indent, unsigned int hanging_indent, unsigned int maxwidth );
 		void addSpaces_( std::ostringstream *oss, unsigned int spaces );
+		unsigned int headerIndent_, footerIndent_, parameterIndent_, 
+			headerHangingIndent_, footerHangingIndent_;
 
 		//GenericParameter * _findParam( std::string key ) const;
 	};

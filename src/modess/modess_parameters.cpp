@@ -13,14 +13,34 @@ void NCPA::configure_modess_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->setComments( "#%" );
 	ps->setDelimiters( "=: " );
 
-	// @todo: Add general descriptive text here
+	// Add header instructions
+	ps->addHeaderTextVerbatim("----------------------------------------------------------------------------");
+	ps->addHeaderTextVerbatim("|                             NCPA Infrasound                              |");
+	ps->addHeaderTextVerbatim("|                               Normal Modes                               |");
+	ps->addHeaderTextVerbatim("|         Single Frequency - Effective Sound Speed Approximation           |");
+	ps->addHeaderTextVerbatim("|                    Attenuation added perturbatively                      |");
+	ps->addHeaderTextVerbatim("----------------------------------------------------------------------------");
+	ps->addBlankHeaderLine();
+	ps->addHeaderText("By default the program computes the 1D transmission loss (TL) at the ground or the specified receiver height and saves the data to 2 files:" );
+	ps->setHeaderIndent( 4 );
+	ps->addHeaderText("file tloss_1d.nm - considering attenuation in the atmosphere" );
+	ps->addHeaderText("file tloss_1d.lossless.nm  - no attenuation" );
+	ps->resetHeaderIndent();
+	ps->addHeaderText("Additionally, if the flag --write_2D_TLoss is present on the command line, the 2D TL is saved to file tloss2d.nm. The user can also choose to propagate in N different directions i.e. (N by 2D mode) by using the option --Nby2Dprop.");
+	ps->addBlankHeaderLine();
+	ps->addHeaderText("The options below can be specified in a colon-separated file \"Modess.options\" or at the command line. Command-line options override file options.");
+
+	// Parameter descriptions
 	ps->addParameter( new FlagParameter( "help" ) );
-	ps->addParameterDescription( "Options Control", "--help", "Prints help test" );
+	ps->addParameter( new FlagParameter( "h" ) );
+	ps->addParameterDescription( "Options Control", "-h, --help", "Prints help test" );
 	//ps->addUsageLine( "  --help, -h              Prints help text" );
 	//ps->addUsageLine( "" );
 	ps->addParameter( new StringParameter( "paramfile", "modess.param") );
 	//ps->addUsageLine( "  --paramfile             Parameter file [modess.param]" );
 	ps->addParameterDescription( "Options Control", "--paramfile", "Parameter file name [modess.param]" );
+	ps->addParameter( new FlagParameter( "printparams" ) );
+	ps->addParameterDescription( "Options Control", "--printparams", "Print parameter summary to screen" );
 
 	// Required parameters
 	//ps->addUsageLine( "Required Parameters:" );
@@ -57,6 +77,7 @@ void NCPA::configure_modess_parameter_set( NCPA::ParameterSet *ps ) {
 
 	ps->addParameter( new NCPA::FloatParameter( "maxheight_km", 150.0 ) );
 	//ps->addUsageLine( "  --maxheight_km          Maximum height of analysis in km [150.0]" );
+	ps->addTest( new NCPA::FloatGreaterThanOrEqualToTest( "maxheight_km", 0.1 ));
 	ps->addParameterDescription( "Optional Parameters [default]", "--maxheight_km", "Maximum height of analysis in km [150.0]" );
 
 
@@ -66,7 +87,7 @@ void NCPA::configure_modess_parameter_set( NCPA::ParameterSet *ps ) {
 
 
 	ps->addParameter( new NCPA::IntegerParameter( "Nz_grid", 20000 ) );
-	ps->addTest( new NCPA::IntegerGreaterThanTest( "Nz_grid", 0 ) );
+	ps->addTest( new NCPA::IntegerGreaterThanOrEqualToTest( "Nz_grid", 10 ) );
 	//ps->addUsageLine( "  --Nz_grid               Number of vertical grid points to use" );
 	ps->addParameterDescription( "Optional Parameters [default]", "--Nz_grid", "Number of vertical grid points to use [2000]" );
 
@@ -81,7 +102,7 @@ void NCPA::configure_modess_parameter_set( NCPA::ParameterSet *ps ) {
 
 	ps->addParameter( new NCPA::FloatParameter( "maxrange_km", 1000.0 ) );
 	//ps->addUsageLine( "  --maxrange_km           Maximum range in km to use for modeling [1000.0]" );
-	ps->addTest( new NCPA::FloatGreaterThanTest( "maxrange_km", 0.0 ) );
+	ps->addTest( new NCPA::FloatGreaterThanOrEqualToTest( "maxrange_km", 0.01 ) );
 	ps->addParameterDescription( "Optional Parameters [default]", "--maxrange_km", "Maximum range in km to use for modeling [1000.0]" );
 
 	ps->addParameter( new NCPA::IntegerParameter( "Nrng_steps", 1000 ) );
@@ -110,14 +131,14 @@ void NCPA::configure_modess_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->addParameterDescription( "Optional Parameters [default]", "--use_attn_file", "File name containing attenuation, to override default Sutherland/Bass. Columns are #n# Height(km) Attenuation(np/m)" );
 
 	ps->addParameter( new NCPA::StringParameter( "modal_starter_file" ) );
-	ps->addUsageLine( "  --modal_starter_file    Filename to output a starter file for the pape module" );
+	//ps->addUsageLine( "  --modal_starter_file    Filename to output a starter file for the pape module" );
 	ps->addParameterDescription( "Optional Parameters [default]", "--modal_starter_file", "Filename to output a starter file for the pape module" );
 	
 
 
 	// Modes of operation
 	std::string modes_of_operation[ 2 ] = { "singleprop", "Nby2Dprop" };
-	for (unsigned int i = 0; i < 3; i++) {
+	for (unsigned int i = 0; i < 2; i++) {
 		std::string tmpStr( modes_of_operation[ i ] );
 		ps->addParameter( new NCPA::FlagParameter( tmpStr ) );
 	}
@@ -203,4 +224,32 @@ void NCPA::configure_modess_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->addParameterDescription( "Flags", "--c_min", "Minimum phase speed to keep", 2*DEFAULT_PARAMETER_INDENT );
 	ps->addParameterDescription( "Flags", "--c_max", "Maximum phase speed to keep", 2*DEFAULT_PARAMETER_INDENT );
 
+
+	// Footer with file formats and sample commands
+	ps->addBlankFooterLine();
+	ps->addFooterText("OUTPUT Files:  Format description (column order):");
+	ps->addFooterTextVerbatim("  tloss_1d.nm:                 r, 4*PI*Re(P), 4*PI*Im(P), (incoherent TL)");
+	ps->addFooterTextVerbatim("  tloss_1d.lossless.nm:");
+	ps->addFooterTextVerbatim("  tloss_2d.nm:                 r, z, 4*PI*Re(P), 4*PI*Im(P)");
+	ps->addFooterTextVerbatim("  Nby2D_tloss_1d.nm:");
+	ps->addFooterTextVerbatim("  Nby2D_tloss_1d.lossless.nm:  r, theta, 4*PI*Re(P), 4*PI*Im(P), (incoherent TL)");
+	ps->addFooterTextVerbatim("  phasespeeds.nm:              Mode#, phase speed [m/s], imag(k)");
+	ps->addFooterTextVerbatim("  speeds.nm:                   Mode#, phase speed [m/s], group speed [m/s], imag(k)");
+	ps->addFooterTextVerbatim("  mode_<mode_count>.nm         z, (Mode amplitude)");
+	ps->addFooterTextVerbatim("  dispersion_<freq>.nm         Contains one line with entries:");
+	ps->addFooterTextVerbatim("                               freq, (# of modes), rho(z_src),");
+	ps->addFooterTextVerbatim("                               followed for each mode 'i' by quadruples:");
+	ps->addFooterTextVerbatim("                               real(k(i)), imag(k(i)), Mode(i)(z_src), Mode(i)(z_rcv)");
+	ps->addFooterTextVerbatim("  atm_profile.nm               z,u,v,w,t,d,p,c,c_eff");
+	ps->addBlankFooterLine();
+	ps->addFooterText("Examples (run from 'samples' directory):");
+	ps->setFooterIndent( 4 );
+	ps->setFooterHangingIndent( 4 );
+	ps->addFooterText("../bin/Modess --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --azimuth 90 --freq 0.1" );
+	ps->addBlankFooterLine();
+	ps->addFooterText("../bin/Modess --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --azimuth 90 --freq 0.1 --write_2D_TLoss" );
+	ps->addBlankFooterLine();
+	ps->addFooterText("../bin/Modess --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --freq 0.1 --Nby2Dprop --azimuth_start 0 --azimuth_end 360 --azimuth_step 1" );
+	ps->setFooterHangingIndent( 0 );
+	ps->resetFooterIndent();
 }

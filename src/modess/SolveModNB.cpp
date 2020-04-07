@@ -21,26 +21,53 @@ using namespace std;
 //
 // constructor
 //
-NCPA::SolveModNB::SolveModNB(ProcessOptionsNB *oNB, SampledProfile *atm_profile)
+//NCPA::SolveModNB::SolveModNB(ProcessOptionsNB *oNB, SampledProfile *atm_profile)
+NCPA::SolveModNB::SolveModNB( NCPA::ParameterSet *param, NCPA::SampledProfile *atm_profile )
 {
-	setParams( oNB, atm_profile );                  
+	//setParams( oNB, atm_profile );       
+	setParams( param, atm_profile );           
 }
 
 
 
 // setParams() prototype
-void NCPA::SolveModNB::setParams(ProcessOptionsNB *oNB, SampledProfile *atm_prof)
+//void NCPA::SolveModNB::setParams(ProcessOptionsNB *oNB, SampledProfile *atm_prof)
+void NCPA::SolveModNB::setParams( NCPA::ParameterSet *param, NCPA::SampledProfile *atm_prof )
 {		
 
 	// obtain the parameter values from the user's options
-	atmosfile      = oNB->getAtmosfile();
-	wind_units     = oNB->getWindUnits();
-	gnd_imp_model  = oNB->getGnd_imp_model();
-	usrattfile     = oNB->getUsrAttFile();
-	modstartfile   = oNB->getModalStarterFile();
-	//atmosfileorder = oNB->getAtmosfileorder();
+	// atmosfile      = oNB->getAtmosfile();
+	// wind_units     = oNB->getWindUnits();
+	// gnd_imp_model  = oNB->getGnd_imp_model();
+	// usrattfile     = oNB->getUsrAttFile();
+	// modstartfile   = oNB->getModalStarterFile();
+	// atmosfileorder = oNB->getAtmosfileorder();
+	atmosfile 			= param->getString( "atmosfile" );
+	wind_units			= param->getString( "wind_units" );
+	gnd_imp_model 		= param->getString( "ground_impedence_model" );
+	usrattfile 			= param->getString( "use_attn_file" );
+	modstartfile 		= param->getString( "modal_starter_file" );
+  	skiplines 			= param->getInteger( "skiplines" );
+  	z_min 				= param->getFloat( "zground_km" );
+  	freq 				= param->getFloat( "freq" );
+  	azi 				= param->getFloat( "azimuth" );
+  	maxrange 			= param->getFloat( "maxrange_km" );
+  	maxheight 			= param->getFloat( "maxheight_km" );
+  	sourceheight 		= param->getFloat( "sourceheight_km" );
+  	receiverheight 		= param->getFloat( "receiverheight_km" );
+  	tol 				= 1.0e-8;
+  	Nz_grid 			= param->getInteger( "Nz_grid" );
+  	Nrng_steps 			= param->getInteger( "Nrng_steps" );
+  	Lamb_wave_BC 		= param->getBool( "Lamb_wave_BC" );
+  	write_2D_TLoss  	= param->getBool( "write_2D_TLoss" );
+  	write_phase_speeds 	= param->getBool( "write_phase_speeds" );
+  	write_speeds 		= param->getBool( "write_speeds" );
+  	write_modes 		= param->getBool( "write_modes" );
+  	write_dispersion 	= param->getBool( "write_dispersion" );
+  	Nby2Dprop 			= param->getBool( "Nby2Dprop" );
+  	turnoff_WKB 		= param->getBool( "turnoff_WKB" );
   
-  
+  /*
 	skiplines          = oNB->getSkiplines();
 	z_min              = oNB->getZ_min();
 	freq               = oNB->getFreq();  
@@ -61,17 +88,21 @@ void NCPA::SolveModNB::setParams(ProcessOptionsNB *oNB, SampledProfile *atm_prof
 	Nby2Dprop          = oNB->getNby2Dprop();
 	//write_atm_profile  = oNB->getWriteAtmProfile();
 	turnoff_WKB        = oNB->getTurnoff_WKB();
+	*/
 
 	// default values for c_min, c_max and wvnum_filter_flg
 	c_min = 0.0;
 	c_max = 0.0;
-	wvnum_filter_flg = 0;
+	//wvnum_filter_flg = 0;
 
 	// set c_min, c_max if wavenumber filtering is on
-	wvnum_filter_flg = oNB->getWvnum_filter_flg();     
+	//wvnum_filter_flg = oNB->getWvnum_filter_flg();   
+	wvnum_filter_flg  	= param->getBool( "wvnum_filter" );  
 	if (wvnum_filter_flg==1) {
-		c_min = oNB->getC_min();
-		c_max = oNB->getC_max();
+		c_min = param->getFloat( "c_min" );
+		c_max = param->getFloat( "c_max" );
+		//c_min = oNB->getC_min();
+		//c_max = oNB->getC_max();
 	};
 
 
@@ -82,9 +113,12 @@ void NCPA::SolveModNB::setParams(ProcessOptionsNB *oNB, SampledProfile *atm_prof
   
 	Naz = 1; // Number of azimuths: default is a propagation along a single azimuth
 	if (Nby2Dprop) {
-		azi      = oNB->getAzimuthStart();
-		azi_max  = oNB->getAzimuthEnd();
-		azi_step = oNB->getAzimuthStep();
+		azi  		= param->getFloat( "azimuth_start" );
+		azi_max 	= param->getFloat( "azimuth_end" );
+		azi_step 	= param->getFloat( "azimuth_step" );
+		// azi      = oNB->getAzimuthStart();
+		// azi_max  = oNB->getAzimuthEnd();
+		// azi_step = oNB->getAzimuthStep();
 		Naz      = (int) ((azi_max - azi)/azi_step) + 1;
 	}
 
@@ -108,16 +142,16 @@ void NCPA::SolveModNB::setParams(ProcessOptionsNB *oNB, SampledProfile *atm_prof
 	// a rounding error. This should be revisited.
 	// @todo revisit this
 	// @todo add max_valid_height to AtmosphericProfile class
-	if (maxheight/1000.0 >= atm_profile->z(atm_profile->nz()-1)) {
-		maxheight = (atm_profile->z(atm_profile->nz()-1) - 1e-9)*1000.0; // slightly less
+	if (maxheight >= atm_profile->z(atm_profile->nz()-1)) {
+		maxheight = (atm_profile->z(atm_profile->nz()-1) - 1e-9); // slightly less
 		cout << "\nmaxheight adjusted to: " << maxheight 
-			<< " meters (max. available in the profile file)" << endl;
+			<< " km (max. available in the profile file)" << endl;
 	}
   
 	// fill and convert to SI units
 	double dz       = (maxheight - z_min)/Nz_grid;	// the z-grid spacing
-	double z_min_km = z_min/1000.0;
-	double dz_km    = dz/1000.0;
+	double z_min_km = z_min;
+	double dz_km    = dz;
 	double kmps2mps = 1.0;
 	//if (!wind_units.compare("kmpersec")) {
 		kmps2mps = 1000.0;
@@ -156,14 +190,14 @@ void NCPA::SolveModNB::setParams(ProcessOptionsNB *oNB, SampledProfile *atm_prof
 		exit(1);
 	}		
 
-	if (maxrange < 10) {
-		cout << "maxrange = " << maxrange/1000.0 << " km" << endl;
+	if (maxrange < 0.01) {
+		cout << "maxrange = " << maxrange << " km" << endl;
 		cout << "maxrange is too short (< 10 m) ... program terminated." << endl;
 		exit(1);
 	}	
 
-	if (maxheight < 100) {
-		cout << "maxheight = " << maxheight/1000.0 << " km" << endl;
+	if (maxheight < 0.100) {
+		cout << "maxheight = " << maxheight << " km" << endl;
 		cout << "maxheight is too short (< 100 m) ... program terminated." << endl;
 		exit(1);
 	}							
@@ -184,11 +218,11 @@ void NCPA::SolveModNB::printParams() {
 	}
 	printf("                Nz_grid : %d\n", Nz_grid);
 	printf("      z_min (meters MSL): %g\n", z_min);
-	printf("      maxheight_km (MSL): %g\n", maxheight/1000.0);
-	printf("   sourceheight_km (AGL): %g\n", sourceheight/1000.0);
-	printf(" receiverheight_km (AGL): %g\n", receiverheight/1000.0);   
+	printf("      maxheight_km (MSL): %g\n", maxheight);
+	printf("   sourceheight_km (AGL): %g\n", sourceheight);
+	printf(" receiverheight_km (AGL): %g\n", receiverheight);   
 	printf("             Nrng_steps : %d\n", Nrng_steps);
-	printf("            maxrange_km : %g\n", maxrange/1000.0); 
+	printf("            maxrange_km : %g\n", maxrange); 
 	printf("          gnd_imp_model : %s\n", gnd_imp_model.c_str());
 	printf("Lamb wave boundary cond : %d\n", Lamb_wave_BC);
 	printf("  SLEPc tolerance param : %g\n", tol);
@@ -258,7 +292,7 @@ int NCPA::SolveModNB::computeModes() {
 	dz       = (maxheight - z_min)/Nz_grid;	// the z-grid spacing
 	h2       = dz*dz;
 	//dz_km    = dz/1000.0;
-	z_min_km = z_min/1000.0;
+	z_min_km = z_min;
   
 	//
 	// loop over azimuths (if not (N by 2D) it's only one azimuth)

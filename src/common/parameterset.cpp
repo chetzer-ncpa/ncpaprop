@@ -19,7 +19,7 @@ Code for ParameterSet class
 NCPA::ParameterSet::ParameterSet() {
 	_params.clear();
 	_unparsed.clear();
-	_usage.clear();
+	//_usage.clear();
 	_headerLines.clear();
 	_footerLines.clear();
 	_descriptionLines.clear();
@@ -29,6 +29,12 @@ NCPA::ParameterSet::ParameterSet() {
 	_delims = ":= ";
 	_comments = "#";
 	_strict = true;
+
+	headerIndent_ = DEFAULT_HEADER_INDENT;
+	footerIndent_ = DEFAULT_FOOTER_INDENT;
+	parameterIndent_ = DEFAULT_PARAMETER_INDENT;
+	headerHangingIndent_ = 0;
+	footerHangingIndent_ = 0;
 }
 
 NCPA::ParameterSet::~ParameterSet() {
@@ -45,7 +51,7 @@ NCPA::ParameterSet::~ParameterSet() {
 	_tests.clear();
 	_failed_tests.clear();
 	_unparsed.clear();
-	_usage.clear();
+	//_usage.clear();
 	_headerLines.clear();
 	_footerLines.clear();
 
@@ -59,23 +65,74 @@ NCPA::ParameterSet::~ParameterSet() {
 	_sections.clear();
 }
 
-void NCPA::ParameterSet::addHeaderText( const std::string& text, unsigned int indent, unsigned int maxwidth ) {
-	formatText_( _headerLines, text, indent, maxwidth );
+void NCPA::ParameterSet::setHeaderIndent( unsigned int newindent ) {
+	headerIndent_ = newindent;
 }
 
-void NCPA::ParameterSet::addFooterText( const std::string& text, unsigned int indent, unsigned int maxwidth ) {
-	formatText_( _footerLines, text, indent, maxwidth );
+void NCPA::ParameterSet::resetHeaderIndent() {
+	headerIndent_ = DEFAULT_HEADER_INDENT;
+}
+
+void NCPA::ParameterSet::resetFooterIndent() {
+	footerIndent_ = DEFAULT_FOOTER_INDENT;
+}
+
+void NCPA::ParameterSet::setFooterIndent( unsigned int newindent ) {
+	footerIndent_ = newindent;
+}
+
+void NCPA::ParameterSet::setParameterIndent( unsigned int newindent ) {
+	parameterIndent_ = newindent;
+}
+
+void NCPA::ParameterSet::resetParameterIndent() {
+	parameterIndent_ = DEFAULT_PARAMETER_INDENT;
+}
+
+void NCPA::ParameterSet::setHeaderHangingIndent( unsigned int newindent ) {
+	headerHangingIndent_ = newindent;
+}
+
+void NCPA::ParameterSet::setFooterHangingIndent( unsigned int newindent ) {
+	footerHangingIndent_ = newindent;
+}
+
+void NCPA::ParameterSet::addHeaderText( const std::string& text, unsigned int maxwidth ) {
+	formatText_( _headerLines, text, headerIndent_, headerHangingIndent_, maxwidth );
+}
+
+void NCPA::ParameterSet::addHeaderTextVerbatim( const std::string& text ) {
+	std::string tmpStr( text );
+	_headerLines.push_back( tmpStr );
+}
+
+void NCPA::ParameterSet::addBlankHeaderLine() {
+	_headerLines.push_back("");
+}
+
+void NCPA::ParameterSet::addBlankFooterLine() {
+	_footerLines.push_back("");
+}
+
+void NCPA::ParameterSet::addFooterText( const std::string& text, unsigned int maxwidth ) {
+	formatText_( _footerLines, text, footerIndent_, footerHangingIndent_, maxwidth );
+}
+
+void NCPA::ParameterSet::addFooterTextVerbatim( const std::string& text ) {
+	std::string tmpStr( text );
+	_footerLines.push_back( tmpStr );
 }
 
 void NCPA::ParameterSet::formatText_( std::vector< std::string > &holder, const std::string& text, 
-	unsigned int indent, unsigned int maxwidth ) {
+	unsigned int indent, unsigned int hanging_indent, unsigned int maxwidth ) {
 
 	std::string tmpStr;
 	std::ostringstream oss;
 	unsigned int indent_i;
+	unsigned int hang = 0;
 
 	std::vector< std::string > words = NCPA::split( text );
-	addSpaces_( &oss, indent );
+	addSpaces_( &oss, indent + hang );
 
 	for (std::vector< std::string >::const_iterator it = words.cbegin(); 
 		it != words.end(); ++it) {
@@ -84,16 +141,18 @@ void NCPA::ParameterSet::formatText_( std::vector< std::string > &holder, const 
 		if (*it == "#n#") {
 			tmpStr = oss.str();
 			holder.push_back( tmpStr );
+			hang = hanging_indent;
 			oss.str( "" );
-			addSpaces_( &oss, indent );
+			addSpaces_( &oss, indent + hang );
 		} else {
 
 			if ( (oss.str().size() + (*it).size() + 1) > maxwidth ) {
 				// adding this word would extend the line too far, so flush it
 				tmpStr = oss.str();
 				holder.push_back( tmpStr );
+				hang = hanging_indent;
 				oss.str( "" );
-				addSpaces_( &oss, indent );
+				addSpaces_( &oss, indent + hang );
 			}
 
 			if (oss.str().size() > indent) {
@@ -107,8 +166,7 @@ void NCPA::ParameterSet::formatText_( std::vector< std::string > &holder, const 
 }
 
 void NCPA::ParameterSet::addParameterDescription( const std::string& section, const std::string& param, 
-			const std::string &description, unsigned int indent, unsigned int firstcolumnwidth, 
-			unsigned int maxwidth ) {
+			const std::string &description, unsigned int firstcolumnwidth, unsigned int maxwidth ) {
 
 	// do we have this header already?
 	std::ostringstream *oss, *oss_orig;
@@ -120,7 +178,7 @@ void NCPA::ParameterSet::addParameterDescription( const std::string& section, co
 	}
 
 	oss = new std::ostringstream("");
-	addSpaces_( oss, indent );
+	addSpaces_( oss, parameterIndent_ );
 	*oss << param;
 	bool indentFirst = false;
 	unsigned int charsUsed = oss->str().size();
@@ -133,7 +191,7 @@ void NCPA::ParameterSet::addParameterDescription( const std::string& section, co
 
 	// Now we format the description, breaking it into lines
 	std::vector< std::string > sublines;
-	formatText_( sublines, description, firstcolumnwidth + 1, maxwidth );
+	formatText_( sublines, description, firstcolumnwidth + 1, 0, maxwidth );
 	if (!indentFirst) {
 		sublines[ 0 ] = sublines[ 0 ].substr( firstcolumnwidth + 1 );
 	}
@@ -158,11 +216,12 @@ void NCPA::ParameterSet::addSpaces_( std::ostringstream *oss, unsigned int space
 }
 
 
-
+/*
 void NCPA::ParameterSet::addUsageLine( const std::string& line ) {
 	std::string nline( line );
 	_usage.push_back( nline );
 }
+*/
 
 void NCPA::ParameterSet::printUsage( std::ostream& os ) const {
 
@@ -455,6 +514,9 @@ unsigned int NCPA::ParameterSet::processLongOption_( int argc, char **argv,
 unsigned int NCPA::ParameterSet::parseFile( std::string filename ) {
 
 	std::ifstream ifs( filename, std::ifstream::in );
+	if (! ifs.good() ) {
+		return 0;
+	}
 	std::string line;
 	NCPA::GenericParameter *param = NULL;
 	unsigned int linesParsed = 0;
@@ -496,7 +558,7 @@ unsigned int NCPA::ParameterSet::parseFile( std::string filename ) {
 			linesParsed++;
 		}
 		line.clear();
-	} while (! ifs.eof() );
+	} while (ifs.good());
 
 	ifs.close();
 
@@ -512,8 +574,8 @@ NCPA::GenericParameter * NCPA::ParameterSet::getParameter( std::string key ) {
 	return param;
 }
 
-/*
-int NCPA::ParameterSet::getIntegerValue( std::string key ) const {
+
+int NCPA::ParameterSet::getInteger( std::string key ) const {
 	NCPA::GenericParameter *param = _params.findParameter( key );
 	if (param == NULL) {
 		throw std::invalid_argument( "No parameter '" + key 
@@ -523,7 +585,7 @@ int NCPA::ParameterSet::getIntegerValue( std::string key ) const {
 	return param->getIntegerValue();
 }
 
-double NCPA::ParameterSet::getFloatValue( std::string key ) const {
+double NCPA::ParameterSet::getFloat( std::string key ) const {
 	NCPA::GenericParameter *param = _params.findParameter( key );
 	if (param == NULL) {
 		throw std::invalid_argument( "No parameter '" + key 
@@ -533,7 +595,7 @@ double NCPA::ParameterSet::getFloatValue( std::string key ) const {
 	return param->getFloatValue();
 }
 
-std::string NCPA::ParameterSet::getStringValue( std::string key ) const {
+std::string NCPA::ParameterSet::getString( std::string key ) const {
 	NCPA::GenericParameter *param = _params.findParameter( key );
 	if (param == NULL) {
 		throw std::invalid_argument( "No parameter '" + key 
@@ -543,7 +605,7 @@ std::string NCPA::ParameterSet::getStringValue( std::string key ) const {
 	return param->getStringValue();
 }
 
-bool NCPA::ParameterSet::getBoolValue( std::string key ) const {
+bool NCPA::ParameterSet::getBool( std::string key ) const {
 	NCPA::GenericParameter *param = _params.findParameter( key );
 	if (param == NULL) {
 		throw std::invalid_argument( "No parameter '" + key 
@@ -552,7 +614,18 @@ bool NCPA::ParameterSet::getBoolValue( std::string key ) const {
 
 	return param->getBoolValue();
 }
-*/
+
+
+bool NCPA::ParameterSet::wasFound( std::string key ) const {
+	NCPA::GenericParameter *param = _params.findParameter( key );
+	if (param == NULL) {
+		throw std::invalid_argument( "No parameter '" + key 
+			+ "' has been specified!" );
+	}
+
+	return param->wasFound();
+}
+
 
 NCPA::ParameterTest * NCPA::ParameterSet::addTest( const std::string& option,
 		NCPA::PARAMETER_TEST_TYPE test_type ) {
@@ -657,14 +730,16 @@ NCPA::ParameterTest *NCPA::ParameterSet::addTest( NCPA::ParameterTest *newTest )
 	return newTest;
 }
 
-void NCPA::ParameterSet::printParameters( std::ostream& os ) const {
+void NCPA::ParameterSet::printParameters( bool printTests, std::ostream& os ) const {
 	for ( ParameterVector::const_iterator it = _params.begin();
 		it != _params.end(); ++it) {
 		os << (*it)->status() << std::endl;
-		std::vector< NCPA::ParameterTest * > subset = this->getTests( (*it)->getKey() );
-		for ( std::vector< NCPA::ParameterTest * >::const_iterator it2 = subset.begin();
-			it2 != subset.end(); ++it2) {
-			os << "   TEST: " << (*it2)->description() << std::endl;
+		if (printTests) {
+			std::vector< NCPA::ParameterTest * > subset = this->getTests( (*it)->getKey() );
+			for ( std::vector< NCPA::ParameterTest * >::const_iterator it2 = subset.begin();
+				it2 != subset.end(); ++it2) {
+				os << "   TEST: " << (*it2)->description() << std::endl;
+			}
 		}
 	}
 }

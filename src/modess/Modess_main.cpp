@@ -5,10 +5,11 @@
 #include <stdexcept>
 #include <sstream>
 #include <complex>
+#include <cstring>
 
 #include "Atmosphere.h"
-#include "anyoption.h"
-#include "ProcessOptionsNB.h"
+//#include "anyoption.h"
+//#include "ProcessOptionsNB.h"
 #include "SolveModNB.h"
 //#include "Modess_lib.h"
 #include "util.h"
@@ -38,7 +39,7 @@ using namespace std;
 */
 
 // Function to parse the options from the command line/config file
-AnyOption *parseInputOptions( int argc, char **argv );
+//AnyOption *parseInputOptions( int argc, char **argv );
 
 //
 // main
@@ -49,41 +50,64 @@ int main( int argc, char **argv ) {
 	// unless mentioned otherwise.
 
 	// parse options from the command line as well as an options file
-	AnyOption *opt = parseInputOptions( argc, argv ); 
+	//AnyOption *opt = parseInputOptions( argc, argv ); 
 
 
 	// object to process the options
-	ProcessOptionsNB *oNB;
+	//ProcessOptionsNB *oNB;
 	//oNB = new ProcessOptionsNB(opt);
 	ParameterSet *param = new ParameterSet();
 	configure_modess_parameter_set( param );
 	param->parseCommandLine( argc, argv );
 
 	// check for help text
-	if (param->getParameter( "help" )->wasFound()) {
+	if (param->wasFound( "help" ) || param->wasFound("h") ) {
 		param->printUsage( cout );
-	} else {
-		cout << "Help request not found" << endl;
+		return 1;
 	}
-	exit( 0 );
 
+	// See if an options file was specified
+	string paramFile = param->getString( "paramfile" );
+	int linesParsed = param->parseFile( paramFile );
 
+	// parse command line again, to override file options
+	param->parseCommandLine( argc, argv );
 
+	// see if we want a parameter summary
+	if (param->wasFound( "printparams" ) ) {
+		param->printParameters();
+	}
 
+	// run parameter checks
+	if (! param->validate() ) {
+		cout << "Parameter validation failed:" << endl;
+		param->printFailedTests( cout );
+		return 0;
+	}
+
+	string atmosfile = 			param->getString( "atmosfile" );
+	string atmosfileorder = 	param->getString( "atmosfileorder" );
+	string wind_units = 		param->getString( "windunits" );
+	int skiplines = 			param->getInteger( "skiplines" );
+
+	/*
 	string atmosfile      = "";          // stores the atmospheric profile name
 	string atmosfileorder = "";          // column order e.g. 'zuvwtdp'
 	string wind_units     = "mpersec";   // m/s
 	int    skiplines      = 0;           // skiplines in "atmosfile"
+	*/
 
 	// set up to measure the duration of this run
 	time_t tm1 = time(NULL);
 
+	/*
 	// obtain the parameter values from the user's options
 	atmosfile      = oNB->getAtmosfile();
 	atmosfileorder = oNB->getAtmosfileorder();
 	wind_units     = oNB->getWindUnits();
 	//gnd_imp_model  = oNB->getGnd_imp_model(); 
 	skiplines      = oNB->getSkiplines();
+	*/
 
 	// get atmospheric profile object; the azimuth is set inside SolveModNB
 	bool inMPS = 0;
@@ -93,27 +117,29 @@ int main( int argc, char **argv ) {
 	SampledProfile *atm_profile = new SampledProfile( atmosfile, atmosfileorder.c_str(), skiplines, inMPS );
 	 
 	// get solver object
-	SolveModNB *a = new SolveModNB(oNB, atm_profile);  
+	//SolveModNB *a = new SolveModNB(oNB, atm_profile);
+	SolveModNB *a = new SolveModNB( param, atm_profile );
                                          
 	//   					 
 	// compute modes - main action happens here
 	//				 
 	a->computeModes();						 
-	
 	a->printParams();
 
 	// save atm. profile if requested
-	if (oNB->getWriteAtmProfile()) {
+	//if (oNB->getWriteAtmProfile()) {
+	if (param->getBool( "write_atm_profile" ) ) {
 		atm_profile->save_profile( wind_units );
 	}	
 	else { 
-		printf(" write_atm_profile flag : %d\n", oNB->getWriteAtmProfile()); 
+		printf(" write_atm_profile flag : %d\n", param->getBool( "write_atm_profile" )); 
 	}
   
 	delete a;	 
 	delete atm_profile;
-	delete opt;
-	delete oNB;
+	//delete opt;
+	delete param;
+	//delete oNB;
 	
 	cout << "\n ... main() is done." << endl;
 	time_t tm2 = time(NULL);
@@ -122,7 +148,7 @@ int main( int argc, char **argv ) {
 	return (0);
 } // end of main();
 
-
+/*
 AnyOption *parseInputOptions( int argc, char **argv ) {
 
 	// parse input options
@@ -321,6 +347,5 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
 
 	return opt;
 }
-
-
+*/
  

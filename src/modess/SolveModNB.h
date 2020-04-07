@@ -1,23 +1,28 @@
 #ifndef _SOLVEMODNB_H_
 #define _SOLVEMODNB_H_
-#include "ProcessOptionsNB.h"
+//#include "ProcessOptionsNB.h"
+#include "parameterset.h"
+#include <string>
+#include <complex>
+
 
 namespace NCPA {
 	class SolveModNB {
 	public:           
 
         
-		SolveModNB(ProcessOptionsNB *oNB, NCPA::SampledProfile *atm_profile); // constructor 2
-      
+		//SolveModNB(ProcessOptionsNB *oNB, NCPA::SampledProfile *atm_profile); // constructor 2
+      	SolveModNB( ParameterSet *param, SampledProfile *atm_profile );
             
-		void setParams(ProcessOptionsNB *oNB, NCPA::SampledProfile *atm_prof);                      	
+		//void setParams(ProcessOptionsNB *oNB, NCPA::SampledProfile *atm_prof);
+		void setParams( ParameterSet *param, SampledProfile *atm_prof );                  	
 		
 		void printParams();
 
 		int computeModes();	
 
 		int getAbsorption(int n, double dz, NCPA::SampledProfile *p, double freq, 
-			string usrattfile, double *alpha);
+			std::string usrattfile, double *alpha);
 
 		int getModalTrace(int nz, double z_min, double sourceheight, double receiverheight, 
 			double dz, NCPA::SampledProfile *p, double admittance, double freq, double azi, 
@@ -35,31 +40,31 @@ namespace NCPA {
 			double *k_s, double **v_s, int *select_modes);
 
 		int getTLoss1D(int select_modes, double dz, int n_r, double dr, double z_src, double z_rcv, 
-			double *rho, complex<double> *k_pert, double **v_s);     
+			double *rho, std::complex<double> *k_pert, double **v_s);     
       
 
       
 		int getTLoss1DNx2(double azimuth, int select_modes, double dz, int n_r, double dr, double z_src, 
-			double z_rcv,  double *rho, complex<double> *k_pert, double **v_s, bool Nx2, int iter);      
+			double z_rcv,  double *rho, std::complex<double> *k_pert, double **v_s, bool Nx2, int iter);      
 
 		int getTLoss2D(int nz, int select_modes, double dz, int n_r, double dr, double z_src, 
-			double *rho, complex<double> *k_pert, double **v_s); 
+			double *rho, std::complex<double> *k_pert, double **v_s); 
       
 		// Modal starter - DV 20151014
 		// Modification to apply the sqrt(k0) factor to agree with Jelle's getModalStarter; 
 		// this in turn will make 'pape' agree with modess output
 		void getModalStarter(int nz, int select_modes, double dz, double freq,  double z_src, 
-			double z_rcv, double *rho, complex<double> *k_pert, double **v_s, string modstartfile);
+			double z_rcv, double *rho, std::complex<double> *k_pert, double **v_s, std::string modstartfile);
 
 		int writeDispersion(int select_modes, double dz, double z_src, double z_rcv, double freq, 
-			complex<double> *k_pert, double **v_s, double *rho);
+			std::complex<double> *k_pert, double **v_s, double *rho);
 
 		int writePhaseSpeeds(int select_modes, double freq, std::complex<double> *k_pert);
 
 		int writeEigenFunctions(int nz, int select_modes, double dz, double **v_s);
       
 		int writePhaseAndGroupSpeeds(int nz, double dz, int select_modes, double freq, 
-			complex<double> *k_pert, double **v_s, double *c_eff);   
+			std::complex<double> *k_pert, double **v_s, double *c_eff);   
 
 	private:
 		bool   write_2D_TLoss;
