@@ -12,6 +12,7 @@
 #include "SolveModNB.h"
 //#include "Modess_lib.h"
 #include "util.h"
+#include "modess_parameters.h"
 
 //#ifndef Pi
 //#define Pi 3.141592653589793
@@ -50,8 +51,24 @@ int main( int argc, char **argv ) {
 	// parse options from the command line as well as an options file
 	AnyOption *opt = parseInputOptions( argc, argv ); 
 
+
 	// object to process the options
-	ProcessOptionsNB *oNB = new ProcessOptionsNB(opt);
+	ProcessOptionsNB *oNB;
+	//oNB = new ProcessOptionsNB(opt);
+	ParameterSet *param = new ParameterSet();
+	configure_modess_parameter_set( param );
+	param->parseCommandLine( argc, argv );
+
+	// check for help text
+	if (param->getParameter( "help" )->wasFound()) {
+		param->printUsage( cout );
+	} else {
+		cout << "Help request not found" << endl;
+	}
+	exit( 0 );
+
+
+
 
 	string atmosfile      = "";          // stores the atmospheric profile name
 	string atmosfileorder = "";          // column order e.g. 'zuvwtdp'
@@ -290,17 +307,17 @@ AnyOption *parseInputOptions( int argc, char **argv ) {
 	opt->processFile( "./Modess.options" );
 	opt->processCommandArgs( argc, argv );
 
-	if( ! opt->hasOptions()) { // print usage if no options
-		opt->printUsage();
-		delete opt;
-		exit( 1 );
-	}
+	//if( ! opt->hasOptions()) { // print usage if no options
+	//	opt->printUsage();
+	//	delete opt;
+	//	exit( 1 );
+	//}
 
 	// Check to see if help text was requested
-	if ( opt->getFlag( "help" ) || opt->getFlag( 'h' ) ) {
-		opt->printUsage();
-		exit( 1 );
-	}
+	//if ( opt->getFlag( "help" ) || opt->getFlag( 'h' ) ) {
+	//	opt->printUsage();
+	//	exit( 1 );
+	//}
 
 	return opt;
 }

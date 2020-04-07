@@ -11,6 +11,7 @@
 #include <sstream>
 #include "util.h"
 
+
 #define PI 3.141592653589793
 
 double NCPA::min( double a, double b ) {

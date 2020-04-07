@@ -39,7 +39,7 @@ namespace NCPA {
 	std::string toLowerCase( const std::string in );
 	
 	// Split a string into more strings by tokenizing
-	std::vector< std::string > split( std::string input, std::string delimiters );
+	std::vector< std::string > split( std::string input, std::string delimiters = " \t\n" );
 	std::string deblank( const std::string& str, const std::string& whitespace );
 
 	bool checkAzimuthLimits( double toCheck, double target, double tolerance );

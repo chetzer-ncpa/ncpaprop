@@ -20,6 +20,10 @@ NCPA::ParameterSet::ParameterSet() {
 	_params.clear();
 	_unparsed.clear();
 	_usage.clear();
+	_headerLines.clear();
+	_footerLines.clear();
+	_descriptionLines.clear();
+	_sections.clear();
 	_tests.clear();
 	_failed_tests.clear();
 	_delims = ":= ";
@@ -42,6 +46,155 @@ NCPA::ParameterSet::~ParameterSet() {
 	_failed_tests.clear();
 	_unparsed.clear();
 	_usage.clear();
+	_headerLines.clear();
+	_footerLines.clear();
+
+	for (std::vector< std::string >::iterator it3 = _sections.begin(); it3 != _sections.end(); ++it3) {
+		try {
+			delete _descriptionLines.at( *it3 );
+		} catch (std::out_of_range &oor) {}
+	}
+
+	_descriptionLines.clear();
+	_sections.clear();
+}
+
+void NCPA::ParameterSet::addHeaderText( const std::string& text, unsigned int indent, unsigned int maxwidth ) {
+	formatText_( _headerLines, text, indent, maxwidth );
+}
+
+void NCPA::ParameterSet::addFooterText( const std::string& text, unsigned int indent, unsigned int maxwidth ) {
+	formatText_( _footerLines, text, indent, maxwidth );
+}
+
+void NCPA::ParameterSet::formatText_( std::vector< std::string > &holder, const std::string& text, 
+	unsigned int indent, unsigned int maxwidth ) {
+
+	std::string tmpStr;
+	std::ostringstream oss;
+	unsigned int indent_i;
+
+	std::vector< std::string > words = NCPA::split( text );
+	addSpaces_( &oss, indent );
+
+	for (std::vector< std::string >::const_iterator it = words.cbegin(); 
+		it != words.end(); ++it) {
+
+		// check for specific newline instruction
+		if (*it == "#n#") {
+			tmpStr = oss.str();
+			holder.push_back( tmpStr );
+			oss.str( "" );
+			addSpaces_( &oss, indent );
+		} else {
+
+			if ( (oss.str().size() + (*it).size() + 1) > maxwidth ) {
+				// adding this word would extend the line too far, so flush it
+				tmpStr = oss.str();
+				holder.push_back( tmpStr );
+				oss.str( "" );
+				addSpaces_( &oss, indent );
+			}
+
+			if (oss.str().size() > indent) {
+				oss << " ";
+			}
+			oss << *it;
+		}
+	}
+	tmpStr = oss.str();
+	holder.push_back( tmpStr );
+}
+
+void NCPA::ParameterSet::addParameterDescription( const std::string& section, const std::string& param, 
+			const std::string &description, unsigned int indent, unsigned int firstcolumnwidth, 
+			unsigned int maxwidth ) {
+
+	// do we have this header already?
+	std::ostringstream *oss, *oss_orig;
+	try {
+		oss_orig = _descriptionLines.at( section );
+	} catch (std::out_of_range &oor) {
+		oss_orig = new std::ostringstream("");
+		_descriptionLines[ section ] = oss_orig;
+	}
+
+	oss = new std::ostringstream("");
+	addSpaces_( oss, indent );
+	*oss << param;
+	bool indentFirst = false;
+	unsigned int charsUsed = oss->str().size();
+	if (charsUsed > firstcolumnwidth) {
+		*oss << std::endl;
+		indentFirst = true;
+	} else {
+		addSpaces_( oss, firstcolumnwidth - charsUsed + 1 );
+	}
+
+	// Now we format the description, breaking it into lines
+	std::vector< std::string > sublines;
+	formatText_( sublines, description, firstcolumnwidth + 1, maxwidth );
+	if (!indentFirst) {
+		sublines[ 0 ] = sublines[ 0 ].substr( firstcolumnwidth + 1 );
+	}
+	for (std::vector< std::string >::const_iterator it = sublines.cbegin();
+		it != sublines.cend(); ++it) {
+		*oss << *it << std::endl;
+	}
+
+	// Finally save the section names in order
+	if (std::find( _sections.begin(), _sections.end(), section ) == _sections.end() ) {
+		std::string tmpStr = section;
+		_sections.push_back( tmpStr );
+	}
+	*oss_orig << oss->str();
+	delete oss;
+}
+
+void NCPA::ParameterSet::addSpaces_( std::ostringstream *oss, unsigned int spaces ) {
+	for (unsigned int i = 0; i < spaces; i++) {
+		*oss << " ";
+	}
+}
+
+
+
+void NCPA::ParameterSet::addUsageLine( const std::string& line ) {
+	std::string nline( line );
+	_usage.push_back( nline );
+}
+
+void NCPA::ParameterSet::printUsage( std::ostream& os ) const {
+
+	// first the header
+	std::vector< std::string >::const_iterator it;
+	for (it = _headerLines.cbegin(); it != _headerLines.cend(); ++it ) {
+		os << *it << std::endl;
+	}
+	os << std::endl;
+
+
+	// now sections of parameters
+	for (it = _sections.cbegin(); it != _sections.cend(); ++it) {
+		os << *it << ":" << std::endl;
+		std::ostringstream *oss = _descriptionLines.at( *it );
+		os << oss->str()<< std::endl;
+
+	}
+	os << std::endl;
+
+	// now the footer
+	for (it = _footerLines.cbegin(); it != _footerLines.cend(); ++it ) {
+		os << *it << std::endl;
+	}
+	os << std::endl;
+
+/*
+	for ( std::vector< std::string >::const_iterator it = _usage.begin();
+		it != _usage.end(); ++it) {
+		os << *it << std::endl;
+	}
+*/
 }
 
 void NCPA::ParameterSet::setDelimiters( std::string newdelim ) {
@@ -84,18 +237,6 @@ void NCPA::ParameterSet::printFailedTests( std::ostream& os ) const {
 	}
 }
 
-void NCPA::ParameterSet::addUsageLine( const std::string& line ) {
-	std::string nline( line );
-	_usage.push_back( nline );
-}
-
-void NCPA::ParameterSet::printUsage( std::ostream& os ) const {
-	for ( std::vector< std::string >::const_iterator it = _usage.begin();
-		it != _usage.end(); ++it) {
-		os << *it << std::endl;
-	}
-}
-
 unsigned int NCPA::ParameterSet::parseCommandLine( int argc, char **argv ) {
 	bool expectingArg = false;
 	std::string lastarg;
@@ -104,11 +245,11 @@ unsigned int NCPA::ParameterSet::parseCommandLine( int argc, char **argv ) {
 	for (unsigned int i = 0; i < argc; i++) {
 		
 		std::string currentarg = argv[ i ];
-		if (_isLongOption( currentarg )) {
-			i = _processLongOption( argc, argv, i );
+		if (isLongOption_( currentarg )) {
+			i = processLongOption_( argc, argv, i );
 			nOptions++;
-		} else if (_isShortOption( currentarg )) {
-			i = _processShortOption( argc, argv, i );
+		} else if (isShortOption_( currentarg )) {
+			i = processShortOption_( argc, argv, i );
 			nOptions++;
 		} else {
 			_unparsed.push_back( currentarg );
@@ -118,7 +259,7 @@ unsigned int NCPA::ParameterSet::parseCommandLine( int argc, char **argv ) {
 }
 
 // returns true if the string is at least 3 characters and the first two are "--"
-bool NCPA::ParameterSet::_isLongOption( std::string opt ) const {
+bool NCPA::ParameterSet::isLongOption_( std::string opt ) const {
 	if (opt.size() < 3) {
 		return false;
 	}
@@ -131,7 +272,7 @@ bool NCPA::ParameterSet::_isLongOption( std::string opt ) const {
 
 // returns true if the string is at least 2 characters, the first character is "-", and the
 // second is NOT "-"
-bool NCPA::ParameterSet::_isShortOption( std::string opt ) const {
+bool NCPA::ParameterSet::isShortOption_( std::string opt ) const {
 	if (opt.size() < 2) {
 		return false;
 	}
@@ -142,7 +283,7 @@ bool NCPA::ParameterSet::_isShortOption( std::string opt ) const {
 	}
 }
 
-unsigned int NCPA::ParameterSet::_processShortOption( int argc, char **argv,
+unsigned int NCPA::ParameterSet::processShortOption_( int argc, char **argv,
 	unsigned int i) {
 
 	std::string fullarg = argv[ i ];
@@ -171,7 +312,7 @@ unsigned int NCPA::ParameterSet::_processShortOption( int argc, char **argv,
 	return i;
 }
 
-void NCPA::ParameterSet::_processDoubleOption( std::string key, std::string value ) {
+void NCPA::ParameterSet::processDoubleOption_( std::string key, std::string value ) {
 
 	// see of we're expecting this parameter
 	NCPA::GenericParameter *param = _params.findParameter( key );
@@ -195,7 +336,7 @@ void NCPA::ParameterSet::_processDoubleOption( std::string key, std::string valu
 	}
 }
 
-void NCPA::ParameterSet::_processSingleOption( std::string key ) {
+void NCPA::ParameterSet::processSingleOption_( std::string key ) {
 
 	// see if we're expecting this parameter
 	NCPA::GenericParameter *param = _params.findParameter( key );
@@ -220,7 +361,7 @@ void NCPA::ParameterSet::_processSingleOption( std::string key ) {
 
 // processes options in the form --flag, --option value, or --option=value, where the '='
 // stands for any of the set delimiter characters
-unsigned int NCPA::ParameterSet::_processLongOption( int argc, char **argv, 
+unsigned int NCPA::ParameterSet::processLongOption_( int argc, char **argv, 
 	unsigned int i ) {
 	
 	std::string fullarg = argv[ i ];
@@ -236,7 +377,7 @@ unsigned int NCPA::ParameterSet::_processLongOption( int argc, char **argv,
 	if ( found != std::string::npos ) {    // found one
 		key = stripped.substr( 0, found );
 		value = stripped.substr( found+1, std::string::npos );
-		this->_processDoubleOption( key, value );
+		this->processDoubleOption_( key, value );
 	} else {
 		key = stripped;
 		param = _params.findParameter( key );
@@ -251,7 +392,7 @@ unsigned int NCPA::ParameterSet::_processLongOption( int argc, char **argv,
 					value = argv[ i+1 ];
 
 					// make sure the value isn't structured like another option or flag
-					if (_isLongOption(value) || _isShortOption(value)) {
+					if (isLongOption_(value) || isShortOption_(value)) {
 						std::ostringstream oss;
 						oss << "Value '" << value << "' for option '" << key
 							<< "' appears to be another argument.";
@@ -259,7 +400,7 @@ unsigned int NCPA::ParameterSet::_processLongOption( int argc, char **argv,
 					}
 
 					// value looks legit, so use it
-					this->_processDoubleOption( key, value );
+					this->processDoubleOption_( key, value );
 					//param->parseArgument( value );
 					//param->setFound( true );
 					i++;
@@ -272,7 +413,7 @@ unsigned int NCPA::ParameterSet::_processLongOption( int argc, char **argv,
 				}
 			} else {
 				// no argument expected, so mark that it's here and move on
-				this->_processSingleOption( key );
+				this->processSingleOption_( key );
 				//param->setFound( true );
 			}
 		} else {
@@ -283,15 +424,15 @@ unsigned int NCPA::ParameterSet::_processLongOption( int argc, char **argv,
 				// don't know what to do with it, so let's see if it's got an argument
 				if (i < argc-1) {
 					value = argv[ i+1 ];
-					if (_isLongOption(value) || _isShortOption(value)) {
+					if (isLongOption_(value) || isShortOption_(value)) {
 						// next option looks like an option, so treat this one as a flag
-						this->_processSingleOption( key );
+						this->processSingleOption_( key );
 						//param = new FlagOption( key, true );
 						//param->setFound( true );
 						//_params.push_back( param );
 					} else {
 						// next option looks like a value, so use it as a string
-						this->_processDoubleOption( key, value );
+						this->processDoubleOption_( key, value );
 						//param = new StringOption( key, value );
 						//param->setFound( true );
 						//_params.push_back( param );
@@ -299,7 +440,7 @@ unsigned int NCPA::ParameterSet::_processLongOption( int argc, char **argv,
 					}
 				} else {
 					// no more arguments to parse, so it must be a flag
-					this->_processSingleOption( key );
+					this->processSingleOption_( key );
 					//param = new FlagOption( key, true );
 					//param->setFound( true );
 					//_params.push_back( param );
@@ -346,9 +487,9 @@ unsigned int NCPA::ParameterSet::parseFile( std::string filename ) {
 
 			if (tokens.size() == 1) {
 				// no argument provided, just the flag
-				this->_processSingleOption( NCPA::deblank(tokens[ 0 ]) );
+				this->processSingleOption_( NCPA::deblank(tokens[ 0 ]) );
 			} else {
-				this->_processDoubleOption( NCPA::deblank(tokens[ 0 ]),
+				this->processDoubleOption_( NCPA::deblank(tokens[ 0 ]),
 				NCPA::deblank( tokens[ 1 ] ) );
 			}
 

@@ -144,7 +144,33 @@ int main( int argc, char **argv ) {
 #ifndef _NCPA_PARAMETERSET_H_
 #define _NCPA_PARAMETERSET_H_
 
+
+// user-controlled formatting
+#ifndef HELP_TEXT_WIDTH
+#define HELP_TEXT_WIDTH 80
+#endif
+
+#ifndef DEFAULT_HEADER_INDENT
+#define DEFAULT_HEADER_INDENT 0
+#endif
+
+#ifndef DEFAULT_FOOTER_INDENT
+#define DEFAULT_FOOTER_INDENT 0
+#endif
+
+#ifndef DEFAULT_PARAMETER_INDENT
+#define DEFAULT_PARAMETER_INDENT 2
+#endif
+
+#ifndef DEFAULT_PARAMETER_FIRST_COLUMN_WIDTH
+#define DEFAULT_PARAMETER_FIRST_COLUMN_WIDTH 24
+#endif
+
+
+
+
 #include <vector>
+#include <map>
 #include <string>
 #include <iostream>
 
@@ -513,6 +539,11 @@ namespace NCPA {
 
 		// Messages to output to the user
 		void addUsageLine( const std::string& line );
+		void addHeaderText( const std::string& text, unsigned int indent = DEFAULT_HEADER_INDENT, unsigned int maxwidth = HELP_TEXT_WIDTH );
+		void addFooterText( const std::string& text, unsigned int indent = DEFAULT_FOOTER_INDENT, unsigned int maxwidth = HELP_TEXT_WIDTH );
+		void addParameterDescription( const std::string& section, const std::string& param, 
+			const std::string &description, unsigned int indent = DEFAULT_PARAMETER_INDENT, unsigned int firstcolumnwidth = DEFAULT_PARAMETER_FIRST_COLUMN_WIDTH, 
+			unsigned int maxwidth = HELP_TEXT_WIDTH );
 		void printUsage( std::ostream& os = std::cout ) const;
 
 		// Ingest from command line or file
@@ -530,30 +561,30 @@ namespace NCPA {
 		void printParameters( std::ostream& os = std::cout ) const;
 
 		GenericParameter *getParameter( std::string key );
-		
-		//int getIntegerValue( std::string key ) const;
-		//double getFloatValue( std::string key ) const;
-		//std::string getStringValue( std::string key ) const;
-		//bool getBoolValue( std::string key ) const;
 
-		
 		
 	protected:
 		ParameterVector _params;
 		std::string _delims, _comments;
 		std::vector< std::string > _unparsed;
 		std::vector< std::string > _usage;
+		std::vector< std::string > _headerLines, _footerLines, _sections;
+		std::map< std::string, std::ostringstream * > _descriptionLines;
 		//NullParameter *_PARAM_NOT_FOUND;
 
 		std::vector< NCPA::ParameterTest * > _tests, _failed_tests;
 		bool _strict;
 		
-		bool _isLongOption( std::string ) const;
-		bool _isShortOption( std::string ) const;
-		unsigned int _processShortOption( int argc, char **argv, unsigned int index );
-		unsigned int _processLongOption( int argc, char **argv, unsigned int index );
-		void _processSingleOption( std::string key );
-		void _processDoubleOption( std::string key, std::string value );
+		bool isLongOption_( std::string ) const;
+		bool isShortOption_( std::string ) const;
+		unsigned int processShortOption_( int argc, char **argv, unsigned int index );
+		unsigned int processLongOption_( int argc, char **argv, unsigned int index );
+		void processSingleOption_( std::string key );
+		void processDoubleOption_( std::string key, std::string value );
+
+		void formatText_( std::vector< std::string > &holder, const std::string& text, 
+			unsigned int indent, unsigned int maxwidth );
+		void addSpaces_( std::ostringstream *oss, unsigned int spaces );
 
 		//GenericParameter * _findParam( std::string key ) const;
 	};

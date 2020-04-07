@@ -1,3 +1,11 @@
+/*
+compile with
+
+g++ -o parameterset_test -ggdb -I.. -I. parameterset_test.cpp ../parameterset.cpp ../util.cpp 
+
+*/
+
+
 #include "parameterset.h"
 #include <iostream>
 
@@ -15,18 +23,28 @@ int main( int argc, char **argv ) {
 	ps->setStrict( false );
 	ps->setComments( "#%" );
 
+
+	ps->addHeaderText( "This is a long header line that should be broken into several lines to fit into an 80-character max terminal window.  We'll see if it works but I don't see any reason why it shouldn't.  Blah blah blah lorem ipsum yada yada yadayadayada." );
+	ps->addParameterDescription( "Flags", "--help", "Print help text and exit", 4 );
+	ps->addParameterDescription( "Flags", "-h", "Print help text and exit (misaligned)", 6 );
+	ps->addParameterDescription( "Integers", "--testval", "Test integer value that hopefully will be properly wrapped since it's way too long to fit in the remainder of the line", 4 );
+	ps->addParameterDescription( "Floating Point Values", "--testfloat", "Test double value", 4 );
+	ps->addParameterDescription( "Floating Point Values", "--this_parameter_is_definitely_too_long", "This text should start on the next line and hopefully will be properly wrapped since it's way too long to fit in the remainder of the line", 4 );
+
+
+
 	ps->addParameter( new FlagParameter( "help" ) );
 	ps->addParameter( new FlagParameter( "h" ) );
-	ps->addUsageLine( "  --help, -h       Prints help text" );
+	//ps->addUsageLine( "  --help, -h       Prints help text" );
 
 	ps->addParameter( new IntegerParameter( "testval" ) );
-	ps->addUsageLine( "  --testval        Test integer value" );
+	//ps->addUsageLine( "  --testval        Test integer value" );
 	//test = ps->addTest( "testval", PARAMETER_TEST_INTEGER_GREATER_THAN );
 	//test->addIntegerParameter( 10 );
 	ps->addTest( new IntegerGreaterThanTest( "testval", 10 ) );
 
 	ps->addParameter( new FloatParameter( "testfloat" ) );
-	ps->addUsageLine( "  --testfloat      Test double value" );
+	//ps->addUsageLine( "  --testfloat      Test double value" );
 
 	// full suite of tests. for each known test type
 	//ps->addParameter( new FlagParameter( "flagtwo" ) );
