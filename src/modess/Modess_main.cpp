@@ -87,7 +87,7 @@ int main( int argc, char **argv ) {
 
 	string atmosfile = 			param->getString( "atmosfile" );
 	string atmosfileorder = 	param->getString( "atmosfileorder" );
-	string wind_units = 		param->getString( "windunits" );
+	string wind_units = 		param->getString( "wind_units" );
 	int skiplines = 			param->getInteger( "skiplines" );
 
 	/*

@@ -183,6 +183,8 @@ void NCPA::Units::initialize_() {
 		{ get_unit_pair_( UNITS_PRESSURE_MILLIBARS, UNITS_PRESSURE_PASCALS ), []( double in ) { return in * 100.0; } },
 		{ get_unit_pair_( UNITS_DENSITY_KILOGRAMS_PER_CUBIC_METER, UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER ), []( double in ) { return in * 0.001; } },
 		{ get_unit_pair_( UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER, UNITS_DENSITY_KILOGRAMS_PER_CUBIC_METER ), []( double in ) { return in * 1000.0; } },
+		{ get_unit_pair_( UNITS_ANGLE_RADIANS, UNITS_ANGLE_DEGREES ), []( double in ) { return in * 180.0 / PI; } },
+		{ get_unit_pair_( UNITS_ANGLE_DEGREES, UNITS_ANGLE_RADIANS ), []( double in ) { return in * PI / 180.0; } },
 		{ get_unit_pair_( UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH, UNITS_DIRECTION_DEGREES_COUNTERCLOCKWISE_FROM_EAST ), []( double in ) { 
 			double out = 90.0 - in; 
 			while (out < 0) {
@@ -775,6 +777,7 @@ void NCPA::VectorWithUnits::convert_units( NCPA::units_t new_units ) {
 	// will throw out_of_range and leave original units unchanged if there's an error
 	// if there's no change in units, don't bother with the calculation, just push another
 	// one onto the stack so reversion can happen properly
+	//std::cout << "Called VectorWithUnits::convert_units()" << std::endl;
 	if (new_units != units_.top()) {
 		do_units_conversion_( n_, values_, units_.top(), new_units );
 	}

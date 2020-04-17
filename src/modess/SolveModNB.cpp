@@ -48,11 +48,11 @@ void NCPA::SolveModNB::setParams( NCPA::ParameterSet *param, NCPA::SampledProfil
 	usrattfile 			= param->getString( "use_attn_file" );
 	modstartfile 		= param->getString( "modal_starter_file" );
   	skiplines 			= param->getInteger( "skiplines" );
-  	z_min 				= param->getFloat( "zground_km" );
+  	z_min 				= param->getFloat( "zground_km" ) * 1000.0;    // meters
   	freq 				= param->getFloat( "freq" );
   	azi 				= param->getFloat( "azimuth" );
-  	maxrange 			= param->getFloat( "maxrange_km" );
-  	maxheight 			= param->getFloat( "maxheight_km" );
+  	maxrange 			= param->getFloat( "maxrange_km" ) * 1000.0;
+  	maxheight 			= param->getFloat( "maxheight_km" ) * 1000.0;      // @todo fix elsewhere that m is required
   	sourceheight 		= param->getFloat( "sourceheight_km" );
   	receiverheight 		= param->getFloat( "receiverheight_km" );
   	tol 				= 1.0e-8;
@@ -142,16 +142,16 @@ void NCPA::SolveModNB::setParams( NCPA::ParameterSet *param, NCPA::SampledProfil
 	// a rounding error. This should be revisited.
 	// @todo revisit this
 	// @todo add max_valid_height to AtmosphericProfile class
-	if (maxheight >= atm_profile->z(atm_profile->nz()-1)) {
-		maxheight = (atm_profile->z(atm_profile->nz()-1) - 1e-9); // slightly less
+	if (maxheight/1000.0 >= atm_profile->z(atm_profile->nz()-1)) {
+		maxheight = (atm_profile->z(atm_profile->nz()-1) - 1e-9) * 1000.0; // slightly less
 		cout << "\nmaxheight adjusted to: " << maxheight 
 			<< " km (max. available in the profile file)" << endl;
 	}
   
 	// fill and convert to SI units
 	double dz       = (maxheight - z_min)/Nz_grid;	// the z-grid spacing
-	double z_min_km = z_min;
-	double dz_km    = dz;
+	double z_min_km = z_min / 1000.0;
+	double dz_km    = dz / 1000.0;
 	double kmps2mps = 1.0;
 	//if (!wind_units.compare("kmpersec")) {
 		kmps2mps = 1000.0;
@@ -218,11 +218,11 @@ void NCPA::SolveModNB::printParams() {
 	}
 	printf("                Nz_grid : %d\n", Nz_grid);
 	printf("      z_min (meters MSL): %g\n", z_min);
-	printf("      maxheight_km (MSL): %g\n", maxheight);
-	printf("   sourceheight_km (AGL): %g\n", sourceheight);
-	printf(" receiverheight_km (AGL): %g\n", receiverheight);   
+	printf("      maxheight_km (MSL): %g\n", maxheight/1000.0);
+	printf("   sourceheight_km (AGL): %g\n", sourceheight/1000.0);
+	printf(" receiverheight_km (AGL): %g\n", receiverheight/1000.0);   
 	printf("             Nrng_steps : %d\n", Nrng_steps);
-	printf("            maxrange_km : %g\n", maxrange); 
+	printf("            maxrange_km : %g\n", maxrange/1000.0); 
 	printf("          gnd_imp_model : %s\n", gnd_imp_model.c_str());
 	printf("Lamb wave boundary cond : %d\n", Lamb_wave_BC);
 	printf("  SLEPc tolerance param : %g\n", tol);
@@ -847,8 +847,8 @@ int NCPA::SolveModNB::getModalTrace( int nz, double z_min, double sourceheight,
 	double cz, windz, ceffmin, ceffmax, ceff_grnd, cefftop; 
 	double kk, dkk, k_eff, k_gnd, k_max_full, wkbIntegral, wkbTerm;
 	//double rho_factor;
-	z_min_km = z_min/1000.0;
-	dz_km    = dz/1000.0;
+	z_min_km = z_min; // @CHH already in km
+	dz_km    = dz;    // @CHH already in km
 	omega    = 2*PI*freq;
   
 	azi_rad  = p->getPropagationAzimuth()*PI/180.0;

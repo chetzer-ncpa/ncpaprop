@@ -146,8 +146,8 @@ int main( int argc, char **argv ) {
 
 
 // user-controlled formatting
-#ifndef HELP_TEXT_WIDTH
-#define HELP_TEXT_WIDTH 80
+#ifndef DEFAULT_TEXT_WIDTH
+#define DEFAULT_TEXT_WIDTH 80
 #endif
 
 #ifndef DEFAULT_PARAMETER_FIRST_COLUMN_WIDTH
@@ -538,7 +538,7 @@ namespace NCPA {
 
 		// Tell the program what to expect
 		void addParameter( GenericParameter *newParam );
-		void setStrict( bool tf );
+		void setStrict( bool tf );   // whether to throw an exception when it runs into an unexpected parameter
 
 		// Messages to output to the user
 		//void addUsageLine( const std::string& line );
@@ -546,26 +546,27 @@ namespace NCPA {
 		void resetHeaderIndent();
 		void setHeaderHangingIndent( unsigned int newindent );
 		void addBlankHeaderLine();
-		void addHeaderText( const std::string& text, unsigned int maxwidth = HELP_TEXT_WIDTH );
+		void addHeaderText( const std::string& text );
 		void addHeaderTextVerbatim( const std::string& text );
 
 		void setFooterIndent( unsigned int newindent );
 		void resetFooterIndent();
 		void setFooterHangingIndent( unsigned int newindent );
 		void addBlankFooterLine();
-		void addFooterText( const std::string& text, unsigned int maxwidth = HELP_TEXT_WIDTH );
+		void addFooterText( const std::string& text );
 		void addFooterTextVerbatim( const std::string& text );
 		
 		void setParameterIndent( unsigned int newindent );
 		void resetParameterIndent();
 		void addParameterDescription( const std::string& section, const std::string& param, 
-			const std::string &description, unsigned int firstcolumnwidth = DEFAULT_PARAMETER_FIRST_COLUMN_WIDTH, 
-			unsigned int maxwidth = HELP_TEXT_WIDTH );
+			const std::string &description, unsigned int firstcolumnwidth = DEFAULT_PARAMETER_FIRST_COLUMN_WIDTH );
 		
+		void setCommandMode( bool tf );
+		void setTextWidth( unsigned int newWidth );
 		void printUsage( std::ostream& os = std::cout ) const;
 
 		// Ingest from command line or file
-		unsigned int parseCommandLine( int argc, char **argv );
+		unsigned int parseCommandLine( unsigned int argc, char **argv );
 		unsigned int parseFile( std::string filename );
 		std::vector< std::string > getUnparsedOptions() const;
 
@@ -596,7 +597,7 @@ namespace NCPA {
 		//NullParameter *_PARAM_NOT_FOUND;
 
 		std::vector< NCPA::ParameterTest * > _tests, _failed_tests;
-		bool _strict;
+		bool _strict, _commandMode;
 		
 		bool isLongOption_( std::string ) const;
 		bool isShortOption_( std::string ) const;
@@ -609,7 +610,7 @@ namespace NCPA {
 			unsigned int indent, unsigned int hanging_indent, unsigned int maxwidth );
 		void addSpaces_( std::ostringstream *oss, unsigned int spaces );
 		unsigned int headerIndent_, footerIndent_, parameterIndent_, 
-			headerHangingIndent_, footerHangingIndent_;
+			headerHangingIndent_, footerHangingIndent_, maxWidth_;
 
 		//GenericParameter * _findParam( std::string key ) const;
 	};

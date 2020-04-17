@@ -21,6 +21,7 @@ using namespace NCPA;
 
 int main( int argc, char **argv ) {
 
+/*
 	string filename, line;
 	ostringstream oss;  // for exceptions
 	unsigned int i;
@@ -97,14 +98,6 @@ int main( int argc, char **argv ) {
 			throw invalid_argument( oss.str() );
 		}
 
-/*
-		if (keys.size() < col) {
-			keys.reserve( 2 * col );
-			units.reserve( 2 * col );
-			column_numbers.reserve( 2 * col );
-			values.reserve( 2 * col );
-		}
-*/
 
 		double tempval = 0.0;
 		units_t tempunits = UNITS_NONE;
@@ -195,11 +188,40 @@ int main( int argc, char **argv ) {
 	for ( i = 0; i < ncols; i++ ) {
 		delete [] columns[ i ];
 	}
+*/
+	string filename;
 
+	if (argc > 1) {
+		filename = argv[ 1 ];
+	} else {
+		cerr << "No input file specified!" << endl;
+		return 0;
+	}	
 	
+	ifstream ifs( filename );
+	Atmosphere1D *atm = new Atmosphere1D( ifs );
+
 	// start playing with atmosphere
 	atm->calculate_sound_speed_from_temperature( "C_T", "T" );
 	atm->calculate_sound_speed_from_pressure_and_density( "C_P", "P", "RHO" );
+
+	// get wind vector quantities from components
+	atm->calculate_wind_speed( "WSPD", "U", "V" );
+	atm->calculate_wind_direction( "WDIR", "U", "V" );
+
+	// calculate wind component and effective sound speed in four directions
+	atm->calculate_wind_component( "WC_90", "WSPD", "WDIR", 90.0 );
+	atm->calculate_wind_component( "WC_45", "WSPD", "WDIR", 45.0 );
+	atm->calculate_wind_component( "WC_00", "WSPD", "WDIR", 0.0 );
+	atm->calculate_wind_component( "WC_270", "WSPD", "WDIR", -90.0 );
+
+	// calculate effective sound speeds in four directions
+	atm->calculate_effective_sound_speed( "C_90", "C_P", "WC_90" );
+	atm->calculate_effective_sound_speed( "C_45", "C_P", "WC_45" );
+	atm->calculate_effective_sound_speed( "C_00", "C_P", "WC_00" );
+	atm->calculate_effective_sound_speed( "C_270", "C_P", "WC_270" );
+
+
 	size_t nz = atm->get_basis_length();
 	double *z = new double[ nz ], *u = new double[ nz ], *t = new double[ nz ], *c_t = new double[ nz ], *c_p = new double[ nz ];
 	units_t z_units, u_units, t_units, c_t_units, c_p_units;
@@ -209,6 +231,8 @@ int main( int argc, char **argv ) {
 	atm->get_property_vector( "T", t, &t_units );
 	atm->get_property_vector( "C_T", c_t, &c_t_units );
 	atm->get_property_vector( "C_P", c_p, &c_p_units );
+
+	cout << "C_P has units " << Units::toString( c_p_units ) << endl;
 
 	// check keys
 	if (atm->contains_vector( "U" )) {
@@ -237,17 +261,20 @@ int main( int argc, char **argv ) {
 	//Units::convert( z, nz, z_units, Units::fromString("m"), z );
 
 	ofstream os( "atm_out_m.dat" );
-	for (i = 0; i < nz; i += 5) {
-		os << z[ i ] << "  " << t[ i ] << "  " << u[ i ] << "  " << c_t[ i ] << "  " << c_p[ i ] << endl;
-	}
+	atm->print_atmosphere( "Z", os );
+	//unsigned int i;
+	//for (i = 0; i < nz; i += 5) {
+	//	os << z[ i ] << "  " << t[ i ] << "  " << u[ i ] << "  " << c_t[ i ] << "  " << c_p[ i ] << endl;
+	//}
 	os.close();
 
 	atm->revert_altitude_units();
-	atm->get_altitude_vector( z, &z_units );
+	//atm->get_altitude_vector( z, &z_units );
 	os = ofstream( "atm_out_km.dat" );
-	for (i = 0; i < nz; i += 5) {
-		os << z[ i ] << "  " << t[ i ] << "  " << u[ i ] << "  " << c_t[ i ] << "  " << c_p[ i ] << endl;
-	}
+	atm->print_atmosphere( "Z", os );
+	//for (i = 0; i < nz; i += 5) {
+	//	os << z[ i ] << "  " << t[ i ] << "  " << u[ i ] << "  " << c_t[ i ] << "  " << c_p[ i ] << endl;
+	//}
 	os.close();
 
 

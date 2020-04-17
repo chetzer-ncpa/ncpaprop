@@ -209,12 +209,12 @@ namespace NCPA {
 		VectorWithUnits( const VectorWithUnits &source );
 		~VectorWithUnits();
 
-		void convert_units( units_t new_units );
-		units_t get_units() const;
-		void revert_units();
+		virtual void convert_units( units_t new_units );
+		virtual units_t get_units() const;
+		virtual void revert_units();
 
-		size_t size() const;
-		void get_vector( double *buffer, units_t *buffer_units ) const;
+		virtual size_t size() const;
+		virtual void get_vector( double *buffer, units_t *buffer_units ) const;
 	};
 
 	class ScalarWithUnits {
@@ -228,11 +228,11 @@ namespace NCPA {
 		ScalarWithUnits( double value, units_t property_units );
 		~ScalarWithUnits();
 
-		double get() const;
+		virtual double get() const;
 
-		void convert_units( units_t new_units );
-		units_t get_units() const;
-		void revert_units();
+		virtual void convert_units( units_t new_units );
+		virtual units_t get_units() const;
+		virtual void revert_units();
 
 		
 	};

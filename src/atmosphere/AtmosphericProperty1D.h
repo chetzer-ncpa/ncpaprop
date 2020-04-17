@@ -34,9 +34,10 @@ namespace NCPA {
 		void convert_altitude_units( units_t new_units );
 		units_t get_altitude_units() const;
 		void revert_altitude_units();
+		void convert_units( units_t new_units );
+		void revert_units();
 
 		void get_altitude_vector( double *buffer, units_t *buffer_units ) const;
-		//void get_property_basis( double *buffer, units_t *buffer_units ) const;
 	};
 
 }

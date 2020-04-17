@@ -43,6 +43,7 @@ void NCPA::AtmosphericProperty1D::convert_altitude_units( NCPA::units_t new_unit
 	// one onto the stack so reversion can happen properly
 	if (new_units != z_units_.top()) {
 		do_units_conversion_( n_, z_, z_units_.top(), new_units );
+		build_splines_();
 	}
 	z_units_.push( new_units );
 }
@@ -59,11 +60,23 @@ void NCPA::AtmosphericProperty1D::revert_altitude_units() {
 	if (current_units != last_units) {
 		try {
 			do_units_conversion_( n_, z_, current_units, last_units );
+			build_splines_();
 		} catch (std::out_of_range &oor) {
 			z_units_.push( current_units );
 			throw;
 		}
 	}
+}
+
+void NCPA::AtmosphericProperty1D::convert_units( NCPA::units_t new_units ) {
+	//std::cout << "Called AtmosphericProperty1D::convert_units()" << std::endl;
+	NCPA::VectorWithUnits::convert_units( new_units );
+	build_splines_();
+}
+
+void NCPA::AtmosphericProperty1D::revert_units() {
+	NCPA::VectorWithUnits::revert_units();
+	build_splines_();
 }
 
 /*

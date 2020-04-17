@@ -8,6 +8,7 @@
 #include <cmath>
 #include <string>
 #include <algorithm>
+#include <cctype>
 #include "util.h"
 
 
@@ -29,10 +30,12 @@ NCPA::ParameterSet::ParameterSet() {
 	_delims = ":= ";
 	_comments = "#";
 	_strict = true;
+	_commandMode = false;
 
 	headerIndent_ = DEFAULT_HEADER_INDENT;
 	footerIndent_ = DEFAULT_FOOTER_INDENT;
 	parameterIndent_ = DEFAULT_PARAMETER_INDENT;
+	maxWidth_ = DEFAULT_TEXT_WIDTH;
 	headerHangingIndent_ = 0;
 	footerHangingIndent_ = 0;
 }
@@ -63,6 +66,29 @@ NCPA::ParameterSet::~ParameterSet() {
 
 	_descriptionLines.clear();
 	_sections.clear();
+}
+
+void NCPA::ParameterSet::setCommandMode( bool tf ) {
+
+	if (tf != _commandMode) {
+		// we're changing, so we need to adjust window width
+		if (tf) {
+			// entering command mode, window width needs to shrink by 2
+			maxWidth_ -= 2;
+		} else {
+			// leaving command mode, expand window by 2
+			maxWidth_ += 2;
+		}
+	}
+
+	_commandMode = tf;
+}
+
+void NCPA::ParameterSet::setTextWidth( unsigned int newWidth ) {
+	if (_commandMode) {
+		newWidth -= 2;
+	}
+	maxWidth_ = newWidth;
 }
 
 void NCPA::ParameterSet::setHeaderIndent( unsigned int newindent ) {
@@ -97,8 +123,8 @@ void NCPA::ParameterSet::setFooterHangingIndent( unsigned int newindent ) {
 	footerHangingIndent_ = newindent;
 }
 
-void NCPA::ParameterSet::addHeaderText( const std::string& text, unsigned int maxwidth ) {
-	formatText_( _headerLines, text, headerIndent_, headerHangingIndent_, maxwidth );
+void NCPA::ParameterSet::addHeaderText( const std::string& text ) {
+	formatText_( _headerLines, text, headerIndent_, headerHangingIndent_, maxWidth_ );
 }
 
 void NCPA::ParameterSet::addHeaderTextVerbatim( const std::string& text ) {
@@ -114,8 +140,8 @@ void NCPA::ParameterSet::addBlankFooterLine() {
 	_footerLines.push_back("");
 }
 
-void NCPA::ParameterSet::addFooterText( const std::string& text, unsigned int maxwidth ) {
-	formatText_( _footerLines, text, footerIndent_, footerHangingIndent_, maxwidth );
+void NCPA::ParameterSet::addFooterText( const std::string& text ) {
+	formatText_( _footerLines, text, footerIndent_, footerHangingIndent_, maxWidth_ );
 }
 
 void NCPA::ParameterSet::addFooterTextVerbatim( const std::string& text ) {
@@ -140,6 +166,9 @@ void NCPA::ParameterSet::formatText_( std::vector< std::string > &holder, const 
 		// check for specific newline instruction
 		if (*it == "#n#") {
 			tmpStr = oss.str();
+			if (_commandMode) { 
+				tmpStr += " \\"; 
+			}
 			holder.push_back( tmpStr );
 			hang = hanging_indent;
 			oss.str( "" );
@@ -149,6 +178,9 @@ void NCPA::ParameterSet::formatText_( std::vector< std::string > &holder, const 
 			if ( (oss.str().size() + (*it).size() + 1) > maxwidth ) {
 				// adding this word would extend the line too far, so flush it
 				tmpStr = oss.str();
+				if (_commandMode) { 
+					tmpStr += " \\"; 
+				}
 				holder.push_back( tmpStr );
 				hang = hanging_indent;
 				oss.str( "" );
@@ -166,7 +198,7 @@ void NCPA::ParameterSet::formatText_( std::vector< std::string > &holder, const 
 }
 
 void NCPA::ParameterSet::addParameterDescription( const std::string& section, const std::string& param, 
-			const std::string &description, unsigned int firstcolumnwidth, unsigned int maxwidth ) {
+			const std::string &description, unsigned int firstcolumnwidth ) {
 
 	// do we have this header already?
 	std::ostringstream *oss, *oss_orig;
@@ -191,7 +223,7 @@ void NCPA::ParameterSet::addParameterDescription( const std::string& section, co
 
 	// Now we format the description, breaking it into lines
 	std::vector< std::string > sublines;
-	formatText_( sublines, description, firstcolumnwidth + 1, 0, maxwidth );
+	formatText_( sublines, description, firstcolumnwidth + 1, 0, maxWidth_ );
 	if (!indentFirst) {
 		sublines[ 0 ] = sublines[ 0 ].substr( firstcolumnwidth + 1 );
 	}
@@ -296,12 +328,12 @@ void NCPA::ParameterSet::printFailedTests( std::ostream& os ) const {
 	}
 }
 
-unsigned int NCPA::ParameterSet::parseCommandLine( int argc, char **argv ) {
+unsigned int NCPA::ParameterSet::parseCommandLine( unsigned int argc, char **argv ) {
 	bool expectingArg = false;
 	std::string lastarg;
 	unsigned int nOptions = 0;
 	
-	for (unsigned int i = 0; i < argc; i++) {
+	for (unsigned int i = 1; i < argc; i++) {
 		
 		std::string currentarg = argv[ i ];
 		if (isLongOption_( currentarg )) {
@@ -335,11 +367,16 @@ bool NCPA::ParameterSet::isShortOption_( std::string opt ) const {
 	if (opt.size() < 2) {
 		return false;
 	}
-	if (opt.compare(0,1,"-") == 0 && opt.compare(1,1,"-") != 0 ) {
+	if (opt[0] == '-') {
+		if (opt[ 1 ] == '-') {
+			return false;    // it's a long option
+		}
+		if (isdigit( opt[ 1 ] ) ) {
+			return false;    // a negative number
+		}
 		return true;
-	} else {
-		return false;
 	}
+	return false;
 }
 
 unsigned int NCPA::ParameterSet::processShortOption_( int argc, char **argv,
