@@ -197,7 +197,8 @@ namespace NCPA {
 	class VectorWithUnits {
 	protected:
 		double *values_;
-		std::stack< NCPA::units_t > units_;
+		units_t units_;
+		//std::stack< NCPA::units_t > units_;
 		size_t n_;
 
 		void do_units_conversion_( size_t n_points, double *inplace, 
@@ -211,17 +212,22 @@ namespace NCPA {
 
 		virtual void convert_units( units_t new_units );
 		virtual units_t get_units() const;
-		virtual void revert_units();
+		//virtual void revert_units();
 
 		virtual size_t size() const;
 		virtual void get_vector( double *buffer, units_t *buffer_units ) const;
+		virtual void get_vector( double *buffer ) const;
+
+		// operator overloading
+		double operator []( size_t i ) const;
+		double & operator []( size_t i );
 	};
 
 	class ScalarWithUnits {
 	protected:
 		double value_;
-		std::stack< NCPA::units_t > units_;
-		
+		//std::stack< NCPA::units_t > units_;
+		units_t units_;
 		void do_units_conversion_( NCPA::units_t fromUnits, NCPA::units_t toUnits );
 
 	public:
@@ -232,7 +238,7 @@ namespace NCPA {
 
 		virtual void convert_units( units_t new_units );
 		virtual units_t get_units() const;
-		virtual void revert_units();
+		//virtual void revert_units();
 
 		
 	};

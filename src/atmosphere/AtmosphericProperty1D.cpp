@@ -4,6 +4,7 @@
 #include <cstring>
 #include <stdexcept>
 #include <sstream>
+#include <cmath>
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_spline.h"
 
@@ -16,10 +17,14 @@ NCPA::AtmosphericProperty1D::AtmosphericProperty1D( size_t n_points, double *alt
 			double *property_values, units_t property_units ) {
 
 	z_ = new double[ n_points ];
-	z_units_.push( altitude_units );
+	z_units_ = altitude_units;
+	//z_units_.push( altitude_units );
 	std::memcpy( z_, altitude_points, n_points*sizeof(double) );
+	//z_vector_ = new VectorWithUnits( n_points, z_, altitude_units );
+	
 	values_ = new double[ n_points ];
-	units_.push( property_units );
+	units_ = property_units;
+	//units_.push( property_units );
 	std::memcpy( values_, property_values, n_points*sizeof(double) );
 	n_ = n_points;
 
@@ -33,7 +38,7 @@ NCPA::AtmosphericProperty1D::~AtmosphericProperty1D() {
 }
 
 NCPA::units_t NCPA::AtmosphericProperty1D::get_altitude_units() const {
-	return z_units_.top();
+	return z_units_;
 }
 
 void NCPA::AtmosphericProperty1D::convert_altitude_units( NCPA::units_t new_units ) {
@@ -41,13 +46,14 @@ void NCPA::AtmosphericProperty1D::convert_altitude_units( NCPA::units_t new_unit
 	// will throw out_of_range and leave original units unchanged if there's an error
 	// if there's no change in units, don't bother with the calculation, just push another
 	// one onto the stack so reversion can happen properly
-	if (new_units != z_units_.top()) {
-		do_units_conversion_( n_, z_, z_units_.top(), new_units );
+	if (new_units != z_units_) {
+		do_units_conversion_( n_, z_, z_units_, new_units );
 		build_splines_();
+		z_units_ = new_units;
 	}
-	z_units_.push( new_units );
 }
 
+/*
 void NCPA::AtmosphericProperty1D::revert_altitude_units() {
 	if (z_units_.size() < 2) {
 		return;
@@ -67,6 +73,7 @@ void NCPA::AtmosphericProperty1D::revert_altitude_units() {
 		}
 	}
 }
+*/
 
 void NCPA::AtmosphericProperty1D::convert_units( NCPA::units_t new_units ) {
 	//std::cout << "Called AtmosphericProperty1D::convert_units()" << std::endl;
@@ -74,10 +81,12 @@ void NCPA::AtmosphericProperty1D::convert_units( NCPA::units_t new_units ) {
 	build_splines_();
 }
 
+/*
 void NCPA::AtmosphericProperty1D::revert_units() {
 	NCPA::VectorWithUnits::revert_units();
 	build_splines_();
 }
+*/
 
 /*
 NCPA::units_t NCPA::AtmosphericProperty1D::get_units() const {
@@ -151,7 +160,7 @@ void NCPA::AtmosphericProperty1D::delete_splines_() {
 }
 
 void NCPA::AtmosphericProperty1D::get_altitude_vector( double *buffer, units_t *buffer_units ) const {
-	*buffer_units = z_units_.top();
+	*buffer_units = z_units_;
 	std::memcpy( buffer, z_, n_ * sizeof(double) );
 }
 
@@ -166,7 +175,7 @@ void NCPA::AtmosphericProperty1D::get_property_basis( double *buffer, units_t *b
 void NCPA::AtmosphericProperty1D::check_altitude_( double z_req ) const {
 	if ( z_req < z_[0] || z_req > z_[ n_ - 1 ] ) {
 		std::ostringstream oss;
-		oss << "Requested altitude " << z_req << " " << NCPA::Units::toStr( z_units_.top() ) << " outside profile bounds.";
+		oss << "Requested altitude " << z_req << " " << NCPA::Units::toStr( z_units_ ) << " outside profile bounds.";
 		throw std::range_error( oss.str() );
 	}
 }
@@ -186,7 +195,28 @@ double NCPA::AtmosphericProperty1D::get_second_derivative( double z_req ) const 
 	return gsl_spline_eval_deriv2( spline_, z_req, accel_ );
 }
 
+void NCPA::AtmosphericProperty1D::resample( double new_dz ) {
 
+	// get new altitude vector
+	double z0 = z_[0];
+	double z1 = z_[ n_ - 1 ];
+	size_t new_nz = (size_t)std::floor( ( z1 - z0 ) / new_dz ) + 1;
+
+	double *new_z = new double[ new_nz ];
+	double *new_prop = new double[ new_nz ];
+	for (size_t i = 0; i < new_nz; i++) {
+		new_z[ i ] = z0 + ((double)i) * new_dz;
+		new_prop[ i ] = get( new_z[ i ] );
+	}
+
+	// reset everything
+	delete [] z_;
+	delete [] values_;
+	n_ = new_nz;
+	z_ = new_z;
+	values_ = new_prop;
+	build_splines_();
+}
 
 
 

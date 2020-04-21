@@ -13,9 +13,11 @@ namespace NCPA {
 	class AtmosphericProperty1D : public VectorWithUnits {
 	protected:
 		double *z_;
+		//NCPA::VectorWithUnits *z_vector_;
 		gsl_interp_accel *accel_ = NULL;
 		gsl_spline *spline_ = NULL;
-		std::stack< NCPA::units_t > z_units_;
+		//std::stack< NCPA::units_t > z_units_;
+		units_t z_units_;
 
 		void check_altitude_( double z_req ) const;
 		void build_splines_();
@@ -33,9 +35,11 @@ namespace NCPA {
 
 		void convert_altitude_units( units_t new_units );
 		units_t get_altitude_units() const;
-		void revert_altitude_units();
+		//void revert_altitude_units();
 		void convert_units( units_t new_units );
-		void revert_units();
+		//void revert_units();
+
+		void resample( double new_dz );
 
 		void get_altitude_vector( double *buffer, units_t *buffer_units ) const;
 	};

@@ -5,6 +5,7 @@
 #include "util.h"
 #include <map>
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <cstring>
 #include <cmath>
@@ -23,14 +24,26 @@
 
 NCPA::Atmosphere1D::Atmosphere1D( size_t n_altitude_points, double *altitude_points, units_t altitude_units ) {
 	contents_.clear();
-	nz_ = n_altitude_points;
-	z_ = new double[ nz_ ];
-	std::memcpy( z_, altitude_points, nz_ * sizeof(double) );
-	z_units_.push( altitude_units );
+	scalar_contents_.clear();
+	z_ = new NCPA::VectorWithUnits( n_altitude_points, altitude_points, altitude_units );
+
+	//nz_ = n_altitude_points;
+	//z_ = new double[ nz_ ];
+	//std::memcpy( z_, altitude_points, nz_ * sizeof(double) );
+	//z_units_.push( altitude_units );
 }
 
 NCPA::Atmosphere1D::Atmosphere1D( std::istream& in ) {
+	read_from_stream( in );
+}
 
+NCPA::Atmosphere1D::Atmosphere1D( std::string filename ) {
+	std::ifstream in( filename );
+	read_from_stream( in );
+	in.close();
+}
+
+void NCPA::Atmosphere1D::read_from_stream( std::istream& in ) {
 	if ( ! in.good() ) {
 		throw std::runtime_error( "Atmosphere1D - Input stream not in good state" );
 	}
@@ -173,10 +186,16 @@ NCPA::Atmosphere1D::Atmosphere1D( std::istream& in ) {
 	}
 
 	contents_.clear();
+	scalar_contents_.clear();
+	z_ = new NCPA::VectorWithUnits( nlines, columns[ 0 ], depunits );
+	/*
+	contents_.clear();
+	scalar_contents_.clear();
 	nz_ = nlines;
 	z_ = new double[ nz_ ];
 	std::memcpy( z_, columns[ 0 ], nz_ * sizeof(double) );
 	z_units_.push( depunits );
+	*/
 
 	for (i = 0; i < keys.size(); i++) {
 		if (column_numbers[ i ] == 0) {
@@ -197,13 +216,16 @@ NCPA::Atmosphere1D::~Atmosphere1D() {
 		delete it->second;
 	}
 	contents_.clear();
-	while (! z_units_.empty()) {
-		z_units_.pop();
-	}
+	scalar_contents_.clear();
+	delete z_;
+	//while (! z_units_.empty()) {
+	//	z_units_.pop();
+	//}
 }
 
 size_t NCPA::Atmosphere1D::get_basis_length() const {
-	return nz_;
+	//return nz_;
+	return z_->size();
 }
 
 void NCPA::Atmosphere1D::calculate_wind_speed( std::string new_key, std::string we_wind_speed_key, 
@@ -218,6 +240,7 @@ void NCPA::Atmosphere1D::calculate_wind_speed( std::string new_key, std::string 
 		throw std::runtime_error( "Requested key " + new_key + " already exists in atmosphere" );
 	} catch (const std::out_of_range& oor) { }
 
+	size_t nz_ = get_basis_length();
 	NCPA::AtmosphericProperty1D *u_prop = contents_.at( we_wind_speed_key );
 	NCPA::AtmosphericProperty1D *v_prop = contents_.at( sn_wind_speed_key );
 	units_t u_units, v_units;
@@ -251,6 +274,7 @@ void NCPA::Atmosphere1D::calculate_wind_direction( std::string new_key, std::str
 		throw std::runtime_error( "Requested key " + new_key + " already exists in atmosphere" );
 	} catch (const std::out_of_range& oor) { }
 
+	size_t nz_ = get_basis_length();
 	NCPA::AtmosphericProperty1D *u_prop = contents_.at( we_wind_speed_key );
 	NCPA::AtmosphericProperty1D *v_prop = contents_.at( sn_wind_speed_key );
 	units_t u_units, v_units;
@@ -286,6 +310,7 @@ void NCPA::Atmosphere1D::calculate_wind_component( std::string new_key, std::str
 		delete c_prop;
 	} catch (const std::out_of_range& oor) { }
 
+	size_t nz_ = get_basis_length();
 	NCPA::AtmosphericProperty1D *sp_prop = contents_.at( wind_speed_key );
 	NCPA::AtmosphericProperty1D *dir_prop = contents_.at( wind_direction_key );
 	//NCPA::ScalarWithUnits *prop_dir = scalar_contents_.at( prop_direction_key );
@@ -322,6 +347,7 @@ void NCPA::Atmosphere1D::calculate_effective_sound_speed( std::string new_key, s
 		delete c_prop;
 	} catch (const std::out_of_range& oor) { }
 
+	size_t nz_ = get_basis_length();
 	NCPA::AtmosphericProperty1D *c0_prop = contents_.at( sound_speed_key );
 	NCPA::AtmosphericProperty1D *ws_prop = contents_.at( wind_component_key );
 	units_t c0_units, ws_units;
@@ -347,8 +373,9 @@ void NCPA::Atmosphere1D::calculate_effective_sound_speed( std::string new_key, s
 }
 
 void NCPA::Atmosphere1D::get_altitude_vector( double *buffer, units_t *buffer_units ) const {
-	*buffer_units = z_units_.top();
-	std::memcpy( buffer, z_, nz_* sizeof( double ) );
+	//*buffer_units = z_units_.top();
+	//std::memcpy( buffer, z_, nz_* sizeof( double ) );
+	z_->get_vector( buffer, buffer_units );
 }
 
 void NCPA::Atmosphere1D::get_property_vector( std::string key, double *buffer, units_t *buffer_units ) const {
@@ -369,13 +396,11 @@ NCPA::units_t NCPA::Atmosphere1D::get_property_units( std::string key ) {
 
 
 double NCPA::Atmosphere1D::get_minimum_altitude() const {
-	return z_[0];
-	//return NCPA::Units::convert( z_[0], z_units_, altitude_units );
+	return (*z_)[ 0 ];
 }
 
 double NCPA::Atmosphere1D::get_maximum_altitude() const {
-	return z_[ nz_ - 1 ];
-	//return NCPA::Units::convert( z_[ nz_-1 ], z_units_, altitude_units );
+	return (*z_)[ get_basis_length() - 1 ];
 }
 
 void NCPA::Atmosphere1D::add_property( std::string key, size_t n_points, double *quantity_points, units_t quantity_units ) {
@@ -390,14 +415,19 @@ void NCPA::Atmosphere1D::add_property( std::string key, size_t n_points, double 
 		throw std::runtime_error( "Requested key " + key + " already exists in atmosphere" );
 	} catch (const std::out_of_range& oor) { }
 
+	size_t nz_ = get_basis_length();
 	if (n_points != nz_) {
 		std::ostringstream oss;
 		oss << "Array length " << n_points << " for key " << key << " does not match number of altitude points " << nz_;
 		throw std::runtime_error( oss.str() );
 	}
+	double *z_values = new double[ nz_ ];
+	NCPA::units_t z_units_ = NCPA::UNITS_NONE;
+	z_->get_vector( z_values, &z_units_ );
 
-	prop = new AtmosphericProperty1D( n_points, z_, z_units_.top(), quantity_points, quantity_units );
+	prop = new AtmosphericProperty1D( n_points, z_values, z_units_, quantity_points, quantity_units );
 	contents_[ key ] = prop;
+	delete [] z_values;
 }
 
 void NCPA::Atmosphere1D::add_property( std::string key, double value, NCPA::units_t units ) {
@@ -469,7 +499,8 @@ double NCPA::Atmosphere1D::get_second_derivative( std::string key, double altitu
 }
 
 
-void NCPA::Atmosphere1D::calculate_sound_speed_from_temperature( std::string new_key, std::string temperature_key ) {
+void NCPA::Atmosphere1D::calculate_sound_speed_from_temperature( std::string new_key, std::string temperature_key,
+	NCPA::units_t wind_units ) {
 
 	NCPA::AtmosphericProperty1D *c_prop;
 	try {
@@ -481,18 +512,22 @@ void NCPA::Atmosphere1D::calculate_sound_speed_from_temperature( std::string new
 	} catch (const std::out_of_range& oor) { }
 
 	NCPA::AtmosphericProperty1D *t_prop = contents_.at( temperature_key );
+	NCPA::units_t old_units = t_prop->get_units();
 	t_prop->convert_units( NCPA::UNITS_TEMPERATURE_KELVIN );
+	size_t nz_ = get_basis_length();
 	double *c = new double[ nz_ ];
 	for (size_t i = 0; i < nz_; i++) {
-		c[ i ] = std::sqrt( GAMMA_FOR_C * R_FOR_C * t_prop->get( z_[i] ) );
+		c[ i ] = std::sqrt( GAMMA_FOR_C * R_FOR_C * t_prop->get( (*z_)[i] ) );
 	}
-	t_prop->revert_units();
+	//t_prop->revert_units();
+	t_prop->convert_units( old_units );
 
-	add_property( new_key, nz_, c, NCPA::UNITS_SPEED_METERS_PER_SECOND );
+	NCPA::Units::convert( c, nz_, NCPA::UNITS_SPEED_METERS_PER_SECOND, wind_units, c );
+	add_property( new_key, nz_, c, wind_units );
 }
 
 void NCPA::Atmosphere1D::calculate_sound_speed_from_pressure_and_density( std::string new_key, 
-			std::string pressure_key, std::string density_key ) {
+			std::string pressure_key, std::string density_key, NCPA::units_t wind_units ) {
 
 	NCPA::AtmosphericProperty1D *c_prop;
 	try {
@@ -504,27 +539,32 @@ void NCPA::Atmosphere1D::calculate_sound_speed_from_pressure_and_density( std::s
 	} catch (const std::out_of_range& oor) { }
 
 	NCPA::AtmosphericProperty1D *p_prop = contents_.at( pressure_key );
+	NCPA::units_t old_p_units = p_prop->get_units();
 	p_prop->convert_units( NCPA::UNITS_PRESSURE_PASCALS );
 	NCPA::AtmosphericProperty1D *r_prop = contents_.at( density_key );
+	NCPA::units_t old_r_units = r_prop->get_units();
 	r_prop->convert_units( NCPA::UNITS_DENSITY_KILOGRAMS_PER_CUBIC_METER );
+	size_t nz_ = get_basis_length();
 	double *c = new double[ nz_ ];
 	for (size_t i = 0; i < nz_; i++) {
-		c[ i ] = std::sqrt( GAMMA_FOR_C * p_prop->get( z_[i] ) / r_prop->get( z_[i] ) );
+		c[ i ] = std::sqrt( GAMMA_FOR_C * p_prop->get( (*z_)[i] ) / r_prop->get( (*z_)[i] ) );
 	}
 
-	p_prop->revert_units();
-	r_prop->revert_units();
-	add_property( new_key, nz_, c, NCPA::UNITS_SPEED_METERS_PER_SECOND );
+	p_prop->convert_units( old_p_units );
+	r_prop->convert_units( old_r_units );
+	NCPA::Units::convert( c, nz_, NCPA::UNITS_SPEED_METERS_PER_SECOND, wind_units, c );
+	add_property( new_key, nz_, c, wind_units );
 }
 
 void NCPA::Atmosphere1D::convert_altitude_units( units_t new_units ) {
 	// will throw out_of_range and leave original units unchanged if there's an error
 	// if there's no change in units, don't bother with the calculation, just push another
 	// one onto the stack so reversion can happen properly
-	if (new_units != z_units_.top()) {
-		do_units_conversion_( nz_, z_, z_units_.top(), new_units );
-	}
-	z_units_.push( new_units );
+	//if (new_units != z_->get_units()) {
+	z_->convert_units( new_units );
+		//do_units_conversion_( nz_, z_, z_units_.top(), new_units );
+	//}
+	//z_units_.push( new_units );
 
 	// update all contents
 	for ( std::map< std::string, NCPA::AtmosphericProperty1D * >::iterator it = contents_.begin();
@@ -533,6 +573,7 @@ void NCPA::Atmosphere1D::convert_altitude_units( units_t new_units ) {
 	}
 }
 
+/*
 void NCPA::Atmosphere1D::revert_altitude_units() {
 	if (z_units_.size() < 2) {
 		return;
@@ -557,6 +598,7 @@ void NCPA::Atmosphere1D::revert_altitude_units() {
 		(*it).second->revert_altitude_units();
 	}
 }
+*/
 
 void NCPA::Atmosphere1D::convert_property_units( std::string key, units_t new_units ) {
 	// if it's not there it'll throw an out_of_range exception
@@ -571,6 +613,7 @@ void NCPA::Atmosphere1D::convert_property_units( std::string key, units_t new_un
 	}
 }
 
+/*
 void NCPA::Atmosphere1D::revert_property_units( std::string key ) {
 	try {
 		contents_.at( key )->revert_units();
@@ -582,7 +625,7 @@ void NCPA::Atmosphere1D::revert_property_units( std::string key ) {
 		throw std::out_of_range( "No vector or scalar quantity found with key " + key );
 	}
 }
-
+*/
 
 
 void NCPA::Atmosphere1D::do_units_conversion_( size_t n_points, double *inplace, 
@@ -630,7 +673,7 @@ void NCPA::Atmosphere1D::print_atmosphere( const std::vector< std::string >& col
 
 	// Now column descriptors.  Altitude first
 	os  << "#% 1, " << altitude_key << ", " 
-		<< NCPA::Units::toStr( z_units_.top() ) << std::endl;
+		<< NCPA::Units::toStr( z_->get_units() ) << std::endl;
 	unsigned int column = 2;
 	for ( vit = columnorder.cbegin(); vit != columnorder.cend(); ++vit ) {
 		os  << "#% " << column << ", "
@@ -640,15 +683,16 @@ void NCPA::Atmosphere1D::print_atmosphere( const std::vector< std::string >& col
 	}
 
 	// Now columns
+	size_t nz_ = get_basis_length();
 	os.setf( std::ios::scientific, 	std::ios::floatfield );
 	os.setf( std::ios::right, 		std::ios::adjustfield );
 	os.precision( 6 );
 	os.width( 9 );
 	os.fill( ' ' );
 	for ( size_t i = 0; i < nz_; i++) {
-		os << z_[ i ];
+		os << (*z_)[ i ];
 		for (vit = columnorder.cbegin(); vit != columnorder.cend(); ++vit ) {
-			os << " " << get( *vit, z_[ i ] );
+			os << " " << get( *vit, (*z_)[ i ] );
 		}
 		os << std::endl;
 	}
@@ -657,4 +701,33 @@ void NCPA::Atmosphere1D::print_atmosphere( const std::vector< std::string >& col
 
 void NCPA::Atmosphere1D::print_atmosphere( std::string altitude_key, std::ostream& os ) {
 	print_atmosphere( get_keys(), altitude_key, os );
+}
+
+void NCPA::Atmosphere1D::resample( double new_dz ) {
+
+	// resample altitude
+	size_t old_nz = get_basis_length();
+	double *old_z = new double[ old_nz ];
+	NCPA::units_t old_z_units;
+	z_->get_vector( old_z, &old_z_units );
+	double z0 = old_z[0];
+	double z1 = old_z[ old_nz - 1 ];
+	size_t new_nz = (size_t)std::floor( ( z1 - z0 ) / new_dz ) + 1;
+
+	double *new_z = new double[ new_nz ];
+	//double *new_prop = new double[ new_nz ];
+	for (size_t i = 0; i < new_nz; i++) {
+		new_z[ i ] = z0 + ((double)i) * new_dz;
+		//new_prop[ i ] = get( new_z[ i ] );
+	}
+
+	delete z_;
+	z_ = new NCPA::VectorWithUnits( new_nz, new_z, old_z_units );
+
+	for (std::map< std::string, NCPA::AtmosphericProperty1D * >::iterator it = contents_.begin();
+			it != contents_.end(); ++it) {
+		(*it).second->resample( new_dz );
+	}
+
+	delete [] new_z;
 }

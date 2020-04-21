@@ -678,26 +678,31 @@ conversion_pair NCPA::Units::get_unit_pair_( NCPA::units_t t1, NCPA::units_t t2 
 
 NCPA::ScalarWithUnits::ScalarWithUnits( double value, units_t units ) {
 	value_ = value;
-	units_.push( units );
+	units_ = units;
+	//units_.push( units );
 }
 
 NCPA::ScalarWithUnits::~ScalarWithUnits() { }
 
 
 NCPA::units_t NCPA::ScalarWithUnits::get_units() const {
-	return units_.top();
+	//return units_.top();
+	return units_;
 }
 
 void NCPA::ScalarWithUnits::convert_units( NCPA::units_t new_units ) {
 	// will throw out_of_range and leave original units unchanged if there's an error
 	// if there's no change in units, don't bother with the calculation, just push another
 	// one onto the stack so reversion can happen properly
-	if (new_units != units_.top()) {
-		do_units_conversion_( units_.top(), new_units );
+	//if (new_units != units_.top()) {
+	if (new_units != units_) {
+		do_units_conversion_( units_, new_units );
 	}
-	units_.push( new_units );
+	units_ = new_units;
+	//units_.push( new_units );
 }
 
+/*
 void NCPA::ScalarWithUnits::revert_units() {
 	if (units_.size() < 2) {
 		return;
@@ -716,6 +721,7 @@ void NCPA::ScalarWithUnits::revert_units() {
 		}
 	}
 }
+*/
 
 void NCPA::ScalarWithUnits::do_units_conversion_( NCPA::units_t fromUnits, NCPA::units_t toUnits ) {
 
@@ -748,9 +754,9 @@ NCPA::VectorWithUnits::VectorWithUnits() {
 
 NCPA::VectorWithUnits::VectorWithUnits( size_t n_points, double *property_values, units_t property_units ) {
 	values_ = new double[ n_points ];
-	//units_ = property_units;
+	units_ = property_units;
 	//units_last_ = property_units;
-	units_.push( property_units );
+	//units_.push( property_units );
 	std::memcpy( values_, property_values, n_points*sizeof(double) );
 	n_ = n_points;
 }
@@ -760,17 +766,22 @@ NCPA::VectorWithUnits::VectorWithUnits( const NCPA::VectorWithUnits &source ) {
 	NCPA::units_t u;
 	values_ = new double[ n_ ];
 	source.get_vector( values_, &u );
-	units_.push( u );
+	units_ = u;
+	//units_.push( u );
 }
 
 NCPA::VectorWithUnits::~VectorWithUnits() {
 	if (values_ != NULL) {
 		delete [] values_;
 	}
+	//while (! units_.empty()) {
+	//	units_.pop();
+	//}
 }
 
 NCPA::units_t NCPA::VectorWithUnits::get_units() const {
-	return units_.top();
+	//return units_.top();
+	return units_;
 }
 
 void NCPA::VectorWithUnits::convert_units( NCPA::units_t new_units ) {
@@ -778,12 +789,14 @@ void NCPA::VectorWithUnits::convert_units( NCPA::units_t new_units ) {
 	// if there's no change in units, don't bother with the calculation, just push another
 	// one onto the stack so reversion can happen properly
 	//std::cout << "Called VectorWithUnits::convert_units()" << std::endl;
-	if (new_units != units_.top()) {
-		do_units_conversion_( n_, values_, units_.top(), new_units );
+	if (new_units != units_) {
+		do_units_conversion_( n_, values_, units_, new_units );
+		units_ = new_units;
 	}
-	units_.push( new_units );
+	//units_.push( new_units );
 }
 
+/*
 void NCPA::VectorWithUnits::revert_units() {
 	if (units_.size() < 2) {
 		return;
@@ -802,6 +815,7 @@ void NCPA::VectorWithUnits::revert_units() {
 		}
 	}
 }
+*/
 
 void NCPA::VectorWithUnits::do_units_conversion_( size_t n_points, double *inplace, 
 			NCPA::units_t fromUnits, NCPA::units_t toUnits ) {
@@ -824,7 +838,18 @@ size_t NCPA::VectorWithUnits::size() const {
 }
 
 void NCPA::VectorWithUnits::get_vector( double *buffer, units_t *buffer_units ) const {
-	*buffer_units = units_.top();
+	*buffer_units = units_;
 	std::memcpy( buffer, values_, n_ * sizeof( double ) );
 }
 
+void NCPA::VectorWithUnits::get_vector( double *buffer ) const {
+	std::memcpy( buffer, values_, n_ * sizeof( double ) );
+}
+
+double NCPA::VectorWithUnits::operator[]( size_t i ) const {
+	return values_[ i ];
+}
+
+double &NCPA::VectorWithUnits::operator[]( size_t i ) {
+	return values_[ i ];
+}
