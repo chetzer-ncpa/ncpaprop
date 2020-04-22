@@ -13,7 +13,7 @@
 
 
 
-# plot 1D TL to the screen
+# plot 1D TL to the screen - 2-way
 if 
     test $1 = plot1dtl2
 then
@@ -26,6 +26,19 @@ then
    
   echo $1 $2
 fi
+
+if 
+    test $1 = plot1dtl
+then
+  ## plot from script
+  gnuplot -persist \
+    -e "set grid; show grid; set xlabel 'Range [km]'; set ylabel 'TL [dB]';" \
+    -e "set title 'ModessRD1WCM: 1D transmission loss; freq = $2 Hz';" \
+    -e "plot './tloss_1d.lossless.nm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 3 title 'lossless', './tloss_1d.nm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 1 title 'lossy';"
+   
+  echo $1 $2
+fi
+
 
 
 # plot 1D TL to .png
@@ -73,7 +86,7 @@ then
     -e "set cbrange [-140:-100];" \
     -e "set xlabel 'Range [km]'; set ylabel 'Height [km]';" \
     -e "set title 'ModessRD1WCM: 2D transmission loss [dB]; freq = $2 Hz';" \
-    -e "splot './tloss_rd_2d.nm' using 1:2:(20*log10(sqrt(\$3**2 + \$4**2)));"
+    -e "splot './tloss_2d.nm' using 1:2:(20*log10(sqrt(\$3**2 + \$4**2)));"
   echo $1 $2
 fi
 

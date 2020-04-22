@@ -2,6 +2,7 @@
 #define _SOLVEMODNB_H_
 //#include "ProcessOptionsNB.h"
 #include "parameterset.h"
+#include "Atmosphere1D.h"
 #include <string>
 #include <complex>
 
@@ -12,29 +13,29 @@ namespace NCPA {
 
         
 		//SolveModNB(ProcessOptionsNB *oNB, NCPA::SampledProfile *atm_profile); // constructor 2
-      	SolveModNB( ParameterSet *param, SampledProfile *atm_profile );
+      	//SolveModNB( ParameterSet *param, SampledProfile *atm_profile );
+      	SolveModNB( ParameterSet *param, Atmosphere1D *atm_profile );
             
 		//void setParams(ProcessOptionsNB *oNB, NCPA::SampledProfile *atm_prof);
-		void setParams( ParameterSet *param, SampledProfile *atm_prof );                  	
+		void setParams( ParameterSet *param, Atmosphere1D *atm_prof );                  	
 		
 		void printParams();
 
 		int computeModes();	
 
-		int getAbsorption(int n, double dz, NCPA::SampledProfile *p, double freq, 
-			std::string usrattfile, double *alpha);
+		int getAbsorption(int n, double dz, /*NCPA::Atmosphere1D *p,*/
+			double freq, std::string usrattfile, double *alpha);
 
 		int getModalTrace(int nz, double z_min, double sourceheight, double receiverheight, 
-			double dz, NCPA::SampledProfile *p, double admittance, double freq, double azi, 
+			double dz, NCPA::Atmosphere1D *p, double admittance, double freq, double azi, 
 			double *diag, double *k_min, double *k_max, bool turnoff_WKB, double *c_eff);      
 
 		int getNumberOfModes(int n, double dz, double *diag, double k_min, double k_max, int *nev);
 
 		int sturmCount(int n, double dz, double *diag, double k, int *cnt);	
 
-		int doPerturb(int nz, double z_min, double dz, int n_modes, double freq, 
-			NCPA::SampledProfile *p, double *k, double **v, double *alpha, 
-			std::complex<double> *k_pert);
+		int doPerturb(int nz, double z_min, double dz, int n_modes, double freq, /*NCPA::Atmosphere1D *p,*/ 
+			double *k, double **v, double *alpha, std::complex<double> *k_pert);
 
 		int doSelect(int nz, int n_modes, double k_min, double k_max, double *k2, double **v, 
 			double *k_s, double **v_s, int *select_modes);
@@ -75,6 +76,7 @@ namespace NCPA {
 		bool   Nby2Dprop;
 		bool   turnoff_WKB;
 		bool   wvnum_filter_flg;
+		bool   z_min_specified;
           
 		int    Nz_grid;
 		int    Nrng_steps;
@@ -97,7 +99,7 @@ namespace NCPA {
 		double c_min; // for wavenumber filtering option
 		double c_max; // for wavenumber filtering option
       
-		NCPA::SampledProfile *atm_profile;
+		NCPA::Atmosphere1D *atm_profile;
 		std::string gnd_imp_model;
 		std::string atmosfile;
 		std::string wind_units;

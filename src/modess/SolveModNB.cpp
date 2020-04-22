@@ -3,14 +3,15 @@
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
 
-#include "Atmosphere.h"
-#include "anyoption.h"
+#include "Atmosphere1D.h"
+//#include "anyoption.h"
 #include "SolveModNB.h"
+#include "modess_parameters.h"
 //#include "Modess_lib.h"
 #include "util.h"
 #include "slepceps.h"
 #include "slepcst.h"
-#include "ProcessOptionsNB.h"
+//#include "ProcessOptionsNB.h"
 
 #define MAX_MODES 4000 
 
@@ -22,7 +23,7 @@ using namespace std;
 // constructor
 //
 //NCPA::SolveModNB::SolveModNB(ProcessOptionsNB *oNB, SampledProfile *atm_profile)
-NCPA::SolveModNB::SolveModNB( NCPA::ParameterSet *param, NCPA::SampledProfile *atm_profile )
+NCPA::SolveModNB::SolveModNB( NCPA::ParameterSet *param, NCPA::Atmosphere1D *atm_profile )
 {
 	//setParams( oNB, atm_profile );       
 	setParams( param, atm_profile );           
@@ -32,7 +33,7 @@ NCPA::SolveModNB::SolveModNB( NCPA::ParameterSet *param, NCPA::SampledProfile *a
 
 // setParams() prototype
 //void NCPA::SolveModNB::setParams(ProcessOptionsNB *oNB, SampledProfile *atm_prof)
-void NCPA::SolveModNB::setParams( NCPA::ParameterSet *param, NCPA::SampledProfile *atm_prof )
+void NCPA::SolveModNB::setParams( NCPA::ParameterSet *param, NCPA::Atmosphere1D *atm_prof )
 {		
 
 	// obtain the parameter values from the user's options
@@ -66,6 +67,8 @@ void NCPA::SolveModNB::setParams( NCPA::ParameterSet *param, NCPA::SampledProfil
   	write_dispersion 	= param->getBool( "write_dispersion" );
   	Nby2Dprop 			= param->getBool( "Nby2Dprop" );
   	turnoff_WKB 		= param->getBool( "turnoff_WKB" );
+  	z_min_specified     = param->wasFound( "zground_km" );
+
   
   /*
 	skiplines          = oNB->getSkiplines();
@@ -127,6 +130,8 @@ void NCPA::SolveModNB::setParams( NCPA::ParameterSet *param, NCPA::SampledProfil
 
 	// get Hgt, zw, mw, T, rho, Pr in SI units; they are freed in computeModes()
 	// @todo write functions to allocate and free these, it shouldn't be hidden
+	// Note units: height in m, wind speeds in m/s, pressure in Pa(?), density in
+	// kg/m3
 	Hgt   = new double [Nz_grid];
 	zw    = new double [Nz_grid];
 	mw    = new double [Nz_grid];
@@ -134,6 +139,15 @@ void NCPA::SolveModNB::setParams( NCPA::ParameterSet *param, NCPA::SampledProfil
 	rho   = new double [Nz_grid];
 	Pr    = new double [Nz_grid];
 	c_eff = new double [Nz_grid]; // to be filled in getModalTrace()
+
+	// Set up units of atmospheric profile object
+	atm_profile->convert_altitude_units( Units::fromString( "m" ) );
+	atm_profile->convert_property_units( "Z0", Units::fromString( "m" ) );
+	atm_profile->convert_property_units( "U", Units::fromString( "m/s" ) );
+	atm_profile->convert_property_units( "V", Units::fromString( "m/s" ) );
+	atm_profile->convert_property_units( "T", Units::fromString( "K" ) );
+	atm_profile->convert_property_units( "P", Units::fromString( "Pa" ) );
+	atm_profile->convert_property_units( "RHO", Units::fromString( "kg/m3" ) );
   
 	//
 	// !!! ensure maxheight is less than the max height covered by the provided atm profile
@@ -142,14 +156,22 @@ void NCPA::SolveModNB::setParams( NCPA::ParameterSet *param, NCPA::SampledProfil
 	// a rounding error. This should be revisited.
 	// @todo revisit this
 	// @todo add max_valid_height to AtmosphericProfile class
+	
+	if (maxheight >= atm_profile->get_maximum_altitude()) {
+		maxheight = atm_profile->get_maximum_altitude() - 1e-6;
+		cout << endl << "maxheight_km adjusted to: " << maxheight / 1000.0
+			 << " km (max available in profile file)" << endl;
+	}
+	/*
 	if (maxheight/1000.0 >= atm_profile->z(atm_profile->nz()-1)) {
 		maxheight = (atm_profile->z(atm_profile->nz()-1) - 1e-9) * 1000.0; // slightly less
 		cout << "\nmaxheight adjusted to: " << maxheight 
 			<< " km (max. available in the profile file)" << endl;
 	}
+	*/
   
 	// fill and convert to SI units
-	double dz       = (maxheight - z_min)/Nz_grid;	// the z-grid spacing
+	double dz       = (maxheight - z_min)/(Nz_grid - 1);	// the z-grid spacing
 	double z_min_km = z_min / 1000.0;
 	double dz_km    = dz / 1000.0;
 	double kmps2mps = 1.0;
@@ -160,18 +182,25 @@ void NCPA::SolveModNB::setParams( NCPA::ParameterSet *param, NCPA::SampledProfil
 	// Note: the rho, Pr, T, zw, mw are computed wrt ground level i.e.
 	// the first value is at the ground level e.g. rho[0] = rho(z_min)
 	// @todo make fill_vector( zvec ) methods in AtmosphericProfile()
+	//atm_profile->resample( dz );
+	atm_profile->calculate_sound_speed_from_pressure_and_density( "C0", "P", "RHO", Units::fromString( "m/s" ) );
+	atm_profile->calculate_wind_speed( "WS", "U", "V" );
+	atm_profile->calculate_wind_direction( "WD", "U", "V" );
+
 	for (int i=0; i<Nz_grid; i++) {
-		Hgt[i] = (z_min_km + i*dz_km) * 1000.0; // Hgt[0] = zground MSL
-		rho[i] = atm_profile->rho(z_min_km + i*dz_km) * 1000.0;
-		Pr[i]  = atm_profile->p(z_min_km + i*dz_km) * 100.0;
-		T[i]   = atm_profile->t(z_min_km + i*dz_km);
-		zw[i]  = atm_profile->u(z_min_km + i*dz_km) * kmps2mps;
-		mw[i]  = atm_profile->v(z_min_km + i*dz_km) * kmps2mps;
+		Hgt[i] = z_min + i*dz; // Hgt[0] = zground MSL
+		rho[i] = atm_profile->get( "RHO", Hgt[i]);
+		Pr[i]  = atm_profile->get( "P", Hgt[i] );
+		T[i]   = atm_profile->get( "T", Hgt[i] );
+		zw[i]  = atm_profile->get( "U", Hgt[i] );
+		mw[i]  = atm_profile->get(  "V", Hgt[i] );
 	}
+	
 
 	//
 	// a block to check parameter validity; this could constitute another function
 	// @todo separate out into function
+	/*
 	if (freq < 0) {
 		cout << "freq = " << freq << endl;
 		cout << "Frequency must be positive ... program terminated." << endl;
@@ -200,7 +229,8 @@ void NCPA::SolveModNB::setParams( NCPA::ParameterSet *param, NCPA::SampledProfil
 		cout << "maxheight = " << maxheight << " km" << endl;
 		cout << "maxheight is too short (< 100 m) ... program terminated." << endl;
 		exit(1);
-	}							
+	}			
+	*/				
 }
 
 
@@ -288,11 +318,11 @@ int NCPA::SolveModNB::computeModes() {
 	k_min = 0; 
 	k_max = 0;  	
 
-	rng_step = maxrange/Nrng_steps;         // range step [meters]
-	dz       = (maxheight - z_min)/Nz_grid;	// the z-grid spacing
+	rng_step = maxrange/Nrng_steps;         		// range step [meters]
+	dz       = (maxheight - z_min)/(Nz_grid - 1);	// the z-grid spacing
 	h2       = dz*dz;
 	//dz_km    = dz/1000.0;
-	z_min_km = z_min;
+	z_min_km = z_min / 1000.0;
   
 	//
 	// loop over azimuths (if not (N by 2D) it's only one azimuth)
@@ -301,12 +331,18 @@ int NCPA::SolveModNB::computeModes() {
   
 		azi = azi_min + it*azi_step; // degrees (not radians)
 		cout << endl << "Now processing azimuth = " << azi << " (" << it+1 << " of " 
-			<< Naz << ")" << endl;
+			 << Naz << ")" << endl;
 
-		atm_profile->setPropagationAzimuth(azi);
+		//atm_profile->setPropagationAzimuth(azi);
+		atm_profile->calculate_wind_component("WC", "WS", "WD", azi );
+		atm_profile->calculate_effective_sound_speed( "CE", "C0", "WC" );
+		atm_profile->get_property_vector( "CE", c_eff );
+		atm_profile->add_property( "AZ", azi, NCPA::UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH );
+
 
 		// compute absorption
-		getAbsorption(Nz_grid, dz, atm_profile, freq, usrattfile, alpha);
+		getAbsorption(Nz_grid, dz, /*atm_profile,*/
+			freq, usrattfile, alpha);
 
 		//
 		// ground impedance model
@@ -319,8 +355,11 @@ int NCPA::SolveModNB::computeModes() {
 		if ( gnd_imp_model.compare( "rigid" ) == 0) {
 			// Rigid ground, check for Lamb wave BC
 			if (Lamb_wave_BC) {
-				admittance = -atm_profile->drhodz(z_min_km) / 1000.0
-					/ atm_profile->rho(z_min_km) / 2.0; // SI units
+				admittance = -atm_profile->get_first_derivative( "RHO", z_min ) 
+					/ atm_profile->get( "RHO", z_min ) / 2.0;
+				cout << "Admittance = " << admittance << endl;
+				//admittance = -atm_profile->drhodz(z_min_km) / 1000.0
+				//	/ atm_profile->rho(z_min_km) / 2.0; // SI units
 			} else {
 				admittance = 0.0;
 			}
@@ -332,6 +371,7 @@ int NCPA::SolveModNB::computeModes() {
 		//
 		// Get the main diagonal and the number of modes
 		//		
+
 		i = getModalTrace(Nz_grid, z_min, sourceheight, receiverheight, dz, atm_profile, admittance, 
 				  freq, azi, diag, &k_min, &k_max, turnoff_WKB, c_eff);
 
@@ -487,7 +527,8 @@ int NCPA::SolveModNB::computeModes() {
 
 		// select modes and do perturbation
 		doSelect(Nz_grid,nconv,k_min,k_max,k2,v,k_s,v_s,&select_modes);  
-		doPerturb(Nz_grid, z_min, dz, select_modes, freq, atm_profile, k_s, v_s, alpha, k_pert);
+		//doPerturb(Nz_grid, z_min, dz, select_modes, freq, atm_profile, k_s, v_s, alpha, k_pert);
+		doPerturb(Nz_grid, z_min, dz, select_modes, freq, k_s, v_s, alpha, k_pert);
 		
 		//
 		// Output data  
@@ -570,6 +611,10 @@ int NCPA::SolveModNB::computeModes() {
 		ierr = MatDestroy(&A);  CHKERRQ(ierr);
 		ierr = VecDestroy(&xr); CHKERRQ(ierr);
 		ierr = VecDestroy(&xi); CHKERRQ(ierr); 
+
+		atm_profile->remove_property( "WC" );
+		atm_profile->remove_property( "CE" );
+		atm_profile->remove_property( "AZ" );
   
 	} // end loop by azimuths
   
@@ -601,8 +646,8 @@ int NCPA::SolveModNB::computeModes() {
 // updated getAbsorption function: bug fixed by Joel and Jelle - Jun 2012
 // updated: will accept attenuation coeff. loaded from a file
 // @todo Make this a method of SampledProfile or AtmosphericProfile
-int NCPA::SolveModNB::getAbsorption(int n, double dz, SampledProfile *p, double freq, 
-				    string usrattfile, double *alpha)
+int NCPA::SolveModNB::getAbsorption(int n, double dz, /*NCPA::Atmosphere1D *p,*/
+	 double freq, string usrattfile, double *alpha)
 {
 
 	if (usrattfile.empty()) {
@@ -832,7 +877,7 @@ int NCPA::SolveModNB::getAbsorption(int n, double dz, SampledProfile *p, double 
 
 // DV 20130827: new getModalTrace() to output the effective sound speed 
 int NCPA::SolveModNB::getModalTrace( int nz, double z_min, double sourceheight, 
-	double receiverheight, double dz, SampledProfile *p,
+	double receiverheight, double dz, Atmosphere1D *p,
 	double admittance, double freq, double azi, double *diag,
 	double *k_min, double *k_max, bool turnoff_WKB, double *ceffz) {
 	// DV Note: Claus's profile->ceff() computes ceff = sqrt(gamma*R*T) + wind; 
@@ -847,37 +892,44 @@ int NCPA::SolveModNB::getModalTrace( int nz, double z_min, double sourceheight,
 	double cz, windz, ceffmin, ceffmax, ceff_grnd, cefftop; 
 	double kk, dkk, k_eff, k_gnd, k_max_full, wkbIntegral, wkbTerm;
 	//double rho_factor;
-	z_min_km = z_min; // @CHH already in km
-	dz_km    = dz;    // @CHH already in km
+	z_min_km = z_min / 1000.0;
+	dz_km    = dz / 1000.0;
 	omega    = 2*PI*freq;
   
-	azi_rad  = p->getPropagationAzimuth()*PI/180.0;
+	azi_rad  = NCPA::Units::convert( p->get( "AZ" ), NCPA::UNITS_ANGLE_DEGREES, UNITS_ANGLE_RADIANS );
+	/*
 	if (fabs(azi_rad-azi*PI/180.0)>1e-12) {
 		std::ostringstream es;
 		es << "Azimuth conflict; requested was " << azi << " but the actual is "
 			<< p->getPropagationAzimuth() << " degrees" << endl; 
 		throw invalid_argument(es.str());
 	}
+	*/
   
 	gamma = 1.4;  
 	// gamma = 1.371 + 2.46E-04*T - 6.436E-07*pow(T,2) + 5.2E-10*pow(T,3) - 1.796E-13*pow(T,4) + 2.182E-17*pow(T,5);
 
 	z_km      = z_min_km;
-	cz        = sqrt(gamma*Pr[0]/rho[0]); // in m/s
-	windz     = zw[0]*sin(azi_rad) + mw[0]*cos(azi_rad); 
-	ceff_grnd = cz + windz;
+	
+	cz        = p->get( "C0", z_min );
+	//cz        = sqrt(gamma*Pr[0]/rho[0]); // in m/s
+	windz     = p->get( "WC", z_min );
+	//windz     = zw[0]*sin(azi_rad) + mw[0]*cos(azi_rad); 
+	ceff_grnd = p->get( "CE", z_min );
+	//ceff_grnd = cz + windz;
 	ceffmin   = ceff_grnd;  // in m/s; initialize ceffmin
 	ceffmax   = ceffmin;    // initialize ceffmax   
 	for (i=0; i<nz; i++) {	     
-		cz       = sqrt(gamma*Pr[i]/rho[i]); // in m/s
-		windz    = zw[i]*sin(azi_rad) + mw[i]*cos(azi_rad);
-		ceffz[i] = cz + windz;
+		ceffz[ i ] = p->get( "CE", Hgt[ i ] );
+		//cz       = sqrt(gamma*Pr[i]/rho[i]); // in m/s
+		//windz    = zw[i]*sin(azi_rad) + mw[i]*cos(azi_rad);
+		//ceffz[i] = cz + windz;
       
 		// we neglect rho_factor - it does not make sense to have in this approximation
 		//rho_factor is 1/2*rho_0"/rho_0 - 3/4*(rho_0')^2/rho_0^2
 		//rho_factor = (-0.75*pow(p->drhodz(z_km)/p->rho(z_km),2)+ 0.5*p->ddrhodzdz(z_km)/p->rho(z_km))*1e-6; // in meters^(-2)!
 		//diag[i]    = pow(omega/ceffz[i],2) + rho_factor;
-		diag[i] = pow(omega/ceffz[i],2);
+		diag[i] = pow( omega / ceffz[ i ], 2 );
 
 		if (ceffz[i] < ceffmin)
 			ceffmin = ceffz[i];  // approximation to find minimum sound speed in problem		   		
@@ -940,9 +992,12 @@ int NCPA::SolveModNB::getModalTrace( int nz, double z_min, double sourceheight,
 
 	top     = nz - ((int) nz/10);
 	z_km    = z_min_km + (top+1)*dz_km;  
-	cz      = sqrt(gamma*Pr[top+1]/rho[top+1]); // in m/s
-	windz   = zw[top+1]*sin(azi_rad) + mw[top+1]*cos(azi_rad);
-	cefftop = cz + windz;
+	//cz      = sqrt(gamma*Pr[top+1]/rho[top+1]); // in m/s
+	cz      = p->get( "C0", Hgt[ top+1 ] );
+	windz   = p->get( "WC", Hgt[ top+1 ] );
+	//windz   = zw[top+1]*sin(azi_rad) + mw[top+1]*cos(azi_rad);
+	cefftop = p->get( "CE", Hgt[ top+1 ] );
+	//cefftop = cz + windz;
 	*k_min  = omega/cefftop;
 
 	// @todo remove?
@@ -964,19 +1019,24 @@ int NCPA::SolveModNB::getModalTrace( int nz, double z_min, double sourceheight,
 	// optional save ceff
 	// @todo add flag to turn on/off
 	if (1) {
-		double *target;
-		target = new double [p->nz()];
-		p->get_ceff(target, p->nz());
+		double *target, *zvec;
+		size_t nz = p->nz();
+		target = new double[ nz ];
+		zvec   = new double[ nz ];
+		p->get_property_vector( "CE", target );
+		p->get_altitude_vector( zvec );
+		//p->get_ceff(target, p->nz());
       
 		FILE *fp = fopen("ceff.nm", "w");    
-		for (i=0; i<p->nz(); i++) {     
-			z_km = p->z(i);
+		for ( i = 0; i < nz; i++ ) {     
+			z_km = zvec[ i ];
 			//printf("%g target[%d] = %g; %g\n", z_km, i, target[i]*1000.0, ceffz[i]);
-			fprintf(fp, "%8.3f %15.6e  %15.6e\n", z_km, target[i], ceffz[i]);
+			fprintf(fp, "%8.3f %15.6e\n", zvec[ i ], target[ i ]);
 		}
 		fclose(fp);
 		printf("ceff saved in ceff.nm\n");
 		delete [] target;
+		delete [] zvec;
 	}
 
 	return 0;
@@ -1023,8 +1083,8 @@ int NCPA::SolveModNB::sturmCount(int n, double dz, double *diag, double k, int *
 }
 
 
-int NCPA::SolveModNB::doPerturb(int nz, double z_min, double dz, int n_modes, double freq,
-		SampledProfile *p, double *k, double **v, double *alpha, complex<double> *k_pert) {
+int NCPA::SolveModNB::doPerturb(int nz, double z_min, double dz, int n_modes, double freq, /*SampledProfile *p,*/ 
+		double *k, double **v, double *alpha, complex<double> *k_pert) {
 	int i, j;
 	double absorption, gamma, c_T;
 	double z_km, dz_km;

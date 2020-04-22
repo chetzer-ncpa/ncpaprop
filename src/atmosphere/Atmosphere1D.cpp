@@ -228,6 +228,10 @@ size_t NCPA::Atmosphere1D::get_basis_length() const {
 	return z_->size();
 }
 
+size_t NCPA::Atmosphere1D::nz() const {
+	return get_basis_length();
+}
+
 void NCPA::Atmosphere1D::calculate_wind_speed( std::string new_key, std::string we_wind_speed_key, 
 	std::string sn_wind_speed_key ) {
 
@@ -378,9 +382,18 @@ void NCPA::Atmosphere1D::get_altitude_vector( double *buffer, units_t *buffer_un
 	z_->get_vector( buffer, buffer_units );
 }
 
+void NCPA::Atmosphere1D::get_altitude_vector( double *buffer ) const {
+	z_->get_vector( buffer );
+}
+
 void NCPA::Atmosphere1D::get_property_vector( std::string key, double *buffer, units_t *buffer_units ) const {
 	NCPA::AtmosphericProperty1D *prop = contents_.at( key );
 	prop->get_vector( buffer, buffer_units );
+}
+
+void NCPA::Atmosphere1D::get_property_vector( std::string key, double *buffer ) const {
+	NCPA::AtmosphericProperty1D *prop = contents_.at( key );
+	prop->get_vector( buffer );
 }
 
 NCPA::units_t NCPA::Atmosphere1D::get_property_units( std::string key ) {
@@ -730,4 +743,20 @@ void NCPA::Atmosphere1D::resample( double new_dz ) {
 	}
 
 	delete [] new_z;
+}
+
+void NCPA::Atmosphere1D::remove_property( std::string key ) {
+
+	try {
+		NCPA::AtmosphericProperty1D *prop = contents_.at( key );
+		delete prop;
+		contents_.erase( key );
+	} catch (std::out_of_range oor) {}
+
+	try {
+		NCPA::ScalarWithUnits *swu = scalar_contents_.at( key );
+		delete swu;
+		scalar_contents_.erase( key );
+	} catch (std::out_of_range oor) {}
+
 }

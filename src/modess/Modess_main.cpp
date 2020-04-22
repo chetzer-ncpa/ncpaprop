@@ -7,11 +7,9 @@
 #include <complex>
 #include <cstring>
 
-#include "Atmosphere.h"
-//#include "anyoption.h"
-//#include "ProcessOptionsNB.h"
+//#include "Atmosphere.h"
+#include "Atmosphere1D.h"
 #include "SolveModNB.h"
-//#include "Modess_lib.h"
 #include "util.h"
 #include "modess_parameters.h"
 
@@ -27,8 +25,8 @@ using namespace std;
 /*
 * This is Jelle Assink's Normal Modes code effective sound speed- moved to C++
 * Contains some of Roger Waxler's original design also.
-* @version 0
-* @date 2012-09
+* @version 2.0
+* @date 2020-04-21
 * @authors Jelle Assink; Roger Waxler; Claus Hetzer; Doru Velea;
 * 
 * Changelog:
@@ -36,10 +34,8 @@ using namespace std;
 * 201305  : DV added use_attn_file option (to allow atten. coeff loaded from a text file)
 * 201306  : DV modified the get() functions that return strings
 * 20130827: DV added the computation of modal group velocities
+* 20200421: CH Retrofitted to use new ParameterSet and Atmosphere1D libraries
 */
-
-// Function to parse the options from the command line/config file
-//AnyOption *parseInputOptions( int argc, char **argv );
 
 //
 // main
@@ -86,9 +82,9 @@ int main( int argc, char **argv ) {
 	}
 
 	string atmosfile = 			param->getString( "atmosfile" );
-	string atmosfileorder = 	param->getString( "atmosfileorder" );
-	string wind_units = 		param->getString( "wind_units" );
-	int skiplines = 			param->getInteger( "skiplines" );
+	//string atmosfileorder = 	param->getString( "atmosfileorder" );
+	//string wind_units = 		param->getString( "wind_units" );
+	//int skiplines = 			param->getInteger( "skiplines" );
 
 	/*
 	string atmosfile      = "";          // stores the atmospheric profile name
@@ -110,11 +106,14 @@ int main( int argc, char **argv ) {
 	*/
 
 	// get atmospheric profile object; the azimuth is set inside SolveModNB
-	bool inMPS = 0;
-	if ( strcmp( wind_units.c_str(), "mpersec" ) == 0) {
-		inMPS = 1;
-	}
-	SampledProfile *atm_profile = new SampledProfile( atmosfile, atmosfileorder.c_str(), skiplines, inMPS );
+	//bool inMPS = 0;
+	//if ( strcmp( wind_units.c_str(), "mpersec" ) == 0) {
+	//	inMPS = 1;
+	//}
+	//SampledProfile *atm_profile = new SampledProfile( atmosfile, atmosfileorder.c_str(), skiplines, inMPS );
+
+	// open the file
+	Atmosphere1D *atm_profile = new Atmosphere1D( atmosfile );
 	 
 	// get solver object
 	//SolveModNB *a = new SolveModNB(oNB, atm_profile);
@@ -129,7 +128,10 @@ int main( int argc, char **argv ) {
 	// save atm. profile if requested
 	//if (oNB->getWriteAtmProfile()) {
 	if (param->getBool( "write_atm_profile" ) ) {
-		atm_profile->save_profile( wind_units );
+		//atm_profile->save_profile( wind_units );
+		ofstream ofs( "atm_profile.nm" );
+		atm_profile->print_atmosphere( "Z", ofs );
+		ofs.close();
 	}	
 	else { 
 		printf(" write_atm_profile flag : %d\n", param->getBool( "write_atm_profile" )); 

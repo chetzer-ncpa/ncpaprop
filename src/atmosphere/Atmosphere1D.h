@@ -24,6 +24,7 @@ namespace NCPA {
 
 		void add_property( std::string key, size_t n_points, double *quantity_points, units_t quantity_units );    // vector quantity
 		void add_property( std::string key, double value, units_t units );    // scalar quantity
+		void remove_property( std::string key );
 
 		double get_minimum_altitude() const;
 		double get_maximum_altitude() const;
@@ -51,8 +52,11 @@ namespace NCPA {
 		units_t get_property_units( std::string key );
 
 		size_t get_basis_length() const;
+		size_t nz() const;
 		void get_altitude_vector( double *buffer, units_t *buffer_units ) const;
 		void get_property_vector( std::string key, double *buffer, units_t *buffer_units ) const;
+		void get_altitude_vector( double *buffer ) const;
+		void get_property_vector( std::string key, double *buffer ) const;
 
 		void resample( double new_dz );
 
