@@ -690,14 +690,14 @@ int NCPA::SolveModNB::getAbsorption(int n, double dz, SampledProfile *p, double 
     P_o   = Pr[0];        // Reference pressure [Pa]
     S     = 117;          // Sutherland constant [K]       
 
-    Cv_R[0] = 5/2;                                    // Heat capacity|volume (O2)
-    Cv_R[1] = 5/2;                                    // Heat capacity|volume (N2)
-    Cv_R[2] = 3;                                      // Heat capacity|volume (CO2)
-    Cv_R[3] = 3;                                      // Heat capacity|volume (O3)
-    Cp_R[0] = 7/2;                                    // Heat capacity|pressure (O2)
-    Cp_R[1] = 7/2;                                    // Heat capacity|pressure (N2)
-    Cp_R[2] = 4;                                      // Heat capacity|pressure (CO2)
-    Cp_R[3] = 4;                                      // Heat capacity|pressure (O3)
+    Cv_R[0] = 5.0/2.0;                                    // Heat capacity|volume (O2)
+    Cv_R[1] = 5.0/2.0;                                    // Heat capacity|volume (N2)
+    Cv_R[2] = 3.0;                                      // Heat capacity|volume (CO2)
+    Cv_R[3] = 3.0;                                      // Heat capacity|volume (O3)
+    Cp_R[0] = 7.0/2.0;                                    // Heat capacity|pressure (O2)
+    Cp_R[1] = 7.0/2.0;                                    // Heat capacity|pressure (N2)
+    Cp_R[2] = 4.0;                                      // Heat capacity|pressure (CO2)
+    Cp_R[3] = 4.0;                                      // Heat capacity|pressure (O3)
     theta[0]= 2239.1;                                 // Charact. temperature (O2)
     theta[1]= 3352;                                   // Charact. temperature (N2)
     theta[2]= 915;                                    // Charact. temperature (CO2)
