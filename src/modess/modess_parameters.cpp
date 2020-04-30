@@ -130,15 +130,15 @@ void NCPA::configure_modess_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->addParameterDescription( "Modes of Operation", "--Nby2Dprop", "Multiple azimuth propagation.  Requires --azimuth_start, --azimuth_end, and --azimuth_step" );
 	ps->addParameter( new NCPA::FloatParameter( "azimuth_start" ) );
 	ps->addTest( new NCPA::FloatGreaterThanOrEqualToTest( "azimuth_start", 0.0 ) );
-	ps->addTest( new NCPA::FloatLessThanTest( "azimuth_start", 360.0 ) );
+	ps->addTest( new NCPA::FloatLessThanOrEqualToTest( "azimuth_start", 360.0 ) );
 	ps->addTest( new NCPA::RequiredIfOtherIsPresentTest( "azimuth_start", "Nby2Dprop" ) );
 	ps->addParameter( new NCPA::FloatParameter( "azimuth_end" ) );
 	ps->addTest( new NCPA::FloatGreaterThanOrEqualToTest( "azimuth_end", 0.0 ) );
-	ps->addTest( new NCPA::FloatLessThanTest( "azimuth_end", 360.0 ) );
+	ps->addTest( new NCPA::FloatLessThanOrEqualToTest( "azimuth_end", 360.0 ) );
 	ps->addTest( new NCPA::RequiredIfOtherIsPresentTest( "azimuth_end", "Nby2Dprop" ) );
 	ps->addParameter( new NCPA::FloatParameter( "azimuth_step" ) );
 	ps->addTest( new NCPA::FloatGreaterThanOrEqualToTest( "azimuth_step", 0.0 ) );
-	ps->addTest( new NCPA::FloatLessThanTest( "azimuth_step", 360.0 ) );
+	ps->addTest( new NCPA::FloatLessThanOrEqualToTest( "azimuth_step", 360.0 ) );
 	ps->addTest( new NCPA::RequiredIfOtherIsPresentTest( "azimuth_step", "Nby2Dprop" ) );
 	
 	ps->setParameterIndent( 2 * DEFAULT_PARAMETER_INDENT );

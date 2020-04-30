@@ -95,7 +95,7 @@ namespace NCPA {
 		double sourceheight;
 		double receiverheight;
 		double tol;
-		double *Hgt, *zw, *mw, *T, *rho, *Pr, *c_eff;
+		double *Hgt, *zw, *mw, *T, *rho, *Pr, *c_eff, *alpha;    // change AA to alpha
 		double c_min; // for wavenumber filtering option
 		double c_max; // for wavenumber filtering option
       
