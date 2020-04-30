@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <sstream>
 #include <cmath>
+#include <iostream>
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_spline.h"
 
@@ -18,17 +19,21 @@ NCPA::AtmosphericProperty1D::AtmosphericProperty1D( size_t n_points, double *alt
 
 	z_ = new double[ n_points ];
 	z_units_ = altitude_units;
-	//z_units_.push( altitude_units );
 	std::memcpy( z_, altitude_points, n_points*sizeof(double) );
-	//z_vector_ = new VectorWithUnits( n_points, z_, altitude_units );
 	
 	values_ = new double[ n_points ];
 	units_ = property_units;
-	//units_.push( property_units );
 	std::memcpy( values_, property_values, n_points*sizeof(double) );
 	n_ = n_points;
 
 	build_splines_();
+}
+
+NCPA::AtmosphericProperty1D::AtmosphericProperty1D( const AtmosphericProperty1D &source ) : VectorWithUnits( source ) {
+	this->n_ = source.n_;
+	this->z_ = new double[ n_ ];
+	std::memcpy( z_, source.z_, n_ * sizeof( double ) );
+	this->z_units_ = source.z_units_;
 }
 
 NCPA::AtmosphericProperty1D::~AtmosphericProperty1D() {
@@ -53,92 +58,12 @@ void NCPA::AtmosphericProperty1D::convert_altitude_units( NCPA::units_t new_unit
 	}
 }
 
-/*
-void NCPA::AtmosphericProperty1D::revert_altitude_units() {
-	if (z_units_.size() < 2) {
-		return;
-	}
-
-	NCPA::units_t current_units, last_units;
-	current_units = z_units_.top();
-	z_units_.pop();
-	last_units = z_units_.top();
-	if (current_units != last_units) {
-		try {
-			do_units_conversion_( n_, z_, current_units, last_units );
-			build_splines_();
-		} catch (std::out_of_range &oor) {
-			z_units_.push( current_units );
-			throw;
-		}
-	}
-}
-*/
 
 void NCPA::AtmosphericProperty1D::convert_units( NCPA::units_t new_units ) {
 	//std::cout << "Called AtmosphericProperty1D::convert_units()" << std::endl;
 	NCPA::VectorWithUnits::convert_units( new_units );
 	build_splines_();
 }
-
-/*
-void NCPA::AtmosphericProperty1D::revert_units() {
-	NCPA::VectorWithUnits::revert_units();
-	build_splines_();
-}
-*/
-
-/*
-NCPA::units_t NCPA::AtmosphericProperty1D::get_units() const {
-	return units_.top();
-}
-
-void NCPA::AtmosphericProperty1D::convert_units( NCPA::units_t new_units ) {
-	// will throw out_of_range and leave original units unchanged if there's an error
-	// if there's no change in units, don't bother with the calculation, just push another
-	// one onto the stack so reversion can happen properly
-	if (new_units != _units_.top()) {
-		do_units_conversion_( n_, values_, units_.top(), new_units );
-	}
-	units_.push( new_units );
-}
-
-void NCPA::AtmosphericProperty1D::revert_units() {
-	if (units_.size() < 2) {
-		return;
-	}
-
-	NCPA::units_t current_units, last_units;
-	current_units = units_.top();
-	units_.pop();
-	last_units = units_.top();
-	if (current_units != last_units) {
-		try {
-			do_units_conversion_( n_, values_, current_units, last_units );
-		} catch (std::out_of_range &oor) {
-			units_.push( current_units );
-			throw;
-		}
-	}
-}
-
-
-void NCPA::AtmosphericProperty1D::do_units_conversion_( size_t n_points, double *inplace, 
-			NCPA::units_t fromUnits, NCPA::units_t toUnits ) {
-
-	// try to convert
-	double *units_buffer = new double[ n_points ];
-	std::memset( units_buffer, 0, n_points * sizeof( double ) );
-	
-	// throws out_of_range if conversion is undefined
-	NCPA::Units::convert( inplace, n_points, fromUnits, toUnits, units_buffer );
-
-	// successful, so record the units change
-	std::memcpy( inplace, units_buffer, n_points * sizeof( double ) );
-	build_splines_();
-	delete [] units_buffer;
-}
-*/
 
 void NCPA::AtmosphericProperty1D::build_splines_() {
 	delete_splines_();
@@ -164,13 +89,6 @@ void NCPA::AtmosphericProperty1D::get_altitude_vector( double *buffer, units_t *
 	std::memcpy( buffer, z_, n_ * sizeof(double) );
 }
 
-/*
-void NCPA::AtmosphericProperty1D::get_property_basis( double *buffer, units_t *buffer_units ) const {
-	get_vector( buffer, buffer_units );
-	//*buffer_units = units_.top();
-	//std::memcpy( buffer, values_, n_ * sizeof( double ) );
-}
-*/
 
 void NCPA::AtmosphericProperty1D::check_altitude_( double z_req ) const {
 	if ( z_req < z_[0] || z_req > z_[ n_ - 1 ] ) {
@@ -217,48 +135,3 @@ void NCPA::AtmosphericProperty1D::resample( double new_dz ) {
 	values_ = new_prop;
 	build_splines_();
 }
-
-
-
-
-// double NCPA::AtmosphericProperty1D::get( double altitude, units_t altitude_units, units_t quantity_units ) {
-
-// 	// make sure units are consistent
-// 	double z_req = NCPA::Units::convert( altitude, altitude_units, z_units_ );
-// 	if ( z_req < z_[0] || z_req > z_[ n_ - 1 ] ) {
-// 		std::ostringstream oss;
-// 		oss << "Requested altitude " << altitude << " " << NCPA::Units::toStr( altitude_units ) << " outside profile bounds.";
-// 		throw std::range_error( oss.str() );
-// 	}
-
-// 	return NCPA::Units::convert( gsl_spline_eval( spline_, z_req, accel_ ), units_, quantity_units );
-// }
-
-// double NCPA::AtmosphericProperty1D::get_first_derivative( double altitude, units_t altitude_units, units_t quantity_units ) {
-
-// 	// make sure units are consistent
-// 	double z_req = NCPA::Units::convert( altitude, altitude_units, z_units_ );
-// 	if ( z_req < z_[0] || z_req > z_[ n_ - 1 ] ) {
-// 		std::ostringstream oss;
-// 		oss << "Requested altitude " << altitude << " " << NCPA::Units::toStr( altitude_units ) << " outside profile bounds.";
-// 		throw std::range_error( oss.str() );
-// 	}
-
-
-// 	return NCPA::Units::convert_first_derivative( gsl_spline_eval_deriv( spline_, z_req, accel_ ), units_, quantity_units );
-// }
-
-// double NCPA::AtmosphericProperty1D::get_second_derivative( double altitude, units_t altitude_units, units_t quantity_units ) {
-
-// 	// make sure units are consistent
-// 	double z_req = NCPA::Units::convert( altitude, altitude_units, z_units_ );
-// 	if ( z_req < z_[0] || z_req > z_[ n_ - 1 ] ) {
-// 		std::ostringstream oss;
-// 		oss << "Requested altitude " << altitude << " " << NCPA::Units::toStr( altitude_units ) << " outside profile bounds.";
-// 		throw std::range_error( oss.str() );
-// 	}
-
-
-// 	return NCPA::Units::convert_second_derivative( gsl_spline_eval_deriv2( spline_, z_req, accel_ ), units_, quantity_units );
-// }
-

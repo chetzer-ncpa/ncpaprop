@@ -9,8 +9,6 @@
 
 // initialize static members
 conversion_map_t NCPA::Units::map_ = conversion_map_t();
-// conversion_map_t NCPA::Units::map_d1_ = conversion_map_t();
-// conversion_map_t NCPA::Units::map_d2_ = conversion_map_t();
 units_to_string_map_t NCPA::Units::enum_to_string_map_ = units_to_string_map_t();
 units_to_string_map_t NCPA::Units::enum_to_abbr_map_ = units_to_string_map_t();
 string_to_units_map_t NCPA::Units::string_to_enum_map_ = string_to_units_map_t();
@@ -60,42 +58,6 @@ std::string NCPA::Units::toString( units_t u ) {
 		throw std::out_of_range( "Unrecognized units type" );
 	}
 
-	// switch (u) {
-	// 	case UNITS_NONE:
-	// 		return "No units";
-	// 	case UNITS_TEMPERATURE_KELVIN:
-	// 		return "degrees Kelvin";
-	// 	case UNITS_TEMPERATURE_CELSIUS:
-	// 		return "degrees Celsius";
-	// 	case UNITS_TEMPERATURE_FAHRENHEIT:
-	// 		return "degrees Fahrenheit";
-	// 	case UNITS_DISTANCE_METERS:
-	// 		return "meters";
-	// 	case UNITS_DISTANCE_KILOMETERS:
-	// 		return "kilometers";
-	// 	case UNITS_SPEED_METERS_PER_SECOND:
-	// 		return "meters per second";
-	// 	case UNITS_SPEED_KILOMETERS_PER_SECOND:
-	// 		return "kilometers per second";
-	// 	case UNITS_PRESSURE_PASCALS:
-	// 		return "Pascals";
-	// 	case UNITS_PRESSURE_MILLIBARS:
-	// 		return "millibars";
-	// 	case UNITS_DENSITY_KILOGRAMS_PER_CUBIC_METER:
-	// 		return "kilograms per cubic meter";
-	// 	case UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER:
-	// 		return "grams per cubic centimeter";
-	// 	case UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH:
-	// 		return "degrees clockwise from North";
-	// 	case UNITS_DIRECTION_DEGREES_COUNTERCLOCKWISE_FROM_EAST:
-	// 		return "degrees counterclockwise from East";
-	// 	case UNITS_ANGLE_DEGREES:
-	// 		return "degrees";
-	// 	case UNITS_ANGLE_RADIANS:
-	// 		return "radians";
-	// 	default:
-	// 		throw std::out_of_range( "Unrecognized units type" );
-	// }
 }
 
 
@@ -110,43 +72,6 @@ std::string NCPA::Units::toStr( units_t u ) {
 	} catch (std::out_of_range e) {
 		throw std::out_of_range( "Unrecognized units type" );
 	}
-
-	// switch (u) {
-	// 	case UNITS_NONE:
-	// 		return "N/A";
-	// 	case UNITS_TEMPERATURE_KELVIN:
-	// 		return "K";
-	// 	case UNITS_TEMPERATURE_CELSIUS:
-	// 		return "C";
-	// 	case UNITS_TEMPERATURE_FAHRENHEIT:
-	// 		return "F";
-	// 	case UNITS_DISTANCE_METERS:
-	// 		return "m";
-	// 	case UNITS_DISTANCE_KILOMETERS:
-	// 		return "km";
-	// 	case UNITS_SPEED_METERS_PER_SECOND:
-	// 		return "m/s";
-	// 	case UNITS_SPEED_KILOMETERS_PER_SECOND:
-	// 		return "km/s";
-	// 	case UNITS_PRESSURE_PASCALS:
-	// 		return "Pa";
-	// 	case UNITS_PRESSURE_MILLIBARS:
-	// 		return "mbar";
-	// 	case UNITS_DENSITY_KILOGRAMS_PER_CUBIC_METER:
-	// 		return "kg/m3";
-	// 	case UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER:
-	// 		return "g/cm3";
-	// 	case UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH:
-	// 		return "deg CW from N";
-	// 	case UNITS_DIRECTION_DEGREES_COUNTERCLOCKWISE_FROM_EAST:
-	// 		return "deg CCW from E";
-	// 	case UNITS_ANGLE_DEGREES:
-	// 		return "deg";
-	// 	case UNITS_ANGLE_RADIANS:
-	// 		return "rad";
-	// 	default:
-	// 		throw std::out_of_range( "Unrecognized units type" );
-	// }
 }
 
 
@@ -207,47 +132,7 @@ void NCPA::Units::initialize_() {
 		} }
 	};
 
-	// unit first derivative conversions.  Since most conversions are linear scaling, so are most derivative conversions, but some have constant offsets that
-	// must be zeroed out.  Note: direction derivatives are not smart, as in they won't take into account phase wrapping
-	// map_d1_ = {
-	// 	{ get_unit_pair_( UNITS_TEMPERATURE_CELSIUS, UNITS_TEMPERATURE_FAHRENHEIT ), []( double in ) { return ( in * 1.8 ); } },
-	// 	{ get_unit_pair_( UNITS_TEMPERATURE_CELSIUS, UNITS_TEMPERATURE_KELVIN ), []( double in ) { return in; } },
-	// 	{ get_unit_pair_( UNITS_TEMPERATURE_KELVIN, UNITS_TEMPERATURE_FAHRENHEIT ), []( double in ) { return in * 1.8; } },
-	// 	{ get_unit_pair_( UNITS_TEMPERATURE_KELVIN, UNITS_TEMPERATURE_CELSIUS ), []( double in ) { return in; } },
-	// 	{ get_unit_pair_( UNITS_TEMPERATURE_FAHRENHEIT, UNITS_TEMPERATURE_KELVIN ), []( double in ) { return in * 5.0 / 9.0; } },
-	// 	{ get_unit_pair_( UNITS_TEMPERATURE_FAHRENHEIT, UNITS_TEMPERATURE_CELSIUS ), []( double in ) { return in * 5.0 / 9.0; } },
-	// 	{ get_unit_pair_( UNITS_DISTANCE_METERS, UNITS_DISTANCE_KILOMETERS ), []( double in ) { return in * 0.001; } },
-	// 	{ get_unit_pair_( UNITS_DISTANCE_KILOMETERS, UNITS_DISTANCE_METERS ), []( double in ) { return in * 1000.0; } },
-	// 	{ get_unit_pair_( UNITS_SPEED_METERS_PER_SECOND, UNITS_SPEED_KILOMETERS_PER_SECOND ), []( double in ) { return in * 0.001; } },
-	// 	{ get_unit_pair_( UNITS_SPEED_KILOMETERS_PER_SECOND, UNITS_SPEED_METERS_PER_SECOND ), []( double in ) { return in * 1000.0; } },
-	// 	{ get_unit_pair_( UNITS_PRESSURE_PASCALS, UNITS_PRESSURE_MILLIBARS ), []( double in ) { return in * 0.01; } },
-	// 	{ get_unit_pair_( UNITS_PRESSURE_MILLIBARS, UNITS_PRESSURE_PASCALS ), []( double in ) { return in * 100.0; } },
-	// 	{ get_unit_pair_( UNITS_DENSITY_KILOGRAMS_PER_CUBIC_METER, UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER ), []( double in ) { return in * 0.001; } },
-	// 	{ get_unit_pair_( UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER, UNITS_DENSITY_KILOGRAMS_PER_CUBIC_METER ), []( double in ) { return in * 1000.0; } },
-	// 	{ get_unit_pair_( UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH, UNITS_DIRECTION_DEGREES_COUNTERCLOCKWISE_FROM_EAST ), []( double in ) { return in; } },
-	// 	{ get_unit_pair_( UNITS_DIRECTION_DEGREES_COUNTERCLOCKWISE_FROM_EAST, UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH ), []( double in ) { return in; } }
-	// };
 
-	// unit second derivative conversions.  Since most conversions are linear scaling, so are most derivative conversions, but some have constant offsets that
-	// must be zeroed out.  There are currently no second-order conversions, so we use the same derivative conversions as the first-order ones.
-	// map_d1_ = {
-	// 	{ get_unit_pair_( UNITS_TEMPERATURE_CELSIUS, UNITS_TEMPERATURE_FAHRENHEIT ), []( double in ) { return ( in * 1.8 ); } },
-	// 	{ get_unit_pair_( UNITS_TEMPERATURE_CELSIUS, UNITS_TEMPERATURE_KELVIN ), []( double in ) { return in; } },
-	// 	{ get_unit_pair_( UNITS_TEMPERATURE_KELVIN, UNITS_TEMPERATURE_FAHRENHEIT ), []( double in ) { return in * 1.8; } },
-	// 	{ get_unit_pair_( UNITS_TEMPERATURE_KELVIN, UNITS_TEMPERATURE_CELSIUS ), []( double in ) { return in; } },
-	// 	{ get_unit_pair_( UNITS_TEMPERATURE_FAHRENHEIT, UNITS_TEMPERATURE_KELVIN ), []( double in ) { return in * 5.0 / 9.0; } },
-	// 	{ get_unit_pair_( UNITS_TEMPERATURE_FAHRENHEIT, UNITS_TEMPERATURE_CELSIUS ), []( double in ) { return in * 5.0 / 9.0; } },
-	// 	{ get_unit_pair_( UNITS_DISTANCE_METERS, UNITS_DISTANCE_KILOMETERS ), []( double in ) { return in * 0.001; } },
-	// 	{ get_unit_pair_( UNITS_DISTANCE_KILOMETERS, UNITS_DISTANCE_METERS ), []( double in ) { return in * 1000.0; } },
-	// 	{ get_unit_pair_( UNITS_SPEED_METERS_PER_SECOND, UNITS_SPEED_KILOMETERS_PER_SECOND ), []( double in ) { return in * 0.001; } },
-	// 	{ get_unit_pair_( UNITS_SPEED_KILOMETERS_PER_SECOND, UNITS_SPEED_METERS_PER_SECOND ), []( double in ) { return in * 1000.0; } },
-	// 	{ get_unit_pair_( UNITS_PRESSURE_PASCALS, UNITS_PRESSURE_MILLIBARS ), []( double in ) { return in * 0.01; } },
-	// 	{ get_unit_pair_( UNITS_PRESSURE_MILLIBARS, UNITS_PRESSURE_PASCALS ), []( double in ) { return in * 100.0; } },
-	// 	{ get_unit_pair_( UNITS_DENSITY_KILOGRAMS_PER_CUBIC_METER, UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER ), []( double in ) { return in * 0.001; } },
-	// 	{ get_unit_pair_( UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER, UNITS_DENSITY_KILOGRAMS_PER_CUBIC_METER ), []( double in ) { return in * 1000.0; } },
-	// 	{ get_unit_pair_( UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH, UNITS_DIRECTION_DEGREES_COUNTERCLOCKWISE_FROM_EAST ), []( double in ) { return in; } },
-	// 	{ get_unit_pair_( UNITS_DIRECTION_DEGREES_COUNTERCLOCKWISE_FROM_EAST, UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH ), []( double in ) { return in; } }
-	// };
 
 	// take an enum value, output it's string value (full version)
 	enum_to_string_map_ = {
@@ -289,6 +174,8 @@ void NCPA::Units::initialize_() {
 	};
 
 	string_to_enum_map_ = {
+		{ "", UNITS_NONE },
+		{ "N/A", UNITS_NONE },
 		{ "K", UNITS_TEMPERATURE_KELVIN },
 		{ "DEGK", UNITS_TEMPERATURE_KELVIN },
 		{ "DEG K", UNITS_TEMPERATURE_KELVIN },
@@ -337,161 +224,6 @@ void NCPA::Units::initialize_() {
 		{ "RADIANS", UNITS_ANGLE_RADIANS }
 	};
 
-	// map_ = {
-	// 	{ get_unit_pair_( UNITS_TEMPERATURE_CELSIUS, UNITS_TEMPERATURE_FAHRENHEIT ), convert_temperature_c_to_f_ },
-	// 	{ get_unit_pair_( UNITS_TEMPERATURE_CELSIUS, UNITS_TEMPERATURE_KELVIN ), convert_temperature_c_to_k_ },
-	// 	{ get_unit_pair_( UNITS_TEMPERATURE_KELVIN, UNITS_TEMPERATURE_FAHRENHEIT ), convert_temperature_k_to_f_ },
-	// 	{ get_unit_pair_( UNITS_TEMPERATURE_KELVIN, UNITS_TEMPERATURE_CELSIUS ), convert_temperature_k_to_c_ },
-	// 	{ get_unit_pair_( UNITS_TEMPERATURE_FAHRENHEIT, UNITS_TEMPERATURE_KELVIN ), convert_temperature_f_to_k_ },
-	// 	{ get_unit_pair_( UNITS_TEMPERATURE_FAHRENHEIT, UNITS_TEMPERATURE_CELSIUS ), convert_temperature_f_to_c_ },
-	// 	{ get_unit_pair_( UNITS_DISTANCE_METERS, UNITS_DISTANCE_KILOMETERS ), convert_distance_m_to_km_ },
-	// 	{ get_unit_pair_( UNITS_DISTANCE_KILOMETERS, UNITS_DISTANCE_METERS ), convert_temperature_f_to_c_ },
-	// 	{ get_unit_pair_( UNITS_SPEED_METERS_PER_SECOND, UNITS_SPEED_KILOMETERS_PER_SECOND ), convert_speed_mps_to_kmps_ },
-	// 	{ get_unit_pair_( UNITS_SPEED_KILOMETERS_PER_SECOND, UNITS_SPEED_METERS_PER_SECOND ), convert_speed_kmps_to_mps_ },
-	// 	{ get_unit_pair_( UNITS_PRESSURE_PASCALS, UNITS_PRESSURE_MILLIBARS ), convert_pressure_pa_to_mbar_ },
-	// 	{ get_unit_pair_( UNITS_PRESSURE_MILLIBARS, UNITS_PRESSURE_PASCALS ), convert_pressure_mbar_to_pa_ },
-	// 	{ get_unit_pair_( UNITS_DENSITY_KILOGRAMS_PER_CUBIC_METER, UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER ), convert_density_kgpm3_to_gpcm3_ },
-	// 	{ get_unit_pair_( UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER, UNITS_DENSITY_KILOGRAMS_PER_CUBIC_METER ), convert_density_gpcm3_to_kgpm3_ },
-	// 	{ get_unit_pair_( UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH, UNITS_DIRECTION_DEGREES_COUNTERCLOCKWISE_FROM_EAST ), convert_direction_geo_to_math_ },
-	// 	{ get_unit_pair_( UNITS_DIRECTION_DEGREES_COUNTERCLOCKWISE_FROM_EAST, UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH ), convert_direction_math_to_geo_ }
-	// };
-
-
-	
-	// // set up valid unit pairs: temperature conversion
-	// map_[ get_unit_pair_( UNITS_TEMPERATURE_CELSIUS, UNITS_TEMPERATURE_FAHRENHEIT ) ] 
-	// 	= convert_temperature_c_to_f_;
-	// map_[ get_unit_pair_( UNITS_TEMPERATURE_CELSIUS, UNITS_TEMPERATURE_KELVIN ) ] 
-	// 	= convert_temperature_c_to_k_;
-	// map_[ get_unit_pair_( UNITS_TEMPERATURE_KELVIN, UNITS_TEMPERATURE_FAHRENHEIT ) ] 
-	// 	= convert_temperature_k_to_f_;
-	// map_[ get_unit_pair_( UNITS_TEMPERATURE_KELVIN, UNITS_TEMPERATURE_CELSIUS ) ]
-	// 	= convert_temperature_k_to_c_;
-	// map_[ get_unit_pair_( UNITS_TEMPERATURE_FAHRENHEIT, UNITS_TEMPERATURE_KELVIN ) ] 
-	// 	= convert_temperature_f_to_k_;
-	// map_[ get_unit_pair_( UNITS_TEMPERATURE_FAHRENHEIT, UNITS_TEMPERATURE_CELSIUS ) ]
-	// 	= convert_temperature_f_to_c_;
-	
-	// // length conversion
-	// map_[ get_unit_pair_( UNITS_DISTANCE_METERS, UNITS_DISTANCE_KILOMETERS ) ] 
-	// 	= convert_distance_m_to_km_;
-	// map_[ get_unit_pair_( UNITS_DISTANCE_KILOMETERS, UNITS_DISTANCE_METERS ) ] 
-	// 	= convert_distance_km_to_m_;
-	
-	// // speed conversion
-	// map_[ get_unit_pair_( UNITS_SPEED_METERS_PER_SECOND, UNITS_SPEED_KILOMETERS_PER_SECOND ) ] 
-	// 	= convert_speed_mps_to_kmps_;
-	// map_[ get_unit_pair_( UNITS_SPEED_KILOMETERS_PER_SECOND, UNITS_SPEED_METERS_PER_SECOND ) ] 
-	// 	= convert_speed_kmps_to_mps_;
-	
-	// // pressure conversion
-	// map_[ get_unit_pair_( UNITS_PRESSURE_PASCALS, UNITS_PRESSURE_MILLIBARS ) ] 
-	// 	= convert_pressure_pa_to_mbar_;
-	// map_[ get_unit_pair_( UNITS_PRESSURE_MILLIBARS, UNITS_PRESSURE_PASCALS ) ] 
-	// 	= convert_pressure_mbar_to_pa_;
-	
-	// // density conversion
-	// map_[ get_unit_pair_( UNITS_DENSITY_KILOGRAMS_PER_CUBIC_METER, UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER ) ] 
-	// 	= convert_density_kgpm3_to_gpcm3_;
-	// map_[ get_unit_pair_( UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER, UNITS_DENSITY_KILOGRAMS_PER_CUBIC_METER ) ] 
-	// 	= convert_density_gpcm3_to_kgpm3_;
-	
-	// // direction conversion
-	// map_[ get_unit_pair_( UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH, UNITS_DIRECTION_DEGREES_COUNTERCLOCKWISE_FROM_EAST ) ] 
-	// 	= convert_direction_geo_to_math_;
-	// map_[ get_unit_pair_( UNITS_DIRECTION_DEGREES_COUNTERCLOCKWISE_FROM_EAST, UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH ) ] 
-	// 	= convert_direction_math_to_geo_;
-
-
-	// // First derivatives
-	// // set up valid unit pairs: temperature conversion
-	// map_d1_[ get_unit_pair_( UNITS_TEMPERATURE_CELSIUS, UNITS_TEMPERATURE_FAHRENHEIT ) ] 
-	// 	= convert_temperature_c_to_f_deriv_;
-	// map_d1_[ get_unit_pair_( UNITS_TEMPERATURE_CELSIUS, UNITS_TEMPERATURE_KELVIN ) ] 
-	// 	= convert_temperature_c_to_k_deriv_;
-	// map_d1_[ get_unit_pair_( UNITS_TEMPERATURE_KELVIN, UNITS_TEMPERATURE_FAHRENHEIT ) ] 
-	// 	= convert_temperature_k_to_f_deriv_;
-	// map_d1_[ get_unit_pair_( UNITS_TEMPERATURE_KELVIN, UNITS_TEMPERATURE_CELSIUS ) ]
-	// 	= convert_temperature_k_to_c_deriv_;
-	// map_d1_[ get_unit_pair_( UNITS_TEMPERATURE_FAHRENHEIT, UNITS_TEMPERATURE_KELVIN ) ] 
-	// 	= convert_temperature_f_to_k_deriv_;
-	// map_d1_[ get_unit_pair_( UNITS_TEMPERATURE_FAHRENHEIT, UNITS_TEMPERATURE_CELSIUS ) ]
-	// 	= convert_temperature_f_to_c_deriv_;
-	
-	// // length conversion
-	// map_d1_[ get_unit_pair_( UNITS_DISTANCE_METERS, UNITS_DISTANCE_KILOMETERS ) ] 
-	// 	= convert_distance_m_to_km_deriv_;
-	// map_d1_[ get_unit_pair_( UNITS_DISTANCE_KILOMETERS, UNITS_DISTANCE_METERS ) ] 
-	// 	= convert_distance_km_to_m_deriv_;
-	
-	// // speed conversion
-	// map_d1_[ get_unit_pair_( UNITS_SPEED_METERS_PER_SECOND, UNITS_SPEED_KILOMETERS_PER_SECOND ) ] 
-	// 	= convert_speed_mps_to_kmps_deriv_;
-	// map_d1_[ get_unit_pair_( UNITS_SPEED_KILOMETERS_PER_SECOND, UNITS_SPEED_METERS_PER_SECOND ) ] 
-	// 	= convert_speed_kmps_to_mps_deriv_;
-	
-	// // pressure conversion
-	// map_d1_[ get_unit_pair_( UNITS_PRESSURE_PASCALS, UNITS_PRESSURE_MILLIBARS ) ] 
-	// 	= convert_pressure_pa_to_mbar_deriv_;
-	// map_d1_[ get_unit_pair_( UNITS_PRESSURE_MILLIBARS, UNITS_PRESSURE_PASCALS ) ] 
-	// 	= convert_pressure_mbar_to_pa_deriv_;
-	
-	// // density conversion
-	// map_d1_[ get_unit_pair_( UNITS_DENSITY_KILOGRAMS_PER_CUBIC_METER, UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER ) ] 
-	// 	= convert_density_kgpm3_to_gpcm3_deriv_;
-	// map_d1_[ get_unit_pair_( UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER, UNITS_DENSITY_KILOGRAMS_PER_CUBIC_METER ) ] 
-	// 	= convert_density_gpcm3_to_kgpm3_deriv_;
-	
-	// // direction conversion
-	// map_d1_[ get_unit_pair_( UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH, UNITS_DIRECTION_DEGREES_COUNTERCLOCKWISE_FROM_EAST ) ] 
-	// 	= convert_direction_geo_to_math_deriv_;
-	// map_d1_[ get_unit_pair_( UNITS_DIRECTION_DEGREES_COUNTERCLOCKWISE_FROM_EAST, UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH ) ] 
-	// 	= convert_direction_math_to_geo_deriv_;
-
-	// // Second derivatives
-	// // set up valid unit pairs: temperature conversion
-	// map_d2_[ get_unit_pair_( UNITS_TEMPERATURE_CELSIUS, UNITS_TEMPERATURE_FAHRENHEIT ) ] 
-	// 	= convert_temperature_c_to_f_deriv2_;
-	// map_d2_[ get_unit_pair_( UNITS_TEMPERATURE_CELSIUS, UNITS_TEMPERATURE_KELVIN ) ] 
-	// 	= convert_temperature_c_to_k_deriv2_;
-	// map_d2_[ get_unit_pair_( UNITS_TEMPERATURE_KELVIN, UNITS_TEMPERATURE_FAHRENHEIT ) ] 
-	// 	= convert_temperature_k_to_f_deriv2_;
-	// map_d2_[ get_unit_pair_( UNITS_TEMPERATURE_KELVIN, UNITS_TEMPERATURE_CELSIUS ) ]
-	// 	= convert_temperature_k_to_c_deriv2_;
-	// map_d2_[ get_unit_pair_( UNITS_TEMPERATURE_FAHRENHEIT, UNITS_TEMPERATURE_KELVIN ) ] 
-	// 	= convert_temperature_f_to_k_deriv2_;
-	// map_d2_[ get_unit_pair_( UNITS_TEMPERATURE_FAHRENHEIT, UNITS_TEMPERATURE_CELSIUS ) ]
-	// 	= convert_temperature_f_to_c_deriv2_;
-	
-	// // length conversion
-	// map_d2_[ get_unit_pair_( UNITS_DISTANCE_METERS, UNITS_DISTANCE_KILOMETERS ) ] 
-	// 	= convert_distance_m_to_km_deriv2_;
-	// map_d2_[ get_unit_pair_( UNITS_DISTANCE_KILOMETERS, UNITS_DISTANCE_METERS ) ] 
-	// 	= convert_distance_km_to_m_deriv2_;
-	
-	// // speed conversion
-	// map_d2_[ get_unit_pair_( UNITS_SPEED_METERS_PER_SECOND, UNITS_SPEED_KILOMETERS_PER_SECOND ) ] 
-	// 	= convert_speed_mps_to_kmps_deriv2_;
-	// map_d2_[ get_unit_pair_( UNITS_SPEED_KILOMETERS_PER_SECOND, UNITS_SPEED_METERS_PER_SECOND ) ] 
-	// 	= convert_speed_kmps_to_mps_deriv2_;
-	
-	// // pressure conversion
-	// map_d2_[ get_unit_pair_( UNITS_PRESSURE_PASCALS, UNITS_PRESSURE_MILLIBARS ) ] 
-	// 	= convert_pressure_pa_to_mbar_deriv2_;
-	// map_d2_[ get_unit_pair_( UNITS_PRESSURE_MILLIBARS, UNITS_PRESSURE_PASCALS ) ] 
-	// 	= convert_pressure_mbar_to_pa_deriv2_;
-	
-	// // density conversion
-	// map_d2_[ get_unit_pair_( UNITS_DENSITY_KILOGRAMS_PER_CUBIC_METER, UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER ) ] 
-	// 	= convert_density_kgpm3_to_gpcm3_deriv2_;
-	// map_d2_[ get_unit_pair_( UNITS_DENSITY_GRAMS_PER_CUBIC_CENTIMETER, UNITS_DENSITY_KILOGRAMS_PER_CUBIC_METER ) ] 
-	// 	= convert_density_gpcm3_to_kgpm3_deriv2_;
-	
-	// // direction conversion
-	// map_d2_[ get_unit_pair_( UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH, UNITS_DIRECTION_DEGREES_COUNTERCLOCKWISE_FROM_EAST ) ] 
-	// 	= convert_direction_geo_to_math_deriv2_;
-	// map_d2_[ get_unit_pair_( UNITS_DIRECTION_DEGREES_COUNTERCLOCKWISE_FROM_EAST, UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH ) ] 
-	// 	= convert_direction_math_to_geo_deriv2_;
 }
 
 bool NCPA::Units::ready_() {
@@ -510,32 +242,6 @@ double NCPA::Units::convert( double in, NCPA::units_t type_in, NCPA::units_t typ
 	}
 	return out;
 }
-
-// double NCPA::Units::convert_first_derivative( double in, NCPA::units_t type_in, NCPA::units_t type_out ) {
-// 	double out = 0.0;
-// 	try {
-// 		// Call the vector conversion with one-element vectors
-// 		NCPA::Units::convert_first_derivative( &in, 1, type_in, type_out, &out );
-// 	} catch (const std::out_of_range& oor) {
-// 		// didn't find the requested conversion, kick it upstairs, user
-// 		// will have been notified in the called function
-// 		throw;
-// 	}
-// 	return out;
-// }
-
-// double NCPA::Units::convert_second_derivative( double in, NCPA::units_t type_in, NCPA::units_t type_out ) {
-// 	double out = 0.0;
-// 	try {
-// 		// Call the vector conversion with one-element vectors
-// 		NCPA::Units::convert_second_derivative( &in, 1, type_in, type_out, &out );
-// 	} catch (const std::out_of_range& oor) {
-// 		// didn't find the requested conversion, kick it upstairs, user
-// 		// will have been notified in the called function
-// 		throw;
-// 	}
-// 	return out;
-// }
 
 /*
 Converts one or more double values from one unit to another.
@@ -582,90 +288,6 @@ void NCPA::Units::convert( const double *in, unsigned int nSamples,
 	}
 }
 
-// void NCPA::Units::convert_first_derivative( const double *in, unsigned int nSamples, 
-// 	NCPA::units_t type_in, NCPA::units_t type_out, double *out ) {
-		
-// 	// Is the conversion from one type to the same type?
-// 	if (type_in == type_out) {
-		
-// 		// If the identity conversion is in place, just return
-// 		if (in == out) {
-// 			return;
-// 		}
-		
-// 		// Copy the old values to the new values with no conversion
-// 		std::memcpy( out, in, nSamples*sizeof(double) );
-// 		return;
-// 	}
-	
-// 	if ( ! NCPA::Units::ready_() ) {
-// 		NCPA::Units::initialize_();
-// 	}
-	
-// 	// Create a pair with the requested in and out units
-// 	conversion_pair cpair( type_in, type_out );
-	
-// 	// function will go here if found
-// 	conversion_function fPtr;
-// 	try {
-// 		// see if the requested conversion exists in the map.  If not, it throws
-// 		// an out_of_range exception that is caught later
-// 		fPtr = NCPA::Units::map_d1_.at( cpair );
-		
-// 		// perform the requested conversion
-// 		for (unsigned int i = 0; i < nSamples; i++) {
-// 			out[ i ] = fPtr( in[ i ] );
-// 		}
-		
-// 	} catch (const std::out_of_range& oor) {
-// 		// didn't find the conversion, notify the user and kick it upstairs
-// 		throw std::out_of_range( "Undefined first derivative conversion requested from " 
-// 			+ NCPA::Units::toString( type_in ) + " to " + NCPA::Units::toString( type_out ) );
-// 	}
-// }
-
-// void NCPA::Units::convert_second_derivative( const double *in, unsigned int nSamples, 
-// 	NCPA::units_t type_in, NCPA::units_t type_out, double *out ) {
-		
-// 	// Is the conversion from one type to the same type?
-// 	if (type_in == type_out) {
-		
-// 		// If the identity conversion is in place, just return
-// 		if (in == out) {
-// 			return;
-// 		}
-		
-// 		// Copy the old values to the new values with no conversion
-// 		std::memcpy( out, in, nSamples*sizeof(double) );
-// 		return;
-// 	}
-	
-// 	if ( ! NCPA::Units::ready_() ) {
-// 		NCPA::Units::initialize_();
-// 	}
-	
-// 	// Create a pair with the requested in and out units
-// 	conversion_pair cpair( type_in, type_out );
-	
-// 	// function will go here if found
-// 	conversion_function fPtr;
-// 	try {
-// 		// see if the requested conversion exists in the map.  If not, it throws
-// 		// an out_of_range exception that is caught later
-// 		fPtr = NCPA::Units::map_d2_.at( cpair );
-		
-// 		// perform the requested conversion
-// 		for (unsigned int i = 0; i < nSamples; i++) {
-// 			out[ i ] = fPtr( in[ i ] );
-// 		}
-		
-// 	} catch (const std::out_of_range& oor) {
-// 		// didn't find the conversion, notify the user and kick it upstairs
-// 		throw std::out_of_range( "Undefined second derivative conversion requested from " 
-// 			+ NCPA::Units::toString( type_in ) + " to " + NCPA::Units::toString( type_out ) );
-// 	}
-// }
-
 
 /*
 Generates and returns a std::pair with the two unit types, for use as a map key.
@@ -676,11 +298,13 @@ conversion_pair NCPA::Units::get_unit_pair_( NCPA::units_t t1, NCPA::units_t t2 
 
 
 
-NCPA::ScalarWithUnits::ScalarWithUnits( double value, units_t units ) {
-	value_ = value;
-	units_ = units;
-	//units_.push( units );
-}
+NCPA::ScalarWithUnits::ScalarWithUnits() : value_{ 0.0 }, units_{ NCPA::UNITS_NONE } {}
+
+NCPA::ScalarWithUnits::ScalarWithUnits( double value, units_t units ) 
+	: value_{ value }, units_{ units } {}
+
+NCPA::ScalarWithUnits::ScalarWithUnits( const NCPA::ScalarWithUnits &source )
+	: value_{ source.value_ }, units_{ source.units_ } {}
 
 NCPA::ScalarWithUnits::~ScalarWithUnits() { }
 
@@ -701,27 +325,6 @@ void NCPA::ScalarWithUnits::convert_units( NCPA::units_t new_units ) {
 	units_ = new_units;
 	//units_.push( new_units );
 }
-
-/*
-void NCPA::ScalarWithUnits::revert_units() {
-	if (units_.size() < 2) {
-		return;
-	}
-
-	NCPA::units_t current_units, last_units;
-	current_units = units_.top();
-	units_.pop();
-	last_units = units_.top();
-	if (current_units != last_units) {
-		try {
-			do_units_conversion_( current_units, last_units );
-		} catch (std::out_of_range &oor) {
-			units_.push( current_units );
-			throw;
-		}
-	}
-}
-*/
 
 void NCPA::ScalarWithUnits::do_units_conversion_( NCPA::units_t fromUnits, NCPA::units_t toUnits ) {
 
@@ -746,76 +349,50 @@ std::ostream &NCPA::operator<<( std::ostream &output, const NCPA::ScalarWithUnit
 
 
 
-NCPA::VectorWithUnits::VectorWithUnits() {
-	values_ = NULL;
-	n_ = 0;
-}
 
 
-NCPA::VectorWithUnits::VectorWithUnits( size_t n_points, double *property_values, units_t property_units ) {
-	values_ = new double[ n_points ];
-	units_ = property_units;
+
+
+NCPA::VectorWithUnits::VectorWithUnits() : n_{ 0 }, values_{ NULL }, units_{ NCPA::UNITS_NONE } {}
+
+
+NCPA::VectorWithUnits::VectorWithUnits( size_t n_points, double *property_values, units_t property_units ) 
+	: n_{ n_points }, units_{ property_units } {
+	values_ = new double[ n_ ];
+	std::memcpy( values_, property_values, n_points*sizeof(double) );
+	//units_ = property_units;
 	//units_last_ = property_units;
 	//units_.push( property_units );
-	std::memcpy( values_, property_values, n_points*sizeof(double) );
-	n_ = n_points;
+	//n_ = n_points;
 }
 
-NCPA::VectorWithUnits::VectorWithUnits( const NCPA::VectorWithUnits &source ) {
-	n_ = source.size();
-	NCPA::units_t u;
+NCPA::VectorWithUnits::VectorWithUnits( const NCPA::VectorWithUnits &source ) 
+	: n_{ source.n_ }, units_{ source.units_ } {
+	//n_ = source.n_;
+	//units_ = source.units_;
 	values_ = new double[ n_ ];
-	source.get_vector( values_, &u );
-	units_ = u;
-	//units_.push( u );
+	std::memcpy( values_, source.values_, n_ * sizeof( double ) );
 }
 
 NCPA::VectorWithUnits::~VectorWithUnits() {
 	if (values_ != NULL) {
 		delete [] values_;
 	}
-	//while (! units_.empty()) {
-	//	units_.pop();
-	//}
 }
 
 NCPA::units_t NCPA::VectorWithUnits::get_units() const {
-	//return units_.top();
 	return units_;
 }
 
 void NCPA::VectorWithUnits::convert_units( NCPA::units_t new_units ) {
 	// will throw out_of_range and leave original units unchanged if there's an error
-	// if there's no change in units, don't bother with the calculation, just push another
-	// one onto the stack so reversion can happen properly
-	//std::cout << "Called VectorWithUnits::convert_units()" << std::endl;
+	// if there's no change in units, don't bother with the calculation
 	if (new_units != units_) {
 		do_units_conversion_( n_, values_, units_, new_units );
 		units_ = new_units;
 	}
-	//units_.push( new_units );
 }
 
-/*
-void NCPA::VectorWithUnits::revert_units() {
-	if (units_.size() < 2) {
-		return;
-	}
-
-	NCPA::units_t current_units, last_units;
-	current_units = units_.top();
-	units_.pop();
-	last_units = units_.top();
-	if (current_units != last_units) {
-		try {
-			do_units_conversion_( n_, values_, current_units, last_units );
-		} catch (std::out_of_range &oor) {
-			units_.push( current_units );
-			throw;
-		}
-	}
-}
-*/
 
 void NCPA::VectorWithUnits::do_units_conversion_( size_t n_points, double *inplace, 
 			NCPA::units_t fromUnits, NCPA::units_t toUnits ) {

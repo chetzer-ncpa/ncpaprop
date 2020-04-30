@@ -154,7 +154,7 @@ void NCPA::ParameterSet::formatText_( std::vector< std::string > &holder, const 
 
 	std::string tmpStr;
 	std::ostringstream oss;
-	unsigned int indent_i;
+	//unsigned int indent_i;
 	unsigned int hang = 0;
 
 	std::vector< std::string > words = NCPA::split( text );
@@ -329,7 +329,7 @@ void NCPA::ParameterSet::printFailedTests( std::ostream& os ) const {
 }
 
 unsigned int NCPA::ParameterSet::parseCommandLine( unsigned int argc, char **argv ) {
-	bool expectingArg = false;
+	//bool expectingArg = false;
 	std::string lastarg;
 	unsigned int nOptions = 0;
 	
@@ -555,7 +555,7 @@ unsigned int NCPA::ParameterSet::parseFile( std::string filename ) {
 		return 0;
 	}
 	std::string line;
-	NCPA::GenericParameter *param = NULL;
+	//NCPA::GenericParameter *param = NULL;
 	unsigned int linesParsed = 0;
 	char linebuffer[ 1024 ];
 	//memset(linebuffer,0,1024);
@@ -1190,6 +1190,11 @@ std::string NCPA::FlagParameter::status() const {
 Code for ParameterTest abstract base class
 *********************************************************************************
 */
+
+NCPA::ParameterTest::ParameterTest() : _optName{ "" }, _ready{ false } {}
+NCPA::ParameterTest::ParameterTest( std::string option_name, bool starts_ready ) 
+	: _optName{ option_name }, _ready{ starts_ready } {}
+
 // Destructor for ABC, must not be pure virtual
 NCPA::ParameterTest::~ParameterTest() { }
 
@@ -1210,18 +1215,18 @@ Each gets a constructor, a validate() method, a description, a failure message,
 and optional add<Type>Parameter() method(s)
 **********************************************************************/
 
-NCPA::RequiredTest::RequiredTest( const std::string& optionName ) {
-	_optName = optionName;
-	_ready = true;
-}
+NCPA::RequiredTest::RequiredTest( const std::string& optionName ) 
+	: ParameterTest( optionName, true ) {}
+
 std::string NCPA::RequiredTest::description() const {
 	return _optName + " is present.";
 }
+
 std::string NCPA::RequiredTest::failureMessage() const {
 	return _optName + " is not present.";
 }
-bool NCPA::RequiredTest::validate( const ParameterVector& paramVec )  {
 
+bool NCPA::RequiredTest::validate( const ParameterVector& paramVec )  {
 	NCPA::GenericParameter *param = paramVec.findParameter( _optName );
 	// Just check to see if it's been provided
 	if (param != NULL && param->wasFound()) {
@@ -1229,24 +1234,26 @@ bool NCPA::RequiredTest::validate( const ParameterVector& paramVec )  {
 	} 
 	return false;
 }
+
 std::string NCPA::RequiredTest::valueString() const { return ""; }
 
 
+
 NCPA::RequiredIfOtherIsPresentTest::RequiredIfOtherIsPresentTest( 
-	const std::string& optionName ) {
-	_optName = optionName;
-	_ready = false;
-}
+	const std::string& optionName ) 
+	: ParameterTest( optionName, false ) {}
+
 NCPA::RequiredIfOtherIsPresentTest::RequiredIfOtherIsPresentTest(
-	const std::string& optionName, const std::string& prereq ) {
-	_optName = optionName;
-	std::string new_prereq = prereq;
+	const std::string& optionName, const std::string& prereq ) 
+	: ParameterTest( optionName, false ) {
+	std::string new_prereq{ prereq };
 	_prereqs.push_back( prereq );
 	_ready = true;
 }
+
 NCPA::RequiredIfOtherIsPresentTest::RequiredIfOtherIsPresentTest(
-	const std::string& optionName, unsigned int nPrereqs, std::string *prereqs ) {
-	_optName = optionName;
+	const std::string& optionName, unsigned int nPrereqs, std::string *prereqs ) 
+	: ParameterTest( optionName, false ) {
 	std::string pr;
 	for (unsigned int i = 0; i < nPrereqs; i++) {
 		pr = prereqs[ i ];
@@ -1254,10 +1261,14 @@ NCPA::RequiredIfOtherIsPresentTest::RequiredIfOtherIsPresentTest(
 	}
 	_ready = true;
 }
+
 NCPA::RequiredIfOtherIsPresentTest::RequiredIfOtherIsPresentTest(
-	const std::string& optionName, const std::vector< std::string > prereq_vector ) {
-	_prereqs = prereq_vector;
+	const std::string& optionName, const std::vector< std::string > prereq_vector ) 
+	: ParameterTest( optionName, false ), _prereqs{ prereq_vector } {
+	//_prereqs = prereq_vector;
+	_ready = true;
 }
+
 std::string NCPA::RequiredIfOtherIsPresentTest::description() const {
 	return _optName + " is present if one of " + this->valueString() 
 		+ " is also present.";
@@ -1315,15 +1326,15 @@ bool NCPA::RequiredIfOtherIsPresentTest::ready() const {
 
 
 
-NCPA::RadioButtonTest::RadioButtonTest( const std::string& optionName ) {
+NCPA::RadioButtonTest::RadioButtonTest( const std::string& optionName ) 
+	: ParameterTest( optionName, false ) {
 	_buttons.clear();
-	_optName = optionName;
 	_matched.clear();
 }
 NCPA::RadioButtonTest::RadioButtonTest( const std::string& optionName, 
-	unsigned int nButtons, std::string *buttons ) {
+	unsigned int nButtons, std::string *buttons ) 
+	: ParameterTest( optionName, false ) {
 	_buttons.clear();
-	_optName = optionName;
 	_matched.clear();
 	for (unsigned int i = 0; i < nButtons; i++) {
 		std::string but = buttons[ i ];
@@ -1331,11 +1342,11 @@ NCPA::RadioButtonTest::RadioButtonTest( const std::string& optionName,
 	}
 }
 NCPA::RadioButtonTest::RadioButtonTest( const std::string& optionName,
-	const std::vector< std::string > newButtons ) {
-	_buttons.clear();
-	_buttons = newButtons;
-	_optName = optionName;
-	_matched.clear();
+	const std::vector< std::string > newButtons ) 
+	: ParameterTest( optionName, false ), _buttons{ newButtons } {
+	//_buttons.clear();
+	//_buttons = newButtons;
+	//_matched.clear();
 }
 std::string NCPA::RadioButtonTest::description() const {
 	return _optName + ": One and only one of " + this->valueString() + " must be present.";
@@ -1392,19 +1403,13 @@ bool NCPA::RadioButtonTest::ready() const {
 
 
 
-NCPA::IntegerGreaterThanTest::IntegerGreaterThanTest( const std::string& optionName ) {
-	_optName = optionName;
-	_testedValue = 0;
-	_value = 0;
-	_ready = false;
-}
-NCPA::IntegerGreaterThanTest::IntegerGreaterThanTest( const std::string& optionname,
-	int comparison ) {
-	_optName = optionname;
-	_testedValue = 0;
-	_value = comparison;
-	_ready = true;
-}
+NCPA::IntegerGreaterThanTest::IntegerGreaterThanTest( const std::string& optionName ) 
+	: ParameterTest( optionName, false ), _value{ 0 }, _testedValue{ 0 } {}
+
+NCPA::IntegerGreaterThanTest::IntegerGreaterThanTest( const std::string& optionName,
+	int comparison )
+ 	: ParameterTest( optionName, true ), _value{ comparison }, _testedValue{ 0 } {}
+
 std::string NCPA::IntegerGreaterThanTest::description() const {
 	return _optName + " is greater than " + 
 		this->valueString() + " if present.";
@@ -1438,19 +1443,13 @@ void NCPA::IntegerGreaterThanTest::addIntegerParameter( int param ) {
 
 
 NCPA::IntegerGreaterThanOrEqualToTest::IntegerGreaterThanOrEqualToTest( 
-	const std::string& optionName ) {
-	_optName = optionName;
-	_testedValue = 0;
-	_value = 0;
-	_ready = false;
-}
+	const std::string& optionName ) 
+	: ParameterTest( optionName, false ), _value{ 0 }, _testedValue{ 0 } {}
+
 NCPA::IntegerGreaterThanOrEqualToTest::IntegerGreaterThanOrEqualToTest( 
-	const std::string& optionname, int comparison ) {
-	_optName = optionname;
-	_testedValue = 0;
-	_value = comparison;
-	_ready = true;
-}
+	const std::string& optionName, int comparison ) 
+	: ParameterTest( optionName, true ), _value{ comparison }, _testedValue{ 0 } {}
+
 std::string NCPA::IntegerGreaterThanOrEqualToTest::description() const {
 	return _optName + " is greater than or equal to " + 
 		this->valueString() + " if present.";
@@ -1484,19 +1483,12 @@ void NCPA::IntegerGreaterThanOrEqualToTest::addIntegerParameter( int param ) {
 
 
 
-NCPA::IntegerLessThanTest::IntegerLessThanTest( const std::string& optionName ) {
-	_optName = optionName;
-	_testedValue = 0;
-	_value = 0;
-	_ready = false;
-}
-NCPA::IntegerLessThanTest::IntegerLessThanTest( 
-	const std::string& optionname, int comparison ) {
-	_optName = optionname;
-	_testedValue = 0;
-	_value = comparison;
-	_ready = true;
-}
+NCPA::IntegerLessThanTest::IntegerLessThanTest( const std::string& optionName ) 
+	: ParameterTest( optionName, false ), _value{ 0 }, _testedValue{ 0 } {}
+
+NCPA::IntegerLessThanTest::IntegerLessThanTest( const std::string& optionName, int comparison ) 
+	: ParameterTest( optionName, true ), _value{ comparison }, _testedValue{ 0 } {}
+
 std::string NCPA::IntegerLessThanTest::description() const {
 	return _optName + " is less than " + 
 		this->valueString() + ".";
@@ -1530,19 +1522,13 @@ void NCPA::IntegerLessThanTest::addIntegerParameter( int param ) {
 
 
 NCPA::IntegerLessThanOrEqualToTest::IntegerLessThanOrEqualToTest( 
-	const std::string& optionName ) {
-	_optName = optionName;
-	_testedValue = 0;
-	_value = 0;
-	_ready = false;
-}
+	const std::string& optionName ) 
+	: ParameterTest( optionName, false ), _value{ 0 }, _testedValue{ 0 } {}
+
 NCPA::IntegerLessThanOrEqualToTest::IntegerLessThanOrEqualToTest( 
-	const std::string& optionname, int comparison ) {
-	_optName = optionname;
-	_testedValue = 0;
-	_value = comparison;
-	_ready = true;
-}
+	const std::string& optionName, int comparison ) 
+	: ParameterTest( optionName, true ), _value{ comparison }, _testedValue{ 0 } {}
+
 std::string NCPA::IntegerLessThanOrEqualToTest::description() const {
 	return _optName + " is less than or equal to " + 
 		this->valueString() + " if present.";
@@ -1578,19 +1564,13 @@ void NCPA::IntegerLessThanOrEqualToTest::addIntegerParameter( int param ) {
 
 
 
-NCPA::IntegerEqualToTest::IntegerEqualToTest( const std::string& optionName ) {
-	_optName = optionName;
-	_testedValue = 0;
-	_value = 0;
-	_ready = false;
-}
+NCPA::IntegerEqualToTest::IntegerEqualToTest( const std::string& optionName ) 
+	: ParameterTest( optionName, false ), _value{ 0 }, _testedValue{ 0 } {}
+
 NCPA::IntegerEqualToTest::IntegerEqualToTest( 
-	const std::string& optionname, int comparison ) {
-	_optName = optionname;
-	_testedValue = 0;
-	_value = comparison;
-	_ready = true;
-}
+	const std::string& optionName, int comparison ) 
+	: ParameterTest( optionName, true ), _value{ comparison }, _testedValue{ 0 } {}
+
 std::string NCPA::IntegerEqualToTest::description() const {
 	return _optName + " is equal to " + this->valueString() + ".";
 }
@@ -1622,19 +1602,13 @@ void NCPA::IntegerEqualToTest::addIntegerParameter( int param ) {
 
 
 
-NCPA::IntegerNotEqualToTest::IntegerNotEqualToTest( const std::string& optionName ) {
-	_optName = optionName;
-	_testedValue = 0;
-	_value = 0;
-	_ready = false;
-}
+NCPA::IntegerNotEqualToTest::IntegerNotEqualToTest( const std::string& optionName ) 
+	: ParameterTest( optionName, false ), _value{ 0 }, _testedValue{ 0 } {}
+
 NCPA::IntegerNotEqualToTest::IntegerNotEqualToTest( 
-	const std::string& optionname, int comparison ) {
-	_optName = optionname;
-	_testedValue = 0;
-	_value = comparison;
-	_ready = true;
-}
+	const std::string& optionName, int comparison ) 
+	: ParameterTest( optionName, true ), _value{ comparison }, _testedValue{ 0 } {}
+
 std::string NCPA::IntegerNotEqualToTest::description() const {
 	return _optName + " is not equal to " + this->valueString() + " if present.";
 }
@@ -1669,19 +1643,13 @@ void NCPA::IntegerNotEqualToTest::addIntegerParameter( int param ) {
 
 
 
-NCPA::FloatGreaterThanTest::FloatGreaterThanTest( const std::string& optionName ) {
-	_optName = optionName;
-	_testedValue = 0.0;
-	_value = 0.0;
-	_ready = false;
-}
+NCPA::FloatGreaterThanTest::FloatGreaterThanTest( const std::string& optionName ) 
+	: ParameterTest( optionName, false ), _value{ 0.0 }, _testedValue{ 0.0 } {}
+
 NCPA::FloatGreaterThanTest::FloatGreaterThanTest( 
-	const std::string& optionname, double comparison ) {
-	_optName = optionname;
-	_testedValue = 0.0;
-	_value = comparison;
-	_ready = true;
-}
+	const std::string& optionName, double comparison ) 
+	: ParameterTest( optionName, true ), _value{ comparison }, _testedValue{ 0.0 } {}
+
 std::string NCPA::FloatGreaterThanTest::description() const {
 	return _optName + " is greater than " 
 		 + this->valueString() + " if present.";
@@ -1715,19 +1683,13 @@ void NCPA::FloatGreaterThanTest::addFloatParameter( double param ) {
 
 
 NCPA::FloatGreaterThanOrEqualToTest::FloatGreaterThanOrEqualToTest( 
-	const std::string& optionName ) {
-	_optName = optionName;
-	_testedValue = 0.0;
-	_value = 0.0;
-	_ready = false;
-}
+	const std::string& optionName ) 
+	: ParameterTest( optionName, false ), _value{ 0.0 }, _testedValue{ 0.0 } {}
+
 NCPA::FloatGreaterThanOrEqualToTest::FloatGreaterThanOrEqualToTest( 
-	const std::string& optionname, double comparison ) {
-	_optName = optionname;
-	_testedValue = 0.0;
-	_value = comparison;
-	_ready = true;
-}
+	const std::string& optionName, double comparison ) 
+	: ParameterTest( optionName, true ), _value{ comparison }, _testedValue{ 0.0 } {}
+
 std::string NCPA::FloatGreaterThanOrEqualToTest::description() const {
 	return _optName + " is greater than or equal to " 
 		 + this->valueString() + " if present.";
@@ -1763,19 +1725,13 @@ void NCPA::FloatGreaterThanOrEqualToTest::addFloatParameter( double param ) {
 
 
 
-NCPA::FloatLessThanTest::FloatLessThanTest( const std::string& optionName ) {
-	_optName = optionName;
-	_testedValue = 0.0;
-	_value = 0.0;
-	_ready = false;
-}
+NCPA::FloatLessThanTest::FloatLessThanTest( const std::string& optionName ) 
+	: ParameterTest( optionName, false ), _value{ 0.0 }, _testedValue{ 0.0 } {}
+
 NCPA::FloatLessThanTest::FloatLessThanTest( 
-	const std::string& optionname, double comparison ) {
-	_optName = optionname;
-	_testedValue = 0.0;
-	_value = comparison;
-	_ready = true;
-}
+	const std::string& optionName, double comparison ) 
+	: ParameterTest( optionName, true ), _value{ comparison }, _testedValue{ 0.0 } {}
+
 std::string NCPA::FloatLessThanTest::description() const {
 	return _optName + " is less than " 
 		 + this->valueString() + " if present.";
@@ -1809,19 +1765,13 @@ void NCPA::FloatLessThanTest::addFloatParameter( double param ) {
 
 
 NCPA::FloatLessThanOrEqualToTest::FloatLessThanOrEqualToTest( 
-	const std::string& optionName ) {
-	_optName = optionName;
-	_testedValue = 0.0;
-	_value = 0.0;
-	_ready = false;
-}
+	const std::string& optionName ) 
+	: ParameterTest( optionName, false ), _value{ 0.0 }, _testedValue{ 0.0 } {}
+
 NCPA::FloatLessThanOrEqualToTest::FloatLessThanOrEqualToTest( 
-	const std::string& optionname, double comparison ) {
-	_optName = optionname;
-	_testedValue = 0.0;
-	_value = comparison;
-	_ready = true;
-}
+	const std::string& optionName, double comparison ) 
+	: ParameterTest( optionName, true ), _value{ comparison }, _testedValue{ 0.0 } {}
+
 std::string NCPA::FloatLessThanOrEqualToTest::description() const {
 	return _optName + " is less than " 
 		 + this->valueString() + " if present.";
@@ -1855,19 +1805,13 @@ void NCPA::FloatLessThanOrEqualToTest::addFloatParameter( double param ) {
 
 
 
-NCPA::FloatEqualToTest::FloatEqualToTest( const std::string& optionName ) {
-	_optName = optionName;
-	_testedValue = 0.0;
-	_value = 0.0;
-	_ready = false;
-}
+NCPA::FloatEqualToTest::FloatEqualToTest( const std::string& optionName ) 
+	: ParameterTest( optionName, false ), _value{ 0.0 }, _testedValue{ 0.0 } {}
+
 NCPA::FloatEqualToTest::FloatEqualToTest( 
-	const std::string& optionname, double comparison ) {
-	_optName = optionname;
-	_testedValue = 0.0;
-	_value = comparison;
-	_ready = true;
-}
+	const std::string& optionName, double comparison ) 
+	: ParameterTest( optionName, true ), _value{ comparison }, _testedValue{ 0.0 } {}
+
 std::string NCPA::FloatEqualToTest::description() const {
 	return _optName + " is equal to " + this->valueString() + " if present.";
 }
@@ -1899,19 +1843,13 @@ void NCPA::FloatEqualToTest::addFloatParameter( double param ) {
 
 
 
-NCPA::FloatNotEqualToTest::FloatNotEqualToTest( const std::string& optionName ) {
-	_optName = optionName;
-	_testedValue = 0.0;
-	_value = 0.0;
-	_ready = false;
-}
+NCPA::FloatNotEqualToTest::FloatNotEqualToTest( const std::string& optionName ) 
+	: ParameterTest( optionName, false ), _value{ 0.0 }, _testedValue{ 0.0 } {}
+
 NCPA::FloatNotEqualToTest::FloatNotEqualToTest( 
-	const std::string& optionname, double comparison ) {
-	_optName = optionname;
-	_testedValue = 0.0;
-	_value = comparison;
-	_ready = true;
-}
+	const std::string& optionName, double comparison ) 
+	: ParameterTest( optionName, true ), _value{ comparison }, _testedValue{ 0.0 } {}
+
 std::string NCPA::FloatNotEqualToTest::description() const {
 	return _optName + " is not equal to " + this->valueString() + " if present.";
 }
@@ -1946,19 +1884,13 @@ void NCPA::FloatNotEqualToTest::addFloatParameter( double param ) {
 
 
 
-NCPA::StringMinimumLengthTest::StringMinimumLengthTest( const std::string& optionName ) {
-	_optName = optionName;
-	_testedValue.clear();
-	_value = 0;
-	_ready = false;
-}
+NCPA::StringMinimumLengthTest::StringMinimumLengthTest( const std::string& optionName ) 
+	: ParameterTest( optionName, false ), _value{ 0 } {}
+
 NCPA::StringMinimumLengthTest::StringMinimumLengthTest( const std::string& optionName,
-	int minlength ) {
-	_optName = optionName;
-	_testedValue.clear();
-	_value = minlength;
-	_ready = true;
-}
+	int minlength ) 
+	: ParameterTest( optionName, true ), _value{ minlength } {}
+
 std::string NCPA::StringMinimumLengthTest::description() const {
 	return _optName + " is at least " + this->valueString() + " characters if present.";
 }
@@ -1994,19 +1926,13 @@ void NCPA::StringMinimumLengthTest::addIntegerParameter( int param ) {
 
 
 
-NCPA::StringMaximumLengthTest::StringMaximumLengthTest( const std::string& optionName ) {
-	_optName = optionName;
-	_testedValue.clear();
-	_value = 0;
-	_ready = false;
-}
+NCPA::StringMaximumLengthTest::StringMaximumLengthTest( const std::string& optionName ) 
+	: ParameterTest( optionName, false ), _value{ 0 } {}
+
 NCPA::StringMaximumLengthTest::StringMaximumLengthTest( const std::string& optionName,
-	int maxlength ) {
-	_optName = optionName;
-	_testedValue.clear();
-	_value = maxlength;
-	_ready = true;
-}
+	int maxlength ) 
+	: ParameterTest( optionName, true ), _value{ maxlength } {}
+
 std::string NCPA::StringMaximumLengthTest::description() const {
 	return _optName + " is at most " + this->valueString() + " characters if present.";
 }
@@ -2042,24 +1968,22 @@ void NCPA::StringMaximumLengthTest::addIntegerParameter( int param ) {
 
 
 
-NCPA::StringSetTest::StringSetTest( const std::string& optionName ) {
-	_choices.clear();
-	_optName = optionName;
-}
+NCPA::StringSetTest::StringSetTest( const std::string& optionName ) 
+	: ParameterTest( optionName, false ) {}
+
 NCPA::StringSetTest::StringSetTest( const std::string& optionName, unsigned int nSet,
-	std::string *choices ) {
-	_choices.clear();
-	_optName = optionName;
+	std::string *choices ) 
+	: ParameterTest( optionName, false ) {
+	//_choices.clear();
 	for (unsigned int i = 0; i < nSet; i++) {
 		std::string ch = choices[ i ];
 		_choices.push_back( ch );
 	}
 }
 NCPA::StringSetTest::StringSetTest( const std::string& optionName, 
-	std::vector< std::string > choices ) {
-	_choices = choices;
-	_optName = optionName;
-}
+	std::vector< std::string > choices ) 
+	: ParameterTest( optionName, false ), _choices{ choices } {}
+	
 std::string NCPA::StringSetTest::description() const {
 	return _optName + " must be in " + this->valueString() + " if present.";
 }

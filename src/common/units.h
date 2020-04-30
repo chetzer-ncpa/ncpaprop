@@ -196,11 +196,10 @@ namespace NCPA {
 
 	class VectorWithUnits {
 	protected:
+		size_t n_;
 		double *values_;
 		units_t units_;
-		//std::stack< NCPA::units_t > units_;
-		size_t n_;
-
+		
 		void do_units_conversion_( size_t n_points, double *inplace, 
 			NCPA::units_t fromUnits, NCPA::units_t toUnits );
 
@@ -208,7 +207,7 @@ namespace NCPA {
 		VectorWithUnits();
 		VectorWithUnits( size_t n_points, double *values, units_t units );
 		VectorWithUnits( const VectorWithUnits &source );
-		~VectorWithUnits();
+		virtual ~VectorWithUnits();
 
 		virtual void convert_units( units_t new_units );
 		virtual units_t get_units() const;
@@ -231,8 +230,10 @@ namespace NCPA {
 		void do_units_conversion_( NCPA::units_t fromUnits, NCPA::units_t toUnits );
 
 	public:
+		ScalarWithUnits();
 		ScalarWithUnits( double value, units_t property_units );
-		~ScalarWithUnits();
+		ScalarWithUnits( const ScalarWithUnits &source );
+		virtual ~ScalarWithUnits();
 
 		virtual double get() const;
 

@@ -269,52 +269,51 @@ namespace NCPA {
 	
 
 	/**
-	  * Abstract base class for command-line and/or file-based parameters.
+	  * @brief Abstract base class for command-line and/or file-based parameters.
 	  */
 	class GenericParameter {
 	public:
 		virtual ~GenericParameter();
 
-		/** true if the parameter requires an argument, false otherwise */
+		/** @brief true if the parameter requires an argument, false otherwise */
 		virtual bool needsArgument() const = 0;
 
-		/** Parse the argument string as appropriate */
+		/** @brief Parse the argument string as appropriate */
 		virtual void parseArgument( const std::string& arg ) = 0;
 
 		/** 
-		  * Indicate that the parameter was actually found, and not just set
-		  * to default value.
+		  * @brief Indicate that the parameter was actually found, and not just set to default value.
 		  */
 		virtual void setFound( bool tf );
 
-		/** Returns whether the parameter has been found or not. */
+		/** @brief Returns whether the parameter has been found or not. */
 		virtual bool wasFound() const;
 
-		/** Whether the parameter has a valid value, which may be default. */
+		/** @brief Whether the parameter has a valid value, which may be default. */
 		virtual bool isValid() const;
 
-		/** Return the key string of the parameter */
+		/** @brief Return the key string of the parameter */
 		virtual std::string getKey() const;
 
-		/** true if the parameter is a Null parameter, false otherwise */
+		/** @brief true if the parameter is a Null parameter, false otherwise */
 		virtual bool isNull() const;
 
-		/** Get the value of the parameter as an integer. */
+		/** @brief Get the value of the parameter as an integer. */
 		virtual int getIntegerValue() const = 0;
 
-		/** Get the value of the parameter as a floating-point number. */
+		/** @brief Get the value of the parameter as a floating-point number. */
 		virtual double getFloatValue() const = 0;
 
-		/** Get the value of the parameter as a string. */
+		/** @brief Get the value of the parameter as a string. */
 		virtual std::string getStringValue() const = 0;
 
-		/** Get the value of the parameter as a bool. */
+		/** @brief Get the value of the parameter as a bool. */
 		virtual bool getBoolValue() const = 0;
 
-		/** Print a brief description of the parameter. */
+		/** @brief Print a brief description of the parameter. */
 		virtual std::string description() const = 0;
 
-		/** Print the current status of the parameter, including any associated tests. */
+		/** @brief Print the current status of the parameter, including any associated tests. */
 		virtual std::string status() const = 0;
 
 	protected:
@@ -324,7 +323,7 @@ namespace NCPA {
 	};
 
 	/**
-	  * A type of parameter indicating a null value.
+	  * @brief A type of parameter indicating a null value.
 	  * Typically this parameter is returned when requesting a parameter that has 
 	  * not been defined.
 	  */
@@ -347,7 +346,7 @@ namespace NCPA {
 	};
 
 	/**
-	  * A type of parameter representing an integer value.
+	  * @brief A type of parameter representing an integer value.
 	  */
 	class IntegerParameter : public GenericParameter {
 	public:
@@ -367,7 +366,7 @@ namespace NCPA {
 	};
 	
 	/**
-	  * A type of parameter indicating a floating-point value.
+	  * @brief A type of parameter indicating a floating-point value.
 	  */
 	class FloatParameter : public GenericParameter {
 	public:
@@ -385,7 +384,10 @@ namespace NCPA {
 	protected:
 		double _value;
 	};
-	
+
+	/**
+	@brief A type of parameter indicating a string value.
+	*/
 	class StringParameter : public GenericParameter {
 	public:
 		StringParameter( std::string key );
@@ -403,6 +405,9 @@ namespace NCPA {
 		std::string _value;
 	};
 	
+	/**
+	@brief A type of parameter indicating a flag with no associated value.
+	*/
 	class FlagParameter : public GenericParameter {
 	public:
 		FlagParameter( std::string key );
@@ -420,7 +425,11 @@ namespace NCPA {
 		bool _value;
 	};
 
-
+	/**
+	Extension of a std::vector< NCPA::GenericParameter * > with a custom search method.
+	Should not be directly instantiated.
+	@brief Extension of std::vector< NCPA::GenericParameter * >
+	*/
 	class ParameterVector : public std::vector< NCPA::GenericParameter * > {
 	public:
 		GenericParameter * findParameter( const std::string& key ) const;
@@ -432,6 +441,19 @@ namespace NCPA {
 	  */
 	class ParameterTest {
 	public:
+
+		/**
+		Default constructor.
+		@brief Default constructor.
+		*/
+		ParameterTest();
+
+		/**
+		Initialization constructor.
+		@brief Initialization constructor for inherited classes to call.
+		*/
+		ParameterTest( std::string option_name, bool starts_ready );
+
 		/**
 		  * Destructor.  Cleans up any dynamically allocated memory.
 		  */
@@ -508,11 +530,6 @@ namespace NCPA {
 		  * The option name.
 		  */
 		std::string _optName;
-	
-		/**
-		  * The value that was last checked against.
-		  */
-		//std::string _testedValue;
 	
 		/**
 		  * All information has been provided and the test can be run.

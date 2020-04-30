@@ -27,6 +27,7 @@ namespace NCPA {
 		AtmosphericProperty1D();
 		AtmosphericProperty1D( size_t n_points, double *altitude_points, units_t altitude_units,
 			double *property_values, units_t property_units );
+		AtmosphericProperty1D( const AtmosphericProperty1D &source );
 		~AtmosphericProperty1D();
 
 		double get( double altitude ) const;
