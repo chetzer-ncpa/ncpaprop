@@ -75,11 +75,11 @@ void NCPA::AtmosphericProperty1D::build_splines_() {
 
 void NCPA::AtmosphericProperty1D::delete_splines_() {
 	if (spline_ != NULL) {
-		delete spline_;
+		gsl_spline_free( spline_ );
 		spline_ = NULL;
 	}
 	if (accel_ != NULL) {
-		delete accel_;
+		gsl_interp_accel_free( accel_ );
 		accel_ = NULL;
 	}
 }

@@ -17,28 +17,12 @@
 Code for ParameterSet class
 *********************************************************************************
 */
-NCPA::ParameterSet::ParameterSet() {
-	_params.clear();
-	_unparsed.clear();
-	//_usage.clear();
-	_headerLines.clear();
-	_footerLines.clear();
-	_descriptionLines.clear();
-	_sections.clear();
-	_tests.clear();
-	_failed_tests.clear();
-	_delims = ":= ";
-	_comments = "#";
-	_strict = true;
-	_commandMode = false;
+NCPA::ParameterSet::ParameterSet() 
+	: _delims{ ":= " }, _comments{ "#" }, _strict{ true }, _commandMode{ false },
+	  headerIndent_{ DEFAULT_HEADER_INDENT }, footerIndent_{ DEFAULT_FOOTER_INDENT },
+	  parameterIndent_{ DEFAULT_PARAMETER_INDENT }, maxWidth_{ DEFAULT_TEXT_WIDTH },
+	  headerHangingIndent_{ 0 }, footerHangingIndent_{ 0 } {}
 
-	headerIndent_ = DEFAULT_HEADER_INDENT;
-	footerIndent_ = DEFAULT_FOOTER_INDENT;
-	parameterIndent_ = DEFAULT_PARAMETER_INDENT;
-	maxWidth_ = DEFAULT_TEXT_WIDTH;
-	headerHangingIndent_ = 0;
-	footerHangingIndent_ = 0;
-}
 
 NCPA::ParameterSet::~ParameterSet() {
 	for ( std::vector< NCPA::GenericParameter * >::iterator it = _params.begin(); 
@@ -1983,7 +1967,7 @@ NCPA::StringSetTest::StringSetTest( const std::string& optionName, unsigned int 
 NCPA::StringSetTest::StringSetTest( const std::string& optionName, 
 	std::vector< std::string > choices ) 
 	: ParameterTest( optionName, false ), _choices{ choices } {}
-	
+
 std::string NCPA::StringSetTest::description() const {
 	return _optName + " must be in " + this->valueString() + " if present.";
 }

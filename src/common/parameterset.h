@@ -543,19 +543,60 @@ namespace NCPA {
 
 
 
-
+	/**
+	Handles the specification, ingestion, and tracking of user-supplied flags and input
+	arguments, including help text and argument validation.
+	@brief Handles input arguments and parameters
+	*/
 	class ParameterSet {
 	public:
+
+		/**
+		Default constructor
+		@brief Default constructor
+		*/
 		ParameterSet();
+
+		/**
+		Destructor.
+		@brief Destructor.
+		*/
 		~ParameterSet();
 
-		// Functions to manipulate how it works
+		/**
+		Changes the delimiters to use for splitting up parameter file entries into keys and
+		values.  Multiple consecutive delimiters will be treated as one.
+		@brief Set the parameter file key/value delimiters.
+		@param newdelims A string containing the new delimiter character set.
+		*/
 		void setDelimiters( std::string newdelims );
+
+		/**
+		Changes the character(s) to be used to indicate comment lines in parameter files.
+		@brief Changes the character(s) to be used to indicate comment lines in parameter files.
+		@param newcomms A string containing the new comment character set.
+		*/
 		void setComments( std::string newcomms );
 
-		// Tell the program what to expect
+		/**
+		Add a new parameter to the expected parameter set.  Usually called using the constructor
+		for the specific parameter type in question, e.g.
+
+		ps->addParameter( new NCPA::FlagParameter( "flagname" ) );
+
+		@brief Add a new parameter to the set
+		@param newParam A pointer to a specific instance of a GenericParameter subclass
+		*/
 		void addParameter( GenericParameter *newParam );
-		void setStrict( bool tf );   // whether to throw an exception when it runs into an unexpected parameter
+
+		/**
+		Turns strict mode on or off.  When in strict mode, the ParameterSet will thrown an exception
+		if it parses a parameter that it was not told to expect.  Otherwise, it will silently add the 
+		parameter as a FlagParameter.
+		@brief Set strict mode on or off
+		@param tf The new state for strict mode
+		*/
+		void setStrict( bool tf );
 
 		// Messages to output to the user
 		//void addUsageLine( const std::string& line );
@@ -608,14 +649,13 @@ namespace NCPA {
 		ParameterVector _params;
 		std::string _delims, _comments;
 		std::vector< std::string > _unparsed;
-		//std::vector< std::string > _usage;
 		std::vector< std::string > _headerLines, _footerLines, _sections;
 		std::map< std::string, std::ostringstream * > _descriptionLines;
-		//NullParameter *_PARAM_NOT_FOUND;
-
 		std::vector< NCPA::ParameterTest * > _tests, _failed_tests;
 		bool _strict, _commandMode;
-		
+		unsigned int headerIndent_, footerIndent_, parameterIndent_, 
+			headerHangingIndent_, footerHangingIndent_, maxWidth_;
+
 		bool isLongOption_( std::string ) const;
 		bool isShortOption_( std::string ) const;
 		unsigned int processShortOption_( int argc, char **argv, unsigned int index );
@@ -626,17 +666,14 @@ namespace NCPA {
 		void formatText_( std::vector< std::string > &holder, const std::string& text, 
 			unsigned int indent, unsigned int hanging_indent, unsigned int maxwidth );
 		void addSpaces_( std::ostringstream *oss, unsigned int spaces );
-		unsigned int headerIndent_, footerIndent_, parameterIndent_, 
-			headerHangingIndent_, footerHangingIndent_, maxWidth_;
-
-		//GenericParameter * _findParam( std::string key ) const;
+		
 	};
 
 
 
 
 
-/** Test whether an option is present */
+	/** Test whether an option is present */
 	class RequiredTest : public ParameterTest {
 	public:
 		RequiredTest( const std::string& option_name );
