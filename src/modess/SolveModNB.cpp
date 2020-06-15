@@ -178,7 +178,7 @@ void NCPA::SolveModNB::printParams() {
 	printf("       write_modes flag : %d\n", write_modes);
 	printf("         Nby2Dprop flag : %d\n", Nby2Dprop);
 	printf("       turnoff_WKB flag : %d\n", turnoff_WKB);
-	printf("             wind_units : %s\n", wind_units.c_str());
+	//printf("             wind_units : %s\n", wind_units.c_str());
 	printf("    atmospheric profile : %s\n", atmosfile.c_str());
 	if (!usrattfile.empty()) {
 		printf("  User attenuation file : %s\n", usrattfile.c_str());

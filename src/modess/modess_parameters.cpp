@@ -48,17 +48,18 @@ void NCPA::configure_modess_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->addTest( new NCPA::RequiredTest( "atmosfileorder" ) );
 	ps->addParameterDescription( "Required Parameters", "--atmosfileorder", "The order of the (z,u,v,w,t,d,p) fields in --atmosfile. The units assumed in the ASCII file are z[km], t [kelvin], d [g/cm^3], p [hectoPa]. The wind speeds are in m/s by default; however if the winds are given in km/s then use option --wind_units kmpersec");
 */
-	
+
 	ps->addParameter( new NCPA::FloatParameter( "freq" ) );
 	ps->addTest( new NCPA::RequiredTest( "freq" ) );
 	ps->addTest( new NCPA::FloatGreaterThanTest( "freq", 0.0 ) );
 	ps->addParameterDescription( "Required Parameters", "--freq", "Frequency of analysis (Hz)" );
 
 	// optional parameters
+	/*
 	ps->addParameter( new NCPA::IntegerParameter( "skiplines", 0 ) );
 	ps->addTest( new NCPA::IntegerGreaterThanOrEqualToTest( "skiplines", 0 ) );
 	ps->addParameterDescription( "Optional Parameters [default]", "--skiplines", "Number of header lines to skip in --atmosfile [0]" );
-
+	*/
 
 	ps->addParameter( new NCPA::FloatParameter( "maxheight_km", 150.0 ) );
 	ps->addTest( new NCPA::FloatGreaterThanOrEqualToTest( "maxheight_km", 0.1 ));
@@ -187,8 +188,10 @@ void NCPA::configure_modess_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->addTest( new NCPA::FloatGreaterThanTest( "c_max", 0.0 ) );
 	ps->addTest( new NCPA::RequiredIfOtherIsPresentTest( "c_max", "wvnum_filter" ) );
 	//ps->addUsageLine( "    --c_max               Maximum phase speed to keep" );
-	ps->addParameterDescription( "Flags", "--c_min", "Minimum phase speed to keep", 2*DEFAULT_PARAMETER_INDENT );
-	ps->addParameterDescription( "Flags", "--c_max", "Maximum phase speed to keep", 2*DEFAULT_PARAMETER_INDENT );
+	ps->setParameterIndent( 2 * DEFAULT_PARAMETER_INDENT );
+	ps->addParameterDescription( "Flags", "--c_min", "Minimum phase speed to keep" );
+	ps->addParameterDescription( "Flags", "--c_max", "Maximum phase speed to keep" );
+	ps->resetParameterIndent();
 
 
 	// Footer with file formats and sample commands
@@ -212,11 +215,14 @@ void NCPA::configure_modess_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->setFooterIndent( 4 );
 	ps->setFooterHangingIndent( 4 );
 	ps->setCommandMode( true );
-	ps->addFooterText("../bin/Modess --singleprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --azimuth 90 --freq 0.1" );
+	//ps->addFooterText("../bin/Modess --singleprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --azimuth 90 --freq 0.1" );
+	ps->addFooterText("../bin/Modess --singleprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --azimuth 90 --freq 0.1" );
 	ps->addBlankFooterLine();
-	ps->addFooterText("../bin/Modess --singleprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --azimuth 90 --freq 0.1 --write_2D_TLoss" );
+	//ps->addFooterText("../bin/Modess --singleprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --azimuth 90 --freq 0.1 --write_2D_TLoss" );
+	ps->addFooterText("../bin/Modess --singleprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --azimuth 90 --freq 0.1 --write_2D_TLoss" );
 	ps->addBlankFooterLine();
-	ps->addFooterText("../bin/Modess --Nby2Dprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --freq 0.1 --azimuth_start 0 --azimuth_end 360 --azimuth_step 1" );
+	//ps->addFooterText("../bin/Modess --Nby2Dprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --freq 0.1 --azimuth_start 0 --azimuth_end 360 --azimuth_step 1" );
+	ps->addFooterText("../bin/Modess --Nby2Dprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --freq 0.1 --azimuth_start 0 --azimuth_end 360 --azimuth_step 1" );
 	ps->setFooterHangingIndent( 0 );
 	ps->setCommandMode( false );
 	ps->resetFooterIndent();
