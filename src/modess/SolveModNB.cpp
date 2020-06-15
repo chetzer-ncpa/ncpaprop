@@ -34,11 +34,11 @@ void NCPA::SolveModNB::setParams( NCPA::ParameterSet *param, NCPA::Atmosphere1D 
 
 	// obtain the parameter values from the user's options
 	atmosfile 			= param->getString( "atmosfile" );
-	wind_units			= param->getString( "wind_units" );
+	//wind_units			= param->getString( "wind_units" );
 	gnd_imp_model 		= param->getString( "ground_impedence_model" );
 	usrattfile 			= param->getString( "use_attn_file" );
 	modstartfile 		= param->getString( "modal_starter_file" );
-  	skiplines 			= param->getInteger( "skiplines" );
+  	//skiplines 			= param->getInteger( "skiplines" );
   	z_min 				= param->getFloat( "zground_km" ) * 1000.0;    // meters
   	freq 				= param->getFloat( "freq" );
   	maxrange 			= param->getFloat( "maxrange_km" ) * 1000.0;
@@ -217,7 +217,7 @@ int NCPA::SolveModNB::computeModes() {
 	int    i, j, select_modes, nev, it;
 	double dz, admittance, h2, rng_step, z_min_km;
 	double k_min, k_max;			
-	double *alpha, *diag, *k2, *k_s, **v, **v_s;	
+	double /* *alpha, */ *diag, *k2, *k_s, **v, **v_s;
 	complex<double> *k_pert;
 	high_resolution_clock::time_point tm1, tm2;
 	duration<double> time_span;
@@ -239,7 +239,7 @@ int NCPA::SolveModNB::computeModes() {
 	dz       = (maxheight - z_min)/(Nz_grid - 1);	// the z-grid spacing
 	h2       = dz*dz;
 	z_min_km = z_min / 1000.0;
-  
+
 	//
 	// loop over azimuths (if not (N by 2D) it's only one azimuth)
 	//
