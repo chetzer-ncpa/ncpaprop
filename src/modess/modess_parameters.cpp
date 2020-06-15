@@ -72,7 +72,7 @@ void NCPA::configure_modess_parameter_set( NCPA::ParameterSet *ps ) {
 
 	ps->addParameter( new NCPA::IntegerParameter( "Nz_grid", 20000 ) );
 	ps->addTest( new NCPA::IntegerGreaterThanOrEqualToTest( "Nz_grid", 10 ) );
-	ps->addParameterDescription( "Optional Parameters [default]", "--Nz_grid", "Number of vertical grid points to use [2000]" );
+	ps->addParameterDescription( "Optional Parameters [default]", "--Nz_grid", "Number of vertical grid points to use [20000]" );
 
 	ps->addParameter( new NCPA::FloatParameter( "sourceheight_km", 0.0 ) );
 	ps->addParameterDescription( "Optional Parameters [default]", "--sourceheight_km", "Source height in km [0.0]" );
