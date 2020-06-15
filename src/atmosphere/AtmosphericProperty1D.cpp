@@ -34,6 +34,8 @@ NCPA::AtmosphericProperty1D::AtmosphericProperty1D( const AtmosphericProperty1D 
 	this->z_ = new double[ n_ ];
 	std::memcpy( z_, source.z_, n_ * sizeof( double ) );
 	this->z_units_ = source.z_units_;
+
+	build_splines_();
 }
 
 NCPA::AtmosphericProperty1D::~AtmosphericProperty1D() {

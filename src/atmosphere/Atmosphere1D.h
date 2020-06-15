@@ -20,7 +20,7 @@ namespace NCPA {
 	to be compared to one another using a common datum.  All properties have associated units
 	that can be tracked and converted internally.
 	*/
-	class Atmosphere1D : public AtmosphericModel {
+	class Atmosphere1D : public AtmosphericModel {   // may take away the inheritance if we don't end up having multiples
 
 	public:
 
@@ -139,7 +139,7 @@ namespace NCPA {
 
 		void convert_altitude_units( units_t new_units );
 		void convert_property_units( std::string key, units_t new_units );
-		units_t get_property_units( std::string key );
+		//units_t get_property_units( std::string key );
 
 		void resample( double new_dz );
 

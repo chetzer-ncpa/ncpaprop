@@ -28,7 +28,7 @@ void NCPA::configure_modess_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->resetHeaderIndent();
 	ps->addHeaderText("Additionally, if the flag --write_2D_TLoss is present on the command line, the 2D TL is saved to file tloss2d.nm. The user can also choose to propagate in N different directions i.e. (N by 2D mode) by using the option --Nby2Dprop.");
 	ps->addBlankHeaderLine();
-	ps->addHeaderText("The options below can be specified in a colon-separated file \"Modess.options\" or at the command line. Command-line options override file options.");
+	ps->addHeaderText("The options below can be specified in a colon-separated file \"modess.param\" or at the command line. Command-line options override file options.");
 
 	// Parameter descriptions
 	ps->addParameter( new FlagParameter( "help" ) );
@@ -43,11 +43,12 @@ void NCPA::configure_modess_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->addParameter( new NCPA::StringParameter( "atmosfile" ) );
 	ps->addTest( new NCPA::RequiredTest( "atmosfile" ) );
 	ps->addParameterDescription( "Required Parameters", "--atmosfile", "Atmospheric profile filename" );
-
+/*
 	ps->addParameter( new NCPA::StringParameter( "atmosfileorder" ) );
 	ps->addTest( new NCPA::RequiredTest( "atmosfileorder" ) );
 	ps->addParameterDescription( "Required Parameters", "--atmosfileorder", "The order of the (z,u,v,w,t,d,p) fields in --atmosfile. The units assumed in the ASCII file are z[km], t [kelvin], d [g/cm^3], p [hectoPa]. The wind speeds are in m/s by default; however if the winds are given in km/s then use option --wind_units kmpersec");
-
+*/
+	
 	ps->addParameter( new NCPA::FloatParameter( "freq" ) );
 	ps->addTest( new NCPA::RequiredTest( "freq" ) );
 	ps->addTest( new NCPA::FloatGreaterThanTest( "freq", 0.0 ) );

@@ -43,6 +43,20 @@ NCPA::Atmosphere1D::Atmosphere1D( std::string filename ) {
 	in.close();
 }
 
+NCPA::Atmosphere1D::Atmosphere1D( const Atmosphere1D &source ) {
+	z_ = new NCPA::VectorWithUnits( *(source.z_) );
+	for ( std::map< std::string, NCPA::AtmosphericProperty1D * >::const_iterator it = source.contents_.cbegin();
+		  it != source.contents_.cend(); ++it ) {
+		NCPA::AtmosphericProperty1D *new_prop = new NCPA::AtmosphericProperty1D( *(it->second) );
+		contents_[ it->first ] = new_prop;
+	}
+	for ( std::map< std::string, NCPA::ScalarWithUnits * >::const_iterator it = source.scalar_contents_.cbegin();
+		  it != source.scalar_contents_.cend(); ++it ) {
+		NCPA::ScalarWithUnits *new_scalar = new NCPA::ScalarWithUnits( *(it->second) );
+		scalar_contents_[ it->first ] = new_scalar;
+	}
+}
+
 void NCPA::Atmosphere1D::read_from_stream( std::istream& in ) {
 	if ( ! in.good() ) {
 		throw std::runtime_error( "Atmosphere1D - Input stream not in good state" );
@@ -218,9 +232,6 @@ NCPA::Atmosphere1D::~Atmosphere1D() {
 	contents_.clear();
 	scalar_contents_.clear();
 	delete z_;
-	//while (! z_units_.empty()) {
-	//	z_units_.pop();
-	//}
 }
 
 size_t NCPA::Atmosphere1D::get_basis_length() const {
@@ -403,6 +414,10 @@ void NCPA::Atmosphere1D::get_altitude_vector( double *buffer, units_t *buffer_un
 	z_->get_vector( buffer, buffer_units );
 }
 
+NCPA::units_t NCPA::Atmosphere1D::get_altitude_units() const {
+	return z_->get_units();
+}
+
 void NCPA::Atmosphere1D::get_altitude_vector( double *buffer ) const {
 	z_->get_vector( buffer );
 }
@@ -417,7 +432,7 @@ void NCPA::Atmosphere1D::get_property_vector( std::string key, double *buffer ) 
 	prop->get_vector( buffer );
 }
 
-NCPA::units_t NCPA::Atmosphere1D::get_property_units( std::string key ) {
+NCPA::units_t NCPA::Atmosphere1D::get_property_units( std::string key ) const {
 	try {
 		return contents_.at( key )->get_units();
 	} catch (std::out_of_range& oor) {}

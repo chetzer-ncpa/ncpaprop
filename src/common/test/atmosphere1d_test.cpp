@@ -4,6 +4,7 @@ g++ -o atmosphere1d_test -ggdb -I.. -I../../atmosphere ../../atmosphere/Atmosphe
 
 */
 #include "Atmosphere1D.h"
+#include "AtmosphericProperty1D.h"
 #include "util.h"
 #include "units.h"
 #include <iostream>
@@ -28,7 +29,13 @@ int main( int argc, char **argv ) {
 	} else {
 		cerr << "No input file specified!" << endl;
 		return 0;
-	}	
+	}
+
+	double dummy_z[5] = { 0, 10, 20, 30, 40 };
+	double dummy_t[5] = { 5, 5, 3, 5, 3 };
+	AtmosphericProperty1D *T = new AtmosphericProperty1D( 5, dummy_z, UNITS_DISTANCE_METERS, dummy_t, UNITS_TEMPERATURE_CELSIUS );
+	AtmosphericProperty1D Tcopy( *T );
+	exit( 0 );
 	
 	//ifstream ifs( filename );
 	Atmosphere1D *atm = new Atmosphere1D( filename );
