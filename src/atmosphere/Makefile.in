@@ -6,7 +6,7 @@ include @SLEPC_INCLUDE_FILE_GENERIC@
 #include $(SLEPC_DIR)/conf/slepc_common
 
 INCPATHS = @INCLUDEFLAGS@ ${PETSC_CC_INCLUDES} ${SLEPC_CC_INCLUDES}
-SOURCES=AtmosphericProfile.cpp AtmosphericSpecification.cpp JetProfile.cpp ProfileGroup.cpp SampledProfile.cpp Slice.cpp Sounding.cpp AtmosphericProperty1D.cpp Atmosphere1D.cpp
+SOURCES=AtmosphericProfile.cpp AtmosphericSpecification.cpp JetProfile.cpp ProfileGroup.cpp SampledProfile.cpp Slice.cpp Sounding.cpp AtmosphericProperty1D.cpp Atmosphere1D.cpp ToyAtmosphere1D.cpp
 OBJS=$(SOURCES:.cpp=.o)
 TARGET=libatmosphere.a
 

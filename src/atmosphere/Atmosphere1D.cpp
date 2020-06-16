@@ -21,6 +21,11 @@
 #define PI 3.14159
 #endif
 
+NCPA::Atmosphere1D::Atmosphere1D() {
+	contents_.clear();
+	scalar_contents_.clear();
+	z_ = NULL;
+}
 
 NCPA::Atmosphere1D::Atmosphere1D( size_t n_altitude_points, double *altitude_points, units_t altitude_units ) {
 	contents_.clear();

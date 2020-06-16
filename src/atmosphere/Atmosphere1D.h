@@ -24,6 +24,8 @@ namespace NCPA {
 
 	public:
 
+		Atmosphere1D();
+
 		/**
 		Constructs an Atmosphere1D object using a vector of altitudes, to which corresponding
 		properties can then be added.
