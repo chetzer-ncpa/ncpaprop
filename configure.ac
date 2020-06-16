@@ -310,9 +310,14 @@ AS_IF(
 		)
 
 		# Use MPI?
-		AC_CHECK_PROGS(MPI_FOUND, [mpic++ mpicxx mpiCC hcp mpxlC_r mpxlC mpCC cmpic++])
-		AS_IF([test "x$MPI_FOUND" = "x"],[
-			petsc_extra_config="${petsc_extra_config} --download-openmpi"
+		AS_IF([test "x${enable_localpetscmpi}" = "xyes"],[
+			
+			AC_CHECK_PROGS(MPI_FOUND, [mpic++ mpicxx mpiCC hcp mpxlC_r mpxlC mpCC cmpic++])
+			AS_IF([test "x$MPI_FOUND" = "x"],[
+				petsc_extra_config="${petsc_extra_config} --download-openmpi"
+			])
+		],[
+			petsc_extra_config="${petsc_extra_config} --with-mpi=0"
 		])
 	
 		# Go get F2CBLAS-LAPACK?

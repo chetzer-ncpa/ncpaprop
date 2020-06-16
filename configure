@@ -6833,7 +6833,10 @@ else
 fi
 
 		# Use MPI?
-		for ac_prog in mpic++ mpicxx mpiCC hcp mpxlC_r mpxlC mpCC cmpic++
+		if test "x${enable_localpetscmpi}" = "xyes"; then :
+
+
+			for ac_prog in mpic++ mpicxx mpiCC hcp mpxlC_r mpxlC mpCC cmpic++
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -6875,9 +6878,15 @@ fi
   test -n "$MPI_FOUND" && break
 done
 
-		if test "x$MPI_FOUND" = "x"; then :
+			if test "x$MPI_FOUND" = "x"; then :
 
-			petsc_extra_config="${petsc_extra_config} --download-openmpi"
+				petsc_extra_config="${petsc_extra_config} --download-openmpi"
+
+fi
+
+else
+
+			petsc_extra_config="${petsc_extra_config} --with-mpi=0"
 
 fi
 
