@@ -523,6 +523,7 @@ AS_IF([test "x${with_localslepc}" = "xyes"],[
 				AS_IF([test "$xdownloader" = "xcurl"],[
 					downloader_flags="--output ${slepc_tarfile}"
 				])
+				echo "Downloading using command: ${downloader} ${slepc_url} ${downloader_flags}"
 				$downloader ${slepc_url} ${downloader_flags}
 				AS_IF([test $? != 0],[
 					AC_MSG_ERROR([Error downloading ${slepc_url}, check internet connection and version number])

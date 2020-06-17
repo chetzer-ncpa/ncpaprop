@@ -8491,6 +8491,7 @@ else
 					downloader_flags="--output ${slepc_tarfile}"
 
 fi
+				echo "Downloading using command: ${downloader} ${slepc_url} ${downloader_flags}"
 				$downloader ${slepc_url} ${downloader_flags}
 				if test $? != 0; then :
 
