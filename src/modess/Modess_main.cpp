@@ -43,8 +43,11 @@ using namespace std;
 int main( int argc, char **argv ) {
   
 	// object to process the options
+	cout << "Creating parameter set" << endl;
 	ParameterSet *param = new ParameterSet();
+	cout << "Configuring parameter set" << endl;
 	configure_modess_parameter_set( param );
+	cout << "Parsing command line" << endl;
 	param->parseCommandLine( argc, argv );
 
 	// check for help text
