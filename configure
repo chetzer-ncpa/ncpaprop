@@ -8494,10 +8494,10 @@ fi
 fi
 
 
-			tar xvzf slepc-${slepc_version}.tar.gz
+			tar xvzf ${slepc_tarfile}
 			if test $? != 0; then :
 
-				as_fn_error $? "Error decompressing slepc-${slepc_version}.tar.gz, check download" "$LINENO" 5
+				as_fn_error $? "Error decompressing ${slepc_tarfile}, check download" "$LINENO" 5
 
 fi
 
