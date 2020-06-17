@@ -186,9 +186,17 @@ void NCPA::ParameterSet::addParameterDescription( const std::string& section, co
 
 	// do we have this header already?
 	std::ostringstream *oss, *oss_orig;
+/*
 	try {
 		oss_orig = _descriptionLines.at( section );
 	} catch (std::out_of_range &oor) {
+		oss_orig = new std::ostringstream("");
+		_descriptionLines[ section ] = oss_orig;
+	}
+*/
+	if ( _descriptionLines.count( section ) == 1 ) {
+		oss_orig = _descriptionLines[ section ];
+	} else {
 		oss_orig = new std::ostringstream("");
 		_descriptionLines[ section ] = oss_orig;
 	}

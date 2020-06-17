@@ -1,7 +1,7 @@
 #include "parameterset.h"
 #include "modess_parameters.h"
 #include <string>
-
+#include <iostream>
 
 void NCPA::configure_modess_parameter_set( NCPA::ParameterSet *ps ) {
 
@@ -33,9 +33,11 @@ void NCPA::configure_modess_parameter_set( NCPA::ParameterSet *ps ) {
 	// Parameter descriptions
 	ps->addParameter( new FlagParameter( "help" ) );
 	ps->addParameter( new FlagParameter( "h" ) );
-	ps->addParameterDescription( "Options Control", "-h, --help", "Prints help test" );
+	ps->addParameterDescription( "Options Control", "--help", "Prints help test" );
+
 	ps->addParameter( new StringParameter( "paramfile", "modess.param") );
 	ps->addParameterDescription( "Options Control", "--paramfile", "Parameter file name [modess.param]" );
+
 	ps->addParameter( new FlagParameter( "printparams" ) );
 	ps->addParameterDescription( "Options Control", "--printparams", "Print parameter summary to screen" );
 
