@@ -48,9 +48,14 @@ int main( int argc, char **argv ) {
 	param->parseCommandLine( argc, argv );
 
 	// check for help text
-	if (param->wasFound( "help" ) || param->wasFound("h") ) {
-		param->printUsage( cout );
-		return 1;
+	try {
+		if (param->wasFound( "help" ) || param->wasFound("h") ) {
+			param->printUsage( cout );
+			return 1;
+		}
+	} catch ( out_of_range &oor ) {
+		cout << "Out of range exception caught: " << oor.what() << endl;
+		return 0;
 	}
 
 	// See if an options file was specified
