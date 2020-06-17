@@ -129,12 +129,18 @@ void NCPA::Atmosphere1D::read_from_stream( std::istream& in ) {
 		}
 
 		double tempval = 0.0;
-		NCPA::units_t tempunits = NCPA::UNITS_NONE;
+		//NCPA::units_t tempunits = NCPA::UNITS_NONE;
+		NCPA::units_t tempunits = NCPA::Units::fromString( NCPA::deblank( fields[ 2 ] ) );
+		if (tempunits == NCPA::UNITS_NONE) {
+			throw std::invalid_argument( "Unrecognized units string: " + fields[ 2 ] );
+		}
+/*
 		try {
 			tempunits = NCPA::Units::fromString( NCPA::deblank( fields[ 2 ] ) );
 		} catch (std::out_of_range& oor) {
 			throw std::invalid_argument( oor.what() );
 		}
+*/
 		if (fields.size() == 4) {
 			tempval = std::stof( deblank(fields[ 3 ]) );
 		}
@@ -438,6 +444,15 @@ void NCPA::Atmosphere1D::get_property_vector( std::string key, double *buffer ) 
 }
 
 NCPA::units_t NCPA::Atmosphere1D::get_property_units( std::string key ) const {
+
+	if (contents_.count( key ) == 1) {
+		return contents_.at( key )->get_units();
+	}
+	if (scalar_contents_.count( key ) == 1) {
+		return scalar_contents_.at( key )->get_units();
+	}
+	throw std::out_of_range( "No vector or scalar quantity found with key " + key );
+	/*
 	try {
 		return contents_.at( key )->get_units();
 	} catch (std::out_of_range& oor) {}
@@ -446,6 +461,7 @@ NCPA::units_t NCPA::Atmosphere1D::get_property_units( std::string key ) const {
 	} catch (std::out_of_range& oor) {
 		throw std::out_of_range( "No vector or scalar quantity found with key " + key );
 	}
+	*/
 }
 
 
@@ -520,16 +536,31 @@ void NCPA::Atmosphere1D::add_property( std::string key, double value, NCPA::unit
 double NCPA::Atmosphere1D::get( std::string key, double altitude ) const {
 	
 	// if it's not there it'll throw an out_of_range exception
-	NCPA::AtmosphericProperty1D *prop;
+	//NCPA::AtmosphericProperty1D *prop;
+	if (contains_vector( key )) {
+		return contents_.at( key )->get( altitude );
+	} else {
+		throw std::out_of_range( "No vector quantity \"" + key + "\" found" );
+	}
+	/*
 	try {
 		prop = contents_.at( key );
 	} catch (std::out_of_range& oor) {
 		throw std::out_of_range( "No vector quantity \"" + key + "\" found" );
 	}
 	return prop->get( altitude );
+	*/
 }
 
 double NCPA::Atmosphere1D::get( std::string key ) const {
+
+	if (contains_scalar( key )) {
+		return scalar_contents_.at( key )->get();
+	} else {
+		throw std::out_of_range( "No scalar quantity \"" + key + "\" found" );
+	}
+
+/*
 	NCPA::ScalarWithUnits *prop;
 	try {
 		prop = scalar_contents_.at( key );
@@ -537,9 +568,11 @@ double NCPA::Atmosphere1D::get( std::string key ) const {
 		throw std::out_of_range( "No scalar quantity \"" + key + "\" found" );
 	}
 	return prop->get();
+*/
 }
 
 bool NCPA::Atmosphere1D::contains_vector( std::string key ) const {
+	/*
 	NCPA::AtmosphericProperty1D *prop;
 	try {
 		prop = contents_.at( key );
@@ -547,9 +580,12 @@ bool NCPA::Atmosphere1D::contains_vector( std::string key ) const {
 		return false;
 	}
 	return true;
+	*/
+	return (contents_.count( key ) == 1);
 }
 
 bool NCPA::Atmosphere1D::contains_scalar( std::string key ) const {
+	/*
 	NCPA::ScalarWithUnits *prop;
 	try {
 		prop = scalar_contents_.at( key );
@@ -557,6 +593,8 @@ bool NCPA::Atmosphere1D::contains_scalar( std::string key ) const {
 		return false;
 	}
 	return true;
+	*/
+	return (scalar_contents_.count( key ) == 1);
 }
 
 bool NCPA::Atmosphere1D::contains_key( std::string key ) const {
@@ -692,6 +730,7 @@ void NCPA::Atmosphere1D::revert_altitude_units() {
 
 void NCPA::Atmosphere1D::convert_property_units( std::string key, units_t new_units ) {
 	// if it's not there it'll throw an out_of_range exception
+	/*
 	try {
 		contents_.at( key )->convert_units( new_units );
 		return;
@@ -701,6 +740,16 @@ void NCPA::Atmosphere1D::convert_property_units( std::string key, units_t new_un
 	} catch (std::out_of_range& oor) {
 		throw std::out_of_range( "No vector or scalar quantity found with key " + key );
 	}
+	*/
+	if (contains_vector( key )) {
+		contents_.at( key )->convert_units( new_units );
+		return;
+	}
+	if (contains_scalar( key )) {
+		scalar_contents_.at( key )->convert_units( new_units );
+		return;
+	}
+	throw std::out_of_range( "No vector or scalar quantity found with key " + key );	
 }
 
 /*
@@ -824,6 +873,17 @@ void NCPA::Atmosphere1D::resample( double new_dz ) {
 
 void NCPA::Atmosphere1D::remove_property( std::string key ) {
 
+	if (contains_vector( key )) {
+		NCPA::AtmosphericProperty1D *prop = contents_.at( key );
+		delete prop;
+		contents_.erase( key );
+	}
+	if (contains_scalar( key )) {
+		NCPA::ScalarWithUnits *swu = scalar_contents_.at( key );
+		delete swu;
+		scalar_contents_.erase( key );
+	}
+/*
 	try {
 		NCPA::AtmosphericProperty1D *prop = contents_.at( key );
 		delete prop;
@@ -835,6 +895,7 @@ void NCPA::Atmosphere1D::remove_property( std::string key ) {
 		delete swu;
 		scalar_contents_.erase( key );
 	} catch (std::out_of_range oor) {}
+*/
 }
 
 

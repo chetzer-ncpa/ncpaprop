@@ -43,9 +43,7 @@ NCPA::ParameterSet::~ParameterSet() {
 	_footerLines.clear();
 
 	for (std::vector< std::string >::iterator it3 = _sections.begin(); it3 != _sections.end(); ++it3) {
-		try {
-			delete _descriptionLines.at( *it3 );
-		} catch (std::out_of_range &oor) {}
+		delete _descriptionLines.at( *it3 );
 	}
 
 	_descriptionLines.clear();

@@ -39,11 +39,19 @@ NCPA::units_t NCPA::Units::fromString( std::string s ) {
 		NCPA::Units::initialize_();
 	}
 
+	if (NCPA::Units::string_to_enum_map_.count( NCPA::toUpperCase( s ) ) == 1) {
+		return NCPA::Units::string_to_enum_map_.at( NCPA::toUpperCase( s ) );
+	} else {
+		return NCPA::UNITS_NONE;
+		//throw std::out_of_range( "Unrecognized units string: " + s );
+	}
+	/*
 	try {
 		return NCPA::Units::string_to_enum_map_.at( NCPA::toUpperCase( s ) );
 	} catch (std::out_of_range e) {
 		throw std::out_of_range( "Unrecognized units string: " + s );
 	}
+	*/
 }
 
 std::string NCPA::Units::toString( units_t u ) {
@@ -52,11 +60,19 @@ std::string NCPA::Units::toString( units_t u ) {
 		NCPA::Units::initialize_();
 	}
 
+	if (NCPA::Units::enum_to_string_map_.count( u ) == 1) {
+		return NCPA::Units::enum_to_string_map_.at( u );
+	} else {
+		return "";
+		//throw std::out_of_range( "Unrecognized units string: " + s );
+	}
+/*
 	try {
 		return NCPA::Units::enum_to_string_map_.at( u );
 	} catch (std::out_of_range e) {
 		throw std::out_of_range( "Unrecognized units type" );
 	}
+*/
 
 }
 
@@ -67,11 +83,19 @@ std::string NCPA::Units::toStr( units_t u ) {
 		NCPA::Units::initialize_();
 	}
 
+	if (NCPA::Units::enum_to_abbr_map_.count( u ) == 1) {
+		return NCPA::Units::enum_to_abbr_map_.at( u );
+	} else {
+		return "";
+		//throw std::out_of_range( "Unrecognized units string: " + s );
+	}
+/*
 	try {
 		return NCPA::Units::enum_to_abbr_map_.at( u );
 	} catch (std::out_of_range e) {
 		throw std::out_of_range( "Unrecognized units type" );
 	}
+*/
 }
 
 
@@ -232,6 +256,8 @@ bool NCPA::Units::ready_() {
 
 double NCPA::Units::convert( double in, NCPA::units_t type_in, NCPA::units_t type_out ) {
 	double out = 0.0;
+	NCPA::Units::convert( &in, 1, type_in, type_out, &out );
+	/*
 	try {
 		// Call the vector conversion with one-element vectors
 		NCPA::Units::convert( &in, 1, type_in, type_out, &out );
@@ -240,6 +266,7 @@ double NCPA::Units::convert( double in, NCPA::units_t type_in, NCPA::units_t typ
 		// will have been notified in the called function
 		throw;
 	}
+	*/
 	return out;
 }
 
