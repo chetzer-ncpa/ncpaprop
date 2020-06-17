@@ -8486,7 +8486,7 @@ else
 
 				slepc_url="${slepc_url_base}/slepc-${slepc_version}.tar.gz"
 				downloader_flags=""
-				if test "$xdownloader" = "xcurl"; then :
+				if test "x$downloader" = "xcurl"; then :
 
 					downloader_flags="--output ${slepc_tarfile}"
 
