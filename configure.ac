@@ -519,7 +519,11 @@ AS_IF([test "x${with_localslepc}" = "xyes"],[
 			AC_MSG_RESULT([no, installing])
 			AC_CHECK_FILE([slepc-${slepc_version}.tar.gz],,[
 				slepc_url="${slepc_url_base}/slepc-${slepc_version}.tar.gz"
-				$downloader ${slepc_url}
+				downloader_flags=""
+				AS_IF([test "$xdownloader" = "xcurl"],[
+					downloader_flags="--output ${slepc_tarfile}"
+				])
+				$downloader ${slepc_url} ${downloader_flags}
 				AS_IF([test $? != 0],[
 					AC_MSG_ERROR([Error downloading ${slepc_url}, check internet connection and version number])
 				])

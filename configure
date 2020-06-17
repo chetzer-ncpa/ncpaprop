@@ -8485,7 +8485,13 @@ if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
 else
 
 				slepc_url="${slepc_url_base}/slepc-${slepc_version}.tar.gz"
-				$downloader ${slepc_url}
+				downloader_flags=""
+				if test "$xdownloader" = "xcurl"; then :
+
+					downloader_flags="--output ${slepc_tarfile}"
+
+fi
+				$downloader ${slepc_url} ${downloader_flags}
 				if test $? != 0; then :
 
 					as_fn_error $? "Error downloading ${slepc_url}, check internet connection and version number" "$LINENO" 5
