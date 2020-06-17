@@ -43,35 +43,15 @@ using namespace std;
 int main( int argc, char **argv ) {
   
 	// object to process the options
-	ParameterSet *param;
-	try {
-		param = new ParameterSet();
-	} catch ( out_of_range &oor ) {
-		cout << "Out of range exception caught in ParameterSet constructor: " << oor.what() << endl;
-		return 0;
-	}
-	try {
-		configure_modess_parameter_set( param );
-	} catch ( out_of_range &oor ) {
-		cout << "Out of range exception caught in ParameterSet configuration: " << oor.what() << endl;
-		return 0;
-	}
-	try {
-		param->parseCommandLine( argc, argv );
-	} catch ( out_of_range &oor ) {
-		cout << "Out of range exception caught in command-line parser: " << oor.what() << endl;
-		return 0;
-	}
+	ParameterSet *param = new ParameterSet();
+	configure_modess_parameter_set( param );
+	param->parseCommandLine( argc, argv );
 
 	// check for help text
-	try {
-		if (param->wasFound( "help" ) || param->wasFound("h") ) {
-			param->printUsage( cout );
-			return 1;
-		}
-	} catch ( out_of_range &oor ) {
-		cout << "Out of range exception caught in wasFound() or printUsage(): " << oor.what() << endl;
-		return 0;
+	cout << "Checking for help request" << endl;
+	if (param->wasFound( "help" ) || param->wasFound("h") ) {
+		param->printUsage( cout );
+		return 1;
 	}
 
 	// See if an options file was specified
