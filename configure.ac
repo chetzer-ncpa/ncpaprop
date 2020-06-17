@@ -516,7 +516,7 @@ AS_IF([test "x${with_localslepc}" = "xyes"],[
 			AC_CHECK_FILE([${slepc_tarfile}],,[
 				slepc_url="${slepc_url_base}/${slepc_tarfile}"
 				downloader_flags=""
-				AS_IF([test "$xdownloader" = "xcurl"],[
+				AS_IF([test "x$downloader" = "xcurl"],[
 					downloader_flags="--output ${slepc_tarfile}"
 				])
 				$downloader ${slepc_url} ${downloader_flags}
