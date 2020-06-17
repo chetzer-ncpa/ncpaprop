@@ -94,12 +94,13 @@ void NCPA::configure_modess_parameter_set( NCPA::ParameterSet *ps ) {
 	test->addStringParameter( "rigid" );
 	ps->addParameterDescription( "Optional Parameters [default]", "--ground_impedence_model", "Impedence model to use.  Currently only \"rigid\" is supported. [rigid]" );
 
+/*
 	ps->addParameter( new NCPA::StringParameter( "wind_units", "mpersec" ) );
 	test = ps->addTest( new NCPA::StringSetTest( "wind_units" ) );
 	test->addStringParameter( "mpersec" );
 	test->addStringParameter( "kmpersec" );
 	ps->addParameterDescription( "Optional Parameters [default]", "--wind_units", "Units wind speed is presented in, kmpersec or mpersec [mpersec]" );
-
+*/
 
 	ps->addParameter( new NCPA::StringParameter( "use_attn_file", "" ) );
 	ps->addParameterDescription( "Optional Parameters [default]", "--use_attn_file", "File name containing attenuation, to override default Sutherland/Bass [n/a]. Columns are #n# Height(km) Attenuation(np/m)" );
