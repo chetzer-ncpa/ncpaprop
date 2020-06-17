@@ -1872,7 +1872,7 @@ NCPA::StringMinimumLengthTest::StringMinimumLengthTest( const std::string& optio
 	: ParameterTest( optionName, false ), _value{ 0 } {}
 
 NCPA::StringMinimumLengthTest::StringMinimumLengthTest( const std::string& optionName,
-	int minlength ) 
+	size_t minlength ) 
 	: ParameterTest( optionName, true ), _value{ minlength } {}
 
 std::string NCPA::StringMinimumLengthTest::description() const {
@@ -1903,7 +1903,7 @@ void NCPA::StringMinimumLengthTest::addIntegerParameter( int param ) {
 	if (param < 0) {
 		throw std::range_error( "String length must not be negative" );
 	}
-	_value = (unsigned int)param;
+	_value = (size_t)param;
 	_ready = true;
 }
 
@@ -1914,7 +1914,7 @@ NCPA::StringMaximumLengthTest::StringMaximumLengthTest( const std::string& optio
 	: ParameterTest( optionName, false ), _value{ 0 } {}
 
 NCPA::StringMaximumLengthTest::StringMaximumLengthTest( const std::string& optionName,
-	int maxlength ) 
+	size_t maxlength ) 
 	: ParameterTest( optionName, true ), _value{ maxlength } {}
 
 std::string NCPA::StringMaximumLengthTest::description() const {
@@ -1945,7 +1945,7 @@ void NCPA::StringMaximumLengthTest::addIntegerParameter( int param ) {
 	if (param < 0) {
 		throw std::range_error( "String length must not be negative" );
 	}
-	_value = (unsigned int)param;
+	_value = (size_t)param;
 	_ready = true;
 }
 

@@ -900,14 +900,14 @@ namespace NCPA {
 	class StringMinimumLengthTest : public ParameterTest {
 	public:
 		StringMinimumLengthTest( const std::string& option_name );
-		StringMinimumLengthTest( const std::string& option_name, int minlength );
+		StringMinimumLengthTest( const std::string& option_name, size_t minlength );
 		bool validate( const ParameterVector& param ) ;
 		std::string description() const;
 		std::string failureMessage() const;
 		void addIntegerParameter( int param );
 		std::string valueString() const;
 	private:
-		unsigned int _value;
+		size_t _value;
 		std::string _testedValue;
 	};
 	
@@ -915,14 +915,14 @@ namespace NCPA {
 	class StringMaximumLengthTest : public ParameterTest {
 	public:
 		StringMaximumLengthTest( const std::string& option_name );
-		StringMaximumLengthTest( const std::string& option_name, int maxlength );
+		StringMaximumLengthTest( const std::string& option_name, size_t maxlength );
 		bool validate( const ParameterVector& param ) ;
 		std::string description() const;
 		std::string failureMessage() const;
 		void addIntegerParameter( int param );
 		std::string valueString() const;
 	private:
-		unsigned int _value;
+		size_t _value;
 		std::string _testedValue;
 	};
 	
