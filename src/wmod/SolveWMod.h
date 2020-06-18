@@ -2,42 +2,19 @@
 #define _SolveWMod_H_
 
 #include <complex>
+#include "Atmosphere1D.h"
 #include "ProcessOptionsNB.h"
+#include "parameterset.h"
 
 
 namespace NCPA {
   class SolveWMod {
     public:
-	    /*
-      SolveWMod( \
-            double freq, int Naz, double azi, double delta_az, \
-            string atmosfile, string wind_units, NCPA::SampledProfile *atm_profile, \
-            int Nz_grid, double z_min, double maxheight, \
-            int Nrng_steps, double maxrange, \
-            double sourceheight, double receiverheight, \
-            std::string gnd_imp_model, int Lamb_wave_BC, \
-            double tol, int write_2D_TLoss, \
-            bool write_phase_speeds, bool write_dispersion, bool write_modes, \
-            bool Nby2prop, bool turnoff_WKB); // constructor
-      */
 	    
-      SolveWMod(ProcessOptionsNB *oNB, NCPA::SampledProfile *atm_profile); // constructor 2
+      SolveWMod(ParameterSet *param, Atmosphere1D *atm_profile);
+      ~SolveWMod();
       
-      //~SolveWMod(); //destructor          
-      /*
-      void setParams( \
-            double freq1, int Naz, double azi1, double delta_az, \
-            string atmosfile1, string wind_units1, NCPA::SampledProfile *atm_prof, \
-            int Nz_grid1, double z_min1, double maxheight1, \
-            int Nrng_steps1, double maxrange1, \
-            double sourceheight1, double receiverheight1, \
-            std::string gnd_imp_model1, \
-            int Lamb_wave_BC1, double tol1, int write_2D_TLoss1, \
-            bool write_phase_speeds1, bool write_dispersion1, bool write_modes1, \
-            bool Nby2prop1, bool turnoff_WKB1);
-      */
-            
-      void setParams(ProcessOptionsNB *oNB, NCPA::SampledProfile *atm_prof);	
+      void setParams(ParameterSet *param, Atmosphere1D *atm_profile);	
 			
       void printParams();
 	
@@ -45,15 +22,18 @@ namespace NCPA {
 
       //int getAbsorption(int n, double dz, NCPA::SampledProfile *p, double freq, double *alpha);	
       
-      int getAbsorption(int n, double dz, NCPA::SampledProfile *p, double freq, string usrattfile, double *alpha);      
+      //int getAbsorption(int n, double dz, NCPA::SampledProfile *p, double freq, string usrattfile, double *alpha);      
 
-      int getModalTrace(int nz, double z_min, double sourceheight, double receiverheight, double dz, SampledProfile *p, double admittance, double freq, double *diag, double *kd, double *md, double *cd, double *k_min, double *k_max, bool turnoff_WKB);
+      int getModalTrace(int nz, double z_min, double sourceheight, double receiverheight, double dz, Atmosphere1D *p, 
+            double admittance, double freq, double *diag, double *kd, double *md, double *cd, double *k_min, 
+            double *k_max, bool turnoff_WKB);
 
       int getNumberOfModes(int n, double dz, double *diag, double k_min, double k_max, int *nev);
 
       int sturmCount(int n, double dz, double *diag, double k, int *cnt);	
 
-      int doPerturb(int nz, double z_min, double dz, int n_modes, double freq, NCPA::SampledProfile *p, double *k, double **v, double *alpha, std::complex<double> *k_pert);
+      int doPerturb(int nz, double z_min, double dz, int n_modes, double freq, double *k, double **v, 
+            double *alpha, std::complex<double> *k_pert);
 
       int doSelect(int nz, int n_modes, double k_min, double k_max, double *k2, double **v, double *k_s, double **v_s, int *select_modes);
 
@@ -72,43 +52,43 @@ namespace NCPA {
       int writeEigenFunctions(int nz, int select_modes, double dz, double **v_s);
 
     private:
-      bool   write_2D_TLoss;
-      bool   write_phase_speeds;
-      bool   write_dispersion;
-      bool   write_modes;
-      bool   Nby2Dprop;
-      bool   turnoff_WKB;
-      bool   wvnum_filter_flg;
+            bool   write_2D_TLoss;
+            bool   write_phase_speeds;
+            bool   write_dispersion;
+            bool   write_modes;        
+            bool   Nby2Dprop;
+            bool   turnoff_WKB;
+            bool   wvnum_filter_flg;
+            bool   z_min_specified;
+          
+            int    Nz_grid;
+            int    Nrng_steps;
+            int    Lamb_wave_BC; 
+            int    Naz;
+            int    skiplines;
       
-      int    Nz_grid;
-      int    Nrng_steps;
-      int    Lamb_wave_BC; 
-      int    Naz;
-      int    skiplines;       
-
-      double freq;
-      double azi;
-      double azi_min;
-      double azi_max;
-      double azi_step;            
-      double z_min;
-      double maxheight;     
-      double maxrange;
-      double sourceheight;
-      double receiverheight;
-      double tol;
-      double *Hgt, *zw, *mw, *T, *rho, *Pr;
-      double c_min; // for wavenumber filtering option
-      double c_max; // for wavenumber filtering option
+            double freq;
+            double azi;
+            double azi_min;
+            double azi_max;
+            double azi_step;           
+            double z_min;
+            double maxheight;     
+            double maxrange;
+            double sourceheight;
+            double receiverheight;
+            double tol;
+            double *Hgt, *zw, *mw, *T, *rho, *Pr, *c_eff, *alpha;
+            double c_min; // for wavenumber filtering option
+            double c_max; // for wavenumber filtering option
       
-      NCPA::SampledProfile *atm_profile;
-      std::string gnd_imp_model;      
-      std::string atmosfile;
-      std::string wind_units;
-      std::string usrattfile;
-      //std::string atmosfileorder;
+            NCPA::Atmosphere1D *atm_profile;
+            std::string gnd_imp_model;
+            std::string atmosfile;
+            std::string wind_units;
+            std::string usrattfile;
       
-	}; // mandatory semicolon here
+	}; 
 }
 
 #endif
