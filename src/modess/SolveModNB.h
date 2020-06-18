@@ -6,6 +6,8 @@
 #include <string>
 #include <complex>
 
+// @todo Create destructor and handle memory deallocation there
+
 
 namespace NCPA {
 	class SolveModNB {
@@ -23,8 +25,8 @@ namespace NCPA {
 
 		int computeModes();	
 
-		int getAbsorption(int n, double dz, /*NCPA::Atmosphere1D *p,*/
-			double freq, std::string usrattfile, double *alpha);
+		//int getAbsorption(int n, double dz, /*NCPA::Atmosphere1D *p,*/
+		//	double freq, std::string usrattfile, double *alpha);
 
 		int getModalTrace(int nz, double z_min, double sourceheight, double receiverheight, 
 			double dz, NCPA::Atmosphere1D *p, double admittance, double freq, double azi, 

@@ -1,11 +1,11 @@
-include @PETSC_INCLUDE_FILE_GENERIC@
-include @SLEPC_INCLUDE_FILE_GENERIC@
+include /home/claus/code/devel/ncpaprop/extern/petsc/lib/petsc/conf/variables
+include /home/claus/code/devel/ncpaprop/extern/slepc/slepc-3.12.2/lib/slepc/conf/slepc_common
 
 
 # the following provides CCPPFLAGS, CLINKER, CC_INCLUDES, SLEPC_INCLUDE, SLEPC_LIB
 #include $(SLEPC_DIR)/conf/slepc_common
 
-INCPATHS = @INCLUDEFLAGS@ ${PETSC_CC_INCLUDES} ${SLEPC_CC_INCLUDES}
+INCPATHS = -I. -I../common -I../atmosphere -I/usr/local/include -I/usr/include ${PETSC_CC_INCLUDES} ${SLEPC_CC_INCLUDES}
 #SOURCES=AtmosphericProfile.cpp AtmosphericSpecification.cpp JetProfile.cpp ProfileGroup.cpp SampledProfile.cpp Slice.cpp Sounding.cpp AtmosphericProperty1D.cpp Atmosphere1D.cpp ToyAtmosphere1D.cpp
 SOURCES=AtmosphericProperty1D.cpp Atmosphere1D.cpp ToyAtmosphere1D.cpp
 OBJS=$(SOURCES:.cpp=.o)
@@ -23,7 +23,7 @@ $(TARGET): $(OBJS)
 	
 # compile 
 %.o: %.cpp
-	${CXX} ${INCPATHS} @CXXFLAGS@ ${CXX_FLAGS} @WARNINGFLAGS@ -o $@ $<
+	${CXX} ${INCPATHS} -fpic -c -Wall ${CXX_FLAGS} -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -Wno-unused-but-set-variable -Wno-maybe-uninitialized -Wno-unused-result -o $@ $<
 
 clean::
 	-$(RM) -rf $(OBJS) $(TARGET)

@@ -132,6 +132,7 @@ void NCPA::SolveModNB::setParams( NCPA::ParameterSet *param, NCPA::Atmosphere1D 
 	// Note: the rho, Pr, T, zw, mw are computed wrt ground level i.e.
 	// the first value is at the ground level e.g. rho[0] = rho(z_min)
 	// @todo make fill_vector( zvec ) methods in AtmosphericProfile()
+	// @todo add underscores to internally calculated parameter keys
 	atm_profile->calculate_sound_speed_from_pressure_and_density( "C0", "P", "RHO", Units::fromString( "m/s" ) );
 	atm_profile->calculate_wind_speed( "WS", "U", "V" );
 	atm_profile->calculate_wind_direction( "WD", "U", "V" );
@@ -222,7 +223,6 @@ int NCPA::SolveModNB::computeModes() {
 	high_resolution_clock::time_point tm1, tm2;
 	duration<double> time_span;
 
-	//alpha  = new double [Nz_grid];
 	diag   = new double [Nz_grid];
   
 	k2     = new double [MAX_MODES];
@@ -523,6 +523,7 @@ int NCPA::SolveModNB::computeModes() {
 	ierr = SlepcFinalize();CHKERRQ(ierr);
   
 	// free the class-wide (profile) arrays; it could be done in a destructor as well
+	// @todo move these to a destructor
 	delete[] Hgt;
 	delete[] zw;
 	delete[] mw;
@@ -530,9 +531,9 @@ int NCPA::SolveModNB::computeModes() {
 	delete[] rho;
 	delete[] Pr;
 	delete[] c_eff;
+	delete[] alpha;
   
 	// free the rest of locally dynamically allocated space
-	delete[] alpha;
 	delete[] diag;
 	delete[] k2;
 	delete[] k_s;
@@ -544,7 +545,7 @@ int NCPA::SolveModNB::computeModes() {
 } // end of computeModes()
 
 
-
+/*
 // updated getAbsorption function: bug fixed by Joel and Jelle - Jun 2012
 // updated: will accept attenuation coeff. loaded from a file
 // @todo Remove this after adding method to take user input file
@@ -758,22 +759,12 @@ int NCPA::SolveModNB::getAbsorption(int n, double dz, double freq, string usratt
 		gsl_interp_accel_free(acc_);
 	}
    
-	/*
-	// save alpha?
-	if (1) {
-	FILE *fp = fopen("attn.dat", "w");
-	for (int ii=0; ii<n; ii++) {
-	fprintf(fp, "%9.4f  %14.6e\n", ii*dz/1000.0, alpha[ii]);
-	}
-	printf("Attenuation coeff. saved in 'attn.dat'\n");
-	fclose(fp);
-	}
-	*/
+	
   
   
 	return 0;
 }
-
+*/
 
 
 // DV 20130827: new getModalTrace() to output the effective sound speed 
@@ -956,8 +947,7 @@ int NCPA::SolveModNB::doPerturb(int nz, double z_min, double dz, int n_modes, do
 	double omega = 2*PI*freq;
 	complex<double> I (0.0, 1.0);
 	gamma = 1.4;
-	// gamma = 1.371 + 2.46E-04*T - 6.436E-07*pow(T,2) + 5.2E-10*pow(T,3) - 1.796E-13*pow(T,4) + 2.182E-17*pow(T,5);
-   
+	
 	dz_km = dz/1000.0;
 	for (j=0; j<n_modes; j++) {
 		absorption = 0.0;
