@@ -447,13 +447,12 @@ int NCPA::SolveModNB::computeModes() {
 		}	
 
 		// select modes and do perturbation
-		doSelect(Nz_grid,nconv,k_min,k_max,k2,v,k_s,v_s,&select_modes);  
+		doSelect(Nz_grid,nconv,k_min,k_max,k2,v,k_s,v_s,&select_modes);
 		doPerturb(Nz_grid, z_min, dz, select_modes, freq, k_s, v_s, alpha, k_pert);
 		
 		//
 		// Output data  
 		//
-
 		if (Nby2Dprop) { // if (N by 2D is requested)
 			getTLoss1DNx2(azi, select_modes, dz, Nrng_steps, rng_step, sourceheight, 
 				      receiverheight, rho, k_pert, v_s, Nby2Dprop, it);
@@ -768,9 +767,8 @@ int NCPA::SolveModNB::getAbsorption(int n, double dz, double freq, string usratt
 
 
 // DV 20130827: new getModalTrace() to output the effective sound speed 
-int NCPA::SolveModNB::getModalTrace( int nz, double z_min, double sourceheight, 
-	double receiverheight, double dz, Atmosphere1D *p,
-	double admittance, double freq, double azi, double *diag,
+int NCPA::SolveModNB::getModalTrace( int nz, double z_min, double sourceheight, double receiverheight, 
+	double dz, Atmosphere1D *p, double admittance, double freq, double azi, double *diag,
 	double *k_min, double *k_max, bool turnoff_WKB, double *ceffz) {
 	
 	// use atmospherics input for the trace of the matrix.
