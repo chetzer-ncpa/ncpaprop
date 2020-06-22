@@ -198,7 +198,4 @@ void NCPA::configure_wmod_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->setCommandMode( false );
 	ps->resetFooterIndent();
 
-	// dummy parameters to prevent errors with Modess
-	ps->addParameter( new NCPA::StringParameter( "modal_starter_file", "" ) );
-	ps->addParameter( new NCPA::FlagParameter( "write_speeds" ) );
 }

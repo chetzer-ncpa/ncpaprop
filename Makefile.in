@@ -76,6 +76,7 @@ clean:
 	-$(MAKE) -C src/common clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 	-$(MAKE) -C src/atmosphere clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 #	-$(MAKE) -C src/raytrace clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
+	-$(MAKE) -C src/libmodes clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 	-$(MAKE) -C src/modess clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 	-$(MAKE) -C src/modbb clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 	-$(MAKE) -C src/modess_rd_1wcm clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
@@ -86,7 +87,7 @@ clean:
 	-$(MAKE) -C src/tdpape clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 	-$(MAKE) -C src/wnlrt clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 #	-$(MAKE) -C src/modess_rd_2wcm clean  PETSC_ARCH=@PETSC_ARCH_COMPLEX@
-	-rm bin/CModBB  bin/CModess  bin/ModBB  bin/Modess  bin/ModessRD1WCM  bin/pape  bin/WMod lib/libatmosphere.a lib/libcommon.a bin/tdpape bin/wnlrt
+	-rm bin/CModBB  bin/CModess  bin/ModBB  bin/Modess  bin/ModessRD1WCM  bin/pape  bin/WMod lib/libatmosphere.a lib/libcommon.a bin/tdpape bin/wnlrt lib/libmodes.a
 
 # Test all executables to make sure their output matches the dev machine output
 test:

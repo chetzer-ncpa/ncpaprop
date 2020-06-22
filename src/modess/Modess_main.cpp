@@ -82,12 +82,12 @@ int main( int argc, char **argv ) {
 	 
 	// get solver object
 	//SolveModNB *a = new SolveModNB( param, atm_profile );
-    ModeSolver *a = new ModeSolver( param, atm_profile );
+    ESSModeSolver *a = new ESSModeSolver( param, atm_profile );
                                          
 	//   					 
 	// compute modes - main action happens here
 	//				 
-	a->computeModessModes();
+	a->computeModes();
 	a->printParams();
 
 	// save atm. profile if requested

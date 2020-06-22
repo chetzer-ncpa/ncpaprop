@@ -75,12 +75,12 @@ int main( int argc, char **argv ) {
 
   // get solver object 
   //SolveWMod *a = new SolveWMod(param, atm_profile);
-  ModeSolver *a = new ModeSolver(param, atm_profile);
+  WModeSolver *a = new WModeSolver(param, atm_profile);
    
 	//   					 
   // compute modes - main action happens here					 
   //
-  a->computeWModModes();
+  a->computeModes();
   a->printParams();
   
   // save atm. profile if requested

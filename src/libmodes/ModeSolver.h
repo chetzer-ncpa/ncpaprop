@@ -13,12 +13,12 @@ namespace NCPA {
 	public:           
 
         // constructor/destructor
-		ModeSolver( ParameterSet *param, Atmosphere1D *atm_profile );
-		~ModeSolver();
+		//ModeSolver( ParameterSet *param, Atmosphere1D *atm_profile );
+		virtual ~ModeSolver();
 
 		// parameter control
-		void setParams( ParameterSet *param, Atmosphere1D *atm_prof );                  	
-		void printParams();
+		virtual void setParams( ParameterSet *param, Atmosphere1D *atm_prof ) = 0;                  	
+		virtual void printParams() = 0;
 
 		// general functions
 		int getNumberOfModes(int n, double dz, double *diag, double k_min, double k_max, int *nev);
@@ -38,35 +38,38 @@ namespace NCPA {
 		int writePhaseSpeeds(int select_modes, double freq, std::complex<double> *k_pert);
 		int writeEigenFunctions(int nz, int select_modes, double dz, double **v_s);
 
+		// to be overridden
+		virtual int computeModes() = 0;
+		virtual int doSelect( int nz, int n_modes, double k_min, double k_max, double *k2, double **v, 
+			double *k_s, double **v_s, int *select_modes ) = 0;
 
 		// Modess-specific
-		int computeModessModes();	
-		int getModalTrace_Modess(int nz, double z_min, double sourceheight, double receiverheight, 
-			double dz, NCPA::Atmosphere1D *p, double admittance, double freq, double azi, 
-			double *diag, double *k_min, double *k_max, bool turnoff_WKB, double *c_eff);      
+		//int computeModessModes();	
+		//int getModalTrace_Modess(int nz, double z_min, double sourceheight, double receiverheight, 
+		//	double dz, NCPA::Atmosphere1D *p, double admittance, double freq, double azi, 
+		//	double *diag, double *k_min, double *k_max, bool turnoff_WKB, double *c_eff);      
 		// Modal starter - DV 20151014
 		// Modification to apply the sqrt(k0) factor to agree with Jelle's getModalStarter; 
 		// this in turn will make 'pape' agree with modess output
-		void getModalStarter(int nz, int select_modes, double dz, double freq,  double z_src, 
-			double z_rcv, double *rho, std::complex<double> *k_pert, double **v_s, std::string modstartfile);
-		int writePhaseAndGroupSpeeds(int nz, double dz, int select_modes, double freq, 
-			std::complex<double> *k_pert, double **v_s, double *c_eff);   
-		int doSelect_Modess(int nz, int n_modes, double k_min, double k_max, double *k2, double **v, 
-			double *k_s, double **v_s, int *select_modes);
+		//void getModalStarter(int nz, int select_modes, double dz, double freq,  double z_src, 
+		//	double z_rcv, double *rho, std::complex<double> *k_pert, double **v_s, std::string modstartfile);
+		//int writePhaseAndGroupSpeeds(int nz, double dz, int select_modes, double freq, 
+		//	std::complex<double> *k_pert, double **v_s, double *c_eff);   
+		//int doSelect_Modess(int nz, int n_modes, double k_min, double k_max, double *k2, double **v, 
+		//	double *k_s, double **v_s, int *select_modes);
 		
 		// WMod-specific
-		int computeWModModes();
-		int getModalTrace_WMod(int nz, double z_min, double sourceheight, double receiverheight, double dz, Atmosphere1D *p, 
-            double admittance, double freq, double *diag, double *kd, double *md, double *cd, double *k_min, 
-            double *k_max, bool turnoff_WKB);
-		int doSelect_WMod(int nz, int n_modes, double k_min, double k_max, double *k2, double **v, 
-			double *k_s, double **v_s, int *select_modes);
+		//int computeWModModes();
+		//int getModalTrace_WMod(int nz, double z_min, double sourceheight, double receiverheight, double dz, Atmosphere1D *p, 
+        //    double admittance, double freq, double *diag, double *kd, double *md, double *cd, double *k_min, 
+        //    double *k_max, bool turnoff_WKB);
+		//int doSelect_WMod(int nz, int n_modes, double k_min, double k_max, double *k2, double **v, 
+		//	double *k_s, double **v_s, int *select_modes);
 
 
-	private:
+	protected:
 		bool   write_2D_TLoss;
 		bool   write_phase_speeds;
-		bool   write_speeds;
 		bool   write_dispersion;
 		bool   write_modes;        
 		bool   Nby2Dprop;
@@ -100,7 +103,6 @@ namespace NCPA {
 		std::string atmosfile;
 		std::string wind_units;
 		std::string usrattfile;
-		std::string modstartfile; // store the modal starter in this file
       
 	}; 
 }
