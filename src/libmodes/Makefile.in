@@ -1,7 +1,3 @@
-PETSC_ARCH_REAL=@PETSC_ARCH_REAL@
-PETSC_ARCH_COMPLEX=@PETSC_ARCH_COMPLEX@
-
-
 include @PETSC_INCLUDE_FILE_GENERIC@
 include @SLEPC_INCLUDE_FILE_GENERIC@
 
@@ -10,9 +6,11 @@ include @SLEPC_INCLUDE_FILE_GENERIC@
 #include $(SLEPC_DIR)/conf/slepc_common
 
 INCPATHS = @INCLUDEFLAGS@ ${PETSC_CC_INCLUDES} ${SLEPC_CC_INCLUDES}
-OBJS=Modess_main.o modess_parameters.o
-#ProcessOptionsNB.o 
-TARGET=Modess
+#SOURCES=anyoption.cpp binaryreader.cpp geographic.cpp util.cpp units.cpp parameterset.cpp
+SOURCES=ModeSolver.cpp
+
+OBJS=$(SOURCES:.cpp=.o)
+TARGET=libmodes.a
 
 
 all: $(TARGET)
@@ -20,9 +18,9 @@ all: $(TARGET)
 .PHONY: clean
 
 # link	
-$(TARGET): $(OBJS) @STATICLIBS@
-	${CXX_LINKER} -o $@ $^  @LDFLAGS@ @STATICLIBS@  ${CXX_LINKER_FLAGS} ${SLEPC_LIB} ${PETSC_LIB} @LIBS@
-	cp $@ ../../bin
+$(TARGET): $(OBJS)
+	ar curv $@ $^
+	cp $@ ../../lib
 	
 # compile 
 %.o: %.cpp
@@ -30,4 +28,3 @@ $(TARGET): $(OBJS) @STATICLIBS@
 
 clean::
 	-$(RM) -rf $(OBJS) $(TARGET)
-

@@ -641,12 +641,12 @@ AC_CHECK_FILE( ${SLEPC_DIR}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables,
 
 
 # Set output variables to propagate into Makefiles
-AC_SUBST([INCLUDEFLAGS],"-I. -I../common -I../atmosphere -I/usr/local/include -I/usr/include")
+AC_SUBST([INCLUDEFLAGS],"-I. -I../common -I../atmosphere -I../libmodes -I/usr/local/include -I/usr/include")
 AC_SUBST([LIBS],"-lgsl -lgslcblas -lm -lfftw3")
 AC_SUBST([WARNINGFLAGS],${warning_compiler_flags})
 AC_SUBST([CXXFLAGS], "-fpic -c -Wall")
 LDFLAGS="${LDFLAGS} -L/usr/lib"
-AC_SUBST([STATICLIBS],"../../lib/libatmosphere.a ../../lib/libcommon.a")
+AC_SUBST([STATICLIBS],"../../lib/libmodes.a ../../lib/libatmosphere.a ../../lib/libcommon.a")
 AC_SUBST([LDFLAGS],$LDFLAGS)
 AC_SUBST([PETSC_DIR],$PETSC_DIR)
 AC_SUBST([SLEPC_DIR],$SLEPC_DIR)
@@ -661,6 +661,7 @@ AC_CONFIG_FILES([
 		Makefile
 		src/common/Makefile
 		src/atmosphere/Makefile
+		src/libmodes/Makefile
 		src/raytrace/Makefile
 		src/modess/Makefile
 		src/modbb/Makefile

@@ -43,11 +43,6 @@ void NCPA::configure_wmod_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->addParameter( new NCPA::StringParameter( "atmosfile" ) );
 	ps->addTest( new NCPA::RequiredTest( "atmosfile" ) );
 	ps->addParameterDescription( "Required Parameters", "--atmosfile", "Atmospheric profile filename" );
-/*
-	ps->addParameter( new NCPA::StringParameter( "atmosfileorder" ) );
-	ps->addTest( new NCPA::RequiredTest( "atmosfileorder" ) );
-	ps->addParameterDescription( "Required Parameters", "--atmosfileorder", "The order of the (z,u,v,w,t,d,p) fields in --atmosfile. The units assumed in the ASCII file are z[km], t [kelvin], d [g/cm^3], p [hectoPa]. The wind speeds are in m/s by default; however if the winds are given in km/s then use option --wind_units kmpersec");
-*/
 
 	ps->addParameter( new NCPA::FloatParameter( "freq" ) );
 	ps->addTest( new NCPA::RequiredTest( "freq" ) );
@@ -55,12 +50,6 @@ void NCPA::configure_wmod_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->addParameterDescription( "Required Parameters", "--freq", "Frequency of analysis (Hz)" );
 
 	// optional parameters
-	/*
-	ps->addParameter( new NCPA::IntegerParameter( "skiplines", 0 ) );
-	ps->addTest( new NCPA::IntegerGreaterThanOrEqualToTest( "skiplines", 0 ) );
-	ps->addParameterDescription( "Optional Parameters [default]", "--skiplines", "Number of header lines to skip in --atmosfile [0]" );
-	*/
-
 	ps->addParameter( new NCPA::FloatParameter( "maxheight_km", 150.0 ) );
 	ps->addTest( new NCPA::FloatGreaterThanOrEqualToTest( "maxheight_km", 0.1 ));
 	ps->addParameterDescription( "Optional Parameters [default]", "--maxheight_km", "Maximum height of analysis in km [150.0]" );
@@ -208,4 +197,8 @@ void NCPA::configure_wmod_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->setFooterHangingIndent( 0 );
 	ps->setCommandMode( false );
 	ps->resetFooterIndent();
+
+	// dummy parameters to prevent errors with Modess
+	ps->addParameter( new NCPA::StringParameter( "modal_starter_file", "" ) );
+	ps->addParameter( new NCPA::FlagParameter( "write_speeds" ) );
 }

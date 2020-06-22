@@ -8814,7 +8814,7 @@ fi
 
 
 # Set output variables to propagate into Makefiles
-INCLUDEFLAGS="-I. -I../common -I../atmosphere -I/usr/local/include -I/usr/include"
+INCLUDEFLAGS="-I. -I../common -I../atmosphere -I../libmodes -I/usr/local/include -I/usr/include"
 
 LIBS="-lgsl -lgslcblas -lm -lfftw3"
 
@@ -8823,7 +8823,7 @@ WARNINGFLAGS=${warning_compiler_flags}
 CXXFLAGS="-fpic -c -Wall"
 
 LDFLAGS="${LDFLAGS} -L/usr/lib"
-STATICLIBS="../../lib/libatmosphere.a ../../lib/libcommon.a"
+STATICLIBS="../../lib/libmodes.a ../../lib/libatmosphere.a ../../lib/libcommon.a"
 
 LDFLAGS=$LDFLAGS
 
@@ -8842,7 +8842,7 @@ PETSC_ARCH_COMPLEX=$PETSC_ARCH_COMPLEX
 
 
 
-ac_config_files="$ac_config_files Makefile src/common/Makefile src/atmosphere/Makefile src/raytrace/Makefile src/modess/Makefile src/modbb/Makefile src/modess_rd_1wcm/Makefile src/pade_pe/Makefile src/wmod/Makefile src/cmodess/Makefile src/cmodbb/Makefile src/tdpape/Makefile src/wnlrt/Makefile test/Makefile"
+ac_config_files="$ac_config_files Makefile src/common/Makefile src/atmosphere/Makefile src/libmodes/Makefile src/raytrace/Makefile src/modess/Makefile src/modbb/Makefile src/modess_rd_1wcm/Makefile src/pade_pe/Makefile src/wmod/Makefile src/cmodess/Makefile src/cmodbb/Makefile src/tdpape/Makefile src/wnlrt/Makefile test/Makefile"
 
 
 
@@ -9554,6 +9554,7 @@ do
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "src/common/Makefile") CONFIG_FILES="$CONFIG_FILES src/common/Makefile" ;;
     "src/atmosphere/Makefile") CONFIG_FILES="$CONFIG_FILES src/atmosphere/Makefile" ;;
+    "src/libmodes/Makefile") CONFIG_FILES="$CONFIG_FILES src/libmodes/Makefile" ;;
     "src/raytrace/Makefile") CONFIG_FILES="$CONFIG_FILES src/raytrace/Makefile" ;;
     "src/modess/Makefile") CONFIG_FILES="$CONFIG_FILES src/modess/Makefile" ;;
     "src/modbb/Makefile") CONFIG_FILES="$CONFIG_FILES src/modbb/Makefile" ;;

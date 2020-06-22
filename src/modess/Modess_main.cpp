@@ -9,7 +9,8 @@
 #include <ctime>
 
 #include "Atmosphere1D.h"
-#include "SolveModNB.h"
+//#include "SolveModNB.h"
+#include "modes.h"
 #include "util.h"
 #include "modess_parameters.h"
 
@@ -80,12 +81,13 @@ int main( int argc, char **argv ) {
 	Atmosphere1D *atm_profile = new Atmosphere1D( atmosfile );
 	 
 	// get solver object
-	SolveModNB *a = new SolveModNB( param, atm_profile );
+	//SolveModNB *a = new SolveModNB( param, atm_profile );
+    ModeSolver *a = new ModeSolver( param, atm_profile );
                                          
 	//   					 
 	// compute modes - main action happens here
 	//				 
-	a->computeModes();						 
+	a->computeModessModes();
 	a->printParams();
 
 	// save atm. profile if requested

@@ -1,7 +1,8 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "SolveWMod.h"
+//#include "SolveWMod.h"
+#include "modes.h"
 #include "util.h"
 #include "Atmosphere1D.h"
 #include "wmod_parameters.h"
@@ -73,12 +74,13 @@ int main( int argc, char **argv ) {
   Atmosphere1D *atm_profile = new Atmosphere1D( atmosfile );
 
   // get solver object 
-  SolveWMod *a = new SolveWMod(param, atm_profile);
+  //SolveWMod *a = new SolveWMod(param, atm_profile);
+  ModeSolver *a = new ModeSolver(param, atm_profile);
    
 	//   					 
   // compute modes - main action happens here					 
   //
-  a->computeModes();
+  a->computeWModModes();
   a->printParams();
   
   // save atm. profile if requested
