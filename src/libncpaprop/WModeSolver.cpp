@@ -28,6 +28,7 @@ void NCPA::WModeSolver::setParams( NCPA::ParameterSet *param, NCPA::Atmosphere1D
 {		
 
 	// obtain the parameter values from the user's options
+  // @todo add units to input scalar quantities
 	atmosfile 			= param->getString( "atmosfile" );
 	gnd_imp_model 		= param->getString( "ground_impedence_model" );
 	usrattfile 			= param->getString( "use_attn_file" );
@@ -35,8 +36,8 @@ void NCPA::WModeSolver::setParams( NCPA::ParameterSet *param, NCPA::Atmosphere1D
   	freq 				= param->getFloat( "freq" );
   	maxrange 			= param->getFloat( "maxrange_km" ) * 1000.0;
   	maxheight 			= param->getFloat( "maxheight_km" ) * 1000.0;      // @todo fix elsewhere that m is required
-  	sourceheight 		= param->getFloat( "sourceheight_km" );
-  	receiverheight 		= param->getFloat( "receiverheight_km" );
+  	sourceheight 		= param->getFloat( "sourceheight_km" ) * 1000.0;
+  	receiverheight 		= param->getFloat( "receiverheight_km" ) * 1000.0;
   	tol 				= 1.0e-8;
   	Nz_grid 			= param->getInteger( "Nz_grid" );
   	Nrng_steps 			= param->getInteger( "Nrng_steps" );
