@@ -135,6 +135,8 @@ int NCPA::EigenEngine::doESSCalculation( double *diag, int Nz_grid, double dz, d
 	Get number of converged approximate eigenpairs
 	*/
 	ierr = EPSGetConverged(eps,nconv);CHKERRQ(ierr);
+	ierr = PetscPrintf(PETSC_COMM_WORLD," Number of converged eigenpairs: %d\n\n",*nconv);CHKERRQ(ierr);
+
 	
 	if ((*nconv)>0) {
 		for (i=0;i<(*nconv);i++) {
@@ -350,8 +352,7 @@ int NCPA::EigenEngine::doWideAngleCalculation( int Nz_grid, double dz, double k_
        Get number of converged approximate eigenpairs
     */
     ierr = EPSGetConverged(eps,nconv); CHKERRQ(ierr);
-    ierr = PetscPrintf(PETSC_COMM_WORLD," Number of converged eigenpairs: %d\n\n",nconv);CHKERRQ(ierr);
-
+    
     if (nconv>0) {
         for( i=0; i<(*nconv); i++ ) {
             ierr = EPSGetEigenpair(eps,i,&kr,&ki,xr,xi);CHKERRQ(ierr);
