@@ -2,10 +2,12 @@
 #include "slepcst.h"
 #include <complex>
 #include <stdexcept>
+#include <sstream>
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
 
 #include "modes.h"
+#include "EigenEngine.h"
 #include "Atmosphere1D.h"
 #include "util.h"
 
@@ -182,26 +184,27 @@ int NCPA::WModeSolver::computeModes() {
   //
   // Declarations related to Slepc computations
   // 
-  Mat            A, B;       
-  EPS            eps;  		// eigenproblem solver context      
-  ST             stx;
-  EPSType  type;		// CHH 191028: removed const qualifier
-  PetscReal      re, im;
-  PetscScalar    kr, ki, *xr_;
-  Vec            xr, xi;
-  PetscInt       Istart, Iend, col[3], its, maxit, nconv;
-  PetscBool      FirstBlock=PETSC_FALSE, LastBlock=PETSC_FALSE;
-  PetscScalar    value[3];
+  // Mat            A, B;       
+  // EPS            eps;  		// eigenproblem solver context      
+  // ST             stx;
+  // EPSType  type;		// CHH 191028: removed const qualifier
+  // PetscReal      re, im;
+  // PetscScalar    kr, ki, *xr_;
+  // Vec            xr, xi;
+  // PetscInt       Istart, Iend, col[3], its, maxit, nconv;
+  // PetscBool      FirstBlock=PETSC_FALSE, LastBlock=PETSC_FALSE;
+  // PetscScalar    value[3];
+  // PetscErrorCode ierr;
+  // PetscMPIInt    rank, size;
+  // Vec            V_SEQ;
+  // VecScatter     ctx;
   PetscErrorCode ierr;
-  PetscMPIInt    rank, size;
-  Vec            V_SEQ;
-  VecScatter     ctx;
-  
+  PetscInt nconv;
 
-  int    i, j, select_modes, nev, it;
+  int    i, select_modes, nev, it;
   double dz, admittance, h2, rng_step, z_min_km;
-  double k_min, k_max, sigma;			
-  double /* *alpha, */ *diag, *kd, *md, *cd, *kH, *k_s, **v, **v_s;	
+  double k_min, k_max;			
+  double *diag, *kd, *md, *cd, *kH, *k_s, **v, **v_s;	
   complex<double> *k_pert;
 
   //alpha  = new double [Nz_grid];
@@ -224,6 +227,9 @@ int NCPA::WModeSolver::computeModes() {
   h2       = dz*dz;
   //dz_km    = dz/1000.0;
   z_min_km = z_min/1000.0;
+
+  // Initialize Slepc
+  SlepcInitialize(PETSC_NULL,PETSC_NULL,(char*)0,PETSC_NULL);
   
   //
   // loop over azimuths (if not (N by 2D) it's only one azimuth
@@ -299,203 +305,217 @@ int NCPA::WModeSolver::computeModes() {
 
     //sigma = pow(0.5*(k_min+k_max),2);
     //sigma = (k_min*k_min + k_max*k_max)/2; //dv: !!! is this sigma better?  
-    sigma     = 0.5*(k_min+k_max);
+    //sigma     = 0.5*(k_min+k_max);
     
-    int nev_2 = nev*2;
-    int n_2   = Nz_grid*2;	
+    //int nev_2 = nev*2;
+    //int n_2   = Nz_grid*2;	
 
     // Initialize Slepc
-    SlepcInitialize(PETSC_NULL,PETSC_NULL,(char*)0,PETSC_NULL);
-    ierr = MPI_Comm_rank(PETSC_COMM_WORLD,&rank); CHKERRQ(ierr);
-    ierr = MPI_Comm_size(PETSC_COMM_WORLD,&size); CHKERRQ(ierr);
+    //SlepcInitialize(PETSC_NULL,PETSC_NULL,(char*)0,PETSC_NULL);
+    std::ostringstream oss;
+    oss << "______________________________________________________________________" 
+        << std::endl << std::endl
+        << " -> Solving wide-angle problem at " << freq << " Hz and " << azi << "deg ("
+        << nev * 2 << " modes)..." << std::endl
+        << " -> Discrete spectrum: " << 2*PI*freq/k_max << " to " << 2*PI*freq/k_min 
+        << " m/s" << std::endl
+        << " -> Quadratic eigenvalue problem  - double dimensionality.";
 
-    if (rank == 0) {
-        printf ("______________________________________________________________________\n\n");
-        printf (" -> Solving wide-angle problem at %6.3f Hz and %6.2f deg (%d modes)...\n", freq, azi, nev_2);
-        printf (" -> Discrete spectrum: %6.2f m/s to %6.2f m/s\n", 2*PI*freq/k_max, 2*PI*freq/k_min);
-        printf (" -> Quadratic eigenvalue problem  - double dimensionality.\n");
-    }
+    i = NCPA::EigenEngine::doWideAngleCalculation( Nz_grid, dz, k_min, k_max,
+      tol, nev, kd, md, cd, &nconv, kH, v, oss.str() );
 
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-    //   Compute the operator matrices that define the eigensystem, A*x = k.B*x
-    //   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    ierr = MatCreate(PETSC_COMM_WORLD,&A);CHKERRQ(ierr);
-    ierr = MatSetSizes(A,PETSC_DECIDE,PETSC_DECIDE,n_2,n_2);CHKERRQ(ierr);
-    ierr = MatSetFromOptions(A);CHKERRQ(ierr);
-    ierr = MatCreate(PETSC_COMM_WORLD,&B);CHKERRQ(ierr);
-    ierr = MatSetSizes(B,PETSC_DECIDE,PETSC_DECIDE,n_2,n_2);CHKERRQ(ierr);
-    ierr = MatSetFromOptions(B);CHKERRQ(ierr);
+
+    // ierr = MPI_Comm_rank(PETSC_COMM_WORLD,&rank); CHKERRQ(ierr);
+    // ierr = MPI_Comm_size(PETSC_COMM_WORLD,&size); CHKERRQ(ierr);
+
+    // if (rank == 0) {
+    //     printf ("______________________________________________________________________\n\n");
+    //     printf (" -> Solving wide-angle problem at %6.3f Hz and %6.2f deg (%d modes)...\n", freq, azi, nev_2);
+    //     printf (" -> Discrete spectrum: %6.2f m/s to %6.2f m/s\n", 2*PI*freq/k_max, 2*PI*freq/k_min);
+    //     printf (" -> Quadratic eigenvalue problem  - double dimensionality.\n");
+    // }
+
+    // // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    // //   Compute the operator matrices that define the eigensystem, A*x = k.B*x
+    // //   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    // ierr = MatCreate(PETSC_COMM_WORLD,&A);CHKERRQ(ierr);
+    // ierr = MatSetSizes(A,PETSC_DECIDE,PETSC_DECIDE,n_2,n_2);CHKERRQ(ierr);
+    // ierr = MatSetFromOptions(A);CHKERRQ(ierr);
+    // ierr = MatCreate(PETSC_COMM_WORLD,&B);CHKERRQ(ierr);
+    // ierr = MatSetSizes(B,PETSC_DECIDE,PETSC_DECIDE,n_2,n_2);CHKERRQ(ierr);
+    // ierr = MatSetFromOptions(B);CHKERRQ(ierr);
     
-    // the following Preallocation calls are needed in PETSc version 3.3
-    ierr = MatSeqAIJSetPreallocation(A, 3, PETSC_NULL);CHKERRQ(ierr);
-    ierr = MatSeqAIJSetPreallocation(B, 2, PETSC_NULL);CHKERRQ(ierr);
+    // // the following Preallocation calls are needed in PETSc version 3.3
+    // ierr = MatSeqAIJSetPreallocation(A, 3, PETSC_NULL);CHKERRQ(ierr);
+    // ierr = MatSeqAIJSetPreallocation(B, 2, PETSC_NULL);CHKERRQ(ierr);
 
-    /*
-    We solve the quadratic eigenvalue problem (Mk^2 + Ck +D)v = 0 where k are the 
-    eigenvalues and v are the eigenvectors and M , C, A are N by N matrices.
-    We linearize this by denoting u = kv and arrive at the following generalized
-    eigenvalue problem:
+    // /*
+    // We solve the quadratic eigenvalue problem (Mk^2 + Ck +D)v = 0 where k are the 
+    // eigenvalues and v are the eigenvectors and M , C, A are N by N matrices.
+    // We linearize this by denoting u = kv and arrive at the following generalized
+    // eigenvalue problem:
 
-     / -D  0 \  (v )      / C  M \  (v ) 
-    |         | (  ) = k |        | (  )
-     \ 0   M /  (kv)      \ M  0 /  (kv)
+    //  / -D  0 \  (v )      / C  M \  (v ) 
+    // |         | (  ) = k |        | (  )
+    //  \ 0   M /  (kv)      \ M  0 /  (kv)
      
-     ie. of the form
-     A*x = k.B*x
-     so now we double the dimensions of the matrices involved: 2N by 2N.
+    //  ie. of the form
+    //  A*x = k.B*x
+    //  so now we double the dimensions of the matrices involved: 2N by 2N.
      
-     Matrix D is tridiagonal and has the form
-     Main diagonal     : -2/h^2 + omega^2/c(1:N)^2 + F(1:N)
-     Upper diagonal    :  1/h^2
-     Lower diagonal    :  1/h^2
-     Boundary condition:  A(1,1) =  (1/(1+h*beta) - 2)/h^2 + omega^2/c(1)^2 + F(1)
+    //  Matrix D is tridiagonal and has the form
+    //  Main diagonal     : -2/h^2 + omega^2/c(1:N)^2 + F(1:N)
+    //  Upper diagonal    :  1/h^2
+    //  Lower diagonal    :  1/h^2
+    //  Boundary condition:  A(1,1) =  (1/(1+h*beta) - 2)/h^2 + omega^2/c(1)^2 + F(1)
      
-     where 
-     F = 1/2*rho_0"/rho_0 - 3/4*(rho_0')^2/rho_0^2 where rho_0 is the ambient
-     stratified air density; the prime and double prime means first and second 
-     derivative with respect to z.
-     beta  = alpha - 1/2*rho_0'/rho_0
-     alpha is given in
-     Psi' = alpha*Psi |at z=0 (i.e. at the ground). Psi is the normal mode.
-     If the ground is rigid then alpha is zero. 
+    //  where 
+    //  F = 1/2*rho_0"/rho_0 - 3/4*(rho_0')^2/rho_0^2 where rho_0 is the ambient
+    //  stratified air density; the prime and double prime means first and second 
+    //  derivative with respect to z.
+    //  beta  = alpha - 1/2*rho_0'/rho_0
+    //  alpha is given in
+    //  Psi' = alpha*Psi |at z=0 (i.e. at the ground). Psi is the normal mode.
+    //  If the ground is rigid then alpha is zero. 
      
-     Matrix M is diagonal:
-     Main diagonal  : u0(1:N)^2/c(1:N)^2 - 1
-      u0 = scalar product of the wind velocity and the horizontal wavenumber k_H
-      u0 = v0.k_H
+    //  Matrix M is diagonal:
+    //  Main diagonal  : u0(1:N)^2/c(1:N)^2 - 1
+    //   u0 = scalar product of the wind velocity and the horizontal wavenumber k_H
+    //   u0 = v0.k_H
       
-     Matrix C is diagonal:
-     Main diagonal: 2*omega*u0(1:N)/c(1:N)^2 
+    //  Matrix C is diagonal:
+    //  Main diagonal: 2*omega*u0(1:N)/c(1:N)^2 
      
-    */
+    // */
 
-    // Assemble the A matrix (2N by 2N)
-    ierr = MatGetOwnershipRange(A,&Istart,&Iend);CHKERRQ(ierr);
-    if (Istart==0) FirstBlock=PETSC_TRUE;
-    if (Iend==n_2) LastBlock =PETSC_TRUE;
+    // // Assemble the A matrix (2N by 2N)
+    // ierr = MatGetOwnershipRange(A,&Istart,&Iend);CHKERRQ(ierr);
+    // if (Istart==0) FirstBlock=PETSC_TRUE;
+    // if (Iend==n_2) LastBlock =PETSC_TRUE;
 
-    // matrix -D is placed in the first N by N block
-    // kd[i]=(omega/c_T)^2
-    for( i=(FirstBlock? Istart+1: Istart); i<(LastBlock? (Iend/2)-1: Iend/2); i++ ) {
-        value[0]=-1.0/h2; value[1] = 2.0/h2 - kd[i]; value[2]=-1.0/h2;
-        col[0]=i-1; col[1]=i; col[2]=i+1;
-        ierr = MatSetValues(A,1,&i,3,col,value,INSERT_VALUES);CHKERRQ(ierr);
-    }
-    if (LastBlock) {
-        i=(n_2/2)-1; col[0]=(n_2/2)-2; col[1]=(n_2/2)-1; value[0]=-1.0/h2; value[1]=2.0/h2 - kd[(n_2/2)-1];
-        ierr = MatSetValues(A,1,&i,2,col,value,INSERT_VALUES);CHKERRQ(ierr);
-    }
+    // // matrix -D is placed in the first N by N block
+    // // kd[i]=(omega/c_T)^2
+    // for( i=(FirstBlock? Istart+1: Istart); i<(LastBlock? (Iend/2)-1: Iend/2); i++ ) {
+    //     value[0]=-1.0/h2; value[1] = 2.0/h2 - kd[i]; value[2]=-1.0/h2;
+    //     col[0]=i-1; col[1]=i; col[2]=i+1;
+    //     ierr = MatSetValues(A,1,&i,3,col,value,INSERT_VALUES);CHKERRQ(ierr);
+    // }
+    // if (LastBlock) {
+    //     i=(n_2/2)-1; col[0]=(n_2/2)-2; col[1]=(n_2/2)-1; value[0]=-1.0/h2; value[1]=2.0/h2 - kd[(n_2/2)-1];
+    //     ierr = MatSetValues(A,1,&i,2,col,value,INSERT_VALUES);CHKERRQ(ierr);
+    // }
 
-    // boundary condition
-    if (FirstBlock) {
-        i=0; col[0]=0; col[1]=1; value[0]=2.0/h2 - kd[0]; value[1]=-1.0/h2;
-        ierr = MatSetValues(A,1,&i,2,col,value,INSERT_VALUES);CHKERRQ(ierr);
-    }
+    // // boundary condition
+    // if (FirstBlock) {
+    //     i=0; col[0]=0; col[1]=1; value[0]=2.0/h2 - kd[0]; value[1]=-1.0/h2;
+    //     ierr = MatSetValues(A,1,&i,2,col,value,INSERT_VALUES);CHKERRQ(ierr);
+    // }
 
-    // Insert matrix M into the lower N by N block of A
-    // md is u0^2/c^2-1
-    for ( i=(n_2/2); i<n_2; i++ ) {
-        ierr = MatSetValue(A,i,i,md[i-(n_2/2)],INSERT_VALUES); CHKERRQ(ierr); 
-    }
+    // // Insert matrix M into the lower N by N block of A
+    // // md is u0^2/c^2-1
+    // for ( i=(n_2/2); i<n_2; i++ ) {
+    //     ierr = MatSetValue(A,i,i,md[i-(n_2/2)],INSERT_VALUES); CHKERRQ(ierr); 
+    // }
 
-    // Assemble the B matrix
-    for ( i=0; i<(n_2/2); i++ ) {
-        col[0]=i; col[1]=i+(n_2/2); value[0]=cd[i]; value[1]=md[i];
-        ierr = MatSetValues(B,1,&i,2,col,value,INSERT_VALUES);CHKERRQ(ierr);
-    }
-    for ( i=(n_2/2); i<n_2; i++ ) {
-        ierr = MatSetValue(B,i,i-(n_2/2),md[i-(n_2/2)],INSERT_VALUES); CHKERRQ(ierr); 
-    }
+    // // Assemble the B matrix
+    // for ( i=0; i<(n_2/2); i++ ) {
+    //     col[0]=i; col[1]=i+(n_2/2); value[0]=cd[i]; value[1]=md[i];
+    //     ierr = MatSetValues(B,1,&i,2,col,value,INSERT_VALUES);CHKERRQ(ierr);
+    // }
+    // for ( i=(n_2/2); i<n_2; i++ ) {
+    //     ierr = MatSetValue(B,i,i-(n_2/2),md[i-(n_2/2)],INSERT_VALUES); CHKERRQ(ierr); 
+    // }
 
-    ierr = MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
-    ierr = MatAssemblyEnd  (A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
-    ierr = MatAssemblyBegin(B,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
-    ierr = MatAssemblyEnd  (B,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
+    // ierr = MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
+    // ierr = MatAssemblyEnd  (A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
+    // ierr = MatAssemblyBegin(B,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
+    // ierr = MatAssemblyEnd  (B,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
 
-    // CHH 191028: MatGetVecs is deprecated, changed to MatCreateVecs
-    ierr = MatCreateVecs(A,PETSC_NULL,&xr);CHKERRQ(ierr);
-    ierr = MatCreateVecs(A,PETSC_NULL,&xi);CHKERRQ(ierr);
-    //ierr = MatGetVecs(A,PETSC_NULL,&xr);CHKERRQ(ierr);
-    //ierr = MatGetVecs(A,PETSC_NULL,&xi);CHKERRQ(ierr);
+    // // CHH 191028: MatGetVecs is deprecated, changed to MatCreateVecs
+    // ierr = MatCreateVecs(A,PETSC_NULL,&xr);CHKERRQ(ierr);
+    // ierr = MatCreateVecs(A,PETSC_NULL,&xi);CHKERRQ(ierr);
+    // //ierr = MatGetVecs(A,PETSC_NULL,&xr);CHKERRQ(ierr);
+    // //ierr = MatGetVecs(A,PETSC_NULL,&xi);CHKERRQ(ierr);
 
-    /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-                  Create the eigensolver and set various options
-       - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-    /* 
-       Create eigensolver context
-    */
-    ierr = EPSCreate(PETSC_COMM_WORLD,&eps);CHKERRQ(ierr);
+    // /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    //               Create the eigensolver and set various options
+    //    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+    // /* 
+    //    Create eigensolver context
+    // */
+    // ierr = EPSCreate(PETSC_COMM_WORLD,&eps);CHKERRQ(ierr);
 
-    /* 
-       Set operators. In this case, it is a quadratic eigenvalue problem
-    */
-    ierr = EPSSetOperators(eps,A,B);CHKERRQ(ierr);
-    ierr = EPSSetProblemType(eps,EPS_GNHEP);CHKERRQ(ierr);
+    // /* 
+    //    Set operators. In this case, it is a quadratic eigenvalue problem
+    // */
+    // ierr = EPSSetOperators(eps,A,B);CHKERRQ(ierr);
+    // ierr = EPSSetProblemType(eps,EPS_GNHEP);CHKERRQ(ierr);
 
-    /*
-       Set solver parameters at runtime
-    */
-    ierr = EPSSetFromOptions(eps);CHKERRQ(ierr);
-    ierr = EPSSetType(eps,"krylovschur"); CHKERRQ(ierr);
-    ierr = EPSSetDimensions(eps,nev_2,PETSC_DECIDE,PETSC_DECIDE); CHKERRQ(ierr);
-    ierr = EPSSetTarget(eps,sigma); CHKERRQ(ierr);
-    ierr = EPSSetTolerances(eps,tol,PETSC_DECIDE); CHKERRQ(ierr);
+    // /*
+    //    Set solver parameters at runtime
+    // */
+    // ierr = EPSSetFromOptions(eps);CHKERRQ(ierr);
+    // ierr = EPSSetType(eps,"krylovschur"); CHKERRQ(ierr);
+    // ierr = EPSSetDimensions(eps,nev_2,PETSC_DECIDE,PETSC_DECIDE); CHKERRQ(ierr);
+    // ierr = EPSSetTarget(eps,sigma); CHKERRQ(ierr);
+    // ierr = EPSSetTolerances(eps,tol,PETSC_DECIDE); CHKERRQ(ierr);
 
-    ierr = EPSGetST(eps,&stx); CHKERRQ(ierr);
-    ierr = STSetType(stx,"sinvert"); CHKERRQ(ierr);
-    ierr = EPSSetWhichEigenpairs(eps,EPS_TARGET_MAGNITUDE); CHKERRQ(ierr);
-    /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-                        Solve the eigensystem
-       - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+    // ierr = EPSGetST(eps,&stx); CHKERRQ(ierr);
+    // ierr = STSetType(stx,"sinvert"); CHKERRQ(ierr);
+    // ierr = EPSSetWhichEigenpairs(eps,EPS_TARGET_MAGNITUDE); CHKERRQ(ierr);
+    // /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    //                     Solve the eigensystem
+    //    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-    ierr = EPSSolve(eps);CHKERRQ(ierr);
-    /*
-       Optional: Get some information from the solver and display it
-    */
-    ierr = EPSGetIterationNumber(eps,&its);CHKERRQ(ierr);
-    ierr = PetscPrintf(PETSC_COMM_WORLD," Number of iterations of the method: %d\n",its);CHKERRQ(ierr);
-    ierr = EPSGetType(eps,&type);CHKERRQ(ierr);
-    ierr = PetscPrintf(PETSC_COMM_WORLD," Solution method: %s\n\n",type);CHKERRQ(ierr);
-    ierr = EPSGetDimensions(eps,&nev_2,PETSC_NULL,PETSC_NULL);CHKERRQ(ierr);
-    ierr = PetscPrintf(PETSC_COMM_WORLD," Number of requested eigenvalues: %d\n",nev_2);CHKERRQ(ierr);
-    ierr = EPSGetTolerances(eps,&tol,&maxit);CHKERRQ(ierr);
-    ierr = PetscPrintf(PETSC_COMM_WORLD," Stopping condition: tol=%.4g, maxit=%d\n",tol,maxit);CHKERRQ(ierr);
+    // ierr = EPSSolve(eps);CHKERRQ(ierr);
+    // /*
+    //    Optional: Get some information from the solver and display it
+    // */
+    // ierr = EPSGetIterationNumber(eps,&its);CHKERRQ(ierr);
+    // ierr = PetscPrintf(PETSC_COMM_WORLD," Number of iterations of the method: %d\n",its);CHKERRQ(ierr);
+    // ierr = EPSGetType(eps,&type);CHKERRQ(ierr);
+    // ierr = PetscPrintf(PETSC_COMM_WORLD," Solution method: %s\n\n",type);CHKERRQ(ierr);
+    // ierr = EPSGetDimensions(eps,&nev_2,PETSC_NULL,PETSC_NULL);CHKERRQ(ierr);
+    // ierr = PetscPrintf(PETSC_COMM_WORLD," Number of requested eigenvalues: %d\n",nev_2);CHKERRQ(ierr);
+    // ierr = EPSGetTolerances(eps,&tol,&maxit);CHKERRQ(ierr);
+    // ierr = PetscPrintf(PETSC_COMM_WORLD," Stopping condition: tol=%.4g, maxit=%d\n",tol,maxit);CHKERRQ(ierr);
 
-    /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-                      Display solution and clean up
-       - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-    /* 
-       Get number of converged approximate eigenpairs
-    */
-    ierr = EPSGetConverged(eps,&nconv); CHKERRQ(ierr);
-    ierr = PetscPrintf(PETSC_COMM_WORLD," Number of converged eigenpairs: %d\n\n",nconv);CHKERRQ(ierr);
+    // /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    //                   Display solution and clean up
+    //    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+    // /* 
+    //    Get number of converged approximate eigenpairs
+    // */
+    // ierr = EPSGetConverged(eps,&nconv); CHKERRQ(ierr);
+    // ierr = PetscPrintf(PETSC_COMM_WORLD," Number of converged eigenpairs: %d\n\n",nconv);CHKERRQ(ierr);
 
-    if (nconv>0) {
-        for( i=0; i<nconv; i++ ) {
-            ierr = EPSGetEigenpair(eps,i,&kr,&ki,xr,xi);CHKERRQ(ierr);
-            #ifdef PETSC_USE_COMPLEX
-                re = PetscRealPart(kr);
-                im = PetscImaginaryPart(kr);
-            #else
-                re = kr;
-                im = ki;
-            #endif 
-            kH[i] = re;
-            ierr = VecScatterCreateToAll(xr,&ctx,&V_SEQ);CHKERRQ(ierr);
-            ierr = VecScatterBegin(ctx,xr,V_SEQ,INSERT_VALUES,SCATTER_FORWARD);CHKERRQ(ierr);
-            ierr = VecScatterEnd(ctx,xr,V_SEQ,INSERT_VALUES,SCATTER_FORWARD);CHKERRQ(ierr);
-            if (rank == 0) {
-                ierr = VecGetArray(V_SEQ,&xr_);CHKERRQ(ierr);
-                for (j = 0; j < Nz_grid; j++) {
-                    v[j][i] = xr_[j]/sqrt(dz);
-                }
-                ierr = VecRestoreArray(V_SEQ,&xr_);CHKERRQ(ierr);
-            }
-            ierr = VecScatterDestroy(&ctx);CHKERRQ(ierr);
-            ierr = VecDestroy(&V_SEQ);CHKERRQ(ierr);
-        }
-    }
+    // if (nconv>0) {
+    //     for( i=0; i<nconv; i++ ) {
+    //         ierr = EPSGetEigenpair(eps,i,&kr,&ki,xr,xi);CHKERRQ(ierr);
+    //         #ifdef PETSC_USE_COMPLEX
+    //             re = PetscRealPart(kr);
+    //             im = PetscImaginaryPart(kr);
+    //         #else
+    //             re = kr;
+    //             im = ki;
+    //         #endif 
+    //         kH[i] = re;
+    //         ierr = VecScatterCreateToAll(xr,&ctx,&V_SEQ);CHKERRQ(ierr);
+    //         ierr = VecScatterBegin(ctx,xr,V_SEQ,INSERT_VALUES,SCATTER_FORWARD);CHKERRQ(ierr);
+    //         ierr = VecScatterEnd(ctx,xr,V_SEQ,INSERT_VALUES,SCATTER_FORWARD);CHKERRQ(ierr);
+    //         if (rank == 0) {
+    //             ierr = VecGetArray(V_SEQ,&xr_);CHKERRQ(ierr);
+    //             for (j = 0; j < Nz_grid; j++) {
+    //                 v[j][i] = xr_[j]/sqrt(dz);
+    //             }
+    //             ierr = VecRestoreArray(V_SEQ,&xr_);CHKERRQ(ierr);
+    //         }
+    //         ierr = VecScatterDestroy(&ctx);CHKERRQ(ierr);
+    //         ierr = VecDestroy(&V_SEQ);CHKERRQ(ierr);
+    //     }
+    // }
 
     // select modes and do perturbation
     doSelect(Nz_grid, nconv, k_min, k_max, kH, v, k_s, v_s, &select_modes);  
@@ -538,12 +558,12 @@ int NCPA::WModeSolver::computeModes() {
         }
     }
     
-    // Free work space
-    ierr = EPSDestroy(&eps);CHKERRQ(ierr);
-    ierr = MatDestroy(&A);  CHKERRQ(ierr);
-    ierr = MatDestroy(&B);  CHKERRQ(ierr);
-    ierr = VecDestroy(&xr); CHKERRQ(ierr);
-    ierr = VecDestroy(&xi); CHKERRQ(ierr); 
+    // // Free work space
+    // ierr = EPSDestroy(&eps);CHKERRQ(ierr);
+    // ierr = MatDestroy(&A);  CHKERRQ(ierr);
+    // ierr = MatDestroy(&B);  CHKERRQ(ierr);
+    // ierr = VecDestroy(&xr); CHKERRQ(ierr);
+    // ierr = VecDestroy(&xi); CHKERRQ(ierr); 
     
     atm_profile->remove_property( "_WC_" );
     atm_profile->remove_property( "_CE_" );

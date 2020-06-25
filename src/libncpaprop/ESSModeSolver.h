@@ -21,8 +21,8 @@ namespace NCPA {
 		void printParams();
 
 		int computeModes();
-		int doESSSLEPcCalculation( double *diag, double dz, double *k_min, double *k_max, 
-			PetscInt *nconv, double *k2, double **v );
+		//int doESSSLEPcCalculation( double *diag, double dz, double *k_min, double *k_max, 
+		//	PetscInt *nconv, double *k2, double **v );
 		int doSelect( int nz, int n_modes, double k_min, double k_max, double *k2, double **v, 
 			double *k_s, double **v_s, int *select_modes );
 		int getModalTrace(int nz, double z_min, double sourceheight, double receiverheight, 

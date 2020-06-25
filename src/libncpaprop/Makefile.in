@@ -7,10 +7,10 @@ include @SLEPC_INCLUDE_FILE_GENERIC@
 
 INCPATHS = @INCLUDEFLAGS@ ${PETSC_CC_INCLUDES} ${SLEPC_CC_INCLUDES}
 #SOURCES=anyoption.cpp binaryreader.cpp geographic.cpp util.cpp units.cpp parameterset.cpp
-SOURCES=ModeSolver.cpp ESSModeSolver.cpp WModeSolver.cpp
+SOURCES=ModeSolver.cpp ESSModeSolver.cpp WModeSolver.cpp EigenEngine.cpp
 
 OBJS=$(SOURCES:.cpp=.o)
-TARGET=libmodes.a
+TARGET=libncpaprop.a
 
 
 all: $(TARGET)
