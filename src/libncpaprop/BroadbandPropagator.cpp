@@ -258,26 +258,28 @@ int NCPA::BroadbandPropagator::get_source_spectrum( std::complex<double> *dft_ve
   } else if ( source_type.compare("pulse1") == 0 || source_type.compare("pulse2") == 0 ) { 
   //use one of the two built-in pulses (provided by Roger Waxler)
 
+  	  // f_center is initialized with negative value if the option --f_center was not used
+      // if that's the case redefine f_center to be = f_max/5;
+      if (f_center < 0.0) {
+          f_center = f_vec[Nfreq-1] / 5.0;
+      }
+
+      // get the scale for the built-in pulse
+      if ((f_center > 0) & (f_center <= f_vec[Nfreq-1]/5.0+1.0E-16)) {	
+          scale = 1.0/f_center;
+      } else {
+          std::ostringstream es;
+          es << std::endl << "f_center = " << f_center << " Hz is too large." << std::endl
+             << "For the built-in pulse f_center should be set smaller than f_max/5 = " 
+             << f_vec[Nfreq-1]/5.0;
+          throw std::invalid_argument(es.str());
+      }
+          
       if (source_type.compare("pulse1") == 0) {  
           // make sure the dispersion file contains what we need to generate a good pulse
           // pulse center frequency f_center should be set <= f_max/5
           
-          // f_center is initialized with negative value if the option --f_center was not used
-          // if that's the case redefine f_center to be = f_max/5;
-          if (f_center < 0.0) {
-              f_center = f_vec[Nfreq-1] / 5.0;
-          }
           
-          // get the scale for the built-in pulse
-          if ((f_center > 0) & (f_center <= f_vec[Nfreq-1]/5.0+1.0E-16)) {	
-              scale = 1.0/f_center;
-          } else {
-              std::ostringstream es;
-              es << std::endl << "f_center = " << f_center << " Hz is too large." << std::endl
-                 << "For the built-in pulse f_center should be set smaller than f_max/5 = " 
-                 << f_vec[Nfreq-1]/5.0;
-              throw std::invalid_argument(es.str());
-          }
          
           // get the source spectrum at 0 and positive frequencies
           // divide by 2 since the pulse has amplitude one and we only want the spectrum at positive freqs
@@ -290,7 +292,7 @@ int NCPA::BroadbandPropagator::get_source_spectrum( std::complex<double> *dft_ve
       // ----------- do pulse choice # 2 ---------------------
       else if (source_type.compare("pulse2") == 0) {
           double power = 8.0; // 'power' hardcoded here
-          scale = 1.0/f_center;
+          //scale = 1.0/f_center;
         
           //cout << "scale = " << scale << endl;
 
