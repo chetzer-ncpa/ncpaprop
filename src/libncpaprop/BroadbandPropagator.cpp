@@ -205,7 +205,7 @@ int NCPA::BroadbandPropagator::calculate() {
           // (e.g. Roger Waxler's modal code)
           double factor = 2.0;								              
           for(i=0;i<NFFT;i++){
-              fprintf(f,"%10.3f %12.6f %15.6e\n", rr/1000.0, 1.0*i/fmx, factor*real(pulse_vec[i]));
+              fprintf(f,"%10.3f %12.6f %15.6e\n", rr/1000.0, 1.0*i/fmx+t0, factor*real(pulse_vec[i]));
           }
           fprintf(f,"\n");
       }
