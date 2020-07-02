@@ -40,6 +40,19 @@ then
 fi
 
 
+if
+    test $1 = plotw1dtl
+then
+  ## plot from script
+  gnuplot -persist \
+    -e "set grid; show grid; set xlabel 'Range [km]'; set ylabel 'TL [dB]';" \
+    -e "set title 'WMod: 1D transmission loss; freq = $2 Hz';" \
+    -e "plot './wtloss_1d.lossless.nm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 3 title 'lossless', './wtloss_1d.nm' using 1:(10*log10(\$2**2 + \$3**2)) with lines lt 1 title 'lossy';"
+
+  echo $1 $2
+fi
+
+
 
 # plot 1D TL to .png
 ## use this to save to ps; then you can convert with: convert output.ps output.png
@@ -89,6 +102,20 @@ then
     -e "splot './tloss_2d.nm' using 1:2:(20*log10(sqrt(\$3**2 + \$4**2)));"
   echo $1 $2
 fi
+
+# plot Wide-angle 2D TL to the screen
+if
+    test $1 = plotw2dtl
+then
+  gnuplot -persist \
+    -e "set pm3d map;" \
+    -e "set cbrange [-140:-100];" \
+    -e "set xlabel 'Range [km]'; set ylabel 'Height [km]';" \
+    -e "set title 'WMod: 2D transmission loss [dB]; freq = $2 Hz';" \
+    -e "splot './wtloss_2d.nm' using 1:2:(20*log10(sqrt(\$3**2 + \$4**2)));"
+  echo $1 $2
+fi
+
 
 
 

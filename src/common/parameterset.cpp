@@ -1115,6 +1115,12 @@ NCPA::FlagParameter::FlagParameter( std::string key ) {
 	_valid = true;
 }
 
+NCPA::FlagParameter::FlagParameter( std::string key, bool defaultValue ) {
+	_key = key;
+	_found = defaultValue;
+	_valid = true;
+}
+
 void NCPA::FlagParameter::setValue( bool newval ) {
 	_value = newval;
 }

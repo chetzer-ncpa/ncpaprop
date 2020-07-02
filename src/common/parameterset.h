@@ -411,6 +411,7 @@ namespace NCPA {
 	class FlagParameter : public GenericParameter {
 	public:
 		FlagParameter( std::string key );
+		FlagParameter( std::string key, bool defaultValue );
 		void setValue( bool newval );
 		bool needsArgument() const;
 		void parseArgument( const std::string& arg );

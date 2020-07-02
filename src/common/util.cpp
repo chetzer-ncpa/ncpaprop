@@ -338,3 +338,21 @@ std::string NCPA::deblank( const std::string& str, const std::string& whitespace
 
 	return str.substr( strBegin, strRange );
 }
+
+int NCPA::count_rows_arbcol(const std::string& filename) {
+  int answer,c;
+  FILE *f=fopen(filename.c_str(),"r");
+
+  if(f==NULL) {
+      std::ostringstream es;
+      es << "file << " << filename << " could not be opened.\n";
+      throw std::invalid_argument(es.str());
+  }
+  answer=0;
+  //read_header(f);
+  while((c=getc(f))!=EOF){
+      if(c=='\n') answer=answer+1;
+  }
+  fclose(f);
+  return answer;
+}

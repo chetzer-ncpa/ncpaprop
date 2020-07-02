@@ -3,6 +3,7 @@
 #include <complex>
 #include <stdexcept>
 #include <sstream>
+#include <cstring>
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
 
@@ -33,22 +34,24 @@ void NCPA::WModeSolver::setParams( NCPA::ParameterSet *param, NCPA::Atmosphere1D
 	gnd_imp_model 		= param->getString( "ground_impedence_model" );
 	usrattfile 			= param->getString( "use_attn_file" );
 	z_min 				= param->getFloat( "zground_km" ) * 1000.0;    // meters
-  	freq 				= param->getFloat( "freq" );
-  	maxrange 			= param->getFloat( "maxrange_km" ) * 1000.0;
-  	maxheight 			= param->getFloat( "maxheight_km" ) * 1000.0;      // @todo fix elsewhere that m is required
-  	sourceheight 		= param->getFloat( "sourceheight_km" ) * 1000.0;
-  	receiverheight 		= param->getFloat( "receiverheight_km" ) * 1000.0;
-  	tol 				= 1.0e-8;
-  	Nz_grid 			= param->getInteger( "Nz_grid" );
-  	Nrng_steps 			= param->getInteger( "Nrng_steps" );
-  	Lamb_wave_BC 		= param->getBool( "Lamb_wave_BC" );
-  	write_2D_TLoss  	= param->getBool( "write_2D_TLoss" );
-  	write_phase_speeds 	= param->getBool( "write_phase_speeds" );
-  	write_modes 		= param->getBool( "write_modes" );
-  	write_dispersion 	= param->getBool( "write_dispersion" );
-  	Nby2Dprop 			= param->getBool( "Nby2Dprop" );
-  	turnoff_WKB 		= param->getBool( "turnoff_WKB" );
-  	z_min_specified     = param->wasFound( "zground_km" );
+	//freq 				= param->getFloat( "freq" );
+	maxrange 			= param->getFloat( "maxrange_km" ) * 1000.0;
+	maxheight 			= param->getFloat( "maxheight_km" ) * 1000.0;      // @todo fix elsewhere that m is required
+	sourceheight 		= param->getFloat( "sourceheight_km" ) * 1000.0;
+	receiverheight 		= param->getFloat( "receiverheight_km" ) * 1000.0;
+	tol 				= 1.0e-8;
+	Nz_grid 			= param->getInteger( "Nz_grid" );
+	Nrng_steps 			= param->getInteger( "Nrng_steps" );
+	Lamb_wave_BC 		= param->getBool( "Lamb_wave_BC" );
+	write_2D_TLoss  	= param->getBool( "write_2D_TLoss" );
+	write_phase_speeds 	= param->getBool( "write_phase_speeds" );
+	write_modes 		= param->getBool( "write_modes" );
+	//write_dispersion 	= param->getBool( "write_dispersion" );
+  dispersion_file = param->getString( "dispersion_file" );
+  append_dispersion_file = param->getBool( "append_dispersion_file" );
+	Nby2Dprop 			= param->getBool( "Nby2Dprop" );
+	turnoff_WKB 		= param->getBool( "turnoff_WKB" );
+	z_min_specified     = param->wasFound( "zground_km" );
 
 	// default values for c_min, c_max and wvnum_filter_flg
 	c_min = 0.0;
@@ -62,7 +65,7 @@ void NCPA::WModeSolver::setParams( NCPA::ParameterSet *param, NCPA::Atmosphere1D
 	};
 
 
-	if (write_phase_speeds || write_2D_TLoss || write_modes || write_dispersion) {
+	if (write_phase_speeds || write_2D_TLoss || write_modes || (!dispersion_file.empty())) {
 		turnoff_WKB = 1; // don't use WKB least phase speed estim. when saving any of the above values
 	}
   
@@ -78,6 +81,31 @@ void NCPA::WModeSolver::setParams( NCPA::ParameterSet *param, NCPA::Atmosphere1D
 
 	azi_min     = azi;
 	atm_profile = atm_prof;
+
+  // frequencies
+  if (param->getBool( "broadband" ) ) {
+    double f_min, f_step, f_max;
+        f_min = param->getFloat( "f_min" );
+        f_step = param->getFloat( "f_step" );
+        f_max = param->getFloat( "f_max" );
+
+        // sanity checks
+        if (f_min >= f_max) {
+          throw std::runtime_error( "f_min must be less than f_max!" );
+        }
+
+        Nfreq = (double)(std::floor((f_max - f_min) / f_step)) + 1;
+        f_vec = new double[ Nfreq ];
+        std::memset( f_vec, 0, Nfreq * sizeof( double ) );
+        for (int fi = 0; fi < Nfreq; fi++) {
+          f_vec[ fi ] = f_min + ((double)fi) * f_step;
+        }
+  } else {
+    freq = param->getFloat( "freq" );
+    f_vec = new double[ 1 ];
+    f_vec[ 0 ] = freq;
+    Nfreq = 1;
+  }
 
 	// get Hgt, zw, mw, T, rho, Pr in SI units; they are freed in computeModes()
 	// @todo write functions to allocate and free these, it shouldn't be hidden
@@ -164,14 +192,19 @@ void NCPA::WModeSolver::printParams() {
 	printf("  SLEPc tolerance param : %g\n", tol);
 	printf("    write_2D_TLoss flag : %d\n", write_2D_TLoss);
 	printf("write_phase_speeds flag : %d\n", write_phase_speeds);
-	printf("  write_dispersion flag : %d\n", write_dispersion);
+	//printf("  write_dispersion flag : %d\n", write_dispersion);
 	printf("       write_modes flag : %d\n", write_modes);
 	printf("         Nby2Dprop flag : %d\n", Nby2Dprop);
 	printf("       turnoff_WKB flag : %d\n", turnoff_WKB);
 	printf("    atmospheric profile : %s\n", atmosfile.c_str());
+  if (!dispersion_file.empty()) {
+    printf("        Dispersion file : %s\n", dispersion_file.c_str());
+    printf(" Dispersion file append : %d\n", append_dispersion_file );
+  }
 	if (!usrattfile.empty()) {
 		printf("  User attenuation file : %s\n", usrattfile.c_str());
 	}
+
 
 	printf("       wvnum_filter_flg : %d\n", wvnum_filter_flg);
 	if (wvnum_filter_flg==1) {
@@ -202,7 +235,7 @@ int NCPA::WModeSolver::computeModes() {
   PetscErrorCode ierr;
   PetscInt nconv;
 
-  int    i, select_modes, nev, it;
+  int    i, select_modes, nev, it, fi;
   double dz, admittance, h2, rng_step, z_min_km;
   double k_min, k_max;			
   double *diag, *kd, *md, *cd, *kH, *k_s, **v, **v_s;	
@@ -232,345 +265,362 @@ int NCPA::WModeSolver::computeModes() {
   // Initialize Slepc
   SlepcInitialize(PETSC_NULL,PETSC_NULL,(char*)0,PETSC_NULL);
   
-  //
-  // loop over azimuths (if not (N by 2D) it's only one azimuth
-  //
-  for (it=0; it<Naz; it++) {
-    
-    azi = azi_min + it*azi_step; // degrees (not radians)
-    cout << endl << "Now processing azimuth = " << azi << " (" << it+1 << " of " 
-         << Naz << ")" << endl;
+  for (fi = 0; fi < Nfreq; fi++) {
+    freq = f_vec[ fi ];
 
-    //atm_profile->setPropagationAzimuth(azi);
-    atm_profile->calculate_wind_component("_WC_", "_WS_", "_WD_", azi );
-    atm_profile->calculate_effective_sound_speed( "_CE_", "_C0_", "_WC_" );
-    atm_profile->get_property_vector( "_CE_", c_eff );
-    atm_profile->add_property( "_AZ_", azi, NCPA::UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH );
-
-    // compute absorption
-    //getAbsorption(Nz_grid, dz, atm_profile, freq, usrattfile, alpha);
 
     //
-    // ground impedance model
+    // loop over azimuths (if not (N by 2D) it's only one azimuth
     //
-    // at the ground the BC is: Phi' = (a - 1/2*dln(rho)/dz)*Phi
-    // for a rigid ground a=0; and the BC is the Lamb Wave BC:
-    // admittance = -1/2*dln(rho)/dz
-    //  
-    /*
-    admittance = 0.0; // default
-    if ((gnd_imp_model.compare("rigid")==0) && Lamb_wave_BC) { //Lamb_wave_BC
-        admittance = -atm_profile->drhodz(z_min/1000.0)/1000.0/atm_profile->rho(z_min/1000.0)/2.0; // SI units
-    }
-    else if (gnd_imp_model.compare("rigid")==0) {
-        admittance = 0.0; // no Lamb_wave_BC
-    }
-    else {
-        std::ostringstream es;
-        es << "This ground impedance model is not implemented yet: " << gnd_imp_model;
-        throw invalid_argument(es.str());
-    }
-    */
-    admittance = 0.0;   // default
-    if ( gnd_imp_model.compare( "rigid" ) == 0) {
-      // Rigid ground, check for Lamb wave BC
-      if (Lamb_wave_BC) {
-        admittance = -atm_profile->get_first_derivative( "RHO", z_min ) 
-          / atm_profile->get( "RHO", z_min ) / 2.0;
-        cout << "Admittance = " << admittance << endl;
-      } else {
-        admittance = 0.0;
-      }
-    } else {
-      throw invalid_argument( 
-        "This ground impedance model is not implemented yet: " + gnd_imp_model );
-    }
-
-    //
-    // Get the main diagonal and the number of modes
-    //		
-    i = getModalTrace(Nz_grid, z_min, sourceheight, receiverheight, dz, atm_profile, 
-      admittance, freq, diag, kd, md, cd, &k_min, &k_max, turnoff_WKB);
-
-    // if wavenumber filtering is on, redefine k_min, k_max
-    if (wvnum_filter_flg) {
-        k_min = 2*PI*freq/c_max;
-        k_max = 2*PI*freq/c_min;
-    }
-
-    i = getNumberOfModes(Nz_grid,dz,diag,k_min,k_max,&nev);
-    
-    //
-    // set up parameters for eigenvalue estimation; double dimension of problem for linearization
-    //
-
-    //sigma = pow(0.5*(k_min+k_max),2);
-    //sigma = (k_min*k_min + k_max*k_max)/2; //dv: !!! is this sigma better?  
-    //sigma     = 0.5*(k_min+k_max);
-    
-    //int nev_2 = nev*2;
-    //int n_2   = Nz_grid*2;	
-
-    // Initialize Slepc
-    //SlepcInitialize(PETSC_NULL,PETSC_NULL,(char*)0,PETSC_NULL);
-    std::ostringstream oss;
-    oss << "______________________________________________________________________" 
-        << std::endl << std::endl
-        << " -> Solving wide-angle problem at " << freq << " Hz and " << azi << "deg ("
-        << nev * 2 << " modes)..." << std::endl
-        << " -> Discrete spectrum: " << 2*PI*freq/k_max << " to " << 2*PI*freq/k_min 
-        << " m/s" << std::endl
-        << " -> Quadratic eigenvalue problem  - double dimensionality.";
-
-    i = NCPA::EigenEngine::doWideAngleCalculation( Nz_grid, dz, k_min, k_max,
-      tol, nev, kd, md, cd, &nconv, kH, v, oss.str() );
-
-
-
-    // ierr = MPI_Comm_rank(PETSC_COMM_WORLD,&rank); CHKERRQ(ierr);
-    // ierr = MPI_Comm_size(PETSC_COMM_WORLD,&size); CHKERRQ(ierr);
-
-    // if (rank == 0) {
-    //     printf ("______________________________________________________________________\n\n");
-    //     printf (" -> Solving wide-angle problem at %6.3f Hz and %6.2f deg (%d modes)...\n", freq, azi, nev_2);
-    //     printf (" -> Discrete spectrum: %6.2f m/s to %6.2f m/s\n", 2*PI*freq/k_max, 2*PI*freq/k_min);
-    //     printf (" -> Quadratic eigenvalue problem  - double dimensionality.\n");
-    // }
-
-    // // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-    // //   Compute the operator matrices that define the eigensystem, A*x = k.B*x
-    // //   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    // ierr = MatCreate(PETSC_COMM_WORLD,&A);CHKERRQ(ierr);
-    // ierr = MatSetSizes(A,PETSC_DECIDE,PETSC_DECIDE,n_2,n_2);CHKERRQ(ierr);
-    // ierr = MatSetFromOptions(A);CHKERRQ(ierr);
-    // ierr = MatCreate(PETSC_COMM_WORLD,&B);CHKERRQ(ierr);
-    // ierr = MatSetSizes(B,PETSC_DECIDE,PETSC_DECIDE,n_2,n_2);CHKERRQ(ierr);
-    // ierr = MatSetFromOptions(B);CHKERRQ(ierr);
-    
-    // // the following Preallocation calls are needed in PETSc version 3.3
-    // ierr = MatSeqAIJSetPreallocation(A, 3, PETSC_NULL);CHKERRQ(ierr);
-    // ierr = MatSeqAIJSetPreallocation(B, 2, PETSC_NULL);CHKERRQ(ierr);
-
-    // /*
-    // We solve the quadratic eigenvalue problem (Mk^2 + Ck +D)v = 0 where k are the 
-    // eigenvalues and v are the eigenvectors and M , C, A are N by N matrices.
-    // We linearize this by denoting u = kv and arrive at the following generalized
-    // eigenvalue problem:
-
-    //  / -D  0 \  (v )      / C  M \  (v ) 
-    // |         | (  ) = k |        | (  )
-    //  \ 0   M /  (kv)      \ M  0 /  (kv)
-     
-    //  ie. of the form
-    //  A*x = k.B*x
-    //  so now we double the dimensions of the matrices involved: 2N by 2N.
-     
-    //  Matrix D is tridiagonal and has the form
-    //  Main diagonal     : -2/h^2 + omega^2/c(1:N)^2 + F(1:N)
-    //  Upper diagonal    :  1/h^2
-    //  Lower diagonal    :  1/h^2
-    //  Boundary condition:  A(1,1) =  (1/(1+h*beta) - 2)/h^2 + omega^2/c(1)^2 + F(1)
-     
-    //  where 
-    //  F = 1/2*rho_0"/rho_0 - 3/4*(rho_0')^2/rho_0^2 where rho_0 is the ambient
-    //  stratified air density; the prime and double prime means first and second 
-    //  derivative with respect to z.
-    //  beta  = alpha - 1/2*rho_0'/rho_0
-    //  alpha is given in
-    //  Psi' = alpha*Psi |at z=0 (i.e. at the ground). Psi is the normal mode.
-    //  If the ground is rigid then alpha is zero. 
-     
-    //  Matrix M is diagonal:
-    //  Main diagonal  : u0(1:N)^2/c(1:N)^2 - 1
-    //   u0 = scalar product of the wind velocity and the horizontal wavenumber k_H
-    //   u0 = v0.k_H
+    for (it=0; it<Naz; it++) {
       
-    //  Matrix C is diagonal:
-    //  Main diagonal: 2*omega*u0(1:N)/c(1:N)^2 
-     
-    // */
+      azi = azi_min + it*azi_step; // degrees (not radians)
+      cout << endl << "Now processing azimuth = " << azi << " (" << it+1 << " of " 
+           << Naz << ")" << endl;
 
-    // // Assemble the A matrix (2N by 2N)
-    // ierr = MatGetOwnershipRange(A,&Istart,&Iend);CHKERRQ(ierr);
-    // if (Istart==0) FirstBlock=PETSC_TRUE;
-    // if (Iend==n_2) LastBlock =PETSC_TRUE;
+      //atm_profile->setPropagationAzimuth(azi);
+      atm_profile->calculate_wind_component("_WC_", "_WS_", "_WD_", azi );
+      atm_profile->calculate_effective_sound_speed( "_CE_", "_C0_", "_WC_" );
+      atm_profile->get_property_vector( "_CE_", c_eff );
+      atm_profile->add_property( "_AZ_", azi, NCPA::UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH );
 
-    // // matrix -D is placed in the first N by N block
-    // // kd[i]=(omega/c_T)^2
-    // for( i=(FirstBlock? Istart+1: Istart); i<(LastBlock? (Iend/2)-1: Iend/2); i++ ) {
-    //     value[0]=-1.0/h2; value[1] = 2.0/h2 - kd[i]; value[2]=-1.0/h2;
-    //     col[0]=i-1; col[1]=i; col[2]=i+1;
-    //     ierr = MatSetValues(A,1,&i,3,col,value,INSERT_VALUES);CHKERRQ(ierr);
-    // }
-    // if (LastBlock) {
-    //     i=(n_2/2)-1; col[0]=(n_2/2)-2; col[1]=(n_2/2)-1; value[0]=-1.0/h2; value[1]=2.0/h2 - kd[(n_2/2)-1];
-    //     ierr = MatSetValues(A,1,&i,2,col,value,INSERT_VALUES);CHKERRQ(ierr);
-    // }
+      // compute absorption
+      //getAbsorption(Nz_grid, dz, atm_profile, freq, usrattfile, alpha);
 
-    // // boundary condition
-    // if (FirstBlock) {
-    //     i=0; col[0]=0; col[1]=1; value[0]=2.0/h2 - kd[0]; value[1]=-1.0/h2;
-    //     ierr = MatSetValues(A,1,&i,2,col,value,INSERT_VALUES);CHKERRQ(ierr);
-    // }
-
-    // // Insert matrix M into the lower N by N block of A
-    // // md is u0^2/c^2-1
-    // for ( i=(n_2/2); i<n_2; i++ ) {
-    //     ierr = MatSetValue(A,i,i,md[i-(n_2/2)],INSERT_VALUES); CHKERRQ(ierr); 
-    // }
-
-    // // Assemble the B matrix
-    // for ( i=0; i<(n_2/2); i++ ) {
-    //     col[0]=i; col[1]=i+(n_2/2); value[0]=cd[i]; value[1]=md[i];
-    //     ierr = MatSetValues(B,1,&i,2,col,value,INSERT_VALUES);CHKERRQ(ierr);
-    // }
-    // for ( i=(n_2/2); i<n_2; i++ ) {
-    //     ierr = MatSetValue(B,i,i-(n_2/2),md[i-(n_2/2)],INSERT_VALUES); CHKERRQ(ierr); 
-    // }
-
-    // ierr = MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
-    // ierr = MatAssemblyEnd  (A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
-    // ierr = MatAssemblyBegin(B,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
-    // ierr = MatAssemblyEnd  (B,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
-
-    // // CHH 191028: MatGetVecs is deprecated, changed to MatCreateVecs
-    // ierr = MatCreateVecs(A,PETSC_NULL,&xr);CHKERRQ(ierr);
-    // ierr = MatCreateVecs(A,PETSC_NULL,&xi);CHKERRQ(ierr);
-    // //ierr = MatGetVecs(A,PETSC_NULL,&xr);CHKERRQ(ierr);
-    // //ierr = MatGetVecs(A,PETSC_NULL,&xi);CHKERRQ(ierr);
-
-    // /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-    //               Create the eigensolver and set various options
-    //    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-    // /* 
-    //    Create eigensolver context
-    // */
-    // ierr = EPSCreate(PETSC_COMM_WORLD,&eps);CHKERRQ(ierr);
-
-    // /* 
-    //    Set operators. In this case, it is a quadratic eigenvalue problem
-    // */
-    // ierr = EPSSetOperators(eps,A,B);CHKERRQ(ierr);
-    // ierr = EPSSetProblemType(eps,EPS_GNHEP);CHKERRQ(ierr);
-
-    // /*
-    //    Set solver parameters at runtime
-    // */
-    // ierr = EPSSetFromOptions(eps);CHKERRQ(ierr);
-    // ierr = EPSSetType(eps,"krylovschur"); CHKERRQ(ierr);
-    // ierr = EPSSetDimensions(eps,nev_2,PETSC_DECIDE,PETSC_DECIDE); CHKERRQ(ierr);
-    // ierr = EPSSetTarget(eps,sigma); CHKERRQ(ierr);
-    // ierr = EPSSetTolerances(eps,tol,PETSC_DECIDE); CHKERRQ(ierr);
-
-    // ierr = EPSGetST(eps,&stx); CHKERRQ(ierr);
-    // ierr = STSetType(stx,"sinvert"); CHKERRQ(ierr);
-    // ierr = EPSSetWhichEigenpairs(eps,EPS_TARGET_MAGNITUDE); CHKERRQ(ierr);
-    // /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-    //                     Solve the eigensystem
-    //    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-
-    // ierr = EPSSolve(eps);CHKERRQ(ierr);
-    // /*
-    //    Optional: Get some information from the solver and display it
-    // */
-    // ierr = EPSGetIterationNumber(eps,&its);CHKERRQ(ierr);
-    // ierr = PetscPrintf(PETSC_COMM_WORLD," Number of iterations of the method: %d\n",its);CHKERRQ(ierr);
-    // ierr = EPSGetType(eps,&type);CHKERRQ(ierr);
-    // ierr = PetscPrintf(PETSC_COMM_WORLD," Solution method: %s\n\n",type);CHKERRQ(ierr);
-    // ierr = EPSGetDimensions(eps,&nev_2,PETSC_NULL,PETSC_NULL);CHKERRQ(ierr);
-    // ierr = PetscPrintf(PETSC_COMM_WORLD," Number of requested eigenvalues: %d\n",nev_2);CHKERRQ(ierr);
-    // ierr = EPSGetTolerances(eps,&tol,&maxit);CHKERRQ(ierr);
-    // ierr = PetscPrintf(PETSC_COMM_WORLD," Stopping condition: tol=%.4g, maxit=%d\n",tol,maxit);CHKERRQ(ierr);
-
-    // /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-    //                   Display solution and clean up
-    //    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-    // /* 
-    //    Get number of converged approximate eigenpairs
-    // */
-    // ierr = EPSGetConverged(eps,&nconv); CHKERRQ(ierr);
-    // ierr = PetscPrintf(PETSC_COMM_WORLD," Number of converged eigenpairs: %d\n\n",nconv);CHKERRQ(ierr);
-
-    // if (nconv>0) {
-    //     for( i=0; i<nconv; i++ ) {
-    //         ierr = EPSGetEigenpair(eps,i,&kr,&ki,xr,xi);CHKERRQ(ierr);
-    //         #ifdef PETSC_USE_COMPLEX
-    //             re = PetscRealPart(kr);
-    //             im = PetscImaginaryPart(kr);
-    //         #else
-    //             re = kr;
-    //             im = ki;
-    //         #endif 
-    //         kH[i] = re;
-    //         ierr = VecScatterCreateToAll(xr,&ctx,&V_SEQ);CHKERRQ(ierr);
-    //         ierr = VecScatterBegin(ctx,xr,V_SEQ,INSERT_VALUES,SCATTER_FORWARD);CHKERRQ(ierr);
-    //         ierr = VecScatterEnd(ctx,xr,V_SEQ,INSERT_VALUES,SCATTER_FORWARD);CHKERRQ(ierr);
-    //         if (rank == 0) {
-    //             ierr = VecGetArray(V_SEQ,&xr_);CHKERRQ(ierr);
-    //             for (j = 0; j < Nz_grid; j++) {
-    //                 v[j][i] = xr_[j]/sqrt(dz);
-    //             }
-    //             ierr = VecRestoreArray(V_SEQ,&xr_);CHKERRQ(ierr);
-    //         }
-    //         ierr = VecScatterDestroy(&ctx);CHKERRQ(ierr);
-    //         ierr = VecDestroy(&V_SEQ);CHKERRQ(ierr);
-    //     }
-    // }
-
-    // select modes and do perturbation
-    doSelect(Nz_grid, nconv, k_min, k_max, kH, v, k_s, v_s, &select_modes);  
-    doPerturb(Nz_grid, z_min, dz, select_modes, freq, k_s, v_s, alpha, k_pert);
-    //cout << "Found " << select_modes << " relevant modes" << endl;
-
-    //
-    // Output data  
-    //
-    if (Nby2Dprop) { // if (N by 2D is requested)
-        getTLoss1DNx2(azi, select_modes, dz, Nrng_steps, rng_step, sourceheight, 
-        	receiverheight, rho, k_pert, v_s, Nby2Dprop, it,
-        	"Nby2D_wtloss_1d.nm", "Nby2D_wtloss_1d.lossless.nm");
-    } 
-    else {  
-        cout << "Writing to file: 1D transmission loss at the ground..." << endl;
-        getTLoss1D(select_modes, dz, Nrng_steps, rng_step, sourceheight, receiverheight, 
-        	rho, k_pert, v_s, "wtloss_1d.nm", "wtloss_1d.lossless.nm");
-
-        if (write_2D_TLoss) {
-            cout << "Writing to file: 2D transmission loss...\n";
-            getTLoss2D(Nz_grid,select_modes,dz,Nrng_steps,rng_step,sourceheight,rho,
-            	k_pert,v_s, "wtloss_2d.nm" );
+      //
+      // ground impedance model
+      //
+      // at the ground the BC is: Phi' = (a - 1/2*dln(rho)/dz)*Phi
+      // for a rigid ground a=0; and the BC is the Lamb Wave BC:
+      // admittance = -1/2*dln(rho)/dz
+      //  
+      /*
+      admittance = 0.0; // default
+      if ((gnd_imp_model.compare("rigid")==0) && Lamb_wave_BC) { //Lamb_wave_BC
+          admittance = -atm_profile->drhodz(z_min/1000.0)/1000.0/atm_profile->rho(z_min/1000.0)/2.0; // SI units
+      }
+      else if (gnd_imp_model.compare("rigid")==0) {
+          admittance = 0.0; // no Lamb_wave_BC
+      }
+      else {
+          std::ostringstream es;
+          es << "This ground impedance model is not implemented yet: " << gnd_imp_model;
+          throw invalid_argument(es.str());
+      }
+      */
+      admittance = 0.0;   // default
+      if ( gnd_imp_model.compare( "rigid" ) == 0) {
+        // Rigid ground, check for Lamb wave BC
+        if (Lamb_wave_BC) {
+          admittance = -atm_profile->get_first_derivative( "RHO", z_min ) 
+            / atm_profile->get( "RHO", z_min ) / 2.0;
+          cout << "Admittance = " << admittance << endl;
+        } else {
+          admittance = 0.0;
         }
+      } else {
+        throw invalid_argument( 
+          "This ground impedance model is not implemented yet: " + gnd_imp_model );
+      }
 
-        if (write_phase_speeds) {
-            cout << "Writing to file: phase speeds...\n";
-            writePhaseSpeeds(select_modes,freq,k_pert);
-        }
+      //
+      // Get the main diagonal and the number of modes
+      //		
+      i = getModalTrace(Nz_grid, z_min, sourceheight, receiverheight, dz, atm_profile, 
+        admittance, freq, diag, kd, md, cd, &k_min, &k_max, turnoff_WKB);
 
-        if (write_modes) {
-            cout << "Writing to file: the modes...\n";
-            writeEigenFunctions(Nz_grid,select_modes,dz,v_s);
-        }
+      // if wavenumber filtering is on, redefine k_min, k_max
+      if (wvnum_filter_flg) {
+          k_min = 2*PI*freq/c_max;
+          k_max = 2*PI*freq/c_min;
+      }
 
-        if (write_dispersion) {
-            printf ("Writing to file: dispersion at freq = %8.3f Hz...\n", freq);
-            //writeDispersion(select_modes,dz,sourceheight,receiverheight,freq,k_pert,v_s);
-            writeDispersion(select_modes,dz,sourceheight,receiverheight,freq,k_pert,v_s, rho);
-        }
-    }
+      i = getNumberOfModes(Nz_grid,dz,diag,k_min,k_max,&nev);
+      
+      //
+      // set up parameters for eigenvalue estimation; double dimension of problem for linearization
+      //
+
+      //sigma = pow(0.5*(k_min+k_max),2);
+      //sigma = (k_min*k_min + k_max*k_max)/2; //dv: !!! is this sigma better?  
+      //sigma     = 0.5*(k_min+k_max);
+      
+      //int nev_2 = nev*2;
+      //int n_2   = Nz_grid*2;	
+
+      // Initialize Slepc
+      //SlepcInitialize(PETSC_NULL,PETSC_NULL,(char*)0,PETSC_NULL);
+      std::ostringstream oss;
+      oss << "______________________________________________________________________" 
+          << std::endl << std::endl
+          << " -> Solving wide-angle problem at " << freq << " Hz and " << azi << "deg ("
+          << nev * 2 << " modes)..." << std::endl
+          << " -> Discrete spectrum: " << 2*PI*freq/k_max << " to " << 2*PI*freq/k_min 
+          << " m/s" << std::endl
+          << " -> Quadratic eigenvalue problem  - double dimensionality.";
+
+      i = NCPA::EigenEngine::doWideAngleCalculation( Nz_grid, dz, k_min, k_max,
+        tol, nev, kd, md, cd, &nconv, kH, v, oss.str() );
+
+
+
+      // ierr = MPI_Comm_rank(PETSC_COMM_WORLD,&rank); CHKERRQ(ierr);
+      // ierr = MPI_Comm_size(PETSC_COMM_WORLD,&size); CHKERRQ(ierr);
+
+      // if (rank == 0) {
+      //     printf ("______________________________________________________________________\n\n");
+      //     printf (" -> Solving wide-angle problem at %6.3f Hz and %6.2f deg (%d modes)...\n", freq, azi, nev_2);
+      //     printf (" -> Discrete spectrum: %6.2f m/s to %6.2f m/s\n", 2*PI*freq/k_max, 2*PI*freq/k_min);
+      //     printf (" -> Quadratic eigenvalue problem  - double dimensionality.\n");
+      // }
+
+      // // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      // //   Compute the operator matrices that define the eigensystem, A*x = k.B*x
+      // //   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+      // ierr = MatCreate(PETSC_COMM_WORLD,&A);CHKERRQ(ierr);
+      // ierr = MatSetSizes(A,PETSC_DECIDE,PETSC_DECIDE,n_2,n_2);CHKERRQ(ierr);
+      // ierr = MatSetFromOptions(A);CHKERRQ(ierr);
+      // ierr = MatCreate(PETSC_COMM_WORLD,&B);CHKERRQ(ierr);
+      // ierr = MatSetSizes(B,PETSC_DECIDE,PETSC_DECIDE,n_2,n_2);CHKERRQ(ierr);
+      // ierr = MatSetFromOptions(B);CHKERRQ(ierr);
+      
+      // // the following Preallocation calls are needed in PETSc version 3.3
+      // ierr = MatSeqAIJSetPreallocation(A, 3, PETSC_NULL);CHKERRQ(ierr);
+      // ierr = MatSeqAIJSetPreallocation(B, 2, PETSC_NULL);CHKERRQ(ierr);
+
+      // /*
+      // We solve the quadratic eigenvalue problem (Mk^2 + Ck +D)v = 0 where k are the 
+      // eigenvalues and v are the eigenvectors and M , C, A are N by N matrices.
+      // We linearize this by denoting u = kv and arrive at the following generalized
+      // eigenvalue problem:
+
+      //  / -D  0 \  (v )      / C  M \  (v ) 
+      // |         | (  ) = k |        | (  )
+      //  \ 0   M /  (kv)      \ M  0 /  (kv)
+       
+      //  ie. of the form
+      //  A*x = k.B*x
+      //  so now we double the dimensions of the matrices involved: 2N by 2N.
+       
+      //  Matrix D is tridiagonal and has the form
+      //  Main diagonal     : -2/h^2 + omega^2/c(1:N)^2 + F(1:N)
+      //  Upper diagonal    :  1/h^2
+      //  Lower diagonal    :  1/h^2
+      //  Boundary condition:  A(1,1) =  (1/(1+h*beta) - 2)/h^2 + omega^2/c(1)^2 + F(1)
+       
+      //  where 
+      //  F = 1/2*rho_0"/rho_0 - 3/4*(rho_0')^2/rho_0^2 where rho_0 is the ambient
+      //  stratified air density; the prime and double prime means first and second 
+      //  derivative with respect to z.
+      //  beta  = alpha - 1/2*rho_0'/rho_0
+      //  alpha is given in
+      //  Psi' = alpha*Psi |at z=0 (i.e. at the ground). Psi is the normal mode.
+      //  If the ground is rigid then alpha is zero. 
+       
+      //  Matrix M is diagonal:
+      //  Main diagonal  : u0(1:N)^2/c(1:N)^2 - 1
+      //   u0 = scalar product of the wind velocity and the horizontal wavenumber k_H
+      //   u0 = v0.k_H
+        
+      //  Matrix C is diagonal:
+      //  Main diagonal: 2*omega*u0(1:N)/c(1:N)^2 
+       
+      // */
+
+      // // Assemble the A matrix (2N by 2N)
+      // ierr = MatGetOwnershipRange(A,&Istart,&Iend);CHKERRQ(ierr);
+      // if (Istart==0) FirstBlock=PETSC_TRUE;
+      // if (Iend==n_2) LastBlock =PETSC_TRUE;
+
+      // // matrix -D is placed in the first N by N block
+      // // kd[i]=(omega/c_T)^2
+      // for( i=(FirstBlock? Istart+1: Istart); i<(LastBlock? (Iend/2)-1: Iend/2); i++ ) {
+      //     value[0]=-1.0/h2; value[1] = 2.0/h2 - kd[i]; value[2]=-1.0/h2;
+      //     col[0]=i-1; col[1]=i; col[2]=i+1;
+      //     ierr = MatSetValues(A,1,&i,3,col,value,INSERT_VALUES);CHKERRQ(ierr);
+      // }
+      // if (LastBlock) {
+      //     i=(n_2/2)-1; col[0]=(n_2/2)-2; col[1]=(n_2/2)-1; value[0]=-1.0/h2; value[1]=2.0/h2 - kd[(n_2/2)-1];
+      //     ierr = MatSetValues(A,1,&i,2,col,value,INSERT_VALUES);CHKERRQ(ierr);
+      // }
+
+      // // boundary condition
+      // if (FirstBlock) {
+      //     i=0; col[0]=0; col[1]=1; value[0]=2.0/h2 - kd[0]; value[1]=-1.0/h2;
+      //     ierr = MatSetValues(A,1,&i,2,col,value,INSERT_VALUES);CHKERRQ(ierr);
+      // }
+
+      // // Insert matrix M into the lower N by N block of A
+      // // md is u0^2/c^2-1
+      // for ( i=(n_2/2); i<n_2; i++ ) {
+      //     ierr = MatSetValue(A,i,i,md[i-(n_2/2)],INSERT_VALUES); CHKERRQ(ierr); 
+      // }
+
+      // // Assemble the B matrix
+      // for ( i=0; i<(n_2/2); i++ ) {
+      //     col[0]=i; col[1]=i+(n_2/2); value[0]=cd[i]; value[1]=md[i];
+      //     ierr = MatSetValues(B,1,&i,2,col,value,INSERT_VALUES);CHKERRQ(ierr);
+      // }
+      // for ( i=(n_2/2); i<n_2; i++ ) {
+      //     ierr = MatSetValue(B,i,i-(n_2/2),md[i-(n_2/2)],INSERT_VALUES); CHKERRQ(ierr); 
+      // }
+
+      // ierr = MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
+      // ierr = MatAssemblyEnd  (A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
+      // ierr = MatAssemblyBegin(B,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
+      // ierr = MatAssemblyEnd  (B,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
+
+      // // CHH 191028: MatGetVecs is deprecated, changed to MatCreateVecs
+      // ierr = MatCreateVecs(A,PETSC_NULL,&xr);CHKERRQ(ierr);
+      // ierr = MatCreateVecs(A,PETSC_NULL,&xi);CHKERRQ(ierr);
+      // //ierr = MatGetVecs(A,PETSC_NULL,&xr);CHKERRQ(ierr);
+      // //ierr = MatGetVecs(A,PETSC_NULL,&xi);CHKERRQ(ierr);
+
+      // /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      //               Create the eigensolver and set various options
+      //    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+      // /* 
+      //    Create eigensolver context
+      // */
+      // ierr = EPSCreate(PETSC_COMM_WORLD,&eps);CHKERRQ(ierr);
+
+      // /* 
+      //    Set operators. In this case, it is a quadratic eigenvalue problem
+      // */
+      // ierr = EPSSetOperators(eps,A,B);CHKERRQ(ierr);
+      // ierr = EPSSetProblemType(eps,EPS_GNHEP);CHKERRQ(ierr);
+
+      // /*
+      //    Set solver parameters at runtime
+      // */
+      // ierr = EPSSetFromOptions(eps);CHKERRQ(ierr);
+      // ierr = EPSSetType(eps,"krylovschur"); CHKERRQ(ierr);
+      // ierr = EPSSetDimensions(eps,nev_2,PETSC_DECIDE,PETSC_DECIDE); CHKERRQ(ierr);
+      // ierr = EPSSetTarget(eps,sigma); CHKERRQ(ierr);
+      // ierr = EPSSetTolerances(eps,tol,PETSC_DECIDE); CHKERRQ(ierr);
+
+      // ierr = EPSGetST(eps,&stx); CHKERRQ(ierr);
+      // ierr = STSetType(stx,"sinvert"); CHKERRQ(ierr);
+      // ierr = EPSSetWhichEigenpairs(eps,EPS_TARGET_MAGNITUDE); CHKERRQ(ierr);
+      // /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      //                     Solve the eigensystem
+      //    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+      // ierr = EPSSolve(eps);CHKERRQ(ierr);
+      // /*
+      //    Optional: Get some information from the solver and display it
+      // */
+      // ierr = EPSGetIterationNumber(eps,&its);CHKERRQ(ierr);
+      // ierr = PetscPrintf(PETSC_COMM_WORLD," Number of iterations of the method: %d\n",its);CHKERRQ(ierr);
+      // ierr = EPSGetType(eps,&type);CHKERRQ(ierr);
+      // ierr = PetscPrintf(PETSC_COMM_WORLD," Solution method: %s\n\n",type);CHKERRQ(ierr);
+      // ierr = EPSGetDimensions(eps,&nev_2,PETSC_NULL,PETSC_NULL);CHKERRQ(ierr);
+      // ierr = PetscPrintf(PETSC_COMM_WORLD," Number of requested eigenvalues: %d\n",nev_2);CHKERRQ(ierr);
+      // ierr = EPSGetTolerances(eps,&tol,&maxit);CHKERRQ(ierr);
+      // ierr = PetscPrintf(PETSC_COMM_WORLD," Stopping condition: tol=%.4g, maxit=%d\n",tol,maxit);CHKERRQ(ierr);
+
+      // /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      //                   Display solution and clean up
+      //    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+      // /* 
+      //    Get number of converged approximate eigenpairs
+      // */
+      // ierr = EPSGetConverged(eps,&nconv); CHKERRQ(ierr);
+      // ierr = PetscPrintf(PETSC_COMM_WORLD," Number of converged eigenpairs: %d\n\n",nconv);CHKERRQ(ierr);
+
+      // if (nconv>0) {
+      //     for( i=0; i<nconv; i++ ) {
+      //         ierr = EPSGetEigenpair(eps,i,&kr,&ki,xr,xi);CHKERRQ(ierr);
+      //         #ifdef PETSC_USE_COMPLEX
+      //             re = PetscRealPart(kr);
+      //             im = PetscImaginaryPart(kr);
+      //         #else
+      //             re = kr;
+      //             im = ki;
+      //         #endif 
+      //         kH[i] = re;
+      //         ierr = VecScatterCreateToAll(xr,&ctx,&V_SEQ);CHKERRQ(ierr);
+      //         ierr = VecScatterBegin(ctx,xr,V_SEQ,INSERT_VALUES,SCATTER_FORWARD);CHKERRQ(ierr);
+      //         ierr = VecScatterEnd(ctx,xr,V_SEQ,INSERT_VALUES,SCATTER_FORWARD);CHKERRQ(ierr);
+      //         if (rank == 0) {
+      //             ierr = VecGetArray(V_SEQ,&xr_);CHKERRQ(ierr);
+      //             for (j = 0; j < Nz_grid; j++) {
+      //                 v[j][i] = xr_[j]/sqrt(dz);
+      //             }
+      //             ierr = VecRestoreArray(V_SEQ,&xr_);CHKERRQ(ierr);
+      //         }
+      //         ierr = VecScatterDestroy(&ctx);CHKERRQ(ierr);
+      //         ierr = VecDestroy(&V_SEQ);CHKERRQ(ierr);
+      //     }
+      // }
+
+      // select modes and do perturbation
+      doSelect(Nz_grid, nconv, k_min, k_max, kH, v, k_s, v_s, &select_modes);  
+      doPerturb(Nz_grid, z_min, dz, select_modes, freq, k_s, v_s, alpha, k_pert);
+      //cout << "Found " << select_modes << " relevant modes" << endl;
+
+      //
+      // Output data  
+      //
+      if (Nby2Dprop) { // if (N by 2D is requested)
+          getTLoss1DNx2(azi, select_modes, dz, Nrng_steps, rng_step, sourceheight, 
+          	receiverheight, rho, k_pert, v_s, Nby2Dprop, it,
+          	"Nby2D_wtloss_1d.nm", "Nby2D_wtloss_1d.lossless.nm");
+      } 
+      else {  
+          cout << "Writing to file: 1D transmission loss at the ground..." << endl;
+          getTLoss1D(select_modes, dz, Nrng_steps, rng_step, sourceheight, receiverheight, 
+          	rho, k_pert, v_s, "wtloss_1d.nm", "wtloss_1d.lossless.nm");
+
+          if (write_2D_TLoss) {
+              cout << "Writing to file: 2D transmission loss...\n";
+              getTLoss2D(Nz_grid,select_modes,dz,Nrng_steps,rng_step,sourceheight,rho,
+              	k_pert,v_s, "wtloss_2d.nm" );
+          }
+
+          if (write_phase_speeds) {
+              cout << "Writing to file: phase speeds...\n";
+              writePhaseSpeeds(select_modes,freq,k_pert);
+          }
+
+          if (write_modes) {
+              cout << "Writing to file: the modes...\n";
+              writeEigenFunctions(Nz_grid,select_modes,dz,v_s);
+          }
+
+          if (!dispersion_file.empty()) {
+              //printf ("Writing to file: dispersion at freq = %8.3f Hz...\n", freq);
+              //writeDispersion(select_modes,dz,sourceheight,receiverheight,freq,k_pert,v_s);
+              //writeDispersion(select_modes,dz,sourceheight,receiverheight,freq,k_pert,v_s, rho);
+            printf ("Writing to file %s: dispersion at freq = %8.3f Hz...\n",
+              dispersion_file.c_str(), freq);
+            FILE *dispersionfile;
+            if (append_dispersion_file) {
+              dispersionfile = fopen(dispersion_file.c_str(),"a");
+            } else {
+              dispersionfile = fopen(dispersion_file.c_str(),"w");
+            }
+            writeDispersion(dispersionfile,select_modes,dz,sourceheight,receiverheight,
+              freq,k_pert,v_s, rho);
+            fclose(dispersionfile);
+          }
+      }
+      
+      // // Free work space
+      // ierr = EPSDestroy(&eps);CHKERRQ(ierr);
+      // ierr = MatDestroy(&A);  CHKERRQ(ierr);
+      // ierr = MatDestroy(&B);  CHKERRQ(ierr);
+      // ierr = VecDestroy(&xr); CHKERRQ(ierr);
+      // ierr = VecDestroy(&xi); CHKERRQ(ierr); 
+      
+      atm_profile->remove_property( "_WC_" );
+      atm_profile->remove_property( "_CE_" );
+      atm_profile->remove_property( "_AZ_" );
     
-    // // Free work space
-    // ierr = EPSDestroy(&eps);CHKERRQ(ierr);
-    // ierr = MatDestroy(&A);  CHKERRQ(ierr);
-    // ierr = MatDestroy(&B);  CHKERRQ(ierr);
-    // ierr = VecDestroy(&xr); CHKERRQ(ierr);
-    // ierr = VecDestroy(&xi); CHKERRQ(ierr); 
-    
-    atm_profile->remove_property( "_WC_" );
-    atm_profile->remove_property( "_CE_" );
-    atm_profile->remove_property( "_AZ_" );
-  
-  } // end loop by azimuths  
+    } // end loop by azimuths  
+
+  } // end loop by frequencies
   
   // Finalize Slepc
   ierr = SlepcFinalize();CHKERRQ(ierr);
@@ -615,13 +665,9 @@ int NCPA::WModeSolver::getModalTrace(int nz, double z_min, double sourceheight, 
   double dz, Atmosphere1D *p, double admittance, double freq, double *diag, double *kd, double *md, 
   double *cd, double *k_min, double *k_max, bool turnoff_WKB)
 {
-  // DV Note: Claus's profile->ceff() computes ceff = sqrt(gamma*R*T) + wind; 
-  // this version of getModalTrace computes ceff = sqrt(gamma*P/rho) + wind.  
-    
   //     use atmospherics input for the trace of the matrix.
   //     the vector diag can be used to solve the modal problem
   //     also returns the bounds on the wavenumber spectrum, [k_min,k_max]
-
   int i, top;
   double azi_rad, gamma, omega, bnd_cnd, windz, ceffmin, ceffmax, ceff_grnd, cefftop, cz;
   double z_min_km, z_km, dz_km;
@@ -673,6 +719,7 @@ int NCPA::WModeSolver::getModalTrace(int nz, double z_min, double sourceheight, 
 
 
   // use WKB trick for ground to ground propagation.
+  // @todo change this to compare with Z0, not 0.0
   if ((fabs(sourceheight)<1.0e-3) && (fabs(receiverheight)<1.0e-3) && (!turnoff_WKB)) {
       //
       // WKB trick for ground to ground propagation. 

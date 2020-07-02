@@ -35,6 +35,8 @@ namespace NCPA {
 			double *rho, std::complex<double> *k_pert, double **v_s, std::string filename_lossy ); 
 		int writeDispersion(int select_modes, double dz, double z_src, double z_rcv, double freq, 
 			std::complex<double> *k_pert, double **v_s, double *rho);
+		int writeDispersion(FILE *fp, int select_modes, double dz, double z_src, double z_rcv, 
+			double freq, std::complex<double> *k_pert, double **v_s, double *rho);
 		int writePhaseSpeeds(int select_modes, double freq, std::complex<double> *k_pert);
 		int writeEigenFunctions(int nz, int select_modes, double dz, double **v_s);
 
@@ -70,20 +72,22 @@ namespace NCPA {
 	protected:
 		bool   write_2D_TLoss;
 		bool   write_phase_speeds;
-		bool   write_dispersion;
+		//bool   write_dispersion;
 		bool   write_modes;        
 		bool   Nby2Dprop;
 		bool   turnoff_WKB;
 		bool   wvnum_filter_flg;
 		bool   z_min_specified;
+		bool   append_dispersion_file;
           
 		int    Nz_grid;
 		int    Nrng_steps;
 		int    Lamb_wave_BC; 
 		int    Naz;
+		int    Nfreq;
 		int    skiplines;
       
-		double freq;
+		//double freq;
 		double azi;
 		double azi_min;
 		double azi_max;
@@ -97,12 +101,16 @@ namespace NCPA {
 		double *Hgt, *zw, *mw, *T, *rho, *Pr, *c_eff, *alpha;    // change AA to alpha
 		double c_min; // for wavenumber filtering option
 		double c_max; // for wavenumber filtering option
-      
+
+		double *f_vec;
+      	double freq;
+      	
 		NCPA::Atmosphere1D *atm_profile;
 		std::string gnd_imp_model;
 		std::string atmosfile;
-		std::string wind_units;
+		//std::string wind_units;
 		std::string usrattfile;
+		std::string dispersion_file;
       
 	}; 
 }

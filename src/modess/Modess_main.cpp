@@ -95,8 +95,6 @@ int main( int argc, char **argv ) {
 		ofstream ofs( "atm_profile.nm" );
 		atm_profile->print_atmosphere( "Z", ofs );
 		ofs.close();
-	} else { 
-		printf(" write_atm_profile flag : %d\n", param->getBool( "write_atm_profile" )); 
 	}
   
   	// clean up dynamic memory

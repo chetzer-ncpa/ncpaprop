@@ -13,7 +13,7 @@
 # SLEPC_INCLUDE_FILE_GENERIC = @SLEPC_INCLUDE_FILE_GENERIC@
 
 #package-parts=common atmosphere raytrace modess modbb modess_rd_1wcm pade_pe wmod cmodess cmodbb wnlrt tdpape
-package-parts=common atmosphere libncpaprop modess wmod
+package-parts=common atmosphere libncpaprop modess wmod modbb
 
 
 # Build everything

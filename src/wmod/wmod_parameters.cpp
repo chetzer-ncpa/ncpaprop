@@ -86,6 +86,14 @@ void NCPA::configure_wmod_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->addParameter( new NCPA::StringParameter( "use_attn_file", "" ) );
 	ps->addParameterDescription( "Optional Parameters [default]", "--use_attn_file", "File name containing attenuation, to override default Sutherland/Bass [n/a]. Columns are #n# Height(km) Attenuation(np/m)" );
 
+	ps->addParameter( new NCPA::StringParameter( "dispersion_file", "" ) );
+	ps->addParameterDescription( "Optional Parameters [default]", "--dispersion_file", "Filename to output the dispersion information" );
+
+	ps->addParameter( new NCPA::FlagParameter( "append_dispersion_file" ) );
+	ps->setParameterIndent( 2 * DEFAULT_PARAMETER_INDENT );
+	ps->addParameterDescription( "Optional Parameters [default]", "--append_dispersion_file", 
+		"Append results to dispersion file rather than overwriting" );
+	ps->resetParameterIndent();
 
 	// Modes of operation
 	std::string modes_of_operation[ 2 ] = { "singleprop", "Nby2Dprop" };
@@ -139,9 +147,6 @@ void NCPA::configure_wmod_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->addParameter( new NCPA::FlagParameter( "write_modes" ) );
 	ps->addParameterDescription( "Flags", "--write_modes", "Output modes to mode_###.nm.  Also implies --write_speeds" );
 
-	ps->addParameter( new NCPA::FlagParameter( "write_dispersion" ) );
-	ps->addParameterDescription( "Flags", "--write_dispersion", "Output dispersion to dispersion_FFF.nm" );
-
 	ps->addParameter( new NCPA::FlagParameter( "write_atm_profile" ) );
 	ps->addParameterDescription( "Flags", "--write_atm_profile", "Output atmospheric profile to atm_profile.nm" );
 
@@ -168,6 +173,11 @@ void NCPA::configure_wmod_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->addParameterDescription( "Flags", "--c_max", "Maximum phase speed to keep" );
 	ps->resetParameterIndent();
 
+	// Dummy parameters
+	ps->addParameter( new NCPA::FlagParameter( "broadband" ) );
+	ps->addParameter( new NCPA::FloatParameter( "f_min", 0.0 ) );
+	ps->addParameter( new NCPA::FloatParameter( "f_max", 0.0 ) );
+	ps->addParameter( new NCPA::FloatParameter( "f_step", 0.0 ) );
 
 	// Footer with file formats and sample commands
 	ps->addBlankFooterLine();
@@ -180,7 +190,7 @@ void NCPA::configure_wmod_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->addFooterTextVerbatim("  wphasespeeds.nm:              Mode#, phase speed [m/s], imag(k)");
 	ps->addFooterTextVerbatim("  wmode_<mode_count>.nm         z, (Mode amplitude)");
 	ps->addFooterTextVerbatim("  wdispersion_<freq>.nm         Contains one line with entries:");
-	ps->addFooterTextVerbatim("                               freq, (# of modes), rho(z_src),");
+	ps->addFooterTextVerbatim("                               freq, (# of modes), rho(z_src), rho(z_rcv)");
 	ps->addFooterTextVerbatim("                               followed for each mode 'i' by quadruples:");
 	ps->addFooterTextVerbatim("                               real(k(i)), imag(k(i)), Mode(i)(z_src), Mode(i)(z_rcv)");
 	ps->addFooterTextVerbatim("  atm_profile.nm               z,u,v,w,t,d,p,c,c_eff");

@@ -2,6 +2,8 @@
 #include "slepcst.h"
 #include <complex>
 #include <stdexcept>
+#include <cstdio>
+#include <cstring>
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
 
@@ -33,7 +35,6 @@ void NCPA::ESSModeSolver::setParams( NCPA::ParameterSet *param, NCPA::Atmosphere
 	usrattfile 			= param->getString( "use_attn_file" );
 	modstartfile 		= param->getString( "modal_starter_file" );
   	z_min 				= param->getFloat( "zground_km" ) * 1000.0;    // meters
-  	freq 				= param->getFloat( "freq" );
   	maxrange 			= param->getFloat( "maxrange_km" ) * 1000.0;
   	maxheight 			= param->getFloat( "maxheight_km" ) * 1000.0;      // @todo fix elsewhere that m is required
   	sourceheight 		= param->getFloat( "sourceheight_km" ) * 1000.0;
@@ -46,7 +47,10 @@ void NCPA::ESSModeSolver::setParams( NCPA::ParameterSet *param, NCPA::Atmosphere
   	write_phase_speeds 	= param->getBool( "write_phase_speeds" );
   	write_speeds 		= param->getBool( "write_speeds" );
   	write_modes 		= param->getBool( "write_modes" );
-  	write_dispersion 	= param->getBool( "write_dispersion" );
+  	//write_dispersion 	= param->getBool( "write_dispersion" );
+  	dispersion_file     = param->getString( "dispersion_file" );
+  	append_dispersion_file
+  						= param->getBool( "append_dispersion_file" );
   	Nby2Dprop 			= param->getBool( "Nby2Dprop" );
   	turnoff_WKB 		= param->getBool( "turnoff_WKB" );
   	z_min_specified     = param->wasFound( "zground_km" );
@@ -64,7 +68,7 @@ void NCPA::ESSModeSolver::setParams( NCPA::ParameterSet *param, NCPA::Atmosphere
 
 
 	if (write_phase_speeds || write_speeds || write_2D_TLoss 
-			       || write_modes || write_dispersion) {
+			       || write_modes || (dispersion_file.size() > 0)) {
 		turnoff_WKB = 1; // don't use WKB least phase speed estim. when saving any of the above values
 	}
   
@@ -80,6 +84,31 @@ void NCPA::ESSModeSolver::setParams( NCPA::ParameterSet *param, NCPA::Atmosphere
 
 	azi_min     = azi;
 	atm_profile = atm_prof;
+
+	// frequencies
+	if (param->getBool( "broadband" ) ) {
+		double f_min, f_step, f_max;
+      	f_min = param->getFloat( "f_min" );
+      	f_step = param->getFloat( "f_step" );
+      	f_max = param->getFloat( "f_max" );
+
+      	// sanity checks
+      	if (f_min >= f_max) {
+      		throw std::runtime_error( "f_min must be less than f_max!" );
+      	}
+
+      	Nfreq = (double)(std::floor((f_max - f_min) / f_step)) + 1;
+      	f_vec = new double[ Nfreq ];
+      	std::memset( f_vec, 0, Nfreq * sizeof( double ) );
+      	for (int fi = 0; fi < Nfreq; fi++) {
+      		f_vec[ fi ] = f_min + ((double)fi) * f_step;
+      	}
+	} else {
+		freq = param->getFloat( "freq" );
+		f_vec = new double[ 1 ];
+		f_vec[ 0 ] = freq;
+		Nfreq = 1;
+	}
 
 	// get Hgt, zw, mw, T, rho, Pr in SI units; they are freed in computeModes()
 	// @todo write functions to allocate and free these, it shouldn't be hidden
@@ -167,11 +196,14 @@ void NCPA::ESSModeSolver::printParams() {
 	printf("    write_2D_TLoss flag : %d\n", write_2D_TLoss);
 	printf("write_phase_speeds flag : %d\n", write_phase_speeds);
 	printf("      write_speeds flag : %d\n", write_speeds);
-	printf("  write_dispersion flag : %d\n", write_dispersion);
 	printf("       write_modes flag : %d\n", write_modes);
 	printf("         Nby2Dprop flag : %d\n", Nby2Dprop);
 	printf("       turnoff_WKB flag : %d\n", turnoff_WKB);
 	printf("    atmospheric profile : %s\n", atmosfile.c_str());
+	if (!dispersion_file.empty()) {
+		printf("        dispersion file : %s\n", dispersion_file.c_str());
+		printf(" Dispersion file append : %d\n", append_dispersion_file );
+	}
 	if (!usrattfile.empty()) {
 		printf("  User attenuation file : %s\n", usrattfile.c_str());
 	}
@@ -369,7 +401,7 @@ int NCPA::ESSModeSolver::computeModes() {
 	PetscInt nconv;
 	PetscErrorCode ierr;
 
-	int    i, select_modes, nev, it;
+	int    i, select_modes, nev, it, fi;
 	double dz, admittance, rng_step, z_min_km;  // , h2;
 	double k_min, k_max;			
 	double *diag, *k2, *k_s, **v, **v_s;
@@ -394,273 +426,287 @@ int NCPA::ESSModeSolver::computeModes() {
 
 	SlepcInitialize(PETSC_NULL,PETSC_NULL,(char*)0,PETSC_NULL); /* @todo move out of loop? */
 
-	//
-	// loop over azimuths (if not (N by 2D) it's only one azimuth)
-	//
-	for (it=0; it<Naz; it++) {
-  
-		azi = azi_min + it*azi_step; // degrees (not radians)
-		cout << endl << "Now processing azimuth = " << azi << " (" << it+1 << " of " 
-			 << Naz << ")" << endl;
-
-		atm_profile->calculate_wind_component("_WC_", "_WS_", "_WD_", azi );
-		atm_profile->calculate_effective_sound_speed( "_CE_", "_C0_", "_WC_" );
-		atm_profile->get_property_vector( "_CE_", c_eff );
-		atm_profile->add_property( "_AZ_", azi, NCPA::UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH );
-
+	for (fi = 0; fi < Nfreq; fi++) {
+		freq = f_vec[ fi ];
 
 		//
-		// ground impedance model
+		// loop over azimuths (if not (N by 2D) it's only one azimuth)
 		//
-		// at the ground the BC is: Phi' = (a - 1/2*dln(rho)/dz)*Phi
-		// for a rigid ground a=0; and the BC is the Lamb Wave BC:
-		// admittance = -1/2*dln(rho)/dz
-		//  
-		admittance = 0.0;   // default
-		if ( gnd_imp_model.compare( "rigid" ) == 0) {
-			// Rigid ground, check for Lamb wave BC
-			if (Lamb_wave_BC) {
-				admittance = -atm_profile->get_first_derivative( "RHO", z_min ) 
-					/ atm_profile->get( "RHO", z_min ) / 2.0;
-				cout << "Admittance = " << admittance << endl;
-			} else {
-				admittance = 0.0;
-			}
-		} else {
-			throw invalid_argument( 
-				"This ground impedance model is not implemented yet: " + gnd_imp_model );
-		}
+		for (it=0; it<Naz; it++) {
+	  
+			azi = azi_min + it*azi_step; // degrees (not radians)
+			cout << endl << "Now processing azimuth = " << azi << " (" << it+1 << " of " 
+				 << Naz << ")" << endl;
 
-		//
-		// Get the main diagonal and the number of modes
-		//		
-		i = getModalTrace(Nz_grid, z_min, sourceheight, receiverheight, dz, atm_profile, 
-				admittance, freq, azi, diag, &k_min, &k_max, turnoff_WKB, c_eff);
-		
-		// if wavenumber filtering is on, redefine k_min, k_max
-		if (wvnum_filter_flg) {
-			k_min = 2 * PI * freq / c_max;
-			k_max = 2 * PI * freq / c_min;
-		}
+			atm_profile->calculate_wind_component("_WC_", "_WS_", "_WD_", azi );
+			atm_profile->calculate_effective_sound_speed( "_CE_", "_C0_", "_WC_" );
+			atm_profile->get_property_vector( "_CE_", c_eff );
+			atm_profile->add_property( "_AZ_", azi, NCPA::UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH );
 
-		i = getNumberOfModes(Nz_grid,dz,diag,k_min,k_max,&nev);
 
-		printf ("______________________________________________________________________\n\n");
-		printf (" -> Normal mode solution at %5.3f Hz and %5.2f deg (%d modes)...\n", freq, azi, nev);
-		printf (" -> Discrete spectrum: %5.2f m/s to %5.2f m/s\n", 2*PI*freq/k_max, 2*PI*freq/k_min);
-    
-    	i = NCPA::EigenEngine::doESSCalculation( diag, Nz_grid, dz, tol,
-    		&k_min, &k_max, &nconv, k2, v );
-/*
-    	// Initialize Slepc
-		SlepcInitialize(PETSC_NULL,PETSC_NULL,(char*)0,PETSC_NULL); 
-		ierr = MPI_Comm_rank(PETSC_COMM_WORLD,&rank); CHKERRQ(ierr);
-		ierr = MPI_Comm_size(PETSC_COMM_WORLD,&size); CHKERRQ(ierr);  
-
-		// Create the matrix A to use in the eigensystem problem: Ak=kx
-		ierr = MatCreate(PETSC_COMM_WORLD,&A); CHKERRQ(ierr);
-		ierr = MatSetSizes(A,PETSC_DECIDE,PETSC_DECIDE,Nz_grid,Nz_grid); CHKERRQ(ierr);
-		ierr = MatSetFromOptions(A); CHKERRQ(ierr);
-    
-		// the following Preallocation call is needed in PETSc version 3.3
-		ierr = MatSeqAIJSetPreallocation(A, 3, PETSC_NULL); CHKERRQ(ierr);
-		// or use: ierr = MatSetUp(A); 
-*/
-
-		/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-		Compute the operator matrix that defines the eigensystem, Ax=kx
-		- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-/*
-		// Make matrix A 
-		ierr = MatGetOwnershipRange(A,&Istart,&Iend);CHKERRQ(ierr);
-		if (Istart==0) 
-			FirstBlock=PETSC_TRUE;
-		if (Iend==Nz_grid) 		// @todo check if should be Nz_grid-1 
-			LastBlock=PETSC_TRUE;    
-    
-		value[0]=1.0/h2; 
-		value[2]=1.0/h2;
-		for( i=(FirstBlock? Istart+1: Istart); i<(LastBlock? Iend-1: Iend); i++ ) {
-			value[1] = -2.0/h2 + diag[i];
-			col[0]=i-1; 
-			col[1]=i; 
-			col[2]=i+1;
-			ierr = MatSetValues(A,1,&i,3,col,value,INSERT_VALUES); CHKERRQ(ierr);
-		}
-		if (LastBlock) {
-			i=Nz_grid-1; 
-			col[0]=Nz_grid-2; 
-			col[1]=Nz_grid-1;
-			ierr = MatSetValues(A,1,&i,2,col,value,INSERT_VALUES); CHKERRQ(ierr);
-		}
-		if (FirstBlock) {
-			i=0; 
-			col[0]=0; 
-			col[1]=1; 
-			value[0]=-2.0/h2 + diag[0]; 
-			value[1]=1.0/h2;
-			ierr = MatSetValues(A,1,&i,2,col,value,INSERT_VALUES); CHKERRQ(ierr);
-		}
-
-		ierr = MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
-		ierr = MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
-
-		// CHH 191022: MatGetVecs() is deprecated, changed to MatCreateVecs()
-		ierr = MatCreateVecs(A,PETSC_NULL,&xr); CHKERRQ(ierr);
-		ierr = MatCreateVecs(A,PETSC_NULL,&xi); CHKERRQ(ierr);
-*/
-
-		/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-		Create the eigensolver and set various options
-		- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-		/* 
-		Create eigensolver context
-		*/
-/*
-		ierr = EPSCreate(PETSC_COMM_WORLD,&eps); CHKERRQ(ierr);
-*/
-
-		/* 
-		Set operators. In this case, it is a standard eigenvalue problem
-		*/
-/*
-		ierr = EPSSetOperators(eps,A,PETSC_NULL); CHKERRQ(ierr);
-		ierr = EPSSetProblemType(eps,EPS_HEP); CHKERRQ(ierr);
-*/
-
-		/*
-		Set solver parameters at runtime
-		*/
-/*
-		ierr = EPSSetFromOptions(eps);CHKERRQ(ierr);
-		ierr = EPSSetType(eps,"krylovschur"); CHKERRQ(ierr);
-		ierr = EPSSetDimensions(eps,10,PETSC_DECIDE,PETSC_DECIDE); CHKERRQ(ierr); // leaving this line in speeds up the code; better if this is computed in chunks of 10? - consult Slepc manual
-		ierr = EPSSetTolerances(eps,tol,PETSC_DECIDE); CHKERRQ(ierr);
-
-		ierr = EPSGetST(eps,&stx); CHKERRQ(ierr);
-		ierr = STGetKSP(stx,&kspx); CHKERRQ(ierr);
-		ierr = KSPGetPC(kspx,&pcx); CHKERRQ(ierr);
-		ierr = STSetType(stx,"sinvert"); CHKERRQ(ierr);
-		ierr = KSPSetType(kspx,"preonly");
-		ierr = PCSetType(pcx,"cholesky");
-		ierr = EPSSetInterval(eps,pow(k_min,2),pow(k_max,2)); CHKERRQ(ierr);
-		ierr = EPSSetWhichEigenpairs(eps,EPS_ALL); CHKERRQ(ierr);
-*/
-
-		/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-		Solve the eigensystem
-		- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-/*
-		ierr = EPSSolve(eps);CHKERRQ(ierr);
-*/
-		/*
-		Optional: Get some information from the solver and display it
-		*/
-/*
-		ierr = EPSGetIterationNumber(eps,&its);CHKERRQ(ierr);
-		ierr = EPSGetType(eps,&type);CHKERRQ(ierr);
-		ierr = EPSGetDimensions(eps,&nev,PETSC_NULL,PETSC_NULL);CHKERRQ(ierr);
-		ierr = EPSGetTolerances(eps,&tol,&maxit);CHKERRQ(ierr);
-*/
-		/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-		Display solution and clean up
-		- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-		/* 
-		Get number of converged approximate eigenpairs
-		*/
-/*
-		ierr = EPSGetConverged(eps,&nconv);CHKERRQ(ierr);
-		
-		if (nconv>0) {
-			for (i=0;i<nconv;i++) {
-				ierr = EPSGetEigenpair(eps,i,&kr,&ki,xr,xi);CHKERRQ(ierr);
-#if defined(PETSC_USE_COMPLEX)
-				re = PetscRealPart(kr);
-				im = PetscImaginaryPart(kr);
-#else
-				re = kr;
-				im = ki;
-#endif 
-				k2[nconv-i-1] = re; // proper count of modes
-				ierr = VecGetArray(xr,&xr_);CHKERRQ(ierr);
-				for (j = 0; j < Nz_grid; j++) {
-					v[j][nconv-i-1] = xr_[j]/sqrt(dz); //per Slepc the 2-norm of xr_ is=1; we need sum(v^2)*dz=1 hence the scaling xr_/sqrt(dz)
+			//
+			// ground impedance model
+			//
+			// at the ground the BC is: Phi' = (a - 1/2*dln(rho)/dz)*Phi
+			// for a rigid ground a=0; and the BC is the Lamb Wave BC:
+			// admittance = -1/2*dln(rho)/dz
+			//  
+			admittance = 0.0;   // default
+			if ( gnd_imp_model.compare( "rigid" ) == 0) {
+				// Rigid ground, check for Lamb wave BC
+				if (Lamb_wave_BC) {
+					admittance = -atm_profile->get_first_derivative( "RHO", z_min ) 
+						/ atm_profile->get( "RHO", z_min ) / 2.0;
+					cout << "Admittance = " << admittance << endl;
+				} else {
+					admittance = 0.0;
 				}
-				ierr = VecRestoreArray(xr,&xr_);CHKERRQ(ierr);
-			}
-		}
-*/
-
-		// select modes and do perturbation
-		doSelect(Nz_grid,nconv,k_min,k_max,k2,v,k_s,v_s,&select_modes);
-		doPerturb(Nz_grid, z_min, dz, select_modes, freq, k_s, v_s, alpha, k_pert);
-		
-		//
-		// Output data  
-		//
-		if (Nby2Dprop) { // if (N by 2D is requested)
-			getTLoss1DNx2(azi, select_modes, dz, Nrng_steps, rng_step, sourceheight, 
-				      receiverheight, rho, k_pert, v_s, Nby2Dprop, it,
-				      "Nby2D_tloss_1d.nm", "Nby2D_tloss_1d.lossless.nm" );
-		}
-		else {
-			cout << "Writing to file: 1D transmission loss at the ground..." << endl;
-			getTLoss1D(select_modes, dz, Nrng_steps, rng_step, sourceheight, receiverheight, rho, 
-				   k_pert, v_s, "tloss_1d.nm", "tloss_1d.lossless.nm" );
-
-			if ( !modstartfile.empty() ) {
-				cout << "Writing to file: modal starter" << endl;
-				
-				// Modal starter - DV 20151014
-				// Modification to apply the sqrt(k0) factor to agree with Jelle's getModalStarter; 
-				// this in turn will make 'pape' agree with modess output
-				getModalStarter(Nz_grid, select_modes, dz, freq, sourceheight, receiverheight, 
-						rho, k_pert, v_s, modstartfile);       
+			} else {
+				throw invalid_argument( 
+					"This ground impedance model is not implemented yet: " + gnd_imp_model );
 			}
 
-			if (write_2D_TLoss) {
-				cout << "Writing to file: 2D transmission loss...\n";
-				getTLoss2D(Nz_grid,select_modes,dz,Nrng_steps,rng_step,sourceheight,rho, 
-					   k_pert,v_s, "tloss_2d.nm" );
+			//
+			// Get the main diagonal and the number of modes
+			//		
+			i = getModalTrace(Nz_grid, z_min, sourceheight, receiverheight, dz, atm_profile, 
+					admittance, freq, azi, diag, &k_min, &k_max, turnoff_WKB, c_eff);
+			
+			// if wavenumber filtering is on, redefine k_min, k_max
+			if (wvnum_filter_flg) {
+				k_min = 2 * PI * freq / c_max;
+				k_max = 2 * PI * freq / c_min;
 			}
 
-			if (write_phase_speeds) {
-				cout << "Writing to file: phase speeds...\n";
-				writePhaseSpeeds(select_modes,freq,k_pert);
+			i = getNumberOfModes(Nz_grid,dz,diag,k_min,k_max,&nev);
+
+			printf ("______________________________________________________________________\n\n");
+			printf (" -> Normal mode solution at %5.3f Hz and %5.2f deg (%d modes)...\n", freq, azi, nev);
+			printf (" -> Discrete spectrum: %5.2f m/s to %5.2f m/s\n", 2*PI*freq/k_max, 2*PI*freq/k_min);
+	    
+	    	i = NCPA::EigenEngine::doESSCalculation( diag, Nz_grid, dz, tol,
+	    		&k_min, &k_max, &nconv, k2, v );
+	/*
+	    	// Initialize Slepc
+			SlepcInitialize(PETSC_NULL,PETSC_NULL,(char*)0,PETSC_NULL); 
+			ierr = MPI_Comm_rank(PETSC_COMM_WORLD,&rank); CHKERRQ(ierr);
+			ierr = MPI_Comm_size(PETSC_COMM_WORLD,&size); CHKERRQ(ierr);  
+
+			// Create the matrix A to use in the eigensystem problem: Ak=kx
+			ierr = MatCreate(PETSC_COMM_WORLD,&A); CHKERRQ(ierr);
+			ierr = MatSetSizes(A,PETSC_DECIDE,PETSC_DECIDE,Nz_grid,Nz_grid); CHKERRQ(ierr);
+			ierr = MatSetFromOptions(A); CHKERRQ(ierr);
+	    
+			// the following Preallocation call is needed in PETSc version 3.3
+			ierr = MatSeqAIJSetPreallocation(A, 3, PETSC_NULL); CHKERRQ(ierr);
+			// or use: ierr = MatSetUp(A); 
+	*/
+
+			/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+			Compute the operator matrix that defines the eigensystem, Ax=kx
+			- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+	/*
+			// Make matrix A 
+			ierr = MatGetOwnershipRange(A,&Istart,&Iend);CHKERRQ(ierr);
+			if (Istart==0) 
+				FirstBlock=PETSC_TRUE;
+			if (Iend==Nz_grid) 		// @todo check if should be Nz_grid-1 
+				LastBlock=PETSC_TRUE;    
+	    
+			value[0]=1.0/h2; 
+			value[2]=1.0/h2;
+			for( i=(FirstBlock? Istart+1: Istart); i<(LastBlock? Iend-1: Iend); i++ ) {
+				value[1] = -2.0/h2 + diag[i];
+				col[0]=i-1; 
+				col[1]=i; 
+				col[2]=i+1;
+				ierr = MatSetValues(A,1,&i,3,col,value,INSERT_VALUES); CHKERRQ(ierr);
+			}
+			if (LastBlock) {
+				i=Nz_grid-1; 
+				col[0]=Nz_grid-2; 
+				col[1]=Nz_grid-1;
+				ierr = MatSetValues(A,1,&i,2,col,value,INSERT_VALUES); CHKERRQ(ierr);
+			}
+			if (FirstBlock) {
+				i=0; 
+				col[0]=0; 
+				col[1]=1; 
+				value[0]=-2.0/h2 + diag[0]; 
+				value[1]=1.0/h2;
+				ierr = MatSetValues(A,1,&i,2,col,value,INSERT_VALUES); CHKERRQ(ierr);
 			}
 
-			if (write_modes) {
-				cout << "Writing to file: the modes and the phase and group speeds...\n";
-				writeEigenFunctions(Nz_grid,select_modes,dz,v_s);
-				writePhaseAndGroupSpeeds(Nz_grid, dz, select_modes, freq, k_pert, v_s, c_eff);
-			}
-        
-			if ((write_speeds) &&  !(write_modes)) {
-				cout << "Writing to file: the modal phase speeds and the group speeds...\n";
-				writePhaseAndGroupSpeeds(Nz_grid, dz, select_modes, freq, k_pert, v_s, c_eff);
-			}        
+			ierr = MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
+			ierr = MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
 
-			if (write_dispersion) {
-				printf ("Writing to file: dispersion at freq = %8.3f Hz...\n", freq);
-				writeDispersion(select_modes,dz,sourceheight,receiverheight,freq,k_pert,v_s, rho);
-			}
-		}
-    
-		// Free work space
-/*
-		ierr = EPSDestroy(&eps);CHKERRQ(ierr);
-		ierr = MatDestroy(&A);  CHKERRQ(ierr);
-		ierr = VecDestroy(&xr); CHKERRQ(ierr);
-		ierr = VecDestroy(&xi); CHKERRQ(ierr); 
-*/
+			// CHH 191022: MatGetVecs() is deprecated, changed to MatCreateVecs()
+			ierr = MatCreateVecs(A,PETSC_NULL,&xr); CHKERRQ(ierr);
+			ierr = MatCreateVecs(A,PETSC_NULL,&xi); CHKERRQ(ierr);
+	*/
 
-		// Clean up azimuth-specific atmospheric properties before starting next run
-		atm_profile->remove_property( "_WC_" );
-		atm_profile->remove_property( "_CE_" );
-		atm_profile->remove_property( "_AZ_" );
-		
-  
-	} // end loop by azimuths
+			/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+			Create the eigensolver and set various options
+			- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+			/* 
+			Create eigensolver context
+			*/
+	/*
+			ierr = EPSCreate(PETSC_COMM_WORLD,&eps); CHKERRQ(ierr);
+	*/
+
+			/* 
+			Set operators. In this case, it is a standard eigenvalue problem
+			*/
+	/*
+			ierr = EPSSetOperators(eps,A,PETSC_NULL); CHKERRQ(ierr);
+			ierr = EPSSetProblemType(eps,EPS_HEP); CHKERRQ(ierr);
+	*/
+
+			/*
+			Set solver parameters at runtime
+			*/
+	/*
+			ierr = EPSSetFromOptions(eps);CHKERRQ(ierr);
+			ierr = EPSSetType(eps,"krylovschur"); CHKERRQ(ierr);
+			ierr = EPSSetDimensions(eps,10,PETSC_DECIDE,PETSC_DECIDE); CHKERRQ(ierr); // leaving this line in speeds up the code; better if this is computed in chunks of 10? - consult Slepc manual
+			ierr = EPSSetTolerances(eps,tol,PETSC_DECIDE); CHKERRQ(ierr);
+
+			ierr = EPSGetST(eps,&stx); CHKERRQ(ierr);
+			ierr = STGetKSP(stx,&kspx); CHKERRQ(ierr);
+			ierr = KSPGetPC(kspx,&pcx); CHKERRQ(ierr);
+			ierr = STSetType(stx,"sinvert"); CHKERRQ(ierr);
+			ierr = KSPSetType(kspx,"preonly");
+			ierr = PCSetType(pcx,"cholesky");
+			ierr = EPSSetInterval(eps,pow(k_min,2),pow(k_max,2)); CHKERRQ(ierr);
+			ierr = EPSSetWhichEigenpairs(eps,EPS_ALL); CHKERRQ(ierr);
+	*/
+
+			/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+			Solve the eigensystem
+			- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+	/*
+			ierr = EPSSolve(eps);CHKERRQ(ierr);
+	*/
+			/*
+			Optional: Get some information from the solver and display it
+			*/
+	/*
+			ierr = EPSGetIterationNumber(eps,&its);CHKERRQ(ierr);
+			ierr = EPSGetType(eps,&type);CHKERRQ(ierr);
+			ierr = EPSGetDimensions(eps,&nev,PETSC_NULL,PETSC_NULL);CHKERRQ(ierr);
+			ierr = EPSGetTolerances(eps,&tol,&maxit);CHKERRQ(ierr);
+	*/
+			/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+			Display solution and clean up
+			- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+			/* 
+			Get number of converged approximate eigenpairs
+			*/
+	/*
+			ierr = EPSGetConverged(eps,&nconv);CHKERRQ(ierr);
+			
+			if (nconv>0) {
+				for (i=0;i<nconv;i++) {
+					ierr = EPSGetEigenpair(eps,i,&kr,&ki,xr,xi);CHKERRQ(ierr);
+	#if defined(PETSC_USE_COMPLEX)
+					re = PetscRealPart(kr);
+					im = PetscImaginaryPart(kr);
+	#else
+					re = kr;
+					im = ki;
+	#endif 
+					k2[nconv-i-1] = re; // proper count of modes
+					ierr = VecGetArray(xr,&xr_);CHKERRQ(ierr);
+					for (j = 0; j < Nz_grid; j++) {
+						v[j][nconv-i-1] = xr_[j]/sqrt(dz); //per Slepc the 2-norm of xr_ is=1; we need sum(v^2)*dz=1 hence the scaling xr_/sqrt(dz)
+					}
+					ierr = VecRestoreArray(xr,&xr_);CHKERRQ(ierr);
+				}
+			}
+	*/
+
+			// select modes and do perturbation
+			doSelect(Nz_grid,nconv,k_min,k_max,k2,v,k_s,v_s,&select_modes);
+			doPerturb(Nz_grid, z_min, dz, select_modes, freq, k_s, v_s, alpha, k_pert);
+			
+			//
+			// Output data  
+			//
+			if (Nby2Dprop) { // if (N by 2D is requested)
+				getTLoss1DNx2(azi, select_modes, dz, Nrng_steps, rng_step, sourceheight, 
+					      receiverheight, rho, k_pert, v_s, Nby2Dprop, it,
+					      "Nby2D_tloss_1d.nm", "Nby2D_tloss_1d.lossless.nm" );
+			}
+			else {
+				cout << "Writing to file: 1D transmission loss at the ground..." << endl;
+				getTLoss1D(select_modes, dz, Nrng_steps, rng_step, sourceheight, receiverheight, rho, 
+					   k_pert, v_s, "tloss_1d.nm", "tloss_1d.lossless.nm" );
+
+				if ( !modstartfile.empty() ) {
+					cout << "Writing to file: modal starter" << endl;
+					
+					// Modal starter - DV 20151014
+					// Modification to apply the sqrt(k0) factor to agree with Jelle's getModalStarter; 
+					// this in turn will make 'pape' agree with modess output
+					getModalStarter(Nz_grid, select_modes, dz, freq, sourceheight, receiverheight, 
+							rho, k_pert, v_s, modstartfile);       
+				}
+
+				if (write_2D_TLoss) {
+					cout << "Writing to file: 2D transmission loss...\n";
+					getTLoss2D(Nz_grid,select_modes,dz,Nrng_steps,rng_step,sourceheight,rho, 
+						   k_pert,v_s, "tloss_2d.nm" );
+				}
+
+				if (write_phase_speeds) {
+					cout << "Writing to file: phase speeds...\n";
+					writePhaseSpeeds(select_modes,freq,k_pert);
+				}
+
+				if (write_modes) {
+					cout << "Writing to file: the modes and the phase and group speeds...\n";
+					writeEigenFunctions(Nz_grid,select_modes,dz,v_s);
+					writePhaseAndGroupSpeeds(Nz_grid, dz, select_modes, freq, k_pert, v_s, c_eff);
+				}
+	        
+				if ((write_speeds) &&  !(write_modes)) {
+					cout << "Writing to file: the modal phase speeds and the group speeds...\n";
+					writePhaseAndGroupSpeeds(Nz_grid, dz, select_modes, freq, k_pert, v_s, c_eff);
+				}        
+
+				if (!dispersion_file.empty()) {
+					printf ("Writing to file %s: dispersion at freq = %8.3f Hz...\n",
+						dispersion_file.c_str(), freq);
+					FILE *dispersionfile;
+					if (append_dispersion_file) {
+						dispersionfile = fopen(dispersion_file.c_str(),"a");
+					} else {
+						dispersionfile = fopen(dispersion_file.c_str(),"w");
+					}
+					writeDispersion(dispersionfile,select_modes,dz,sourceheight,receiverheight,
+						freq,k_pert,v_s, rho);
+					fclose(dispersionfile);
+				}
+			}
+	    
+			// Free work space
+	/*
+			ierr = EPSDestroy(&eps);CHKERRQ(ierr);
+			ierr = MatDestroy(&A);  CHKERRQ(ierr);
+			ierr = VecDestroy(&xr); CHKERRQ(ierr);
+			ierr = VecDestroy(&xi); CHKERRQ(ierr); 
+	*/
+
+			// Clean up azimuth-specific atmospheric properties before starting next run
+			atm_profile->remove_property( "_WC_" );
+			atm_profile->remove_property( "_CE_" );
+			atm_profile->remove_property( "_AZ_" );
+			
+	  
+		} // end loop by azimuths
+
+	} // end loop by frequencies
   
 	// Finalize Slepc
 	ierr = SlepcFinalize();CHKERRQ(ierr);

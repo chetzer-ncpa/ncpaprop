@@ -52,6 +52,9 @@ namespace NCPA {
 	int free_cmatrix(std::complex<double> **v, long nr, long nc);
 	std::complex<double> ***c3Darray(size_t xlen, size_t ylen, size_t zlen);
 	void free_c3Darray(std::complex<double> ***data, size_t xlen, size_t ylen);
+
+	//int count_rows_arbcol(const char *filename);
+	int count_rows_arbcol( const std::string& filename );
 	
 //	double phase( std::complex< double > );
 	

@@ -29,10 +29,11 @@ NCPA::ModeSolver::~ModeSolver() {
 	delete[] Pr;
 	delete[] c_eff;
 	delete[] alpha;
-	atm_profile->remove_property( "_WS_" );
-	atm_profile->remove_property( "_WD_" );
-	atm_profile->remove_property( "_C0_" );
-	atm_profile->remove_property( "_ALPHA_" );
+	delete[] f_vec;
+	// atm_profile->remove_property( "_WS_" );
+	// atm_profile->remove_property( "_WD_" );
+	// atm_profile->remove_property( "_C0_" );
+	// atm_profile->remove_property( "_ALPHA_" );
 }
 
 /*
@@ -254,7 +255,7 @@ int NCPA::ModeSolver::doPerturb(int nz, double z_min, double dz, int n_modes, do
 	double absorption, gamma, c_T;
 	double z_km, dz_km;
 	double omega = 2*PI*freq;
-	complex<double> I (0.0, 1.0);
+	complex<double> I (0.0, 1.0);    // @todo replace with I macro from <complex>
 	gamma = 1.4;
 	
 	dz_km = dz/1000.0;
@@ -262,9 +263,9 @@ int NCPA::ModeSolver::doPerturb(int nz, double z_min, double dz, int n_modes, do
 		absorption = 0.0;
 		z_km=z_min/1000.0;
 		for (i=0; i<nz; i++) {
-			c_T = sqrt(gamma*Pr[i]/rho[i]); // in m/s
+			c_T = sqrt(gamma*Pr[i]/rho[i]); // in m/s  @todo create and get from c0 vector?
 			absorption = absorption + dz*v[i][j]*v[i][j]*(omega/c_T)*alpha[i]*2;
-			z_km = z_km + dz_km;
+			z_km += dz_km;
 		}			
 		k_pert[j] = sqrt(k[j]*k[j] + I*absorption);
 	}
@@ -538,27 +539,37 @@ int NCPA::ModeSolver::getTLoss2D(int nz, int select_modes, double dz, int n_r, d
 
 
 // DV 20150409 - added rho as argument
-int NCPA::ModeSolver::writeDispersion(int select_modes, double dz, double z_src, double z_rcv, 
-	double freq, complex<double> *k_pert, double **v_s, double *rho) {
+int NCPA::ModeSolver::writeDispersion(FILE *dispersion, int select_modes, double dz, double z_src, 
+	double z_rcv, double freq, complex<double> *k_pert, double **v_s, double *rho) {
 	int i;
 	int n_zsrc = (int) ceil(z_src/dz);
 	int n_zrcv = (int) ceil(z_rcv/dz);
-	char dispersion_file[128];
+	//char dispersion_file[128];
   
 	//printf("In writeDispersion(): n_zsrc=%d ; n_zrcv=%d; z_src=%g; z_rcv=%g\n", n_zsrc, n_zrcv, z_src, z_rcv);
 
-	sprintf(dispersion_file,"dispersion_%e.nm", freq);
-	FILE *dispersion = fopen(dispersion_file,"w");
-	fprintf(dispersion,"%.12e   %d    %.12e", freq, select_modes, rho[n_zsrc]);
+	//sprintf(dispersion_file,"dispersion_%e.nm", freq);
+	//FILE *dispersion = fopen(dispersion_file,"w");
+	fprintf(dispersion,"%.7e   %d    %.7e   %.7e", freq, select_modes, rho[n_zsrc], rho[n_zrcv]);
 	for( i=0; i<select_modes; i++ ) {
 		fprintf(dispersion,"   %.12e   %.12e",real(k_pert[i]),imag(k_pert[i]));
-		//fprintf(dispersion,"   %.12e   %.12e",real(v_s[n_zsrc][i]),real(v_s[0][i]));
 		fprintf(dispersion,"   %.12e   %.12e",(v_s[n_zsrc][i]),(v_s[n_zrcv][i]));
 	}
 	fprintf(dispersion,"\n");
-	fclose(dispersion);
-	printf("           file %s created\n", dispersion_file);
+	//fclose(dispersion);
+	//printf("           file %s created\n", dispersion_file.c_str());
 	return 0;
+}
+
+int NCPA::ModeSolver::writeDispersion(int select_modes, double dz, double z_src, 
+	double z_rcv, double freq, complex<double> *k_pert, double **v_s, double *rho) {
+
+	char dispersion_file[128];
+	sprintf(dispersion_file,"dispersion_%e.nm", freq);
+	FILE *dispersion = fopen(dispersion_file,"w");
+	int rval = writeDispersion( dispersion, select_modes, dz, z_src, z_rcv, freq, k_pert, v_s, rho );
+	fclose( dispersion );
+	return rval;
 }
  
 
