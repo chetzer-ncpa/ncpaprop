@@ -17,7 +17,8 @@ namespace NCPA {
 		~ToyAtmosphere1D();
 
 	private:
-		void make_gaussian_parameter_( std::string new_key, double amplitude, double center, double width );
+		void make_gaussian_parameter_( std::string new_key, double amplitude, double center, 
+			double width );
 
 	};
 }

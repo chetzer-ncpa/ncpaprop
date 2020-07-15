@@ -8842,7 +8842,7 @@ PETSC_ARCH_COMPLEX=$PETSC_ARCH_COMPLEX
 
 
 
-ac_config_files="$ac_config_files Makefile src/common/Makefile src/atmosphere/Makefile src/libncpaprop/Makefile src/raytrace/Makefile src/modess/Makefile src/modbb/Makefile src/modess_rd_1wcm/Makefile src/pade_pe/Makefile src/wmod/Makefile src/cmodess/Makefile src/cmodbb/Makefile src/tdpape/Makefile src/wnlrt/Makefile test/Makefile"
+ac_config_files="$ac_config_files Makefile src/common/Makefile src/atmosphere/Makefile src/libncpaprop/Makefile src/raytrace/Makefile src/modess/Makefile src/modbb/Makefile src/modess_rd_1wcm/Makefile src/pade_pe/Makefile src/epade_pe/Makefile src/wmod/Makefile src/cmodess/Makefile src/cmodbb/Makefile src/tdpape/Makefile src/wnlrt/Makefile test/Makefile"
 
 
 
@@ -9560,6 +9560,7 @@ do
     "src/modbb/Makefile") CONFIG_FILES="$CONFIG_FILES src/modbb/Makefile" ;;
     "src/modess_rd_1wcm/Makefile") CONFIG_FILES="$CONFIG_FILES src/modess_rd_1wcm/Makefile" ;;
     "src/pade_pe/Makefile") CONFIG_FILES="$CONFIG_FILES src/pade_pe/Makefile" ;;
+    "src/epade_pe/Makefile") CONFIG_FILES="$CONFIG_FILES src/epade_pe/Makefile" ;;
     "src/wmod/Makefile") CONFIG_FILES="$CONFIG_FILES src/wmod/Makefile" ;;
     "src/cmodess/Makefile") CONFIG_FILES="$CONFIG_FILES src/cmodess/Makefile" ;;
     "src/cmodbb/Makefile") CONFIG_FILES="$CONFIG_FILES src/cmodbb/Makefile" ;;

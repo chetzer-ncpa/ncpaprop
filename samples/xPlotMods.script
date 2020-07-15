@@ -103,6 +103,20 @@ then
   echo $1 $2
 fi
 
+# plot 2D PE to the screen
+if
+    test $1 = plot2dpe
+then
+  gnuplot -persist \
+    -e "set pm3d map;" \
+    -e "set cbrange [-120:-70];" \
+    -e "set xlabel 'Range [km]'; set ylabel 'Height [km]';" \
+    -e "set title 'PE: 2D transmission loss [dB]; freq = $2 Hz';" \
+    -e "splot './tloss_2d.pe' using 1:2:3;"
+  echo $1 $2
+fi
+
+
 # plot Wide-angle 2D TL to the screen
 if
     test $1 = plotw2dtl

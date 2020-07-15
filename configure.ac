@@ -667,6 +667,7 @@ AC_CONFIG_FILES([
 		src/modbb/Makefile
 		src/modess_rd_1wcm/Makefile
 		src/pade_pe/Makefile
+		src/epade_pe/Makefile
 		src/wmod/Makefile
 		src/cmodess/Makefile
 		src/cmodbb/Makefile

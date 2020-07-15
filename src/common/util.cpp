@@ -9,10 +9,12 @@
 #include <cstring>
 #include <vector>
 #include <sstream>
+#include <cfloat>
 #include "util.h"
 
-
+#ifndef PI
 #define PI 3.141592653589793
+#endif
 
 double NCPA::min( double a, double b ) {
 	return a < b ? a : b;
@@ -355,4 +357,27 @@ int NCPA::count_rows_arbcol(const std::string& filename) {
   }
   fclose(f);
   return answer;
+}
+
+double NCPA::mean( double *vec, size_t n ) {
+	double running = 0.0;
+	for (size_t i = 0; i < n; i++) {
+		running += vec[i];
+	}
+	return running / ((double)n);
+}
+
+size_t NCPA::find_closest_index( double *z, size_t NZ, double zs ) {
+	double diff = 0.0, mindiff = DBL_MAX;
+	size_t tmpind;
+
+	for (size_t i = 0; i < NZ; i++) {
+		diff = abs( z[i] - zs );
+		if (diff < mindiff) {
+			tmpind = i;
+			mindiff = diff;
+		}
+	}
+
+	return tmpind;
 }

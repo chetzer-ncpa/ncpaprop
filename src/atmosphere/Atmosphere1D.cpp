@@ -905,17 +905,7 @@ void NCPA::Atmosphere1D::calculate_attenuation( std::string new_key, std::string
 	if (contains_key( new_key )) {
 		throw std::runtime_error( "Requested key " + new_key + " already exists in atmosphere" );
 	}
-	/*
-	NCPA::AtmosphericProperty1D *c_prop;
-	try {
-		// see if the requested key exists in the map.  If not, it throws
-		// an out_of_range exception that we catch and ignore; if it is then
-		// we throw an exception
-		c_prop = contents_.at( new_key );
-		throw std::runtime_error( "Requested key " + new_key + " already exists in atmosphere" );
-	} catch (const std::out_of_range& oor) { }
-	*/
-
+	
 	size_t nz = this->nz();
 	double *Z = new double[ nz ];
 	double *T = new double[ nz ];

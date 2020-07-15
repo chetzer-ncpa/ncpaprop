@@ -28,6 +28,7 @@ namespace NCPA {
 	std::string deblank( const std::string& orig );
 	double deg2rad( double );
 	double rad2deg( double );
+	double mean( double*, size_t );
 	
 	std::istream &safe_getline( std::istream &is, std::string &s );
 	
@@ -55,6 +56,8 @@ namespace NCPA {
 
 	//int count_rows_arbcol(const char *filename);
 	int count_rows_arbcol( const std::string& filename );
+
+	size_t find_closest_index( double *z, size_t NZ, double zs );
 	
 //	double phase( std::complex< double > );
 	
