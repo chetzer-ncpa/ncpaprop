@@ -240,6 +240,10 @@ NCPA::Atmosphere1D::~Atmosphere1D() {
 	for (std::map< std::string, NCPA::AtmosphericProperty1D * >::iterator it=contents_.begin(); it != contents_.end(); ++it) {
 		delete it->second;
 	}
+	for (std::map< std::string, NCPA::ScalarWithUnits * >::iterator it=scalar_contents_.begin(); 
+			it != scalar_contents_.end(); ++it) {
+		delete it->second;
+	}
 	contents_.clear();
 	scalar_contents_.clear();
 	delete z_;

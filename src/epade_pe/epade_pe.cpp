@@ -53,10 +53,12 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
   	for (i = 0; i < NR; i++) {
   		r[ i ] = ((double)(i+1)) * dr;
   	}
-	
+
+  	lossless 			= param->wasFound( "lossless" );
 	use_atm_1d			= param->wasFound( "atmosfile" );
 	use_atm_2d			= param->wasFound( "atmosfile2d" );
 	use_atm_toy			= param->wasFound( "toy" );
+	top_layer			= !(param->wasFound( "disable_top_layer" ));
 
 	if (use_atm_1d) {
 		atm_profile = new NCPA::Atmosphere1D( param->getString( "atmosfile" ) );
@@ -146,12 +148,21 @@ int NCPA::EPadeSolver::computeTLField() {
 	double *a_t = new double[ NZ ];
 	memset( a_t, 0, NZ * sizeof(double) );
 	atm_profile->get_property_vector( "_CEFF_", c );
+	double c0 = NCPA::mean( c, NZ );
 
 	// @todo implement lossless version
-	atm_profile->get_property_vector( "_ALPHA_", a_t );
+	if (!lossless) {
+		atm_profile->get_property_vector( "_ALPHA_", a_t );
+	}
+	double *abslayer = new double[ NZ ];
+	memset( abslayer, 0, NZ * sizeof(double) );
+	if (top_layer) {
+		absorption_layer( c0 / freq, z, NZ, abslayer );
+	}
+	
+
 	
 	// check vertical sampling
-	double c0 = NCPA::mean( c, NZ );
 	double z_cnd = (c0 / freq) / 10.0;
 	if (h > z_cnd) {
 		std::cerr << "Altitude sampling is too low!  (is " << h << ", should be <= "<< z_cnd << std::endl;
@@ -166,7 +177,7 @@ int NCPA::EPadeSolver::computeTLField() {
 	// Set up vectors
 	indices = new PetscInt[ NZ ];
 	for (i = 0; i < NZ; i++) {
-		k[ i ] = omega / c[ i ] + a_t[ i ] * I;
+		k[ i ] = omega / c[ i ] + (a_t[ i ] + abslayer[ i ]) * I;
 		n[ i ] = k[ i ] / k0;
 		indices[ i ] = i;
 	}
@@ -292,8 +303,16 @@ int NCPA::EPadeSolver::computeTLField() {
 	delete [] a_t;
 	delete [] contents;
 	delete [] indices;
+	delete [] abslayer;
 
 	return 1;
+}
+
+void NCPA::EPadeSolver::absorption_layer( double lambda, double *z, int NZ, double *layer ) {
+	double z_t = z[NZ-1] - lambda;
+	for (int i = 0; i < NZ; i++) {
+		layer[ i ] = absorption_layer_mu * std::exp( (z[i]-z_t) / lambda );
+	}
 }
 
 

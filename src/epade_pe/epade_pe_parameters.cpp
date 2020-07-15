@@ -112,6 +112,10 @@ void NCPA::configure_epade_pe_parameter_set( NCPA::ParameterSet *ps ) {
 	//ps->addUsageLine( "Flags:" );
 	ps->addParameter( new NCPA::FlagParameter( "write_atm_profile" ) );
 	ps->addParameterDescription( "Flags", "--write_atm_profile", "Output atmospheric profile to atm_profile.nm" );
+	ps->addParameter( new NCPA::FlagParameter( "lossless" ) );
+	ps->addParameterDescription( "Flags", "--lossless", "Ignore atmospheric attenuation" );
+	ps->addParameter( new NCPA::FlagParameter( "disable_top_layer" ) );
+	
 
 	// Footer with file formats and sample commands
 	ps->addBlankFooterLine();

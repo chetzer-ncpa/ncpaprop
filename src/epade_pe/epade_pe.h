@@ -27,6 +27,7 @@ namespace NCPA {
 		int get_starter_gaussian( size_t NZ, double *z, double zs, double k0, Vec *psi );
 		int get_starter_self( size_t NZ, double *z, double zs, double k0, Mat *qpowers, size_t npade, 
 			Vec *psi );
+		void absorption_layer( double lambda, double *z, int NZ, double *layer );
 
 		double *z = NULL, *r = NULL, **tl = NULL;
 		double freq;
@@ -34,7 +35,7 @@ namespace NCPA {
 		int NZ, NR;
 		int npade;
 		bool use_atm_1d = false, use_atm_2d = false, use_atm_toy = false;
-		bool z_min_specified = false;
+		bool z_min_specified = false, lossless = false, top_layer = true;
 		double r_max;
 		double z_max;
 		double z_min;
@@ -46,6 +47,8 @@ namespace NCPA {
 		std::vector< double > zt;
 		std::vector< int > zti;
 		int nzplot;
+
+		double absorption_layer_mu = 0.01;
 
 		NCPA::Atmosphere1D *atm_profile;
 		NCPA::Atmosphere2D *atm_profile_2d;
