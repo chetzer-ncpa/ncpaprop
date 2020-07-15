@@ -682,6 +682,7 @@ void NCPA::Atmosphere1D::calculate_sound_speed_from_pressure_and_density( std::s
 	r_prop->convert_units( old_r_units );
 	NCPA::Units::convert( c, nz_, NCPA::UNITS_SPEED_METERS_PER_SECOND, wind_units, c );
 	add_property( new_key, nz_, c, wind_units );
+	delete [] c;
 }
 
 void NCPA::Atmosphere1D::convert_altitude_units( units_t new_units ) {
@@ -869,6 +870,7 @@ void NCPA::Atmosphere1D::resample( double new_dz ) {
 	}
 
 	delete [] new_z;
+	delete [] old_z;
 }
 
 void NCPA::Atmosphere1D::remove_property( std::string key ) {

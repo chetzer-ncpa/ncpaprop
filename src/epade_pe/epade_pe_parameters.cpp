@@ -45,9 +45,9 @@ void NCPA::configure_epade_pe_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->addParameter( new NCPA::StringParameter( modes_of_operation[ 1 ] ) );
 	ps->addParameter( new NCPA::FlagParameter( modes_of_operation[ 2 ] ) );
 	ps->addTest( new NCPA::RadioButtonTest( "atmosphere_type", 3, modes_of_operation ) );
-	ps->addParameterDescription( "Atmospheric Specifications", "--atmosfile", "1-D atmospheric profile filename" );
-	ps->addParameterDescription( "Atmospheric Specifications", "--atmosfile2d", "2-D atmospheric profile filename" );
-	ps->addParameterDescription( "Atmospheric Specifications", "--toy", "Use NCPA toy atmosphere" );
+	ps->addParameterDescription( "Atmosphere", "--atmosfile", "1-D atmospheric profile filename" );
+	ps->addParameterDescription( "Atmosphere", "--atmosfile2d", "2-D atmospheric profile filename" );
+	ps->addParameterDescription( "Atmosphere", "--toy", "Use NCPA toy atmosphere" );
 
 
 	// Required parameters
@@ -55,6 +55,13 @@ void NCPA::configure_epade_pe_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->addTest( new NCPA::RequiredTest( "freq" ) );
 	ps->addTest( new NCPA::FloatGreaterThanTest( "freq", 0.0 ) );
 	ps->addParameterDescription( "Required Parameters", "--freq", "Frequency of analysis (Hz)" );
+
+	ps->addParameter( new NCPA::StringParameter( "starter" ) );
+	ps->addTest( new NCPA::RequiredTest( "starter" ) );
+	test = ps->addTest( new NCPA::StringSetTest( "starter" ) );
+	test->addStringParameter( "self" );
+	test->addStringParameter( "gaussian" );
+	ps->addParameterDescription( "Required Parameters", "--starter", "Starter type: one of { self, gaussian }" );
 
 	ps->addParameter( new NCPA::FloatParameter( "azimuth" ) );
 	ps->addTest( new NCPA::RequiredTest( "azimuth" ) );
@@ -95,6 +102,7 @@ void NCPA::configure_epade_pe_parameter_set( NCPA::ParameterSet *ps ) {
 	test->addStringParameter( "rigid" );
 	ps->addParameterDescription( "Optional Parameters [default]", "--ground_impedence_model", "Impedence model to use.  Currently only \"rigid\" is supported. [rigid]" );
 
+
 /*
 	ps->addParameter( new NCPA::StringParameter( "use_attn_file", "" ) );
 	ps->addParameterDescription( "Optional Parameters [default]", "--use_attn_file", "File name containing attenuation, to override default Sutherland/Bass [n/a]. Columns are #n# Height(km) Attenuation(np/m)" );
@@ -117,10 +125,10 @@ void NCPA::configure_epade_pe_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->setFooterHangingIndent( 4 );
 	ps->setCommandMode( true );
 	//ps->addFooterText("../bin/Modess --singleprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --azimuth 90 --freq 0.1" );
-	ps->addFooterText("../bin/epade_pe --toy --freq 0.1 --azimuth 90 --maxrange_km 1000" );
+	ps->addFooterText("../bin/epade_pe --toy --starter self --freq 0.1 --azimuth 90 --maxrange_km 1000" );
 	ps->addBlankFooterLine();
 	//ps->addFooterText("../bin/Modess --singleprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --azimuth 90 --freq 0.1 --write_2D_TLoss" );
-	ps->addFooterText("../bin/epade_pe --atmosfile NCPA_canonical_profile_trimmed.dat --freq 0.1 --azimuth 90 --maxrange_km 1000" );
+	ps->addFooterText("../bin/epade_pe --starter self --atmosfile NCPA_canonical_profile_trimmed.dat --freq 0.1 --azimuth 90 --maxrange_km 1000" );
 	ps->addBlankFooterLine();
 	//ps->addFooterText("../bin/Modess --Nby2Dprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --freq 0.1 --azimuth_start 0 --azimuth_end 360 --azimuth_step 1" );
 	//ps->addFooterText("../bin/Modess --Nby2Dprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --freq 0.1 --azimuth_start 0 --azimuth_end 360 --azimuth_step 1" );

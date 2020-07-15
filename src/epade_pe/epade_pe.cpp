@@ -38,6 +38,7 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
   	azi 				= param->getFloat( "azimuth" );
 	freq 				= param->getFloat( "freq" );
 	npade 				= param->getInteger( "npade" );
+	starter 			= param->getString( "starter" );
 
 	double dr;
   	if (NR == 0) {
@@ -237,7 +238,14 @@ int NCPA::EPadeSolver::computeTLField() {
 		ierr = MatAXPY( B, P[ i ], qpowers[ i-1 ], DIFFERENT_NONZERO_PATTERN );CHKERRQ(ierr);
 	}
 
-	get_starter_self( NZ, z, zs, k0, qpowers, npade, &psi_o );
+	if (starter == "self") {
+		get_starter_self( NZ, z, zs, k0, qpowers, npade, &psi_o );
+	} else if (starter == "gaussian") {
+		get_starter_gaussian( NZ, z, zs, k0, &psi_o );
+	} else {
+		std::cerr << "Unrecognized starter type: " << starter << std::endl;
+		exit(0);
+	}
 
 	std::cout << "Marching out field..." << std::endl;
 	ierr = VecDuplicate( psi_o, &Bpsi_o );CHKERRQ(ierr);
@@ -277,10 +285,13 @@ int NCPA::EPadeSolver::computeTLField() {
 	for (i = 0; i < npade+1; i++) {    // for some reason throws an error at i == npade
 		ierr = MatDestroy( qpowers + i );CHKERRQ(ierr);
 	}
+	delete [] qpowers;
 	delete [] k;
 	delete [] n;
 	delete [] c;
 	delete [] a_t;
+	delete [] contents;
+	delete [] indices;
 
 	return 1;
 }
@@ -539,6 +550,7 @@ int NCPA::EPadeSolver::epade( int order, double k0, double dr, std::vector<Petsc
 	}
 	delete [] contents;
 	delete [] indices;
+	delete [] c;
 	
 	// clean up memory
 	ierr = KSPDestroy( &ksp );CHKERRQ(ierr);

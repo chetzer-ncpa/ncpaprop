@@ -41,6 +41,7 @@ namespace NCPA {
 		double zs;
 		double zrcv;
 		std::string gnd_imp_model;
+		std::string starter;
 
 		std::vector< double > zt;
 		std::vector< int > zti;

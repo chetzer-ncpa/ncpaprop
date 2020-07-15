@@ -83,4 +83,5 @@ void NCPA::ToyAtmosphere1D::make_gaussian_parameter_( std::string new_key, doubl
     }
 
     add_property( new_key, nz(), newprop, NCPA::Units::fromString( "m/s" ) );
+    delete [] newprop;
 }
