@@ -92,7 +92,7 @@ clean:
 	-$(MAKE) -C src/tdpape clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 	-$(MAKE) -C src/wnlrt clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 #	-$(MAKE) -C src/modess_rd_2wcm clean  PETSC_ARCH=@PETSC_ARCH_COMPLEX@
-	-rm bin/CModBB  bin/CModess  bin/ModBB  bin/Modess  bin/ModessRD1WCM  bin/pape  bin/WMod lib/libatmosphere.a lib/libcommon.a bin/tdpape bin/wnlrt lib/libncpaprop.a
+	-rm bin/CModBB  bin/CModess  bin/ModBB  bin/Modess  bin/ModessRD1WCM  bin/pape  bin/ePape  bin/WMod lib/libatmosphere.a lib/libcommon.a bin/tdpape bin/wnlrt lib/libncpaprop.a
 
 # Test all executables to make sure their output matches the dev machine output
 test:
@@ -102,4 +102,4 @@ test:
 testlong:
 	$(MAKE) -C test testlong
 
-.PHONY:  common atmosphere libncpaprop modess modbb modess_rd_1wcm pade_pe wmod cmodess cmodbb modess_rd_2wcm clean test
+.PHONY:  common atmosphere libncpaprop modess modbb modess_rd_1wcm pade_pe epape_pe wmod cmodess cmodbb modess_rd_2wcm clean test

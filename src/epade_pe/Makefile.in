@@ -7,7 +7,7 @@ include @SLEPC_INCLUDE_FILE_GENERIC@
 
 INCPATHS = @INCLUDEFLAGS@ ${PETSC_CC_INCLUDES} ${SLEPC_CC_INCLUDES}
 OBJS=epade_pe.o epade_pe_parameters.o epade_pe_main.o
-TARGET=epade_pe
+TARGET=ePape
 
 
 all: $(TARGET)

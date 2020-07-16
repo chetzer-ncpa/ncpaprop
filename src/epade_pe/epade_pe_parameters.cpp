@@ -115,7 +115,7 @@ void NCPA::configure_epade_pe_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->addParameter( new NCPA::FlagParameter( "lossless" ) );
 	ps->addParameterDescription( "Flags", "--lossless", "Ignore atmospheric attenuation" );
 	ps->addParameter( new NCPA::FlagParameter( "disable_top_layer" ) );
-	
+
 
 	// Footer with file formats and sample commands
 	ps->addBlankFooterLine();
@@ -129,10 +129,10 @@ void NCPA::configure_epade_pe_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->setFooterHangingIndent( 4 );
 	ps->setCommandMode( true );
 	//ps->addFooterText("../bin/Modess --singleprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --azimuth 90 --freq 0.1" );
-	ps->addFooterText("../bin/epade_pe --toy --starter self --freq 0.1 --azimuth 90 --maxrange_km 1000" );
+	ps->addFooterText("../bin/ePape --starter self --toy --freq 0.1 --azimuth 90 --maxrange_km 1000" );
 	ps->addBlankFooterLine();
 	//ps->addFooterText("../bin/Modess --singleprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --azimuth 90 --freq 0.1 --write_2D_TLoss" );
-	ps->addFooterText("../bin/epade_pe --starter self --atmosfile NCPA_canonical_profile_trimmed.dat --freq 0.1 --azimuth 90 --maxrange_km 1000" );
+	ps->addFooterText("../bin/ePape --starter self --atmosfile NCPA_canonical_profile_trimmed.dat --freq 0.1 --azimuth 90 --maxrange_km 1000 --lossless" );
 	ps->addBlankFooterLine();
 	//ps->addFooterText("../bin/Modess --Nby2Dprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --freq 0.1 --azimuth_start 0 --azimuth_end 360 --azimuth_step 1" );
 	//ps->addFooterText("../bin/Modess --Nby2Dprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --freq 0.1 --azimuth_start 0 --azimuth_end 360 --azimuth_step 1" );
