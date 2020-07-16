@@ -83,12 +83,14 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
 	z_ground = z_min;
 	if (atm_profile->contains_scalar( "Z0" )) {
 		z_ground = atm_profile->get( "Z0" );
-		if (z_ground < z_min) {
-			std::cerr << "Supplied ground height is outside of atmospheric specification." << std::endl;
-			exit(0);
-		}
 	}
-	
+	if (param->wasFound("groundheight_km")) {
+		z_ground = param->getFloat( "groundheight_km" ) * 1000.0;
+	}
+	if (z_ground < z_min) {
+		std::cerr << "Supplied ground height is outside of atmospheric specification." << std::endl;
+		exit(0);
+	}
   
 	// fill and convert to SI units
 	double dz       = (z_max - z_ground)/(NZ - 1);	// the z-grid spacing

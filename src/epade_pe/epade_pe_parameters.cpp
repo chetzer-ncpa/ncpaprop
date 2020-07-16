@@ -93,6 +93,9 @@ void NCPA::configure_epade_pe_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->addParameter( new NCPA::FloatParameter( "receiverheight_km", 0.0 ) );
 	ps->addParameterDescription( "Optional Parameters [default]", "--receiverheight_km", "Receiver height in km [ground]" );
 
+	ps->addParameter( new NCPA::FloatParameter( "groundheight_km", 0.0 ) );
+	ps->addParameterDescription( "Optional Parameters [default]", "--groundheight_km", "Ground height in km [0.0, or Z0 parameter in profile]" );
+
 	ps->addParameter( new NCPA::IntegerParameter( "Nrng_steps", 0 ) );
 	ps->addTest( new NCPA::IntegerGreaterThanOrEqualToTest( "Nrng_steps", 0 ) );
 	ps->addParameterDescription( "Optional Parameters [default]", "--Nrng_steps", "Number of range steps to use [decide internally]" );
