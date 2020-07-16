@@ -28,8 +28,10 @@ namespace NCPA {
 		int get_starter_self( size_t NZ, double *z, double zs, double k0, Mat *qpowers, size_t npade, 
 			Vec *psi );
 		void absorption_layer( double lambda, double *z, int NZ, double *layer );
+		void fill_atm_vector( NCPA::Atmosphere1D *atm, int NZvec, double *zvec, std::string key,
+			double groundheight, double *vec );
 
-		double *z = NULL, *r = NULL, **tl = NULL;
+		double *z = NULL, *z_abs = NULL, *r = NULL, **tl = NULL;
 		double freq;
 		double azi;
 		int NZ, NR;
@@ -39,6 +41,7 @@ namespace NCPA {
 		double r_max;
 		double z_max;
 		double z_min;
+		double z_ground;
 		double zs;
 		double zrcv;
 		std::string gnd_imp_model;

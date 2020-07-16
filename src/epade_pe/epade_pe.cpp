@@ -33,7 +33,7 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
   	z_max	 			= param->getFloat( "maxheight_km" ) * 1000.0;      // @todo fix elsewhere that m is required
   	zs			 		= param->getFloat( "sourceheight_km" ) * 1000.0;
   	zrcv		 		= param->getFloat( "receiverheight_km" ) * 1000.0;
-  	NZ 					= param->getInteger( "Nz_grid" );
+  	NZ 					= param->getInteger( "Nz_grid" );    // @todo calculate dynamically
   	NR 					= param->getInteger( "Nrng_steps" );
   	azi 				= param->getFloat( "azimuth" );
 	freq 				= param->getFloat( "freq" );
@@ -79,20 +79,37 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
 
 
 	z_max = NCPA::min( z_max, atm_profile->get_maximum_altitude() );
-	z_min = NCPA::max( atm_profile->get( "Z0" ), atm_profile->get_minimum_altitude() );
+	z_min = atm_profile->get_minimum_altitude();
+	z_ground = z_min;
+	if (atm_profile->contains_scalar( "Z0" )) {
+		z_ground = atm_profile->get( "Z0" );
+		if (z_ground < z_min) {
+			std::cerr << "Supplied ground height is outside of atmospheric specification." << std::endl;
+			exit(0);
+		}
+	}
 	
   
 	// fill and convert to SI units
-	double dz       = (z_max - z_min)/(NZ - 1);	// the z-grid spacing
+	double dz       = (z_max - z_ground)/(NZ - 1);	// the z-grid spacing
+	z = new double[ NZ ];
+	z_abs = new double[ NZ ];
+	std::memset( z, 0, NZ * sizeof( double ) );
+	for (i = 0; i < NZ; i++) {
+		z[ i ]     = ((double)i) * dz;
+		z_abs[ i ] = z[ i ] + z_ground;
+	}
+	/*
 	atm_profile->resample( dz );
 	NZ = atm_profile->nz();
 	z = new double[ NZ ];
 	atm_profile->get_altitude_vector( z );
+	*/
 	tl = NCPA::dmatrix( NZ, NR-1 );
 
 	int plotz = 10;
 	for (i = 0; i < NZ; i += plotz) {
-		zt.push_back( z[ i ] );
+		zt.push_back( z_abs[ i ] );
 		zti.push_back( i );
 	}
 	nzplot = zt.size();
@@ -102,8 +119,6 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
   
 	// Note: the rho, Pr, T, zw, mw are computed wrt ground level i.e.
 	// the first value is at the ground level e.g. rho[0] = rho(z_min)
-	// @todo make fill_vector( zvec ) methods in AtmosphericProfile()
-	// @todo add underscores to internally calculated parameter keys
 	atm_profile->calculate_sound_speed_from_pressure_and_density( "_C0_", "P", "RHO", Units::fromString( "m/s" ) );
 	atm_profile->calculate_wind_speed( "_WS_", "U", "V" );
 	atm_profile->calculate_wind_direction( "_WD_", "U", "V" );
@@ -115,8 +130,17 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
 NCPA::EPadeSolver::~EPadeSolver() {
 	delete [] r;
 	delete [] z;
+	delete [] z_abs;
 	NCPA::free_dmatrix( tl, NZ, NR-1 );
 	delete atm_profile;
+}
+
+void NCPA::EPadeSolver::fill_atm_vector( NCPA::Atmosphere1D *atm, int NZvec, double *zvec, std::string key,
+	double groundheight, double *vec ) {
+
+	for (int i = 0; i < NZvec; i++) {
+		vec[i] = atm->get( key, zvec[i] + groundheight );
+	}
 }
 
 int NCPA::EPadeSolver::computeTLField() {
@@ -131,6 +155,7 @@ int NCPA::EPadeSolver::computeTLField() {
 	Mat *qpowers;
 	Vec psi_o, Bpsi_o; //, psi_temp;
 	KSP ksp;
+	// PC pc;
 
 	double omega = 2.0 * PI * freq;
 	//double gamma = 1.4;
@@ -147,12 +172,14 @@ int NCPA::EPadeSolver::computeTLField() {
 	memset( c, 0, NZ * sizeof(double) );
 	double *a_t = new double[ NZ ];
 	memset( a_t, 0, NZ * sizeof(double) );
-	atm_profile->get_property_vector( "_CEFF_", c );
+	//atm_profile->get_property_vector( "_CEFF_", c );
+	fill_atm_vector( atm_profile, NZ, z, "_CEFF_", z_ground, c );
 	double c0 = NCPA::mean( c, NZ );
 
 	// @todo implement lossless version
 	if (!lossless) {
-		atm_profile->get_property_vector( "_ALPHA_", a_t );
+		//atm_profile->get_property_vector( "_ALPHA_", a_t );
+		fill_atm_vector( atm_profile, NZ, z, "_ALPHA_", z_ground, a_t );
 	}
 	double *abslayer = new double[ NZ ];
 	memset( abslayer, 0, NZ * sizeof(double) );
@@ -264,6 +291,8 @@ int NCPA::EPadeSolver::computeTLField() {
 
 	ierr = KSPCreate( PETSC_COMM_SELF, &ksp );CHKERRQ(ierr);
 	ierr = KSPSetOperators( ksp, C, C );CHKERRQ(ierr);
+	// ierr = KSPGetPC( ksp, &pc );CHKERRQ(ierr);
+	// ierr = PCSetType( pc, PCLU );
 	ierr = KSPSetFromOptions( ksp );CHKERRQ(ierr);
 	for (PetscInt ir = 0; ir < (NR-1); ir++) {
 
@@ -284,6 +313,8 @@ int NCPA::EPadeSolver::computeTLField() {
 
 		ierr = MatMult( B, psi_o, Bpsi_o );CHKERRQ(ierr);
 		ierr = KSPSetOperators( ksp, C, C );CHKERRQ(ierr);  // may not be necessary
+		// ierr = KSPGetPC( ksp, &pc );CHKERRQ(ierr);
+		// ierr = PCSetType( pc, PCLU );
 		ierr = KSPSolve( ksp, Bpsi_o, psi_o );CHKERRQ(ierr);
 	}
 
