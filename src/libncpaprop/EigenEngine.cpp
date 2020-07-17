@@ -353,7 +353,7 @@ int NCPA::EigenEngine::doWideAngleCalculation( int Nz_grid, double dz, double k_
     */
     ierr = EPSGetConverged(eps,nconv); CHKERRQ(ierr);
     
-    if (nconv>0) {
+    if ((*nconv)>0) {
         for( i=0; i<(*nconv); i++ ) {
             ierr = EPSGetEigenpair(eps,i,&kr,&ki,xr,xi);CHKERRQ(ierr);
             #ifdef PETSC_USE_COMPLEX
