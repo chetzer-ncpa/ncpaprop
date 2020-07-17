@@ -249,6 +249,7 @@ NCPA::Atmosphere1D::~Atmosphere1D() {
 	delete z_;
 }
 
+
 size_t NCPA::Atmosphere1D::get_basis_length() const {
 	//return nz_;
 	return z_->size();

@@ -19,14 +19,16 @@ namespace NCPA {
 		void insert_profile( const Atmosphere1D *profile, double range );
 		void set_insert_range_units( units_t u );
 		void sort_profiles();
+		void convert_range_units( NCPA::units_t new_units );
 
 		// data retrieval, single values
-		double get( std::string key, double range );    // retrieve scalar quantity from profile
-		double get( std::string key, double range, double altitude );
-		double get_first_derivative( std::string key, double range, double altitude );
-		double get_second_derivative( std::string key, double range, double altitude );
+		double get( double range, std::string key );    // retrieve scalar quantity from profile
+		double get( double range, std::string key, double altitude );
+		double get_first_derivative( double range, std::string key, double altitude );
+		double get_second_derivative( double range, std::string key, double altitude );
 
 		// data retrieval, arrays
+		size_t get_profile_index( double range );
 		size_t nz( double range );
 		void get_altitude_vector( double range, double *buffer, units_t *buffer_units );
 		void get_property_vector( double range, std::string key, double *buffer, units_t *buffer_units );
@@ -34,6 +36,9 @@ namespace NCPA {
 		void get_property_vector( double range, std::string key, double *buffer );
 		units_t get_altitude_units( double range );
 		units_t get_property_units( double range, std::string key );
+		bool contains_scalar( double range, std::string key );
+		bool contains_vector( double range, std::string key );
+		bool contains_key( double range, std::string key );
 
 		// metadata
 		double get_minimum_altitude( double range );
@@ -61,7 +66,7 @@ namespace NCPA {
 		void clear_last_index_();
 		void set_last_index_( size_t ind );
 		void calculate_midpoints_();
-		size_t get_profile_index_( double range );
+		
 
 		// data storage
 		std::vector< Atmosphere1D * > profiles_;

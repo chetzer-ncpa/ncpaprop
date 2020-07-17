@@ -99,7 +99,7 @@ void NCPA::Atmosphere2D::calculate_midpoints_() {
 	}
 }
 
-size_t NCPA::Atmosphere2D::get_profile_index_( double range ) {
+size_t NCPA::Atmosphere2D::get_profile_index( double range ) {
 	if (profiles_.size() == 0) {
 		throw std::runtime_error( "No profiles have been added to 2-D atmosphere!" );
 	}
@@ -128,69 +128,84 @@ size_t NCPA::Atmosphere2D::get_profile_index_( double range ) {
 	return ind;
 }
 
-double NCPA::Atmosphere2D::get( std::string key, double range ) {
-	size_t ind = get_profile_index_( range );
+double NCPA::Atmosphere2D::get( double range, std::string key ) {
+	size_t ind = get_profile_index( range );
 	return profiles_.at( ind )->get( key );
 }
 
-double NCPA::Atmosphere2D::get( std::string key, double range, double altitude ) {
-	size_t ind = get_profile_index_( range );
+double NCPA::Atmosphere2D::get( double range, std::string key, double altitude ) {
+	size_t ind = get_profile_index( range );
 	return profiles_.at( ind )->get( key, altitude );
 }
 
-double NCPA::Atmosphere2D::get_first_derivative( std::string key, double range, double altitude ) {
-	size_t ind = get_profile_index_( range );
+double NCPA::Atmosphere2D::get_first_derivative( double range, std::string key, double altitude ) {
+	size_t ind = get_profile_index( range );
 	return profiles_.at( ind )->get_first_derivative( key, altitude );
 }
 
-double NCPA::Atmosphere2D::get_second_derivative( std::string key, double range, double altitude ) {
-	size_t ind = get_profile_index_( range );
+double NCPA::Atmosphere2D::get_second_derivative( double range, std::string key, double altitude ) {
+	size_t ind = get_profile_index( range );
 	return profiles_.at( ind )->get_second_derivative( key, altitude );
 }
 
 size_t NCPA::Atmosphere2D::nz( double range ) {
-	size_t ind = get_profile_index_( range );
+	size_t ind = get_profile_index( range );
 	return profiles_.at( ind )->nz();
 }
 
 void NCPA::Atmosphere2D::get_altitude_vector( double range, double *buffer, units_t *buffer_units ) {
-	size_t ind = get_profile_index_( range );
+	size_t ind = get_profile_index( range );
 	profiles_.at( ind )->get_altitude_vector( buffer, buffer_units );
 }
 
 void NCPA::Atmosphere2D::get_property_vector( double range, std::string key, double *buffer, units_t *buffer_units ) {
-	size_t ind = get_profile_index_( range );
+	size_t ind = get_profile_index( range );
 	profiles_.at( ind )->get_property_vector( key, buffer, buffer_units );
 }
 
 void NCPA::Atmosphere2D::get_altitude_vector( double range, double *buffer ) {
-	size_t ind = get_profile_index_( range );
+	size_t ind = get_profile_index( range );
 	profiles_.at( ind )->get_altitude_vector( buffer );
 }
 
 void NCPA::Atmosphere2D::get_property_vector( double range, std::string key, double *buffer ) {
-	size_t ind = get_profile_index_( range );
+	size_t ind = get_profile_index( range );
 	profiles_.at( ind )->get_property_vector( key, buffer );
 }
 
 NCPA::units_t NCPA::Atmosphere2D::get_altitude_units( double range ) {
-	size_t ind = get_profile_index_( range );
+	size_t ind = get_profile_index( range );
 	return profiles_.at( ind )->get_altitude_units();
 }
 
 NCPA::units_t NCPA::Atmosphere2D::get_property_units( double range, std::string key ) {
-	size_t ind = get_profile_index_( range );
+	size_t ind = get_profile_index( range );
 	return profiles_.at( ind )->get_property_units( key );
 }
 
 double NCPA::Atmosphere2D::get_minimum_altitude( double range ) {
-	size_t ind = get_profile_index_( range );
+	size_t ind = get_profile_index( range );
 	return profiles_.at( ind )->get_minimum_altitude();
 }
 
 double NCPA::Atmosphere2D::get_maximum_altitude( double range ) {
-	size_t ind = get_profile_index_( range );
+	size_t ind = get_profile_index( range );
 	return profiles_.at( ind )->get_maximum_altitude();
+}
+
+bool NCPA::Atmosphere2D::contains_scalar( double range, std::string key ) {
+	size_t ind = get_profile_index( range );
+	return profiles_.at( ind )->contains_scalar( key );
+}
+
+bool NCPA::Atmosphere2D::contains_vector( double range, std::string key ) {
+	size_t ind = get_profile_index( range );
+	return profiles_.at( ind )->contains_vector( key );
+}
+
+bool NCPA::Atmosphere2D::contains_key( double range, std::string key ) {
+	size_t ind = get_profile_index( range );
+	return profiles_.at( ind )->contains_key( key );
 }
 
 void NCPA::Atmosphere2D::calculate_sound_speed_from_temperature( std::string new_key, std::string temperature_key, 
@@ -260,4 +275,11 @@ void NCPA::Atmosphere2D::convert_property_units( std::string key, NCPA::units_t 
 		  it != profiles_.end(); ++it ) {
 		(*it)->convert_property_units( key, new_units );
 	}
+}
+
+void NCPA::Atmosphere2D::convert_range_units( NCPA::units_t new_units ) {
+	this->convert_property_units( "_RANGE_", new_units );
+	sorted_ = false;
+	clear_last_index_();
+	calculate_midpoints_();
 }

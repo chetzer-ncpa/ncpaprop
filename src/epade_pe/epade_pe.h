@@ -28,8 +28,17 @@ namespace NCPA {
 		int get_starter_self( size_t NZ, double *z, double zs, double k0, Mat *qpowers, size_t npade, 
 			Vec *psi );
 		void absorption_layer( double lambda, double *z, int NZ, double *layer );
-		void fill_atm_vector( NCPA::Atmosphere1D *atm, int NZvec, double *zvec, std::string key,
+		void fill_atm_vector( NCPA::Atmosphere2D *atm, double range, int NZvec, double *zvec, std::string key,
 			double groundheight, double *vec );
+
+		int make_q_powers( int NZvec, double *zvec, double k0, double h2, std::complex<double> *n, 
+			size_t nqp, Mat *qpowers );
+		int make_B_and_C_matrices( Mat *qpowers, int npade, int NZ, 
+			std::vector< std::complex< double > > &P, std::vector< std::complex< double > > &Q,
+			Mat *B, Mat *C );
+		void calculate_atmosphere_parameters( NCPA::Atmosphere2D *atm, int NZvec, double *z_vec, 
+			double r, double z_g, bool use_lossless, bool use_top_layer, double freq, double &k0, double &c0, 
+			double *c_vec, double *a_vec, std::complex<double> *k_vec, std::complex<double> *n_vec );
 
 		double *z = NULL, *z_abs = NULL, *r = NULL, **tl = NULL;
 		double freq;
@@ -37,13 +46,13 @@ namespace NCPA {
 		int NZ, NR;
 		int npade;
 		bool use_atm_1d = false, use_atm_2d = false, use_atm_toy = false;
-		bool z_min_specified = false, lossless = false, top_layer = true;
+		bool z_ground_specified = false, lossless = false, top_layer = true;
 		double r_max;
 		double z_max;
 		double z_min;
 		double z_ground;
 		double zs;
-		double zrcv;
+		//double zrcv;
 		std::string gnd_imp_model;
 		std::string starter;
 
@@ -53,7 +62,7 @@ namespace NCPA {
 
 		double absorption_layer_mu = 0.01;
 
-		NCPA::Atmosphere1D *atm_profile;
+		//NCPA::Atmosphere1D *atm_profile;
 		NCPA::Atmosphere2D *atm_profile_2d;
 
 
