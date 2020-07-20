@@ -26,8 +26,7 @@ using namespace NCPA;
 int main( int argc, char **argv ) {
 	
 	using namespace std::chrono;
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-
+	
 	std::string help = "ePade Parabolic Equation Solver";
 	//PetscErrorCode ierr = PetscInitialize( &argc, &argv, (char *)0, help.c_str());CHKERRQ(ierr);
 	PetscErrorCode ierr = PetscInitializeNoArguments();CHKERRQ(ierr);
@@ -64,17 +63,19 @@ int main( int argc, char **argv ) {
 	}
 	
 	EPadeSolver *solver = new EPadeSolver( param );
+	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	solver->computeTLField();
+	high_resolution_clock::time_point t2 = high_resolution_clock::now();
+	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+	cout << "Elapsed time: " << time_span.count() << " seconds." << endl;
 
+	cout << "Writing 1-D output to tloss_1d.pe" << endl;
 	solver->output1DTL( "tloss_1d.pe" );
+	cout << "Writing 2-D output to tloss_2d.pe" << endl;
 	solver->output2DTL( "tloss_2d.pe" );
 
 	delete solver;
 	delete param;
-
-	high_resolution_clock::time_point t2 = high_resolution_clock::now();
-	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
-	cout << "Elapsed time: " << time_span.count() << " seconds." << endl;
 
 	ierr = PetscFinalize();
 

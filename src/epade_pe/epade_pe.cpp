@@ -62,6 +62,7 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
 	use_atm_2d			= param->wasFound( "atmosfile2d" );
 	use_atm_toy			= param->wasFound( "toy" );
 	top_layer			= !(param->wasFound( "disable_top_layer" ));
+	use_topo			= param->wasFound( "topo" );
 
 	//NCPA::Atmosphere1D *atm_profile_1d;
 	if (use_atm_1d) {
@@ -118,8 +119,6 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
   			<< std::endl;
   		exit(0);
   	}
-
-
 }
 
 NCPA::EPadeSolver::~EPadeSolver() {
@@ -147,13 +146,30 @@ int NCPA::EPadeSolver::computeTLField() {
 	// set up z grid for flat ground.  When we add terrain we will need to move this inside
 	// the range loop
 	size_t profile_index = atm_profile_2d->get_profile_index( 0.0 );
-	z_max = NCPA::min( z_max, atm_profile_2d->get_overall_maximum_altitude() );
+	double minlimit, maxlimit;
+	atm_profile_2d->get_maximum_altitude_limits( minlimit, maxlimit );
+	z_max = NCPA::min( z_max, minlimit );    // lowest valid top value
 
 	if (use_topo) {
-		std::cerr << "Topography not yet implemented" << std::endl;
-		exit(0);
+		z_bottom = -5000.0;    // make this eventually depend on frequency
+		z_ground = atm_profile_2d->get( 0.0, "Z0" );
+		NZ = ((int)std::floor((z_max - z_bottom) / dz)) + 1;
+		z = new double[ NZ ];
+		z_abs = new double[ NZ ];
+		std::memset( z, 0, NZ * sizeof( double ) );
+		std::memset( z_abs, 0, NZ * sizeof( double ) );
+		indices = new PetscInt[ NZ ];
+		std::memset( indices, 0, NZ*sizeof(PetscInt) );
+		for (i = 0; i < NZ; i++) {
+			z[ i ] = ((double)i) * dz + z_bottom;
+			z_abs[ i ] = z[ i ];
+			indices[ i ] = i;
+		}
+		zs = NCPA::max( zs, z_ground+dz );
+
 	} else {
-		z_min = atm_profile_2d->get_overall_minimum_altitude();
+		atm_profile_2d->get_minimum_altitude_limits( minlimit, z_min );
+		//z_min = atm_profile_2d->get_highest_minimum_altitude();
 		if ( (!z_ground_specified) && atm_profile_2d->contains_scalar( 0.0, "Z0" )) {
 			z_ground = atm_profile_2d->get( 0.0, "Z0" );
 		}
@@ -161,7 +177,7 @@ int NCPA::EPadeSolver::computeTLField() {
 			std::cerr << "Supplied ground height is outside of atmospheric specification." << std::endl;
 			exit(0);
 		}
-	  
+	  	z_bottom = z_min;
 		// fill and convert to SI units
 		//double dz       = (z_max - z_ground)/(NZ - 1);	// the z-grid spacing
 		NZ = ((int)std::floor((z_max - z_ground) / dz)) + 1;
@@ -176,11 +192,11 @@ int NCPA::EPadeSolver::computeTLField() {
 			z_abs[ i ] = z[ i ] + z_ground;
 			indices[ i ] = i;
 		}
-		tl = NCPA::dmatrix( NZ, NR-1 );
+		zs = NCPA::max( zs-z_ground+dz, dz );
 	}
+	tl = NCPA::dmatrix( NZ, NR-1 );
 	
-
-	int plotz = 10;
+	int plotz = 2;
 	for (i = 0; i < NZ; i += plotz) {
 		zt.push_back( z_abs[ i ] );
 		zti.push_back( i );
@@ -205,7 +221,7 @@ int NCPA::EPadeSolver::computeTLField() {
 	std::complex<double> *k = new std::complex<double>[ NZ ];
 	std::complex<double> *n = new std::complex<double>[ NZ ];
 	std::cout << "Using atmosphere index " << profile_index << std::endl;
-	calculate_atmosphere_parameters( atm_profile_2d, NZ, z, 0.0, z_ground, lossless, top_layer, freq, 
+	calculate_atmosphere_parameters( atm_profile_2d, NZ, z, 0.0, z_ground, lossless, top_layer, freq, use_topo,
 		k0, c0, c, a_t, k, n );
 
 
@@ -315,7 +331,7 @@ int NCPA::EPadeSolver::computeTLField() {
 	// for (i = 1; i < P.size(); i++) {
 	// 	ierr = MatAXPY( B, P[ i ], qpowers[ i-1 ], DIFFERENT_NONZERO_PATTERN );CHKERRQ(ierr);
 	// }
-
+	//double zg = use_topo ? z_ground : 0.0;
 	if (starter == "self") {
 		get_starter_self( NZ, z, zs, k0, qpowers, npade, &psi_o );
 	} else if (starter == "gaussian") {
@@ -344,7 +360,7 @@ int NCPA::EPadeSolver::computeTLField() {
 
 			profile_index = atm_profile_2d->get_profile_index( rr );
 			calculate_atmosphere_parameters( atm_profile_2d, NZ, z, rr, z_ground, lossless, top_layer, freq, 
-				k0, c0, c, a_t, k, n );
+				use_topo, k0, c0, c, a_t, k, n );
 			for (i = 0; i < npade+1; i++) {
 				ierr = MatDestroy( qpowers + i );CHKERRQ(ierr);
 			}
@@ -376,6 +392,7 @@ int NCPA::EPadeSolver::computeTLField() {
 		// ierr = PCSetType( pc, PCLU );
 		ierr = KSPSolve( ksp, Bpsi_o, psi_o );CHKERRQ(ierr);
 	}
+	std::cout << "Stopped at range " << r[ NR-1 ]/1000.0 << " km" << std::endl;
 
 	//ierr = MatDestroy( &q );       CHKERRQ(ierr);
 	ierr = MatDestroy( &B );       CHKERRQ(ierr);
@@ -398,8 +415,9 @@ int NCPA::EPadeSolver::computeTLField() {
 }
 
 void NCPA::EPadeSolver::calculate_atmosphere_parameters( NCPA::Atmosphere2D *atm, int NZvec, double *z_vec, 
-	double r, double z_g, bool use_lossless, bool use_top_layer, double freq, double &k0, double &c0, 
-	double *c_vec, double *a_vec, std::complex<double> *k_vec, std::complex<double> *n_vec ) {
+	double r, double z_g, bool use_lossless, bool use_top_layer, double freq, bool absolute, 
+	double &k0, double &c0, double *c_vec, double *a_vec, std::complex<double> *k_vec, 
+	std::complex<double> *n_vec ) {
 
 	std::complex<double> I( 0.0, 1.0 );
 
@@ -409,11 +427,21 @@ void NCPA::EPadeSolver::calculate_atmosphere_parameters( NCPA::Atmosphere2D *atm
 	std::memset( n_vec, 0, NZvec * sizeof( std::complex< double > ) );
 
 	// z_vec is relative to ground
-	fill_atm_vector( atm, r, NZvec, z_vec, "_CEFF_", z_g, c_vec );
-	c0 = NCPA::mean( c_vec, NZvec );
+	if (absolute) {
+		fill_atm_vector_absolute( atm, r, NZvec, z_vec, "_CEFF_", c_underground, c_vec );
+		int zeroind = find_closest_index( z_vec, NZvec, 0.0 );
+		c0 = NCPA::mean( c_vec+zeroind, NZvec-zeroind );
+	} else {
+		fill_atm_vector_relative( atm, r, NZvec, z_vec, "_CEFF_", z_g, c_vec );
+		c0 = NCPA::mean( c_vec, NZvec );
+	}
 
 	if (!use_lossless) {
-		fill_atm_vector( atm, r, NZvec, z_vec, "_ALPHA_", z_g, a_vec );
+		if (absolute) {
+			fill_atm_vector_absolute( atm, r, NZvec, z_vec, "_ALPHA_", 0.0, a_vec );
+		} else {
+			fill_atm_vector_relative( atm, r, NZvec, z_vec, "_ALPHA_", z_g, a_vec );
+		}
 	}
 	double *abslayer = new double[ NZvec ];
 	memset( abslayer, 0, NZvec * sizeof(double) );
@@ -431,13 +459,27 @@ void NCPA::EPadeSolver::calculate_atmosphere_parameters( NCPA::Atmosphere2D *atm
 	}
 }
 
-void NCPA::EPadeSolver::fill_atm_vector( NCPA::Atmosphere2D *atm, double range, int NZvec, double *zvec, 
+void NCPA::EPadeSolver::fill_atm_vector_relative( NCPA::Atmosphere2D *atm, double range, int NZvec, double *zvec, 
 	std::string key, double groundheight, double *vec ) {
 
 	for (int i = 0; i < NZvec; i++) {
 		vec[i] = atm->get( range, key, zvec[i] + groundheight );
 	}
 }
+
+void NCPA::EPadeSolver::fill_atm_vector_absolute( NCPA::Atmosphere2D *atm, double range, int NZvec, double *zvec, 
+	std::string key, double fill_value, double *vec ) {
+
+	double zmin = atm->get( range, "Z0" );
+	for (int i = 0; i < NZvec; i++) {
+		if (zvec[i] < zmin) {
+			vec[i] = fill_value;
+		} else {
+			vec[i] = atm->get( range, key, zvec[i] );
+		}
+	}
+}
+
 
 
 int NCPA::EPadeSolver::make_B_and_C_matrices( Mat *qpowers, int npade, int NZ, 
@@ -546,11 +588,14 @@ int NCPA::EPadeSolver::get_starter_gaussian( size_t NZ, double *z, double zs, do
 	ierr = VecCreate( PETSC_COMM_SELF, psi );CHKERRQ(ierr);
 	ierr = VecSetSizes( *psi, PETSC_DECIDE, NZ );CHKERRQ(ierr);
 	ierr = VecSetFromOptions( *psi ); CHKERRQ(ierr);
+	ierr = VecSet( *psi, 0.0 );
 
 	for (PetscInt i = 0; i < NZ; i++) {
-		tempval = -( k0*k0/fac/fac ) * (z[i] - zs) * (z[i] - zs);
-		tempval = sqrt( k0/fac ) * exp( tempval );
-		ierr = VecSetValues( *psi, 1, &i, &tempval, INSERT_VALUES );CHKERRQ(ierr);
+		//if (z[i] >= zg) {
+			tempval = -( k0*k0/fac/fac ) * (z[i] - zs) * (z[i] - zs);
+			tempval = sqrt( k0/fac ) * exp( tempval );
+			ierr = VecSetValues( *psi, 1, &i, &tempval, INSERT_VALUES );CHKERRQ(ierr);
+		//}
 	}
 	ierr = VecAssemblyBegin( *psi );CHKERRQ(ierr);
 	ierr = VecAssemblyEnd( *psi );CHKERRQ(ierr);
@@ -563,7 +608,7 @@ int NCPA::EPadeSolver::get_starter_self( size_t NZ, double *z, double zs, double
 	Vec rhs, ksi, Bksi, tempvec;
 	Mat A, AA, B, C;
 	KSP ksp, ksp2;
-	PetscScalar I( 0.0, 1.0 ), tempsc;
+	PetscScalar I( 0.0, 1.0 ), tempsc, zeroval = 0.0;
 	PetscInt ii, Istart, Iend;
 	PetscErrorCode ierr;
 	
@@ -651,6 +696,7 @@ int NCPA::EPadeSolver::get_starter_self( size_t NZ, double *z, double zs, double
 	// multiply and scale
 	ierr = MatMult( AA, tempvec, *psi );CHKERRQ(ierr);
 	ierr = VecScale( *psi, hank_inv );CHKERRQ(ierr);
+
 
 	// clean up
 	ierr = MatDestroy( &A );CHKERRQ(ierr);

@@ -284,20 +284,24 @@ void NCPA::Atmosphere2D::convert_range_units( NCPA::units_t new_units ) {
 	calculate_midpoints_();
 }
 
-double NCPA::Atmosphere2D::get_overall_minimum_altitude() {
-	double minalt = -DBL_MAX;
+void NCPA::Atmosphere2D::get_minimum_altitude_limits( double &lowlimit, double &highlimit ) {
+	lowlimit = DBL_MAX;
+	highlimit = -DBL_MAX;
 	for ( std::vector< NCPA::Atmosphere1D * >::iterator it = profiles_.begin();
 		  it != profiles_.end(); ++it ) {
-		minalt = NCPA::max( minalt, (*it)->get_minimum_altitude() );
+		double curalt = (*it)->get_minimum_altitude();
+		highlimit = NCPA::max( highlimit, curalt );
+		lowlimit = NCPA::min( lowlimit, curalt );
 	}
-	return minalt;
 }
 
-double NCPA::Atmosphere2D::get_overall_maximum_altitude() {
-	double maxalt = DBL_MAX;
+void NCPA::Atmosphere2D::get_maximum_altitude_limits( double &lowlimit, double &highlimit ) {
+	lowlimit = DBL_MAX;
+	highlimit = -DBL_MAX;
 	for ( std::vector< NCPA::Atmosphere1D * >::iterator it = profiles_.begin();
 		  it != profiles_.end(); ++it ) {
-		maxalt = NCPA::min( maxalt, (*it)->get_maximum_altitude() );
+		double curalt = (*it)->get_maximum_altitude();
+		highlimit = NCPA::max( highlimit, curalt );
+		lowlimit = NCPA::min( lowlimit, curalt );
 	}
-	return maxalt;
 }

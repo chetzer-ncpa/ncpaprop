@@ -42,9 +42,9 @@ namespace NCPA {
 
 		// metadata
 		double get_minimum_altitude( double range );
-		double get_overall_minimum_altitude();
+		void get_minimum_altitude_limits( double &lowlimit, double &highlimit );
 		double get_maximum_altitude( double range );
-		double get_overall_maximum_altitude();
+		void get_maximum_altitude_limits( double &lowlimit, double &highlimit );
 		//double get_overall_maximum_altitude() const;
 
 		// bulk calculations
