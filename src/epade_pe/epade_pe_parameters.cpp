@@ -79,13 +79,19 @@ void NCPA::configure_epade_pe_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->addTest( new NCPA::IntegerGreaterThanOrEqualToTest( "npade", 3 ) );
 	ps->addParameterDescription( "Optional Parameters [default]", "--npade", "Number of Pade coefficients to use [4]" );
 
+	ps->addParameter( new NCPA::FloatParameter( "dz_m", -1.0 ) );
+	ps->addParameterDescription( "Optional Parameters [default]", "--dz_m", "Altitude resolution in meters [automatic]" );
+
 	ps->addParameter( new NCPA::FloatParameter( "maxheight_km", 150.0 ) );
 	ps->addTest( new NCPA::FloatGreaterThanOrEqualToTest( "maxheight_km", 0.1 ));
 	ps->addParameterDescription( "Optional Parameters [default]", "--maxheight_km", "Maximum height of analysis in km [150.0, or max height of atmosphere]" );
 
+	/*
 	ps->addParameter( new NCPA::IntegerParameter( "Nz_grid", 5001 ) );
 	ps->addTest( new NCPA::IntegerGreaterThanOrEqualToTest( "Nz_grid", 10 ) );
 	ps->addParameterDescription( "Optional Parameters [default]", "--Nz_grid", "Number of vertical grid points to use [5001]" );
+	*/
+
 
 	ps->addParameter( new NCPA::FloatParameter( "sourceheight_km", 0.0 ) );
 	ps->addParameterDescription( "Optional Parameters [default]", "--sourceheight_km", "Source height in km [ground]" );
@@ -117,6 +123,8 @@ void NCPA::configure_epade_pe_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->addParameterDescription( "Flags", "--write_atm_profile", "Output atmospheric profile to atm_profile.nm" );
 	ps->addParameter( new NCPA::FlagParameter( "lossless" ) );
 	ps->addParameterDescription( "Flags", "--lossless", "Ignore atmospheric attenuation" );
+	ps->addParameter( new NCPA::FlagParameter( "topo" ) );
+	ps->addParameterDescription( "Flags", "--topo", "Use topography.  Requires presence of Z0 parameter in atmospheric files" );
 	ps->addParameter( new NCPA::FlagParameter( "disable_top_layer" ) );
 
 

@@ -44,14 +44,15 @@ namespace NCPA {
 		double freq;
 		double azi;
 		int NZ, NR;
+		double dz;
 		int npade;
-		bool use_atm_1d = false, use_atm_2d = false, use_atm_toy = false;
+		bool use_atm_1d = false, use_atm_2d = false, use_atm_toy = false, use_topo = false;
 		bool z_ground_specified = false, lossless = false, top_layer = true;
 		double r_max;
 		double z_max;
-		double z_min;
-		double z_ground;
+		double z_min, z_ground, z_bottom;
 		double zs;
+		double c_underground = 1.0e7;
 		//double zrcv;
 		std::string gnd_imp_model;
 		std::string starter;

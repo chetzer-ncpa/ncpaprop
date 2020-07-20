@@ -36,7 +36,7 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
   	z_max	 			= param->getFloat( "maxheight_km" ) * 1000.0;      // @todo fix elsewhere that m is required
   	zs			 		= param->getFloat( "sourceheight_km" ) * 1000.0;
   	//zrcv		 		= param->getFloat( "receiverheight_km" ) * 1000.0;
-  	NZ 					= param->getInteger( "Nz_grid" );    // @todo calculate dynamically
+  	//NZ 					= param->getInteger( "Nz_grid" );    // @todo calculate dynamically
   	NR 					= param->getInteger( "Nrng_steps" );
   	azi 				= param->getFloat( "azimuth" );
 	freq 				= param->getFloat( "freq" );
@@ -85,6 +85,7 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
 		z_ground_specified = true;
 	}
 
+	// set units
 	atm_profile_2d->convert_altitude_units( Units::fromString( "m" ) );
 	atm_profile_2d->convert_property_units( "Z0", Units::fromString( "m" ) );
 	atm_profile_2d->convert_property_units( "U", Units::fromString( "m/s" ) );
@@ -93,19 +94,32 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
 	atm_profile_2d->convert_property_units( "P", Units::fromString( "Pa" ) );
 	atm_profile_2d->convert_property_units( "RHO", Units::fromString( "kg/m3" ) );
 
-	
-
-	//double z_min_km = z_min / 1000.0;
-	//double dz_km    = dz / 1000.0;
-  
-	// Note: the rho, Pr, T, zw, mw are computed wrt ground level i.e.
-	// the first value is at the ground level e.g. rho[0] = rho(z_min)
+	// calculate derived quantities
 	atm_profile_2d->calculate_sound_speed_from_pressure_and_density( "_C0_", "P", "RHO", Units::fromString( "m/s" ) );
 	atm_profile_2d->calculate_wind_speed( "_WS_", "U", "V" );
 	atm_profile_2d->calculate_wind_direction( "_WD_", "U", "V" );
 	atm_profile_2d->calculate_wind_component( "_WC_", "_WS_", "_WD_", azi );
 	atm_profile_2d->calculate_effective_sound_speed( "_CEFF_", "_C0_", "_WC_" );
 	atm_profile_2d->calculate_attenuation( "_ALPHA_", "T", "P", "RHO", freq );
+
+	// calculate/check z resolution
+	dz = 				param->getFloat( "dz_m" );
+	double c0 = atm_profile_2d->get( 0.0, "_CEFF_", z_ground );
+	double lambda0 = c0 / freq;
+  	if (dz < 0.0) {
+  		dz = lambda0 / 10.0;
+  		double nearestpow10 = std::pow( 10.0, std::floor( std::log10( dz ) ) - 1.0 );
+  		double factor = std::floor( dz / nearestpow10 / 10.0 );
+  		dz = nearestpow10 * factor;
+  		std::cout << "Setting dz to " << dz << " m" << std::endl;
+  	}
+  	if (dz > (c0 / freq / 10.0) ) {
+  		std::cerr << "Altitude resolution is too coarse.  Must be <= " << lambda0 / 10.0 << " meters." 
+  			<< std::endl;
+  		exit(0);
+  	}
+
+
 }
 
 NCPA::EPadeSolver::~EPadeSolver() {
@@ -114,14 +128,6 @@ NCPA::EPadeSolver::~EPadeSolver() {
 	delete [] z_abs;
 	NCPA::free_dmatrix( tl, NZ, NR-1 );
 	delete atm_profile_2d;
-}
-
-void NCPA::EPadeSolver::fill_atm_vector( NCPA::Atmosphere2D *atm, double range, int NZvec, double *zvec, 
-	std::string key, double groundheight, double *vec ) {
-
-	for (int i = 0; i < NZvec; i++) {
-		vec[i] = atm->get( range, key, zvec[i] + groundheight );
-	}
 }
 
 int NCPA::EPadeSolver::computeTLField() {
@@ -141,29 +147,38 @@ int NCPA::EPadeSolver::computeTLField() {
 	// set up z grid for flat ground.  When we add terrain we will need to move this inside
 	// the range loop
 	size_t profile_index = atm_profile_2d->get_profile_index( 0.0 );
-	z_max = NCPA::min( z_max, atm_profile_2d->get_maximum_altitude( 0.0 ) );
-	z_min = atm_profile_2d->get_minimum_altitude( 0.0 );
-	if ( (!z_ground_specified) && atm_profile_2d->contains_scalar( 0.0, "Z0" )) {
-		z_ground = atm_profile_2d->get( 0.0, "Z0" );
-	}
-	if (z_ground < z_min) {
-		std::cerr << "Supplied ground height is outside of atmospheric specification." << std::endl;
+	z_max = NCPA::min( z_max, atm_profile_2d->get_overall_maximum_altitude() );
+
+	if (use_topo) {
+		std::cerr << "Topography not yet implemented" << std::endl;
 		exit(0);
+	} else {
+		z_min = atm_profile_2d->get_overall_minimum_altitude();
+		if ( (!z_ground_specified) && atm_profile_2d->contains_scalar( 0.0, "Z0" )) {
+			z_ground = atm_profile_2d->get( 0.0, "Z0" );
+		}
+		if (z_ground < z_min) {
+			std::cerr << "Supplied ground height is outside of atmospheric specification." << std::endl;
+			exit(0);
+		}
+	  
+		// fill and convert to SI units
+		//double dz       = (z_max - z_ground)/(NZ - 1);	// the z-grid spacing
+		NZ = ((int)std::floor((z_max - z_ground) / dz)) + 1;
+		z = new double[ NZ ];
+		z_abs = new double[ NZ ];
+		std::memset( z, 0, NZ * sizeof( double ) );
+		std::memset( z_abs, 0, NZ * sizeof( double ) );
+		indices = new PetscInt[ NZ ];
+		std::memset( indices, 0, NZ*sizeof(PetscInt) );
+		for (i = 0; i < NZ; i++) {
+			z[ i ]     = ((double)i) * dz;
+			z_abs[ i ] = z[ i ] + z_ground;
+			indices[ i ] = i;
+		}
+		tl = NCPA::dmatrix( NZ, NR-1 );
 	}
-  
-	// fill and convert to SI units
-	double dz       = (z_max - z_ground)/(NZ - 1);	// the z-grid spacing
-	z = new double[ NZ ];
-	z_abs = new double[ NZ ];
-	std::memset( z, 0, NZ * sizeof( double ) );
-	indices = new PetscInt[ NZ ];
-	std::memset( indices, 0, NZ*sizeof(PetscInt) );
-	for (i = 0; i < NZ; i++) {
-		z[ i ]     = ((double)i) * dz;
-		z_abs[ i ] = z[ i ] + z_ground;
-		indices[ i ] = i;
-	}
-	tl = NCPA::dmatrix( NZ, NR-1 );
+	
 
 	int plotz = 10;
 	for (i = 0; i < NZ; i += plotz) {
@@ -378,7 +393,6 @@ int NCPA::EPadeSolver::computeTLField() {
 	delete [] a_t;
 	delete [] contents;
 	delete [] indices;
-	//delete [] abslayer;
 
 	return 1;
 }
@@ -394,6 +408,7 @@ void NCPA::EPadeSolver::calculate_atmosphere_parameters( NCPA::Atmosphere2D *atm
 	std::memset( k_vec, 0, NZvec * sizeof( std::complex< double > ) );
 	std::memset( n_vec, 0, NZvec * sizeof( std::complex< double > ) );
 
+	// z_vec is relative to ground
 	fill_atm_vector( atm, r, NZvec, z_vec, "_CEFF_", z_g, c_vec );
 	c0 = NCPA::mean( c_vec, NZvec );
 
@@ -414,7 +429,14 @@ void NCPA::EPadeSolver::calculate_atmosphere_parameters( NCPA::Atmosphere2D *atm
 		k_vec[ i ] = 2.0 * PI * freq / c_vec[ i ] + (a_vec[ i ] + abslayer[ i ]) * I;
 		n_vec[ i ] = k_vec[ i ] / k0;
 	}
+}
 
+void NCPA::EPadeSolver::fill_atm_vector( NCPA::Atmosphere2D *atm, double range, int NZvec, double *zvec, 
+	std::string key, double groundheight, double *vec ) {
+
+	for (int i = 0; i < NZvec; i++) {
+		vec[i] = atm->get( range, key, zvec[i] + groundheight );
+	}
 }
 
 
