@@ -107,9 +107,9 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
 	double c0 = atm_profile_2d->get( 0.0, "_CEFF_", z_ground );
 	double lambda0 = c0 / freq;
   	if (dz < 0.0) {
-  		dz = lambda0 / 10.0;
-  		double nearestpow10 = std::pow( 10.0, std::floor( std::log10( dz ) ) - 1.0 );
-  		double factor = std::floor( dz / nearestpow10 / 10.0 );
+  		dz = lambda0 / 20.0;
+  		double nearestpow10 = std::pow( 10.0, std::floor( std::log10( dz ) ) );
+  		double factor = std::floor( dz / nearestpow10 );
   		dz = nearestpow10 * factor;
   		std::cout << "Setting dz to " << dz << " m" << std::endl;
   	}
