@@ -29,6 +29,8 @@
 
 NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
 
+	c_underground		= 50000000.0;
+
 	// obtain the parameter values from the user's options
 	// @todo add units to input scalar quantities
 	gnd_imp_model 		= param->getString( "ground_impedence_model" );
@@ -52,6 +54,8 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
   	}
   	r = new double[ NR ];
   	std::memset( r, 0, NR * sizeof(double) );
+  	zgi_r = new int[ NR ];
+  	std::memset( zgi_r, 0, NR * sizeof( int ) );
   	int i;
   	for (i = 0; i < NR; i++) {
   		r[ i ] = ((double)(i+1)) * dr;
@@ -125,6 +129,7 @@ NCPA::EPadeSolver::~EPadeSolver() {
 	delete [] r;
 	delete [] z;
 	delete [] z_abs;
+	delete [] zgi_r;
 	NCPA::free_dmatrix( tl, NZ, NR-1 );
 	delete atm_profile_2d;
 }
@@ -225,113 +230,15 @@ int NCPA::EPadeSolver::computeTLField() {
 		k0, c0, c, a_t, k, n );
 
 
-	// memset( c, 0, NZ * sizeof(double) );
-	// memset( a_t, 0, NZ * sizeof(double) );
-	// fill_atm_vector( atm_profile_2d, 0.0, NZ, z, "_CEFF_", z_ground, c );
-	// double c0 = NCPA::mean( c, NZ );
-
-	// if (!lossless) {
-	// 	fill_atm_vector( atm_profile_2d, 0.0, NZ, z, "_ALPHA_", z_ground, a_t );
-	// }
-	// double *abslayer = new double[ NZ ];
-	// memset( abslayer, 0, NZ * sizeof(double) );
-	// if (top_layer) {
-	// 	absorption_layer( c0 / freq, z, NZ, abslayer );
-	// }
-	
-	// // check vertical sampling
-	// double z_cnd = (c0 / freq) / 10.0;
-	// if (h > z_cnd) {
-	// 	std::cerr << "Altitude sampling is too low!  (is " << h << ", should be <= "<< z_cnd << std::endl;
-	// 	exit(0);
-	// }
-
-	// double k0 = omega / c0;
-	// std::complex<double> *k = new std::complex<double>[ NZ ];
-	// std::complex<double> *n = new std::complex<double>[ NZ ];
-	// std::memset( k, 0, NZ * sizeof( std::complex< double > ) );
-	// std::memset( n, 0, NZ * sizeof( std::complex< double > ) );
-	// // Set up vectors
-	// //indices = new PetscInt[ NZ ];
-	// for (i = 0; i < NZ; i++) {
-	// 	k[ i ] = omega / c[ i ] + (a_t[ i ] + abslayer[ i ]) * I;
-	// 	n[ i ] = k[ i ] / k0;
-	// 	//indices[ i ] = i;
-	// }
-
 	// calculate q matrices
 	qpowers = new Mat[ npade+1 ];
 	make_q_powers( NZ, z, k0, h2, n, npade+1, qpowers );
 
-
-	// // Set up matrices
-	// ierr = MatCreateSeqAIJ( PETSC_COMM_SELF, NZ, NZ, 3, NULL, &q );CHKERRQ(ierr);
-	// ierr = MatSetFromOptions( q );CHKERRQ(ierr);
-
-	// // populate
-	// double bnd_cnd = -1.0 / h2;    // @todo add hook for alternate boundary conditions
-	// double k02 = k0*k0;
-	// //gsl_complex tempdiag;
-	// ierr = MatGetOwnershipRange(q,&Istart,&Iend);CHKERRQ(ierr);
-	// if (Istart==0) FirstBlock=PETSC_TRUE;
- //    if (Iend==NZ) LastBlock=PETSC_TRUE;
- //    value[0]=1.0 / h2 / k02; value[2]=1.0 / h2 / k02;
- //    for( i=(FirstBlock? Istart+1: Istart); i<(LastBlock? Iend-1: Iend); i++ ) {
- //    		value[ 1 ] = -2.0/h2/k02 + (n[i]*n[i] - 1);
-	// 	    col[0]=i-1; col[1]=i; col[2]=i+1;
-	// 	    ierr = MatSetValues(q,1,&i,3,col,value,INSERT_VALUES);CHKERRQ(ierr);
- //    }
- //    if (LastBlock) {
-	// 	    i=NZ-1; col[0]=NZ-2; col[1]=NZ-1;
-	// 	    value[ 1 ] = -2.0/h2/k02 + (n[i]*n[i] - 1);
-	// 	    ierr = MatSetValues(q,1,&i,2,col,value,INSERT_VALUES);CHKERRQ(ierr);
- //    }
- //    if (FirstBlock) {
-	// 	    i=0; col[0]=0; col[1]=1; 
-	// 	    value[0]=bnd_cnd/k02 + (n[i]*n[i] - 1); value[1]=1.0 / h2 / k02;
-	// 	    ierr = MatSetValues(q,1,&i,2,col,value,INSERT_VALUES);CHKERRQ(ierr);
- //    }
- //    ierr = MatAssemblyBegin(q,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
- //    ierr = MatAssemblyEnd(q,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
-
 	std::cout << "Finding ePade coefficients..." << std::endl;
 	std::vector< std::complex<double> > P, Q;
 	epade( npade, k0, dr, &P, &Q );
-
 	make_B_and_C_matrices( qpowers, npade, NZ, P, Q, &B, &C );
 
-	// ierr = MatCreateSeqAIJ( PETSC_COMM_SELF, NZ, NZ, 2*npade-1, NULL, &B );CHKERRQ(ierr);
-	// ierr = MatSetFromOptions( B );CHKERRQ(ierr);
-	// ierr = MatCreateSeqAIJ( PETSC_COMM_SELF, NZ, NZ, 2*npade+1, NULL, &C );CHKERRQ(ierr);
-	// ierr = MatSetFromOptions( C );CHKERRQ(ierr);
-
-	// ierr = MatGetOwnershipRange(B,&Istart,&Iend);CHKERRQ(ierr);
-	// value[ 0 ] = 1.0;
-	// for (i = Istart; i < Iend; i++) {
-	// 	ierr = MatSetValues( B, 1, &i, 1, &i, value, INSERT_VALUES );CHKERRQ(ierr);
-	// 	ierr = MatSetValues( C, 1, &i, 1, &i, value, INSERT_VALUES );CHKERRQ(ierr);
-	// }
-
-	// ierr = MatAssemblyBegin(B,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
- //    ierr = MatAssemblyEnd(B,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
- //    ierr = MatAssemblyBegin(C,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
- //    ierr = MatAssemblyEnd(C,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
-
-	// // // calculate powers of q
-	// // qpowers = new Mat[ npade+1 ];
-	// // ierr = MatConvert( q, MATSAME, MAT_INITIAL_MATRIX, qpowers );CHKERRQ(ierr);
-	// // for (i = 1; i < npade+1; i++) {
-	// // 	ierr = MatMatMult( qpowers[i-1], q, MAT_INITIAL_MATRIX, PETSC_DEFAULT, 
-	// // 		qpowers+i );CHKERRQ(ierr);
-	// // }
-
-	// for (i = 1; i < Q.size(); i++) {
-	// 	ierr = MatAXPY( C, Q[ i ], qpowers[ i-1 ], DIFFERENT_NONZERO_PATTERN );CHKERRQ(ierr);
-	// }
-	// for (i = 1; i < P.size(); i++) {
-	// 	ierr = MatAXPY( B, P[ i ], qpowers[ i-1 ], DIFFERENT_NONZERO_PATTERN );CHKERRQ(ierr);
-	// }
-	//double zg = use_topo ? z_ground : 0.0;
 	if (starter == "self") {
 		get_starter_self( NZ, z, zs, k0, qpowers, npade, &psi_o );
 	} else if (starter == "gaussian") {
@@ -359,6 +266,7 @@ int NCPA::EPadeSolver::computeTLField() {
 		if (atm_profile_2d->get_profile_index( rr ) != profile_index) {
 
 			profile_index = atm_profile_2d->get_profile_index( rr );
+			//z_ground = atm_profile_2d->get( rr, "Z0" );
 			calculate_atmosphere_parameters( atm_profile_2d, NZ, z, rr, z_ground, lossless, top_layer, freq, 
 				use_topo, k0, c0, c, a_t, k, n );
 			for (i = 0; i < npade+1; i++) {
@@ -380,6 +288,16 @@ int NCPA::EPadeSolver::computeTLField() {
 		ierr = VecGetValues( psi_o, NZ, indices, contents );
 		for (i = 0; i < nzplot; i++) {
 			tl[ i ][ ir ] = 20.0 * log10( abs( contents[ zti[i] ] * hank ) );
+		}
+
+		if (use_topo) {
+			double z0g = atm_profile_2d->get( rr, "Z0" );
+			zgi_r[ ir ] = NCPA::find_closest_index( z, NZ, z0g );
+			if ( z[ zgi_r[ ir ] ] < z0g ) {
+				z[ zgi_r[ ir ] ]++;
+			}
+		} else {
+			zgi_r[ ir ] = 0.0;
 		}
 
 		if ( fmod( rr, 1.0e5 ) < dr) {
@@ -429,12 +347,14 @@ void NCPA::EPadeSolver::calculate_atmosphere_parameters( NCPA::Atmosphere2D *atm
 	// z_vec is relative to ground
 	if (absolute) {
 		fill_atm_vector_absolute( atm, r, NZvec, z_vec, "_CEFF_", c_underground, c_vec );
-		int zeroind = find_closest_index( z_vec, NZvec, 0.0 );
-		c0 = NCPA::mean( c_vec+zeroind, NZvec-zeroind );
+		//int zeroind = find_closest_index( z_vec, NZvec, 0.0 );
+		//c0 = NCPA::mean( c_vec+zeroind, NZvec-zeroind );
 	} else {
 		fill_atm_vector_relative( atm, r, NZvec, z_vec, "_CEFF_", z_g, c_vec );
-		c0 = NCPA::mean( c_vec, NZvec );
+		//c0 = NCPA::mean( c_vec, NZvec );
+		//c0 = c_vec[ 0 ];
 	}
+	c0 = atm->get( r, "_CEFF_", z_g );
 
 	if (!use_lossless) {
 		if (absolute) {
@@ -454,7 +374,11 @@ void NCPA::EPadeSolver::calculate_atmosphere_parameters( NCPA::Atmosphere2D *atm
 	// Set up vectors
 	//indices = new PetscInt[ NZ ];
 	for (int i = 0; i < NZ; i++) {
-		k_vec[ i ] = 2.0 * PI * freq / c_vec[ i ] + (a_vec[ i ] + abslayer[ i ]) * I;
+		if (z_vec[i] < z_g) {
+			k_vec[ i ] = 0.0;
+		} else {
+			k_vec[ i ] = 2.0 * PI * freq / c_vec[ i ] + (a_vec[ i ] + abslayer[ i ]) * I;
+		}
 		n_vec[ i ] = k_vec[ i ] / k0;
 	}
 }
@@ -851,7 +775,7 @@ int NCPA::EPadeSolver::epade( int order, double k0, double dr, std::vector<Petsc
 void NCPA::EPadeSolver::output1DTL( std::string filename ) {
 	std::ofstream out_1d( "tloss_1d.pe", std::ofstream::out | std::ofstream::trunc );
 	for (int i = 0; i < (NR-1); i++) {
-		out_1d << r[ i ]/1000.0 << " " << tl[ 0 ][ i ] << std::endl;
+		out_1d << r[ i ]/1000.0 << " " << tl[ zgi_r[ i ] ][ i ] << std::endl;
 	}
 	out_1d.close();
 }

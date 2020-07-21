@@ -44,6 +44,7 @@ namespace NCPA {
 			std::complex<double> *n_vec );
 
 		double *z = NULL, *z_abs = NULL, *r = NULL, **tl = NULL;
+		int *zgi_r = NULL;   // ground height index
 		double freq;
 		double azi;
 		int NZ, NR;
@@ -55,7 +56,7 @@ namespace NCPA {
 		double z_max;
 		double z_min, z_ground, z_bottom;
 		double zs;
-		double c_underground = 50000.0;
+		double c_underground;
 		//double zrcv;
 		std::string gnd_imp_model;
 		std::string starter;
