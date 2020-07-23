@@ -111,11 +111,9 @@ void NCPA::configure_epade_pe_parameter_set( NCPA::ParameterSet *ps ) {
 	test->addStringParameter( "rigid" );
 	ps->addParameterDescription( "Optional Parameters [default]", "--ground_impedence_model", "Impedence model to use.  Currently only \"rigid\" is supported. [rigid]" );
 
+	ps->addParameter( new NCPA::StringParameter( "attnfile", "" ) );
+	ps->addParameterDescription( "Optional Parameters [default]", "--attnfile", "File name containing attenuation, to override default Sutherland/Bass [n/a]. Columns are #n# Height(km) Attenuation(np/m)" );
 
-/*
-	ps->addParameter( new NCPA::StringParameter( "use_attn_file", "" ) );
-	ps->addParameterDescription( "Optional Parameters [default]", "--use_attn_file", "File name containing attenuation, to override default Sutherland/Bass [n/a]. Columns are #n# Height(km) Attenuation(np/m)" );
-*/
 
 	// Setup flags
 	//ps->addUsageLine( "Flags:" );

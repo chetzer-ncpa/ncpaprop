@@ -105,13 +105,17 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
 	atm_profile_2d->calculate_wind_direction( "_WD_", "U", "V" );
 	atm_profile_2d->calculate_wind_component( "_WC_", "_WS_", "_WD_", azi );
 	atm_profile_2d->calculate_effective_sound_speed( "_CEFF_", "_C0_", "_WC_" );
-	atm_profile_2d->calculate_attenuation( "_ALPHA_", "T", "P", "RHO", freq );
+	if (param->wasFound( "attnfile" ) ) {
+		atm_profile_2d->read_attenuation_from_file( "_ALPHA_", param->getString( "attnfile" ) );
+	} else {
+		atm_profile_2d->calculate_attenuation( "_ALPHA_", "T", "P", "RHO", freq );
+	}
 
 	// calculate/check z resolution
 	dz = 				param->getFloat( "dz_m" );
 	double c0 = atm_profile_2d->get( 0.0, "_CEFF_", z_ground );
 	double lambda0 = c0 / freq;
-  	if (dz < 0.0) {
+  	if (dz <= 0.0) {
   		dz = lambda0 / 20.0;
   		double nearestpow10 = std::pow( 10.0, std::floor( std::log10( dz ) ) );
   		double factor = std::floor( dz / nearestpow10 );
@@ -277,7 +281,8 @@ int NCPA::EPadeSolver::computeTLField() {
 			ierr = MatZeroEntries( B );CHKERRQ(ierr);
 			ierr = MatZeroEntries( C );CHKERRQ(ierr);
 			make_B_and_C_matrices( qpowers, npade, NZ, P, Q, &B, &C );
-			std::cout << "Switching to atmosphere index " << profile_index << std::endl;
+			std::cout << "Switching to atmosphere index " << profile_index 
+				<< " at range = " << rr/1000.0 << " km" << std::endl;
 		}
 
 
@@ -374,8 +379,12 @@ void NCPA::EPadeSolver::calculate_atmosphere_parameters( NCPA::Atmosphere2D *atm
 	// Set up vectors
 	//indices = new PetscInt[ NZ ];
 	for (int i = 0; i < NZ; i++) {
-		if (z_vec[i] < z_g) {
-			k_vec[ i ] = 0.0;
+		if (absolute) {
+			if (z_vec[i] < z_g) {
+				k_vec[ i ] = 0.0;
+			} else {
+				k_vec[ i ] = 2.0 * PI * freq / c_vec[ i ] + (a_vec[ i ] + abslayer[ i ]) * I;
+			}
 		} else {
 			k_vec[ i ] = 2.0 * PI * freq / c_vec[ i ] + (a_vec[ i ] + abslayer[ i ]) * I;
 		}

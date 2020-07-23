@@ -247,6 +247,13 @@ void NCPA::Atmosphere2D::calculate_attenuation( std::string new_key, std::string
 	}
 }
 
+void NCPA::Atmosphere2D::read_attenuation_from_file( std::string new_key, std::string filename ) {
+	for ( std::vector< NCPA::Atmosphere1D * >::iterator it = profiles_.begin();
+		  it != profiles_.end(); ++it ) {
+		(*it)->read_attenuation_from_file( new_key, filename );
+	}
+}
+
 void NCPA::Atmosphere2D::calculate_wind_component( std::string new_key, std::string wind_speed_key, std::string wind_direction_key, 
 		double azimuth ) {
 	for ( std::vector< NCPA::Atmosphere1D * >::iterator it = profiles_.begin();

@@ -89,7 +89,7 @@ void NCPA::Atmosphere1D::read_from_stream( std::istream& in ) {
 			atmlines.push_back( line );
 		}
 
-		getline( in, line );
+		std::getline( in, line );
 	}
 	//in.close();
 	//cout << "Found " << headerlines.size() << " header lines" << endl;
@@ -213,15 +213,7 @@ void NCPA::Atmosphere1D::read_from_stream( std::istream& in ) {
 	contents_.clear();
 	scalar_contents_.clear();
 	z_ = new NCPA::VectorWithUnits( nlines, columns[ 0 ], depunits );
-	/*
-	contents_.clear();
-	scalar_contents_.clear();
-	nz_ = nlines;
-	z_ = new double[ nz_ ];
-	std::memcpy( z_, columns[ 0 ], nz_ * sizeof(double) );
-	z_units_.push( depunits );
-	*/
-
+	
 	for (i = 0; i < keys.size(); i++) {
 		if (column_numbers[ i ] == 0) {
 			this->add_property( keys[ i ], values[ i ], units[ i ] );
@@ -247,6 +239,116 @@ NCPA::Atmosphere1D::~Atmosphere1D() {
 	contents_.clear();
 	scalar_contents_.clear();
 	delete z_;
+}
+
+void NCPA::Atmosphere1D::read_attenuation_from_file( std::string new_key, std::string filename ) {
+
+	std::ifstream in( filename );
+	std::string line;
+	std::ostringstream oss;
+	std::getline( in, line );
+	std::vector< std::string > atmlines, fields;
+	size_t i;
+
+	if (contains_key( new_key )) {
+		throw std::runtime_error( "Requested key " + new_key + " already exists in atmosphere" );
+	}
+
+	while ( in.good() ) {
+		// lines will either be comments (# ), field descriptions (#% ), or
+		// field contents
+		line = NCPA::deblank( line );
+		if (line[ 0 ] != '#') {
+			atmlines.push_back( line );
+		}
+
+		getline( in, line );
+	}
+	in.close();
+
+	size_t nlines = atmlines.size();
+	double *z_a = new double[ nlines ];
+	std::memset( z_a, 0, nlines * sizeof( double ) );
+	double *attn = new double[ nlines ];
+	std::memset( attn, 0, nlines * sizeof( double ) );
+	double this_z, this_a;
+
+	for (i = 0; i < nlines; i++) {
+		fields = NCPA::split( NCPA::deblank( atmlines[ i ] ), " ," );
+		if (fields.size() != 2) {
+			oss << "Atmosphere1D - Error parsing attenuation line:" << std::endl << line << std::endl 
+				<< "Must be formatted as:" << std::endl
+				<< "altitude  attenuation" << std::endl;
+			throw std::invalid_argument( oss.str() );
+		}
+
+		try {
+			this_z = std::stof( fields[ 0 ] );
+			this_a = std::stof( fields[ 1 ] );
+		} catch ( std::invalid_argument &e ) {
+			oss << "Atmosphere1D - Error parsing attenuation line:" << std::endl << line << std::endl 
+				<< "Both fields must be numerical" << std::endl;
+			throw std::invalid_argument( oss.str() );
+		}
+		z_a[ i ] = this_z;
+		attn[ i ] = this_a;
+	}
+
+	// extend if necessary
+	bool short_on_bottom = (z_a[0] > get_minimum_altitude());
+	bool short_on_top    = (z_a[nlines-1] < get_maximum_altitude());
+	double *temp_a, *temp_z;
+	if (short_on_bottom) {
+		temp_z = new double[ nlines+1 ];
+		temp_a = new double[ nlines+1 ];
+		std::memcpy( temp_z+1, z_a, nlines );
+		std::memcpy( temp_a+1, attn, nlines );
+		temp_z[ 0 ] = get_minimum_altitude();
+		temp_a[ 0 ] = temp_a[ 1 ];
+		delete [] z_a;
+		delete [] attn;
+		z_a = temp_z;
+		attn = temp_a;
+		nlines++;
+	}
+	if (short_on_top) {
+		temp_z = new double[ nlines+1 ];
+		temp_a = new double[ nlines+1 ];
+		std::memcpy( temp_z, z_a, nlines );
+		std::memcpy( temp_a, attn, nlines );
+		temp_z[ nlines-1 ] = get_maximum_altitude();
+		temp_a[ nlines-1 ] = temp_a[ nlines-2 ];
+		delete [] z_a;
+		delete [] attn;
+		z_a = temp_z;
+		attn = temp_a;
+		nlines++;
+	}
+
+	// Now interpolate onto current z grid
+	double *existing_z = new double[ this->nz() ];
+	NCPA::units_t alt_units = get_altitude_units();
+	this->convert_altitude_units( NCPA::Units::fromString( "km" ) );
+	this->get_altitude_vector( existing_z );
+	double *interp_attn = new double[ this->nz() ];
+	std::memset( interp_attn, 0, this->nz() * sizeof( double ) );
+
+	gsl_interp_accel *aacc = gsl_interp_accel_alloc();
+	gsl_spline *aspl = gsl_spline_alloc( gsl_interp_cspline, nlines );
+	gsl_spline_init( aspl, z_a, attn, nlines );
+	for (i = 0; i < this->nz(); i++) {
+		interp_attn[ i ] = gsl_spline_eval( aspl, existing_z[ i ], aacc );
+	}
+	gsl_spline_free( aspl );
+	gsl_interp_accel_free( aacc );
+
+	this->add_property( new_key, nlines, interp_attn, NCPA::Units::fromString( "km" ) );
+	this->convert_altitude_units( alt_units );
+	delete [] interp_attn;
+	delete [] existing_z;
+	delete [] attn;
+	delete [] z_a;
+
 }
 
 

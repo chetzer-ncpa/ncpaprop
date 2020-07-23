@@ -60,6 +60,7 @@ namespace NCPA {
 		//double zrcv;
 		std::string gnd_imp_model;
 		std::string starter;
+		std::string attnfile;
 
 		std::vector< double > zt;
 		std::vector< int > zti;

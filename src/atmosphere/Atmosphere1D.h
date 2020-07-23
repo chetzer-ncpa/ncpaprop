@@ -136,7 +136,7 @@ namespace NCPA {
 		void calculate_wind_component( std::string new_key, std::string wind_speed_key, std::string wind_direction_key, 
 			double azimuth );
 		void calculate_effective_sound_speed( std::string new_key, std::string sound_speed_key, std::string wind_component_key );
-
+		void read_attenuation_from_file( std::string new_key, std::string filename );
 		
 
 		void convert_altitude_units( units_t new_units );

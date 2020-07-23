@@ -62,6 +62,7 @@ namespace NCPA {
 		void calculate_effective_sound_speed( std::string new_key, std::string sound_speed_key, std::string wind_component_key );
 		void convert_altitude_units( units_t new_units );
 		void convert_property_units( std::string key, units_t new_units );
+		void read_attenuation_from_file( std::string new_key, std::string filename );    // apply universally
 		
 
 	protected:
