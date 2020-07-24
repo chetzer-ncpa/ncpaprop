@@ -147,7 +147,7 @@ int NCPA::EPadeSolver::computeTLField() {
 	PetscScalar    value[3];  // for populating tridiagonal matrices
 	PetscScalar hank, *contents;
 	Mat B, C;   // , q;
-	Mat *qpowers;
+	Mat *qpowers, *qpowers_starter;
 	Vec psi_o, Bpsi_o; //, psi_temp;
 	KSP ksp;
 	// PC pc;
@@ -158,6 +158,7 @@ int NCPA::EPadeSolver::computeTLField() {
 	double minlimit, maxlimit;
 	atm_profile_2d->get_maximum_altitude_limits( minlimit, maxlimit );
 	z_max = NCPA::min( z_max, minlimit );    // lowest valid top value
+	int ground_index = 0;
 
 	if (use_topo) {
 		z_bottom = -5000.0;    // make this eventually depend on frequency
@@ -175,6 +176,10 @@ int NCPA::EPadeSolver::computeTLField() {
 			indices[ i ] = i;
 		}
 		zs = NCPA::max( zs, z_ground+dz );
+		ground_index = NCPA::find_closest_index( z, NZ, z_ground );
+		// if (z[ ground_index ] > z_ground && ground_index > 0) {
+		// 	ground_index--;
+		// }
 
 	} else {
 		atm_profile_2d->get_minimum_altitude_limits( minlimit, z_min );
@@ -236,7 +241,9 @@ int NCPA::EPadeSolver::computeTLField() {
 
 	// calculate q matrices
 	qpowers = new Mat[ npade+1 ];
-	make_q_powers( NZ, z, k0, h2, n, npade+1, qpowers );
+	make_q_powers( NZ, z, k0, h2, n, npade+1, 0, qpowers );
+	qpowers_starter = new Mat[ npade+1 ];
+
 
 	std::cout << "Finding ePade coefficients..." << std::endl;
 	std::vector< std::complex<double> > P, Q;
@@ -244,9 +251,11 @@ int NCPA::EPadeSolver::computeTLField() {
 	make_B_and_C_matrices( qpowers, npade, NZ, P, Q, &B, &C );
 
 	if (starter == "self") {
-		get_starter_self( NZ, z, zs, k0, qpowers, npade, &psi_o );
+		make_q_powers( NZ, z, k0, h2, n, npade+1, ground_index, qpowers_starter );
+		//get_starter_self( NZ, z, zs, k0, qpowers, npade, &psi_o );
+		get_starter_self( NZ, z, zs, k0, qpowers_starter, npade, &psi_o );
 	} else if (starter == "gaussian") {
-		get_starter_gaussian( NZ, z, zs, k0, &psi_o );
+		get_starter_gaussian( NZ, z, zs, k0, ground_index, &psi_o );
 	} else {
 		std::cerr << "Unrecognized starter type: " << starter << std::endl;
 		exit(0);
@@ -276,7 +285,7 @@ int NCPA::EPadeSolver::computeTLField() {
 			for (i = 0; i < npade+1; i++) {
 				ierr = MatDestroy( qpowers + i );CHKERRQ(ierr);
 			}
-			make_q_powers( NZ, z, k0, h2, n, npade+1, qpowers );
+			make_q_powers( NZ, z, k0, h2, n, npade+1, 0, qpowers );
 			epade( npade, k0, dr, &P, &Q );
 			ierr = MatZeroEntries( B );CHKERRQ(ierr);
 			ierr = MatZeroEntries( C );CHKERRQ(ierr);
@@ -325,8 +334,10 @@ int NCPA::EPadeSolver::computeTLField() {
 	ierr = KSPDestroy( &ksp );     CHKERRQ(ierr);
 	for (i = 0; i < npade+1; i++) {
 		ierr = MatDestroy( qpowers + i );CHKERRQ(ierr);
+		ierr = MatDestroy( qpowers_starter + i );CHKERRQ(ierr);
 	}
 	delete [] qpowers;
+	delete [] qpowers_starter;
 	delete [] k;
 	delete [] n;
 	delete [] c;
@@ -453,7 +464,7 @@ int NCPA::EPadeSolver::make_B_and_C_matrices( Mat *qpowers, int npade, int NZ,
 }
 
 int NCPA::EPadeSolver::make_q_powers( int NZvec, double *zvec, double k0, double h2, 
-	std::complex<double> *n, size_t nqp, Mat *qpowers ) {
+	std::complex<double> *n, size_t nqp, int boundary_index, Mat *qpowers ) {
 
 	Mat q;
 	PetscInt Istart, Iend, col[3];
@@ -475,18 +486,39 @@ int NCPA::EPadeSolver::make_q_powers( int NZvec, double *zvec, double k0, double
     if (Iend==NZ) LastBlock=PETSC_TRUE;
     value[0]=1.0 / h2 / k02; value[2]=1.0 / h2 / k02;
     for( i=(FirstBlock? Istart+1: Istart); i<(LastBlock? Iend-1: Iend); i++ ) {
-    		value[ 1 ] = -2.0/h2/k02 + (n[i]*n[i] - 1);
+    		if (i < boundary_index)  {
+    			value[ 0 ] = 0.0;
+    			value[ 1 ] = 0.0;  
+    			value[ 2 ] = 0.0;
+    		} else if (i == boundary_index) {
+    			value[ 0 ] = 0.0;
+    			value[ 1 ] = bnd_cnd/k02 + (n[i]*n[i] - 1);
+    			value[ 2 ] = 1.0 / h2 / k02;
+    		} else {
+    			value[ 0 ] = 1.0 / h2 / k02;
+    			value[ 1 ] = -2.0/h2/k02 + (n[i]*n[i] - 1);
+    			value[ 2 ] = 1.0 / h2 / k02;
+    		}
 		    col[0]=i-1; col[1]=i; col[2]=i+1;
 		    ierr = MatSetValues(q,1,&i,3,col,value,INSERT_VALUES);CHKERRQ(ierr);
     }
     if (LastBlock) {
 		    i=NZ-1; col[0]=NZ-2; col[1]=NZ-1;
+		    value[ 0 ] = 1.0 / h2 / k02;
 		    value[ 1 ] = -2.0/h2/k02 + (n[i]*n[i] - 1);
 		    ierr = MatSetValues(q,1,&i,2,col,value,INSERT_VALUES);CHKERRQ(ierr);
     }
     if (FirstBlock) {
 		    i=0; col[0]=0; col[1]=1; 
-		    value[0]=bnd_cnd/k02 + (n[i]*n[i] - 1); value[1]=1.0 / h2 / k02;
+		    if (i < boundary_index)  {
+    			value[ 0 ] = 0.0;
+    			value[ 1 ] = 0.0;
+    		} else {
+    			value[ 0 ] = bnd_cnd/k02 + (n[i]*n[i] - 1);
+    			value[ 1 ] = 1.0 / h2 / k02;
+    		}
+		    //value[0]=bnd_cnd/k02 + (n[i]*n[i] - 1); 
+		    //value[1]=1.0 / h2 / k02;
 		    ierr = MatSetValues(q,1,&i,2,col,value,INSERT_VALUES);CHKERRQ(ierr);
     }
     ierr = MatAssemblyBegin(q,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
@@ -511,7 +543,8 @@ void NCPA::EPadeSolver::absorption_layer( double lambda, double *z, int NZ, doub
 }
 
 
-int NCPA::EPadeSolver::get_starter_gaussian( size_t NZ, double *z, double zs, double k0, Vec *psi ) {
+int NCPA::EPadeSolver::get_starter_gaussian( size_t NZ, double *z, double zs, double k0, int ground_index,
+	Vec *psi ) {
 
 	double fac = 2.0;
 	//double kfac = k0 / fac;

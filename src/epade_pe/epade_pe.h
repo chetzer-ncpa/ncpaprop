@@ -24,7 +24,7 @@ namespace NCPA {
 
 		int epade( int order, double k0, double dr, std::vector<PetscScalar> *P, std::vector<PetscScalar> *Q,
 			bool starter = false );
-		int get_starter_gaussian( size_t NZ, double *z, double zs, double k0, Vec *psi );
+		int get_starter_gaussian( size_t NZ, double *z, double zs, double k0, int ground_index, Vec *psi );
 		int get_starter_self( size_t NZ, double *z, double zs, double k0, Mat *qpowers, size_t npade, 
 			Vec *psi );
 		void absorption_layer( double lambda, double *z, int NZ, double *layer );
@@ -34,7 +34,7 @@ namespace NCPA {
 			std::string key, double fill_value, double *vec );
 
 		int make_q_powers( int NZvec, double *zvec, double k0, double h2, std::complex<double> *n, 
-			size_t nqp, Mat *qpowers );
+			size_t nqp, int boundary_index, Mat *qpowers );
 		int make_B_and_C_matrices( Mat *qpowers, int npade, int NZ, 
 			std::vector< std::complex< double > > &P, std::vector< std::complex< double > > &Q,
 			Mat *B, Mat *C );
