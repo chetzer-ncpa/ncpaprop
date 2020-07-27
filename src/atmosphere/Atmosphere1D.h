@@ -93,6 +93,8 @@ namespace NCPA {
 		*/
 		void add_property( std::string key, double value, units_t units = NCPA::UNITS_NONE );
 
+		void copy_vector_property( std::string old_key, std::string new_key );
+
 		/**
 		Removes a scalar or vector property from the atmosphere.  Has no effect if the property does not exist.
 		@brief Removes a property.

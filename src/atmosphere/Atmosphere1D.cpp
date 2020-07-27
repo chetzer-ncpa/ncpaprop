@@ -361,6 +361,22 @@ size_t NCPA::Atmosphere1D::nz() const {
 	return get_basis_length();
 }
 
+void NCPA::Atmosphere1D::copy_vector_property( std::string old_key, std::string new_key ) {
+	if (contains_key( new_key )) {
+		throw std::runtime_error( "Requested key " + new_key + " already exists in atmosphere" );
+	}
+	if (!contains_key( old_key )) {
+		throw std::runtime_error( "Requested source key " + old_key + " not found" );
+	}
+
+	NCPA::AtmosphericProperty1D *source = contents_.at( old_key );
+	units_t source_units;
+	double *source_data = new double[ nz() ];
+	source->get_vector( source_data, &source_units );
+	add_property( new_key, nz(), source_data, source_units );
+	delete [] source_data;
+}
+
 void NCPA::Atmosphere1D::calculate_wind_speed( std::string new_key, std::string we_wind_speed_key, 
 	std::string sn_wind_speed_key ) {
 

@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <cstdio>
 #include <cstring>
+#include <fstream>
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
 
@@ -155,7 +156,13 @@ void NCPA::ESSModeSolver::setParams( NCPA::ParameterSet *param, NCPA::Atmosphere
 	// the first value is at the ground level e.g. rho[0] = rho(z_min)
 	// @todo make fill_vector( zvec ) methods in AtmosphericProfile()
 	// @todo add underscores to internally calculated parameter keys
-	atm_profile->calculate_sound_speed_from_pressure_and_density( "_C0_", "P", "RHO", Units::fromString( "m/s" ) );
+	if (atm_profile->contains_vector( "C0" ) ) {
+		atm_profile->copy_vector_property( "C0", "_C0_" );
+		atm_profile->convert_property_units( "_C0_", Units::fromString( "m/s" ) );
+	} else {
+		atm_profile->calculate_sound_speed_from_pressure_and_density( "_C0_", "P", "RHO", 
+			Units::fromString( "m/s" ) );
+	}
 	atm_profile->calculate_wind_speed( "_WS_", "U", "V" );
 	atm_profile->calculate_wind_direction( "_WD_", "U", "V" );
 	atm_profile->calculate_attenuation( "_ALPHA_", "T", "P", "RHO", freq );
@@ -443,7 +450,6 @@ int NCPA::ESSModeSolver::computeModes() {
 			atm_profile->get_property_vector( "_CE_", c_eff );
 			atm_profile->add_property( "_AZ_", azi, NCPA::UNITS_DIRECTION_DEGREES_CLOCKWISE_FROM_NORTH );
 
-
 			//
 			// ground impedance model
 			//
@@ -471,7 +477,7 @@ int NCPA::ESSModeSolver::computeModes() {
 			//		
 			i = getModalTrace(Nz_grid, z_min, sourceheight, receiverheight, dz, atm_profile, 
 					admittance, freq, azi, diag, &k_min, &k_max, turnoff_WKB, c_eff);
-			
+
 			// if wavenumber filtering is on, redefine k_min, k_max
 			if (wvnum_filter_flg) {
 				k_min = 2 * PI * freq / c_max;
