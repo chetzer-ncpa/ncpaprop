@@ -40,11 +40,11 @@ void NCPA::configure_epade_pe_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->addParameterDescription( "Options Control", "--printparams", "Print parameter summary to screen" );
 
 	// Atmosphere
-	std::string modes_of_operation[ 3 ] = { "atmosfile", "atmosfile2d", "toy" };
-	ps->addParameter( new NCPA::StringParameter( modes_of_operation[ 0 ] ) );
-	ps->addParameter( new NCPA::StringParameter( modes_of_operation[ 1 ] ) );
-	ps->addParameter( new NCPA::FlagParameter( modes_of_operation[ 2 ] ) );
-	ps->addTest( new NCPA::RadioButtonTest( "atmosphere_type", 3, modes_of_operation ) );
+	std::string atmosphere_types[ 3 ] = { "atmosfile", "atmosfile2d", "toy" };
+	ps->addParameter( new NCPA::StringParameter( atmosphere_types[ 0 ] ) );
+	ps->addParameter( new NCPA::StringParameter( atmosphere_types[ 1 ] ) );
+	ps->addParameter( new NCPA::FlagParameter( atmosphere_types[ 2 ] ) );
+	ps->addTest( new NCPA::RadioButtonTest( "atmosphere_type", 3, atmosphere_types ) );
 	ps->addParameterDescription( "Atmosphere", "--atmosfile", "1-D atmospheric profile filename" );
 	ps->addParameterDescription( "Atmosphere", "--atmosfile2d", "2-D atmospheric profile filename" );
 	ps->addParameterDescription( "Atmosphere", "--toy", "Use NCPA toy atmosphere" );
@@ -63,16 +63,51 @@ void NCPA::configure_epade_pe_parameter_set( NCPA::ParameterSet *ps ) {
 	test->addStringParameter( "gaussian" );
 	ps->addParameterDescription( "Required Parameters", "--starter", "Starter type: one of { self, gaussian }" );
 
-	ps->addParameter( new NCPA::FloatParameter( "azimuth" ) );
-	ps->addTest( new NCPA::RequiredTest( "azimuth" ) );
-	ps->addTest( new NCPA::FloatGreaterThanOrEqualToTest( "azimuth", 0.0 ) );
-	ps->addTest( new NCPA::FloatLessThanOrEqualToTest( "azimuth", 360.0 ) );
-	ps->addParameterDescription( "Required Parameters", "--azimuth", "Propagation azimuth (degrees clockwise from north)" );
-
 	ps->addParameter( new NCPA::FloatParameter( "maxrange_km" ) );
 	ps->addTest( new NCPA::RequiredTest( "maxrange_km" ) );
 	ps->addTest( new NCPA::FloatGreaterThanOrEqualToTest( "maxrange_km", 0.01 ) );
 	ps->addParameterDescription( "Required Parameters", "--maxrange_km", "Maximum range in km to use for modeling" );
+
+	// Modes of operation
+	std::string modes_of_operation[ 2 ] = { "singleprop", "multiprop" };
+	for (unsigned int i = 0; i < 2; i++) {
+		std::string tmpStr( modes_of_operation[ i ] );
+		ps->addParameter( new NCPA::FlagParameter( tmpStr ) );
+	}
+	ps->addTest( new NCPA::RadioButtonTest( "operation_mode", 2, modes_of_operation ) );
+	ps->addParameterDescription( "Modes of Operation", "--singleprop", "Single azimuth propagation.  Requires --azimuth" );
+	
+	// for single propagation, must specify azimuth
+	ps->addParameter( new NCPA::FloatParameter( "azimuth" ) );
+	ps->addTest( new NCPA::FloatGreaterThanOrEqualToTest( "azimuth", 0.0 ) );
+	ps->addTest( new NCPA::FloatLessThanTest( "azimuth", 360.0 ) );
+	ps->addTest( new NCPA::RequiredIfOtherIsPresentTest( "azimuth", "singleprop" ) );
+	ps->setParameterIndent( 2 * DEFAULT_PARAMETER_INDENT );
+	ps->addParameterDescription( "Modes of Operation", "--azimuth", "Propagation azimuth ( degrees clockwise from north, [0,360) )" );
+	ps->resetParameterIndent();
+
+	// for multiple propagation, must specify azimuth start, end, and step
+
+	ps->addParameterDescription( "Modes of Operation", "--multiprop", "Multiple azimuth propagation.  Requires --azimuth_start, --azimuth_end, and --azimuth_step, disables --atmosfile2d and --topo" );
+	ps->addParameter( new NCPA::FloatParameter( "azimuth_start" ) );
+	ps->addTest( new NCPA::FloatGreaterThanOrEqualToTest( "azimuth_start", 0.0 ) );
+	ps->addTest( new NCPA::FloatLessThanOrEqualToTest( "azimuth_start", 360.0 ) );
+	ps->addTest( new NCPA::RequiredIfOtherIsPresentTest( "azimuth_start", "multiprop" ) );
+	ps->addParameter( new NCPA::FloatParameter( "azimuth_end" ) );
+	ps->addTest( new NCPA::FloatGreaterThanOrEqualToTest( "azimuth_end", 0.0 ) );
+	ps->addTest( new NCPA::FloatLessThanOrEqualToTest( "azimuth_end", 360.0 ) );
+	ps->addTest( new NCPA::RequiredIfOtherIsPresentTest( "azimuth_end", "multiprop" ) );
+	ps->addParameter( new NCPA::FloatParameter( "azimuth_step" ) );
+	ps->addTest( new NCPA::FloatGreaterThanOrEqualToTest( "azimuth_step", 0.0 ) );
+	ps->addTest( new NCPA::FloatLessThanOrEqualToTest( "azimuth_step", 360.0 ) );
+	ps->addTest( new NCPA::RequiredIfOtherIsPresentTest( "azimuth_step", "multiprop" ) );
+	ps->setParameterIndent( 2 * DEFAULT_PARAMETER_INDENT );
+	ps->addParameterDescription( "Modes of Operation", "--azimuth_start", "Starting azimuth, in degrees CW from North [0,360)" );
+	ps->addParameterDescription( "Modes of Operation", "--azimuth_end", "Ending azimuth, in degrees CW from North [0,360)" );
+	ps->addParameterDescription( "Modes of Operation", "--azimuth_step", "Azimuth step, in degrees CW from North [0,360)" );
+	ps->resetParameterIndent();
+
+
 
 	// optional parameters
 	ps->addParameter( new NCPA::IntegerParameter( "npade", 4 ) );
@@ -100,7 +135,7 @@ void NCPA::configure_epade_pe_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->addParameterDescription( "Optional Parameters [default]", "--receiverheight_km", "Receiver height in km [ground]" );
 */
 	ps->addParameter( new NCPA::FloatParameter( "groundheight_km", 0.0 ) );
-	ps->addParameterDescription( "Optional Parameters [default]", "--groundheight_km", "Ground height in km [0.0, or Z0 parameter in profile]" );
+	ps->addParameterDescription( "Optional Parameters [default]", "--groundheight_km", "Ground height in km [Z0 parameter in profile, or 0.0]" );
 
 	ps->addParameter( new NCPA::IntegerParameter( "Nrng_steps", 0 ) );
 	ps->addTest( new NCPA::IntegerGreaterThanOrEqualToTest( "Nrng_steps", 0 ) );
@@ -117,8 +152,10 @@ void NCPA::configure_epade_pe_parameter_set( NCPA::ParameterSet *ps ) {
 
 	// Setup flags
 	//ps->addUsageLine( "Flags:" );
+	ps->addParameter( new NCPA::FlagParameter( "write_2d_tloss" ) );
+	ps->addParameterDescription( "Flags", "--write_2d_tloss", "Output 2-D transmission loss to tloss_2d.pe" );
 	ps->addParameter( new NCPA::FlagParameter( "write_atm_profile" ) );
-	ps->addParameterDescription( "Flags", "--write_atm_profile", "Output atmospheric profile to atm_profile.nm" );
+	ps->addParameterDescription( "Flags", "--write_atm_profile", "Output atmospheric profile to atm_profile.pe" );
 	ps->addParameter( new NCPA::FlagParameter( "lossless" ) );
 	ps->addParameterDescription( "Flags", "--lossless", "Ignore atmospheric attenuation" );
 	ps->addParameter( new NCPA::FlagParameter( "topo" ) );
@@ -129,25 +166,24 @@ void NCPA::configure_epade_pe_parameter_set( NCPA::ParameterSet *ps ) {
 	// Footer with file formats and sample commands
 	ps->addBlankFooterLine();
 	ps->addFooterText("OUTPUT Files:  Format description (column order):");
-	ps->addFooterTextVerbatim("  tloss_1d.pe:                 r (km), TL (dB)");
-	ps->addFooterTextVerbatim("  tloss_2d.nm:                 r, z, TL (dB), 0.0");
-	ps->addFooterTextVerbatim("  atm_profile.nm               z,u,v,w,t,d,p,c,c_eff");
+	ps->addFooterTextVerbatim("  tloss_1d.pe:                 az (deg), r (km), TL (real), TL (imag)");
+	ps->addFooterTextVerbatim("  tloss_multiplot.pe           az (deg), r (km), TL (real), TL (imag)");
+	ps->addFooterTextVerbatim("  tloss_2d.pe:                 r, z, TL (real), TL (imag)");
+	ps->addFooterTextVerbatim("  atm_profile.pe:              z,u,v,w,t,d,p,c,c_eff");
 	ps->addBlankFooterLine();
 	ps->addFooterText("Examples (run from 'samples' directory):");
 	ps->setFooterIndent( 4 );
 	ps->setFooterHangingIndent( 4 );
 	ps->setCommandMode( true );
-	//ps->addFooterText("../bin/Modess --singleprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --azimuth 90 --freq 0.1" );
-	ps->addFooterText("../bin/ePape --starter gaussian --toy --freq 0.1 --azimuth 90 --maxrange_km 1000" );
+	ps->addFooterText("../bin/ePape --singleprop --starter gaussian --toy --freq 0.1 --azimuth 90 --maxrange_km 1000" );
 	ps->addBlankFooterLine();
-	//ps->addFooterText("../bin/Modess --singleprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --azimuth 90 --freq 0.1 --write_2D_TLoss" );
-	ps->addFooterText("../bin/ePape --starter self --atmosfile NCPA_canonical_profile_trimmed.dat --freq 0.1 --azimuth 90 --maxrange_km 1000" );
+	ps->addFooterText("../bin/ePape --singleprop --starter self --atmosfile NCPA_canonical_profile_trimmed.dat --freq 0.1 --azimuth 90 --maxrange_km 1000" );
 	ps->addBlankFooterLine();
-	ps->addFooterText("../bin/ePape --starter self --atmosfile2d atmosphere_2d_summary.dat --freq 0.5 --azimuth 90 --maxrange_km 1000 --lossless" );
+	ps->addFooterText("../bin/ePape --singleprop --starter self --atmosfile2d atmosphere_2d_summary.dat --freq 0.5 --azimuth 90 --maxrange_km 1000 --lossless" );
 	ps->addBlankFooterLine();
-	ps->addFooterText("../bin/ePape --starter self --atmosfile2d atmosphere_2d_summary.dat --freq 1.0 --azimuth 90 --maxrange_km 500 --topo");
-	//ps->addFooterText("../bin/Modess --Nby2Dprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --freq 0.1 --azimuth_start 0 --azimuth_end 360 --azimuth_step 1" );
-	//ps->addFooterText("../bin/Modess --Nby2Dprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --freq 0.1 --azimuth_start 0 --azimuth_end 360 --azimuth_step 1" );
+	ps->addFooterText("../bin/ePape --singleprop --starter self --atmosfile2d atmosphere_2d_summary.dat --freq 1.0 --azimuth 90 --maxrange_km 500 --topo");
+	ps->addBlankFooterLine();
+	ps->addFooterText("../bin/ePape --multiprop --starter self --atmosfile NCPA_canonical_profile_trimmed.dat --freq 0.5 --azimuth_start 0 --azimuth_end 360 --azimuth_step 2 --maxrange_km 1000");
 	ps->setFooterHangingIndent( 0 );
 	ps->setCommandMode( false );
 	ps->resetFooterIndent();

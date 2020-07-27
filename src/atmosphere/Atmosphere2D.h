@@ -21,6 +21,15 @@ namespace NCPA {
 		void sort_profiles();
 		void convert_range_units( NCPA::units_t new_units );
 
+		// profile manipulation
+		void add_property( std::string key, size_t n_points, double *quantity_points, 
+			units_t quantity_units = NCPA::UNITS_NONE );
+		void add_property( std::string key, double value, units_t units = NCPA::UNITS_NONE );
+		void copy_vector_property( std::string old_key, std::string new_key );
+		void copy_scalar_property( std::string old_key, std::string new_key );
+		void remove_property( std::string key );
+
+
 		// data retrieval, single values
 		double get( double range, std::string key );    // retrieve scalar quantity from profile
 		double get( double range, std::string key, double altitude );

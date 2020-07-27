@@ -365,7 +365,7 @@ void NCPA::Atmosphere1D::copy_vector_property( std::string old_key, std::string 
 	if (contains_key( new_key )) {
 		throw std::runtime_error( "Requested key " + new_key + " already exists in atmosphere" );
 	}
-	if (!contains_key( old_key )) {
+	if (!contains_vector( old_key )) {
 		throw std::runtime_error( "Requested source key " + old_key + " not found" );
 	}
 
@@ -375,6 +375,20 @@ void NCPA::Atmosphere1D::copy_vector_property( std::string old_key, std::string 
 	source->get_vector( source_data, &source_units );
 	add_property( new_key, nz(), source_data, source_units );
 	delete [] source_data;
+}
+
+void NCPA::Atmosphere1D::copy_scalar_property( std::string old_key, std::string new_key ) {
+	if (contains_key( new_key )) {
+		throw std::runtime_error( "Requested key " + new_key + " already exists in atmosphere" );
+	}
+	if (!contains_scalar( old_key )) {
+		throw std::runtime_error( "Requested source key " + old_key + " not found" );
+	}
+
+	NCPA::ScalarWithUnits *source = scalar_contents_.at( old_key );
+	units_t source_units = source->get_units();
+	double value = source->get();
+	add_property( new_key, value, source_units );
 }
 
 void NCPA::Atmosphere1D::calculate_wind_speed( std::string new_key, std::string we_wind_speed_key, 

@@ -69,10 +69,12 @@ int main( int argc, char **argv ) {
 	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 	cout << "Elapsed time: " << time_span.count() << " seconds." << endl;
 
+	/*
 	cout << "Writing 1-D output to tloss_1d.pe" << endl;
 	solver->output1DTL( "tloss_1d.pe" );
 	cout << "Writing 2-D output to tloss_2d.pe" << endl;
 	solver->output2DTL( "tloss_2d.pe" );
+	*/
 
 	delete solver;
 	delete param;

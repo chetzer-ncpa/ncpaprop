@@ -312,3 +312,40 @@ void NCPA::Atmosphere2D::get_maximum_altitude_limits( double &lowlimit, double &
 		lowlimit = NCPA::min( lowlimit, curalt );
 	}
 }
+
+
+void NCPA::Atmosphere2D::add_property( std::string key, size_t n_points, double *quantity_points, 
+			units_t quantity_units ) {
+	for ( std::vector< NCPA::Atmosphere1D * >::iterator it = profiles_.begin();
+		  it != profiles_.end(); ++it ) {
+		(*it)->add_property( key, n_points, quantity_points, quantity_units );
+	}
+}
+
+void NCPA::Atmosphere2D::add_property( std::string key, double value, units_t units ) {
+	for ( std::vector< NCPA::Atmosphere1D * >::iterator it = profiles_.begin();
+		  it != profiles_.end(); ++it ) {
+		(*it)->add_property( key, value, units );
+	}
+}
+
+void NCPA::Atmosphere2D::copy_vector_property( std::string old_key, std::string new_key ) {
+	for ( std::vector< NCPA::Atmosphere1D * >::iterator it = profiles_.begin();
+		  it != profiles_.end(); ++it ) {
+		(*it)->copy_vector_property( old_key, new_key );
+	}
+}
+
+void NCPA::Atmosphere2D::copy_scalar_property( std::string old_key, std::string new_key ) {
+	for ( std::vector< NCPA::Atmosphere1D * >::iterator it = profiles_.begin();
+		  it != profiles_.end(); ++it ) {
+		(*it)->copy_scalar_property( old_key, new_key );
+	}
+}
+
+void NCPA::Atmosphere2D::remove_property( std::string key ) {
+	for ( std::vector< NCPA::Atmosphere1D * >::iterator it = profiles_.begin();
+		  it != profiles_.end(); ++it ) {
+		(*it)->remove_property( key );
+	}
+}

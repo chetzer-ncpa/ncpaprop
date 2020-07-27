@@ -31,25 +31,43 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
 
 	c_underground		= 5000.0;
 
-	//azi = new double[ 1 ];
-
 	// obtain the parameter values from the user's options
 	// @todo add units to input scalar quantities
 	gnd_imp_model 		= param->getString( "ground_impedence_model" );
 	r_max	 			= param->getFloat( "maxrange_km" ) * 1000.0;
   	z_max	 			= param->getFloat( "maxheight_km" ) * 1000.0;      // @todo fix elsewhere that m is required
   	zs			 		= param->getFloat( "sourceheight_km" ) * 1000.0;
-  	//zrcv		 		= param->getFloat( "receiverheight_km" ) * 1000.0;
-  	//NZ 					= param->getInteger( "Nz_grid" );    // @todo calculate dynamically
   	NR 					= param->getInteger( "Nrng_steps" );
-  	//azi[ 0 ] 			= param->getFloat( "azimuth" );
-	freq 				= param->getFloat( "freq" );
+  	freq 				= param->getFloat( "freq" );
 	npade 				= param->getInteger( "npade" );
 	starter 			= param->getString( "starter" );
 
-	//NA = 1; // Number of azimuths: default is a propagation along a single azimuth
+	// flags
+	lossless 			= param->wasFound( "lossless" );
+	size_t n_atm_selected = 0;
+	use_atm_1d			= param->wasFound( "atmosfile" );
+	use_atm_2d			= param->wasFound( "atmosfile2d" );
+	use_atm_toy			= param->wasFound( "toy" );
+	top_layer			= !(param->wasFound( "disable_top_layer" ));
+	use_topo			= param->wasFound( "topo" );
+	write2d 			= param->wasFound( "write_2d_tloss" );
+	multiprop 			= param->wasFound( "multiprop" );
+
+	// Handle differences based on single vs multiprop
 	double min_az, max_az, step_az;
-	if (Nby2Dprop) {
+	if (multiprop) {
+		if (use_atm_2d) {
+			std::cerr << "Range-dependent 2-D atmosphere incompatible with multiple azimuth propagation"
+					  << std::endl;
+			exit(0);
+		}
+		if (write2d) {
+			std::cout << "Multi-azimuth propagation requested, disabling 2-D output" << std::endl;
+			write2d = false;
+		}
+		if (use_topo) {
+			std::cout << "Multi-azimuth propagation requested, disabling topography flag" << std::endl;
+		}
 		min_az 			= param->getFloat( "azimuth_start" );
 		max_az 			= param->getFloat( "azimuth_end" );
 		step_az 		= param->getFloat( "azimuth_step" );
@@ -59,7 +77,6 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
 		min_az 			= param->getFloat( "azimuth" );
 		max_az 			= min_az;
 		step_az 		= 0;
-		//azi[0] 			= param->getFloat( "azimuth" );
 	}
 	azi = new double[ NAz ];
 	memset( azi, 0, NAz * sizeof( double ) );
@@ -83,12 +100,7 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
   		r[ i ] = ((double)(i+1)) * dr;
   	}
 
-  	lossless 			= param->wasFound( "lossless" );
-	use_atm_1d			= param->wasFound( "atmosfile" );
-	use_atm_2d			= param->wasFound( "atmosfile2d" );
-	use_atm_toy			= param->wasFound( "toy" );
-	top_layer			= !(param->wasFound( "disable_top_layer" ));
-	use_topo			= param->wasFound( "topo" );
+  	
 
 	//NCPA::Atmosphere1D *atm_profile_1d;
 	if (use_atm_1d) {
@@ -125,8 +137,8 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
 	atm_profile_2d->calculate_sound_speed_from_pressure_and_density( "_C0_", "P", "RHO", Units::fromString( "m/s" ) );
 	atm_profile_2d->calculate_wind_speed( "_WS_", "U", "V" );
 	atm_profile_2d->calculate_wind_direction( "_WD_", "U", "V" );
-	atm_profile_2d->calculate_wind_component( "_WC_", "_WS_", "_WD_", azi[0] );
-	atm_profile_2d->calculate_effective_sound_speed( "_CEFF_", "_C0_", "_WC_" );
+	// atm_profile_2d->calculate_wind_component( "_WC_", "_WS_", "_WD_", azi[0] );
+	// atm_profile_2d->calculate_effective_sound_speed( "_CEFF_", "_C0_", "_WC_" );
 	if (param->wasFound( "attnfile" ) ) {
 		atm_profile_2d->read_attenuation_from_file( "_ALPHA_", param->getString( "attnfile" ) );
 	} else {
@@ -135,7 +147,7 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
 
 	// calculate/check z resolution
 	dz = 				param->getFloat( "dz_m" );
-	double c0 = atm_profile_2d->get( 0.0, "_CEFF_", z_ground );
+	double c0 = atm_profile_2d->get( 0.0, "_C0_", z_ground );
 	double lambda0 = c0 / freq;
   	if (dz <= 0.0) {
   		dz = lambda0 / 20.0;
@@ -157,7 +169,7 @@ NCPA::EPadeSolver::~EPadeSolver() {
 	delete [] z_abs;
 	delete [] zgi_r;
 	delete [] azi;
-	NCPA::free_dmatrix( tl, NZ, NR-1 );
+	NCPA::free_cmatrix( tl, NZ, NR-1 );
 	delete atm_profile_2d;
 }
 
@@ -178,11 +190,17 @@ int NCPA::EPadeSolver::computeTLField() {
 	// set up z grid for flat ground.  When we add terrain we will need to move this inside
 	// the range loop
 	//int profile_index = atm_profile_2d->get_profile_index( 0.0 );
-	int profile_index = -1;
+	int profile_index;
 	double minlimit, maxlimit;
 	atm_profile_2d->get_maximum_altitude_limits( minlimit, maxlimit );
 	z_max = NCPA::min( z_max, minlimit );    // lowest valid top value
 	int ground_index = 0;
+
+	// truncate multiprop file if needed
+	if (multiprop) {
+		std::ofstream ofs( "tloss_multiprop.pe", std::ofstream::out | std::ofstream::trunc );
+		ofs.close();
+	}
 
 	if (use_topo) {
 		z_bottom = -5000.0;    // make this eventually depend on frequency
@@ -236,7 +254,7 @@ int NCPA::EPadeSolver::computeTLField() {
 		}
 		zs = NCPA::max( zs-z_ground+dz, dz );
 	}
-	tl = NCPA::dmatrix( NZ, NR-1 );
+	tl = NCPA::cmatrix( NZ, NR-1 );
 	
 	/*
 	int plotz = 10;
@@ -254,110 +272,150 @@ int NCPA::EPadeSolver::computeTLField() {
 	double h = dz;
 	double h2 = h * h;
 
-	std::cout << "Infrasound PE code at f = " << freq << " Hz, azi = " 
-		<< azi[0] << " deg" << std::endl;
-
 	// set up for source atmosphere
 	double k0 = 0.0, c0 = 0.0;
 	double *c = new double[ NZ ];
 	double *a_t = new double[ NZ ];
 	std::complex<double> *k = new std::complex<double>[ NZ ];
 	std::complex<double> *n = new std::complex<double>[ NZ ];
-	std::cout << "Using atmosphere index " << profile_index << std::endl;
-	calculate_atmosphere_parameters( atm_profile_2d, NZ, z, 0.0, z_ground, lossless, top_layer, freq, use_topo,
-		k0, c0, c, a_t, k, n );
+	
+
+	for (int azind = 0; azind < NAz; azind++) {
+		std::cout << "Infrasound PE code at f = " << freq << " Hz, azi = " 
+			<< azi[ azind ] << " deg" << std::endl;
+
+		profile_index = -1;
+		atm_profile_2d->calculate_wind_component( "_WC_", "_WS_", "_WD_", azi[ azind ] );
+		atm_profile_2d->calculate_effective_sound_speed( "_CEFF_", "_C0_", "_WC_" );
+		calc_az = azi[ azind ];
+
+		//std::cout << "Using atmosphere index " << profile_index << std::endl;
+		calculate_atmosphere_parameters( atm_profile_2d, NZ, z, 0.0, z_ground, lossless, top_layer, freq, use_topo,
+			k0, c0, c, a_t, k, n );
 
 
-	// calculate q matrices
-	qpowers = new Mat[ npade+1 ];
-	make_q_powers( NZ, z, k0, h2, n, npade+1, 0, qpowers );
-	qpowers_starter = new Mat[ npade+1 ];
-
-	if (starter == "self") {
-		make_q_powers( NZ, z, k0, h2, n, npade+1, ground_index, qpowers_starter );
-		//get_starter_self( NZ, z, zs, k0, qpowers, npade, &psi_o );
-		get_starter_self( NZ, z, zs, k0, qpowers_starter, npade, &psi_o );
-	} else if (starter == "gaussian") {
-		get_starter_gaussian( NZ, z, zs, k0, ground_index, &psi_o );
-	} else {
-		std::cerr << "Unrecognized starter type: " << starter << std::endl;
-		exit(0);
-	}
-
-	std::cout << "Finding ePade coefficients..." << std::endl;
-	std::vector< std::complex<double> > P, Q;
-	epade( npade, k0, dr, &P, &Q );
-	make_B_and_C_matrices( qpowers_starter, npade, NZ, P, Q, &B, &C );
-
-	std::cout << "Marching out field..." << std::endl;
-	ierr = VecDuplicate( psi_o, &Bpsi_o );CHKERRQ(ierr);
-	contents = new PetscScalar[ NZ ];
-
-	ierr = KSPCreate( PETSC_COMM_SELF, &ksp );CHKERRQ(ierr);
-	ierr = KSPSetOperators( ksp, C, C );CHKERRQ(ierr);
-	// ierr = KSPGetPC( ksp, &pc );CHKERRQ(ierr);
-	// ierr = PCSetType( pc, PCLU );
-	ierr = KSPSetFromOptions( ksp );CHKERRQ(ierr);
-	for (PetscInt ir = 0; ir < (NR-1); ir++) {
-
-		//double rr = ((double)ir+1) * dr;
-		//r[ ir ] = rr;
-		double rr = r[ ir ];
-		// check for atmosphere change
-		if (atm_profile_2d->get_profile_index( rr ) != profile_index) {
-		//if (rr > 20000.0) {
-
-			profile_index = atm_profile_2d->get_profile_index( rr );
-			//z_ground = atm_profile_2d->get( rr, "Z0" );
-			calculate_atmosphere_parameters( atm_profile_2d, NZ, z, rr, z_ground, lossless, top_layer, freq, 
-				use_topo, k0, c0, c, a_t, k, n );
-			for (i = 0; i < npade+1; i++) {
-				ierr = MatDestroy( qpowers + i );CHKERRQ(ierr);
-			}
-			make_q_powers( NZ, z, k0, h2, n, npade+1, 0, qpowers );
-			epade( npade, k0, dr, &P, &Q );
-			ierr = MatZeroEntries( B );CHKERRQ(ierr);
-			ierr = MatZeroEntries( C );CHKERRQ(ierr);
-			make_B_and_C_matrices( qpowers, npade, NZ, P, Q, &B, &C );
-			std::cout << "Switching to atmosphere index " << profile_index 
-				<< " at range = " << rr/1000.0 << " km" << std::endl;
-		}
+		// calculate q matrices
+		qpowers = new Mat[ npade+1 ];
+		//qpowers_starter = new Mat[ npade+1 ];
+		make_q_powers( NZ, z, k0, h2, n, npade+1, 0, qpowers );
 
 
-
-		hank = sqrt( 2.0 / ( PI * k0 * rr ) ) * exp( I * ( k0 * rr - PI/4.0 ) );
-		//ierr = VecCopy( psi_o, psi_temp );CHKERRQ(ierr);
-		//ierr = VecScale( psi_temp, hank );CHKERRQ(ierr);
-		ierr = VecGetValues( psi_o, NZ, indices, contents );
-		// for (i = 0; i < nzplot; i++) {
-		// 	tl[ i ][ ir ] = 20.0 * log10( abs( contents[ zti[i] ] * hank ) );
-		// }
-		for (i = 0; i < NZ; i++) {
-			tl[ i ][ ir ] = 20.0 * log10( abs( contents[ i ] * hank ) );
-		}
-
-		if (use_topo) {
-			double z0g = atm_profile_2d->get( rr, "Z0" );
-			zgi_r[ ir ] = NCPA::find_closest_index( z, NZ, z0g );
-			if ( z[ zgi_r[ ir ] ] < z0g ) {
-				zgi_r[ ir ]++;
-			}
+		if (starter == "self") {
+			qpowers_starter = new Mat[ npade+1 ];
+			make_q_powers( NZ, z, k0, h2, n, npade+1, ground_index, qpowers_starter );
+			//get_starter_self( NZ, z, zs, k0, qpowers, npade, &psi_o );
+			get_starter_self( NZ, z, zs, k0, qpowers_starter, npade, &psi_o );
+		} else if (starter == "gaussian") {
+			qpowers_starter = qpowers;
+			get_starter_gaussian( NZ, z, zs, k0, ground_index, &psi_o );
 		} else {
-			zgi_r[ ir ] = 0.0;
+			std::cerr << "Unrecognized starter type: " << starter << std::endl;
+			exit(0);
 		}
 
+		std::cout << "Finding ePade coefficients..." << std::endl;
+		std::vector< std::complex<double> > P, Q;
+		epade( npade, k0, dr, &P, &Q );
+		make_B_and_C_matrices( qpowers_starter, npade, NZ, P, Q, &B, &C );
 
-		if ( fmod( rr, 1.0e5 ) < dr) {
-			std::cout << " -> Range " << rr/1000.0 << " km" << std::endl;
-		}
+		std::cout << "Marching out field..." << std::endl;
+		ierr = VecDuplicate( psi_o, &Bpsi_o );CHKERRQ(ierr);
+		contents = new PetscScalar[ NZ ];
 
-		ierr = MatMult( B, psi_o, Bpsi_o );CHKERRQ(ierr);
-		ierr = KSPSetOperators( ksp, C, C );CHKERRQ(ierr);  // may not be necessary
+		ierr = KSPCreate( PETSC_COMM_SELF, &ksp );CHKERRQ(ierr);
+		ierr = KSPSetOperators( ksp, C, C );CHKERRQ(ierr);
 		// ierr = KSPGetPC( ksp, &pc );CHKERRQ(ierr);
 		// ierr = PCSetType( pc, PCLU );
-		ierr = KSPSolve( ksp, Bpsi_o, psi_o );CHKERRQ(ierr);
+		ierr = KSPSetFromOptions( ksp );CHKERRQ(ierr);
+		for (PetscInt ir = 0; ir < (NR-1); ir++) {
+
+			//double rr = ((double)ir+1) * dr;
+			//r[ ir ] = rr;
+			double rr = r[ ir ];
+			// check for atmosphere change
+			if (atm_profile_2d->get_profile_index( rr ) != profile_index) {
+			//if (rr > 20000.0) {
+
+				profile_index = atm_profile_2d->get_profile_index( rr );
+				//z_ground = atm_profile_2d->get( rr, "Z0" );
+				calculate_atmosphere_parameters( atm_profile_2d, NZ, z, rr, z_ground, lossless, top_layer, freq, 
+					use_topo, k0, c0, c, a_t, k, n );
+				for (i = 0; i < npade+1; i++) {
+					ierr = MatDestroy( qpowers + i );CHKERRQ(ierr);
+				}
+				make_q_powers( NZ, z, k0, h2, n, npade+1, 0, qpowers );
+				epade( npade, k0, dr, &P, &Q );
+				ierr = MatZeroEntries( B );CHKERRQ(ierr);
+				ierr = MatZeroEntries( C );CHKERRQ(ierr);
+				make_B_and_C_matrices( qpowers, npade, NZ, P, Q, &B, &C );
+				std::cout << "Switching to atmosphere index " << profile_index 
+					<< " at range = " << rr/1000.0 << " km" << std::endl;
+			}
+
+
+
+			hank = sqrt( 2.0 / ( PI * k0 * rr ) ) * exp( I * ( k0 * rr - PI/4.0 ) );
+			//ierr = VecCopy( psi_o, psi_temp );CHKERRQ(ierr);
+			//ierr = VecScale( psi_temp, hank );CHKERRQ(ierr);
+			ierr = VecGetValues( psi_o, NZ, indices, contents );
+			// for (i = 0; i < nzplot; i++) {
+			// 	tl[ i ][ ir ] = 20.0 * log10( abs( contents[ zti[i] ] * hank ) );
+			// }
+			for (i = 0; i < NZ; i++) {
+				//tl[ i ][ ir ] = 20.0 * log10( abs( contents[ i ] * hank ) );
+				tl[ i ][ ir ] = contents[ i ] * hank;
+			}
+
+			if (use_topo) {
+				double z0g = atm_profile_2d->get( rr, "Z0" );
+				zgi_r[ ir ] = NCPA::find_closest_index( z, NZ, z0g );
+				if ( z[ zgi_r[ ir ] ] < z0g ) {
+					zgi_r[ ir ]++;
+				}
+			} else {
+				zgi_r[ ir ] = 0.0;
+			}
+
+
+			if ( fmod( rr, 1.0e5 ) < dr) {
+				std::cout << " -> Range " << rr/1000.0 << " km" << std::endl;
+			}
+
+			ierr = MatMult( B, psi_o, Bpsi_o );CHKERRQ(ierr);
+			ierr = KSPSetOperators( ksp, C, C );CHKERRQ(ierr);  // may not be necessary
+			// ierr = KSPGetPC( ksp, &pc );CHKERRQ(ierr);
+			// ierr = PCSetType( pc, PCLU );
+			ierr = KSPSolve( ksp, Bpsi_o, psi_o );CHKERRQ(ierr);
+		}
+		std::cout << "Stopped at range " << r[ NR-1 ]/1000.0 << " km" << std::endl;
+
+		atm_profile_2d->remove_property( "_CEFF_" );
+		atm_profile_2d->remove_property( "_WC_" );
+
+		if (multiprop) {
+			std::cout << "Writing 1-D output to tloss_multiprop.pe" << std::endl;
+			output1DTL( "tloss_multiprop.pe", true );
+		} else { 
+			std::cout << "Writing 1-D output to tloss_1d.pe" << std::endl;
+			output1DTL( "tloss_1d.pe" );
+			if (write2d) {
+				std::cout << "Writing 2-D output to tloss_2d.pe" << std::endl;
+				output2DTL( "tloss_2d.pe" );
+			}
+		}
+		std::cout << std::endl;
+
+		for (i = 0; i < npade+1; i++) {
+			ierr = MatDestroy( qpowers + i );CHKERRQ(ierr);
+			if (starter == "self") {
+				ierr = MatDestroy( qpowers_starter + i );CHKERRQ(ierr);
+			}
+		}
+		delete [] qpowers;
+		if (starter == "self") {
+			delete [] qpowers_starter;
+		}
 	}
-	std::cout << "Stopped at range " << r[ NR-1 ]/1000.0 << " km" << std::endl;
 
 	//ierr = MatDestroy( &q );       CHKERRQ(ierr);
 	ierr = MatDestroy( &B );       CHKERRQ(ierr);
@@ -365,12 +423,11 @@ int NCPA::EPadeSolver::computeTLField() {
 	ierr = VecDestroy( &psi_o );   CHKERRQ(ierr);
 	ierr = VecDestroy( &Bpsi_o );  CHKERRQ(ierr);
 	ierr = KSPDestroy( &ksp );     CHKERRQ(ierr);
-	for (i = 0; i < npade+1; i++) {
-		ierr = MatDestroy( qpowers + i );CHKERRQ(ierr);
-		ierr = MatDestroy( qpowers_starter + i );CHKERRQ(ierr);
-	}
-	delete [] qpowers;
-	delete [] qpowers_starter;
+	// for (i = 0; i < npade+1; i++) {
+	// 	ierr = MatDestroy( qpowers + i );CHKERRQ(ierr);
+	// 	ierr = MatDestroy( qpowers_starter + i );CHKERRQ(ierr);
+	// }
+	
 	delete [] k;
 	delete [] n;
 	delete [] c;
@@ -855,20 +912,30 @@ int NCPA::EPadeSolver::epade( int order, double k0, double dr, std::vector<Petsc
 	return 0;
 }
 
-void NCPA::EPadeSolver::output1DTL( std::string filename ) {
-	std::ofstream out_1d( "tloss_1d.pe", std::ofstream::out | std::ofstream::trunc );
+void NCPA::EPadeSolver::output1DTL( std::string filename, bool append ) {
+	std::ofstream out_1d;
+	if (append) {
+		out_1d.open( filename, std::ofstream::out | std::ofstream::app );
+		out_1d << std::endl;
+	} else {
+		out_1d.open( filename, std::ofstream::out | std::ofstream::trunc );
+	}
 	for (int i = 0; i < (NR-1); i++) {
-		out_1d << r[ i ]/1000.0 << " " << tl[ zgi_r[ i ] ][ i ] << std::endl;
+		//out_1d << calc_az << " " << r[ i ]/1000.0 << " " << tl[ zgi_r[ i ] ][ i ] << std::endl;
+		out_1d << calc_az << " " << r[ i ]/1000.0 << " " << tl[ zgi_r[ i ] ][ i ].real()
+		       << " " << tl[ zgi_r[ i ] ][ i ].imag() << std::endl;
 	}
 	out_1d.close();
 }
 
 void NCPA::EPadeSolver::output2DTL( std::string filename ) {
-	std::ofstream out_2d( "tloss_2d.pe", std::ofstream::out | std::ofstream::trunc );
+	std::ofstream out_2d( filename, std::ofstream::out | std::ofstream::trunc );
 	int zplot_int = 10;
 	for (int i = 0; i < (NR-1); i++) {
 		for (int j = 0; j < NZ; j += zplot_int) {
-			out_2d << r[ i ]/1000.0 << " " << z[ j ]/1000.0 << " " << tl[ j ][ i ] << " 0.0" << std::endl;
+			//out_2d << r[ i ]/1000.0 << " " << z[ j ]/1000.0 << " " << tl[ j ][ i ] << " 0.0" << std::endl;
+			out_2d << r[ i ]/1000.0 << " " << z[ j ]/1000.0 << " " << tl[ j ][ i ].real() 
+			<< " " << tl[ j ][ i ].imag() << std::endl;
 		}
 		out_2d << std::endl;
 	}

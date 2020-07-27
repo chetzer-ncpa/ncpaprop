@@ -17,7 +17,7 @@ namespace NCPA {
 		EPadeSolver( NCPA::ParameterSet *param );
 		~EPadeSolver();
 		int computeTLField();
-		void output1DTL( std::string filename );
+		void output1DTL( std::string filename, bool append = false );
 		void output2DTL( std::string filename );
 
 	protected:
@@ -43,7 +43,8 @@ namespace NCPA {
 			double &k0, double &c0, double *c_vec, double *a_vec, std::complex<double> *k_vec, 
 			std::complex<double> *n_vec );
 
-		double *z = NULL, *z_abs = NULL, *r = NULL, **tl = NULL;
+		double *z = NULL, *z_abs = NULL, *r = NULL, calc_az;
+		std::complex< double > **tl;
 		int *zgi_r = NULL;   // ground height index
 		double freq;
 		double *azi;
@@ -52,11 +53,10 @@ namespace NCPA {
 		int npade;
 		bool use_atm_1d = false, use_atm_2d = false, use_atm_toy = false, use_topo = false;
 		bool z_ground_specified = false, lossless = false, top_layer = true;
-		bool Nby2Dprop = false;
-		double r_max;
-		double z_max;
-		double z_min, z_ground, z_bottom;
-		double zs;
+		bool multiprop = false, write2d = false;
+		double r_max;    // range limits
+		double z_max, z_min, z_ground, z_bottom;  // atmosphere profile limits
+		double zs;  // source height
 		double c_underground;
 		//double zrcv;
 		std::string gnd_imp_model;
