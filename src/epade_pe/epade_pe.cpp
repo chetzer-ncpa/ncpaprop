@@ -29,7 +29,9 @@
 
 NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
 
-	c_underground		= 50000000.0;
+	c_underground		= 5000.0;
+
+	//azi = new double[ 1 ];
 
 	// obtain the parameter values from the user's options
 	// @todo add units to input scalar quantities
@@ -40,10 +42,30 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
   	//zrcv		 		= param->getFloat( "receiverheight_km" ) * 1000.0;
   	//NZ 					= param->getInteger( "Nz_grid" );    // @todo calculate dynamically
   	NR 					= param->getInteger( "Nrng_steps" );
-  	azi 				= param->getFloat( "azimuth" );
+  	//azi[ 0 ] 			= param->getFloat( "azimuth" );
 	freq 				= param->getFloat( "freq" );
 	npade 				= param->getInteger( "npade" );
 	starter 			= param->getString( "starter" );
+
+	//NA = 1; // Number of azimuths: default is a propagation along a single azimuth
+	double min_az, max_az, step_az;
+	if (Nby2Dprop) {
+		min_az 			= param->getFloat( "azimuth_start" );
+		max_az 			= param->getFloat( "azimuth_end" );
+		step_az 		= param->getFloat( "azimuth_step" );
+		NAz 			= (int) ((max_az - min_az)/step_az) + 1;
+	} else {
+		NAz 			= 1;
+		min_az 			= param->getFloat( "azimuth" );
+		max_az 			= min_az;
+		step_az 		= 0;
+		//azi[0] 			= param->getFloat( "azimuth" );
+	}
+	azi = new double[ NAz ];
+	memset( azi, 0, NAz * sizeof( double ) );
+	for (int i = 0; i < NAz; i++) {
+		azi[ i ] = min_az + i * step_az;
+	}
 
 	double dr;
   	if (NR == 0) {
@@ -103,7 +125,7 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
 	atm_profile_2d->calculate_sound_speed_from_pressure_and_density( "_C0_", "P", "RHO", Units::fromString( "m/s" ) );
 	atm_profile_2d->calculate_wind_speed( "_WS_", "U", "V" );
 	atm_profile_2d->calculate_wind_direction( "_WD_", "U", "V" );
-	atm_profile_2d->calculate_wind_component( "_WC_", "_WS_", "_WD_", azi );
+	atm_profile_2d->calculate_wind_component( "_WC_", "_WS_", "_WD_", azi[0] );
 	atm_profile_2d->calculate_effective_sound_speed( "_CEFF_", "_C0_", "_WC_" );
 	if (param->wasFound( "attnfile" ) ) {
 		atm_profile_2d->read_attenuation_from_file( "_ALPHA_", param->getString( "attnfile" ) );
@@ -134,6 +156,7 @@ NCPA::EPadeSolver::~EPadeSolver() {
 	delete [] z;
 	delete [] z_abs;
 	delete [] zgi_r;
+	delete [] azi;
 	NCPA::free_dmatrix( tl, NZ, NR-1 );
 	delete atm_profile_2d;
 }
@@ -154,7 +177,8 @@ int NCPA::EPadeSolver::computeTLField() {
 
 	// set up z grid for flat ground.  When we add terrain we will need to move this inside
 	// the range loop
-	size_t profile_index = atm_profile_2d->get_profile_index( 0.0 );
+	//int profile_index = atm_profile_2d->get_profile_index( 0.0 );
+	int profile_index = -1;
 	double minlimit, maxlimit;
 	atm_profile_2d->get_maximum_altitude_limits( minlimit, maxlimit );
 	z_max = NCPA::min( z_max, minlimit );    // lowest valid top value
@@ -162,6 +186,7 @@ int NCPA::EPadeSolver::computeTLField() {
 
 	if (use_topo) {
 		z_bottom = -5000.0;    // make this eventually depend on frequency
+		z_bottom -= fmod( z_bottom, dz );
 		z_ground = atm_profile_2d->get( 0.0, "Z0" );
 		NZ = ((int)std::floor((z_max - z_bottom) / dz)) + 1;
 		z = new double[ NZ ];
@@ -175,8 +200,11 @@ int NCPA::EPadeSolver::computeTLField() {
 			z_abs[ i ] = z[ i ];
 			indices[ i ] = i;
 		}
-		zs = NCPA::max( zs, z_ground+dz );
+		zs = NCPA::max( zs, z_ground );
 		ground_index = NCPA::find_closest_index( z, NZ, z_ground );
+		if ( z[ ground_index ] < z_ground ) {
+			ground_index++;
+		}
 		// if (z[ ground_index ] > z_ground && ground_index > 0) {
 		// 	ground_index--;
 		// }
@@ -210,13 +238,14 @@ int NCPA::EPadeSolver::computeTLField() {
 	}
 	tl = NCPA::dmatrix( NZ, NR-1 );
 	
-	int plotz = 2;
-	for (i = 0; i < NZ; i += plotz) {
+	/*
+	int plotz = 10;
+	for (i = ((int)fmod((double)ground_index,(double)plotz)); i < NZ; i += plotz) {
 		zt.push_back( z_abs[ i ] );
 		zti.push_back( i );
 	}
 	nzplot = zt.size();
-
+	*/
 
 	// constants for now
 	double omega = 2.0 * PI * freq;
@@ -225,8 +254,8 @@ int NCPA::EPadeSolver::computeTLField() {
 	double h = dz;
 	double h2 = h * h;
 
-	std::cout << std::endl << "Infrasound PE code at f = " << freq << " Hz, azi = " 
-		<< azi << " deg" << std::endl;
+	std::cout << "Infrasound PE code at f = " << freq << " Hz, azi = " 
+		<< azi[0] << " deg" << std::endl;
 
 	// set up for source atmosphere
 	double k0 = 0.0, c0 = 0.0;
@@ -244,12 +273,6 @@ int NCPA::EPadeSolver::computeTLField() {
 	make_q_powers( NZ, z, k0, h2, n, npade+1, 0, qpowers );
 	qpowers_starter = new Mat[ npade+1 ];
 
-
-	std::cout << "Finding ePade coefficients..." << std::endl;
-	std::vector< std::complex<double> > P, Q;
-	epade( npade, k0, dr, &P, &Q );
-	make_B_and_C_matrices( qpowers, npade, NZ, P, Q, &B, &C );
-
 	if (starter == "self") {
 		make_q_powers( NZ, z, k0, h2, n, npade+1, ground_index, qpowers_starter );
 		//get_starter_self( NZ, z, zs, k0, qpowers, npade, &psi_o );
@@ -260,6 +283,11 @@ int NCPA::EPadeSolver::computeTLField() {
 		std::cerr << "Unrecognized starter type: " << starter << std::endl;
 		exit(0);
 	}
+
+	std::cout << "Finding ePade coefficients..." << std::endl;
+	std::vector< std::complex<double> > P, Q;
+	epade( npade, k0, dr, &P, &Q );
+	make_B_and_C_matrices( qpowers_starter, npade, NZ, P, Q, &B, &C );
 
 	std::cout << "Marching out field..." << std::endl;
 	ierr = VecDuplicate( psi_o, &Bpsi_o );CHKERRQ(ierr);
@@ -277,6 +305,7 @@ int NCPA::EPadeSolver::computeTLField() {
 		double rr = r[ ir ];
 		// check for atmosphere change
 		if (atm_profile_2d->get_profile_index( rr ) != profile_index) {
+		//if (rr > 20000.0) {
 
 			profile_index = atm_profile_2d->get_profile_index( rr );
 			//z_ground = atm_profile_2d->get( rr, "Z0" );
@@ -300,19 +329,23 @@ int NCPA::EPadeSolver::computeTLField() {
 		//ierr = VecCopy( psi_o, psi_temp );CHKERRQ(ierr);
 		//ierr = VecScale( psi_temp, hank );CHKERRQ(ierr);
 		ierr = VecGetValues( psi_o, NZ, indices, contents );
-		for (i = 0; i < nzplot; i++) {
-			tl[ i ][ ir ] = 20.0 * log10( abs( contents[ zti[i] ] * hank ) );
+		// for (i = 0; i < nzplot; i++) {
+		// 	tl[ i ][ ir ] = 20.0 * log10( abs( contents[ zti[i] ] * hank ) );
+		// }
+		for (i = 0; i < NZ; i++) {
+			tl[ i ][ ir ] = 20.0 * log10( abs( contents[ i ] * hank ) );
 		}
 
 		if (use_topo) {
 			double z0g = atm_profile_2d->get( rr, "Z0" );
 			zgi_r[ ir ] = NCPA::find_closest_index( z, NZ, z0g );
 			if ( z[ zgi_r[ ir ] ] < z0g ) {
-				z[ zgi_r[ ir ] ]++;
+				zgi_r[ ir ]++;
 			}
 		} else {
 			zgi_r[ ir ] = 0.0;
 		}
+
 
 		if ( fmod( rr, 1.0e5 ) < dr) {
 			std::cout << " -> Range " << rr/1000.0 << " km" << std::endl;
@@ -390,15 +423,15 @@ void NCPA::EPadeSolver::calculate_atmosphere_parameters( NCPA::Atmosphere2D *atm
 	// Set up vectors
 	//indices = new PetscInt[ NZ ];
 	for (int i = 0; i < NZ; i++) {
-		if (absolute) {
-			if (z_vec[i] < z_g) {
-				k_vec[ i ] = 0.0;
-			} else {
-				k_vec[ i ] = 2.0 * PI * freq / c_vec[ i ] + (a_vec[ i ] + abslayer[ i ]) * I;
-			}
-		} else {
+		// if (absolute) {
+		// 	if (z_vec[i] < z_g) {
+		// 		k_vec[ i ] = 0.0;
+		// 	} else {
+		// 		k_vec[ i ] = 2.0 * PI * freq / c_vec[ i ] + (a_vec[ i ] + abslayer[ i ]) * I;
+		// 	}
+		// } else {
 			k_vec[ i ] = 2.0 * PI * freq / c_vec[ i ] + (a_vec[ i ] + abslayer[ i ]) * I;
-		}
+		// }
 		n_vec[ i ] = k_vec[ i ] / k0;
 	}
 }
@@ -415,9 +448,16 @@ void NCPA::EPadeSolver::fill_atm_vector_absolute( NCPA::Atmosphere2D *atm, doubl
 	std::string key, double fill_value, double *vec ) {
 
 	double zmin = atm->get( range, "Z0" );
+	// double bound_val = atm->get( range, key, zmin );
+	// double tempval;
 	for (int i = 0; i < NZvec; i++) {
+		// if (zvec[i] < (zmin - 500.0)) {
 		if (zvec[i] < zmin) {
 			vec[i] = fill_value;
+		// } else if (zvec[i] < zmin) {
+		// 	double factor = 0.5 - 0.5 * std::cos( PI * (zmin - zvec[i]) / 500.0  );
+		// 	tempval = (fill_value - bound_val) * factor + bound_val;
+		// 	vec[i] = (fill_value - bound_val) * factor + bound_val;
 		} else {
 			vec[i] = atm->get( range, key, zvec[i] );
 		}
@@ -479,6 +519,7 @@ int NCPA::EPadeSolver::make_q_powers( int NZvec, double *zvec, double k0, double
 
 	// populate
 	double bnd_cnd = -1.0 / h2;    // @todo add hook for alternate boundary conditions
+	//double bnd_cnd = -2.0 / h2;      // pressure release condition
 	double k02 = k0*k0;
 	
 	ierr = MatGetOwnershipRange(q,&Istart,&Iend);CHKERRQ(ierr);
@@ -824,9 +865,10 @@ void NCPA::EPadeSolver::output1DTL( std::string filename ) {
 
 void NCPA::EPadeSolver::output2DTL( std::string filename ) {
 	std::ofstream out_2d( "tloss_2d.pe", std::ofstream::out | std::ofstream::trunc );
+	int zplot_int = 10;
 	for (int i = 0; i < (NR-1); i++) {
-		for (int j = 0; j < nzplot; j++) {
-			out_2d << r[ i ]/1000.0 << " " << zt[ j ]/1000.0 << " " << tl[ j ][ i ] << " 0.0" << std::endl;
+		for (int j = 0; j < NZ; j += zplot_int) {
+			out_2d << r[ i ]/1000.0 << " " << z[ j ]/1000.0 << " " << tl[ j ][ i ] << " 0.0" << std::endl;
 		}
 		out_2d << std::endl;
 	}

@@ -46,12 +46,13 @@ namespace NCPA {
 		double *z = NULL, *z_abs = NULL, *r = NULL, **tl = NULL;
 		int *zgi_r = NULL;   // ground height index
 		double freq;
-		double azi;
-		int NZ, NR;
+		double *azi;
+		int NZ, NR, NAz;
 		double dz;
 		int npade;
 		bool use_atm_1d = false, use_atm_2d = false, use_atm_toy = false, use_topo = false;
 		bool z_ground_specified = false, lossless = false, top_layer = true;
+		bool Nby2Dprop = false;
 		double r_max;
 		double z_max;
 		double z_min, z_ground, z_bottom;
