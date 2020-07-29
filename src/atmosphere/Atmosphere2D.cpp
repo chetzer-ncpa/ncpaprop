@@ -349,3 +349,11 @@ void NCPA::Atmosphere2D::remove_property( std::string key ) {
 		(*it)->remove_property( key );
 	}
 }
+
+std::vector< NCPA::Atmosphere1D * >::iterator NCPA::Atmosphere2D::first_profile() {
+	return profiles_.begin();
+}
+
+std::vector< NCPA::Atmosphere1D * >::iterator NCPA::Atmosphere2D::last_profile() {
+	return profiles_.end();
+}

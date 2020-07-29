@@ -37,6 +37,7 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
 	r_max	 			= param->getFloat( "maxrange_km" ) * 1000.0;
   	z_max	 			= param->getFloat( "maxheight_km" ) * 1000.0;      // @todo fix elsewhere that m is required
   	zs			 		= param->getFloat( "sourceheight_km" ) * 1000.0;
+  	zr 					= param->getFloat( "receiverheight_km" ) * 1000.0;
   	NR 					= param->getInteger( "Nrng_steps" );
   	freq 				= param->getFloat( "freq" );
 	npade 				= param->getInteger( "npade" );
@@ -122,6 +123,12 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
 	if (param->wasFound("groundheight_km")) {
 		z_ground = param->getFloat( "groundheight_km" ) * 1000.0;
 		z_ground_specified = true;
+		
+		std::cout << "Overriding profile Z0 value with command-line value " << z_ground 
+		     << " m" << std::endl;
+		atm_profile_2d->remove_property("Z0");
+		atm_profile_2d->add_property( "Z0", z_ground, NCPA::Units::fromString("m") );
+		
 	}
 
 	// set units
@@ -134,11 +141,18 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
 	atm_profile_2d->convert_property_units( "RHO", Units::fromString( "kg/m3" ) );
 
 	// calculate derived quantities
-	atm_profile_2d->calculate_sound_speed_from_pressure_and_density( "_C0_", "P", "RHO", Units::fromString( "m/s" ) );
+	for (std::vector< NCPA::Atmosphere1D * >::iterator it = atm_profile_2d->first_profile();
+		 it != atm_profile_2d->last_profile(); ++it) {
+		if ( (*it)->contains_vector( "C0" ) ) {
+			(*it)->convert_property_units( "C0", Units::fromString( "m/s" ) );
+			(*it)->copy_vector_property( "C0", "_C0_" );
+		} else {
+			(*it)->calculate_sound_speed_from_pressure_and_density( "_C0_", "P", "RHO", 
+				Units::fromString( "m/s" ) );
+		}
+	}
 	atm_profile_2d->calculate_wind_speed( "_WS_", "U", "V" );
 	atm_profile_2d->calculate_wind_direction( "_WD_", "U", "V" );
-	// atm_profile_2d->calculate_wind_component( "_WC_", "_WS_", "_WD_", azi[0] );
-	// atm_profile_2d->calculate_effective_sound_speed( "_CEFF_", "_C0_", "_WC_" );
 	if (param->wasFound( "attnfile" ) ) {
 		atm_profile_2d->read_attenuation_from_file( "_ALPHA_", param->getString( "attnfile" ) );
 	} else {
@@ -368,6 +382,7 @@ int NCPA::EPadeSolver::computeTLField() {
 
 			if (use_topo) {
 				double z0g = atm_profile_2d->get( rr, "Z0" );
+				z0g = NCPA::max( z0g, zr );
 				zgi_r[ ir ] = NCPA::find_closest_index( z, NZ, z0g );
 				if ( z[ zgi_r[ ir ] ] < z0g ) {
 					zgi_r[ ir ]++;
@@ -921,7 +936,6 @@ void NCPA::EPadeSolver::output1DTL( std::string filename, bool append ) {
 		out_1d.open( filename, std::ofstream::out | std::ofstream::trunc );
 	}
 	for (int i = 0; i < (NR-1); i++) {
-		//out_1d << calc_az << " " << r[ i ]/1000.0 << " " << tl[ zgi_r[ i ] ][ i ] << std::endl;
 		out_1d << calc_az << " " << r[ i ]/1000.0 << " " << tl[ zgi_r[ i ] ][ i ].real()
 		       << " " << tl[ zgi_r[ i ] ][ i ].imag() << std::endl;
 	}

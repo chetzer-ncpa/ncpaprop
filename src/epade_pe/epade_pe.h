@@ -56,7 +56,7 @@ namespace NCPA {
 		bool multiprop = false, write2d = false;
 		double r_max;    // range limits
 		double z_max, z_min, z_ground, z_bottom;  // atmosphere profile limits
-		double zs;  // source height
+		double zs, zr;  // source height, receiver height
 		double c_underground;
 		//double zrcv;
 		std::string gnd_imp_model;

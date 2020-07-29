@@ -73,7 +73,8 @@ namespace NCPA {
 		void convert_property_units( std::string key, units_t new_units );
 		void read_attenuation_from_file( std::string new_key, std::string filename );    // apply universally
 		
-
+		std::vector< NCPA::Atmosphere1D * >::iterator first_profile();
+		std::vector< NCPA::Atmosphere1D * >::iterator last_profile();
 	protected:
 		void clear_last_index_();
 		void set_last_index_( size_t ind );

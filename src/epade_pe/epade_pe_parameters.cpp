@@ -130,10 +130,10 @@ void NCPA::configure_epade_pe_parameter_set( NCPA::ParameterSet *ps ) {
 
 	ps->addParameter( new NCPA::FloatParameter( "sourceheight_km", 0.0 ) );
 	ps->addParameterDescription( "Optional Parameters [default]", "--sourceheight_km", "Source height in km [ground]" );
-/*
+
 	ps->addParameter( new NCPA::FloatParameter( "receiverheight_km", 0.0 ) );
 	ps->addParameterDescription( "Optional Parameters [default]", "--receiverheight_km", "Receiver height in km [ground]" );
-*/
+
 	ps->addParameter( new NCPA::FloatParameter( "groundheight_km", 0.0 ) );
 	ps->addParameterDescription( "Optional Parameters [default]", "--groundheight_km", "Ground height in km [Z0 parameter in profile, or 0.0]" );
 

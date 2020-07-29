@@ -122,12 +122,20 @@ void NCPA::WModeSolver::setParams( NCPA::ParameterSet *param, NCPA::Atmosphere1D
 
 	// Set up units of atmospheric profile object
 	atm_profile->convert_altitude_units( Units::fromString( "m" ) );
-	atm_profile->convert_property_units( "Z0", Units::fromString( "m" ) );
 	atm_profile->convert_property_units( "U", Units::fromString( "m/s" ) );
 	atm_profile->convert_property_units( "V", Units::fromString( "m/s" ) );
 	atm_profile->convert_property_units( "T", Units::fromString( "K" ) );
 	atm_profile->convert_property_units( "P", Units::fromString( "Pa" ) );
 	atm_profile->convert_property_units( "RHO", Units::fromString( "kg/m3" ) );
+  if (atm_profile->contains_scalar("Z0")) {
+    atm_profile->convert_property_units( "Z0", Units::fromString( "m" ) );
+    double profile_z0 = atm_profile->get( "Z0" );
+    if (z_min < profile_z0) {
+      std::cout << "Adjusting minimum altitude to profile ground height of "
+                << profile_z0 << " m" << std::endl;
+      z_min = profile_z0;
+    }
+  }
   
 	//
 	// !!! ensure maxheight is less than the max height covered by the provided atm profile
@@ -152,10 +160,20 @@ void NCPA::WModeSolver::setParams( NCPA::ParameterSet *param, NCPA::Atmosphere1D
 	// the first value is at the ground level e.g. rho[0] = rho(z_min)
 	// @todo make fill_vector( zvec ) methods in AtmosphericProfile()
 	// @todo add underscores to internally calculated parameter keys
-	atm_profile->calculate_sound_speed_from_pressure_and_density( "_C0_", "P", "RHO", Units::fromString( "m/s" ) );
-	atm_profile->calculate_wind_speed( "_WS_", "U", "V" );
+	if (atm_profile->contains_vector( "C0" ) ) {
+    atm_profile->copy_vector_property( "C0", "_C0_" );
+    atm_profile->convert_property_units( "_C0_", Units::fromString( "m/s" ) );
+  } else {
+    atm_profile->calculate_sound_speed_from_pressure_and_density( "_C0_", "P", "RHO", 
+      Units::fromString( "m/s" ) );
+  }
+  atm_profile->calculate_wind_speed( "_WS_", "U", "V" );
 	atm_profile->calculate_wind_direction( "_WD_", "U", "V" );
-	atm_profile->calculate_attenuation( "_ALPHA_", "T", "P", "RHO", freq );
+	if (usrattfile.empty()) {
+    atm_profile->calculate_attenuation( "_ALPHA_", "T", "P", "RHO", freq );
+  } else {
+    atm_profile->read_attenuation_from_file( "_ALPHA_", usrattfile );
+  }
 
 	for (int i=0; i<Nz_grid; i++) {
 		Hgt[i] = z_min + i*dz; // Hgt[0] = zground MSL
