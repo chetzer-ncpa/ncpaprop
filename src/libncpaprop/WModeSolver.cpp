@@ -43,7 +43,7 @@ void NCPA::WModeSolver::setParams( NCPA::ParameterSet *param, NCPA::Atmosphere1D
 	Nz_grid 			= param->getInteger( "Nz_grid" );
 	Nrng_steps 			= param->getInteger( "Nrng_steps" );
 	Lamb_wave_BC 		= param->getBool( "Lamb_wave_BC" );
-	write_2D_TLoss  	= param->getBool( "write_2D_TLoss" );
+	write_2D_TLoss  	= param->getBool( "write_2d_tloss" );
 	write_phase_speeds 	= param->getBool( "write_phase_speeds" );
 	write_modes 		= param->getBool( "write_modes" );
 	//write_dispersion 	= param->getBool( "write_dispersion" );
@@ -208,7 +208,7 @@ void NCPA::WModeSolver::printParams() {
 	printf("          gnd_imp_model : %s\n", gnd_imp_model.c_str());
 	printf("Lamb wave boundary cond : %d\n", Lamb_wave_BC);
 	printf("  SLEPc tolerance param : %g\n", tol);
-	printf("    write_2D_TLoss flag : %d\n", write_2D_TLoss);
+	printf("    write_2d_tloss flag : %d\n", write_2D_TLoss);
 	printf("write_phase_speeds flag : %d\n", write_phase_speeds);
 	//printf("  write_dispersion flag : %d\n", write_dispersion);
 	printf("       write_modes flag : %d\n", write_modes);

@@ -26,7 +26,7 @@ void NCPA::configure_wmod_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->addHeaderText("file wtloss_1d.nm - considering attenuation in the atmosphere" );
 	ps->addHeaderText("file wtloss_1d.lossless.nm  - no attenuation" );
 	ps->resetHeaderIndent();
-	ps->addHeaderText("Additionally, if the flag --write_2D_TLoss is present on the command line, the 2D TL is saved to file wtloss2d.nm. The user can also choose to propagate in N different directions i.e. (N by 2D mode) by using the option --multiprop.");
+	ps->addHeaderText("Additionally, if the flag --write_2d_tloss is present on the command line, the 2D TL is saved to file wtloss2d.nm. The user can also choose to propagate in N different directions i.e. (N by 2D mode) by using the option --multiprop.");
 	ps->addBlankHeaderLine();
 	ps->addHeaderText("The options below can be specified in a colon-separated file \"wmod.param\" or at the command line. Command-line options override file options.");
 
@@ -138,8 +138,8 @@ void NCPA::configure_wmod_parameter_set( NCPA::ParameterSet *ps ) {
 
 	// Setup flags
 	//ps->addUsageLine( "Flags:" );
-	ps->addParameter( new NCPA::FlagParameter( "write_2D_TLoss" ) );
-	ps->addParameterDescription( "Flags", "--write_2D_TLoss", "Output 2-D transmission loss to tloss2D.nm" );
+	ps->addParameter( new NCPA::FlagParameter( "write_2d_tloss" ) );
+	ps->addParameterDescription( "Flags", "--write_2d_tloss", "Output 2-D transmission loss to tloss2D.nm" );
 
 	ps->addParameter( new NCPA::FlagParameter( "write_phase_speeds" ) );
 	ps->addParameterDescription( "Flags", "--write_phase_speeds", "Output phase speeds to phasespeeds.nm" );
@@ -201,7 +201,7 @@ void NCPA::configure_wmod_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->setCommandMode( true );
 	ps->addFooterText("../bin/WMod --singleprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --azimuth 90 --freq 0.1");
 	ps->addBlankFooterLine();
-	ps->addFooterText("../bin/WMod --singleprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --azimuth 90 --freq 0.1 --write_2D_TLoss --sourceheight_km 60 --receiverheight_km 60");
+	ps->addFooterText("../bin/WMod --singleprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --azimuth 90 --freq 0.1 --write_2d_tloss --sourceheight_km 60 --receiverheight_km 60");
 	ps->addBlankFooterLine();
 	ps->addFooterText("../bin/WMod --multiprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --freq 0.1 --azimuth_start 0 --azimuth_end 360 --azimuth_step 1");
 	ps->setFooterHangingIndent( 0 );
