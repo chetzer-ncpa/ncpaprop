@@ -37,15 +37,15 @@ void NCPA::configure_modbb_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->resetHeaderIndent();
 	ps->addHeaderText("Additionally, if the flag --write_2D_TLoss is present on the command line, the 2D TL is saved to file tloss2d.nm. The user can also choose to propagate in N different directions i.e. (N by 2D mode) by using the option --Nby2Dprop.");
 	ps->addBlankHeaderLine();
-	ps->addHeaderText("The options below can be specified in a colon-separated file \"modess.param\" or at the command line. Command-line options override file options.");
+	ps->addHeaderText("The options below can be specified in a colon-separated file \"modbb.param\" or at the command line. Command-line options override file options.");
 
 	// Parameter descriptions
 	ps->addParameter( new FlagParameter( "help" ) );
 	ps->addParameter( new FlagParameter( "h" ) );
 	ps->addParameterDescription( "Options Control", "--help", "Prints help test" );
 
-	ps->addParameter( new StringParameter( "paramfile", "modess.param") );
-	ps->addParameterDescription( "Options Control", "--paramfile", "Parameter file name [modess.param]" );
+	ps->addParameter( new StringParameter( "paramfile", "modbb.param") );
+	ps->addParameterDescription( "Options Control", "--paramfile", "Parameter file name [modbb.param]" );
 
 	ps->addParameter( new FlagParameter( "printparams" ) );
 	ps->addParameterDescription( "Options Control", "--printparams", "Print parameter summary to screen" );

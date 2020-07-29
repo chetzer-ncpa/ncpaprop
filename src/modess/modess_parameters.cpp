@@ -26,7 +26,7 @@ void NCPA::configure_modess_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->addHeaderText("file tloss_1d.nm - considering attenuation in the atmosphere" );
 	ps->addHeaderText("file tloss_1d.lossless.nm  - no attenuation" );
 	ps->resetHeaderIndent();
-	ps->addHeaderText("Additionally, if the flag --write_2D_TLoss is present on the command line, the 2D TL is saved to file tloss2d.nm. The user can also choose to propagate in N different directions i.e. (N by 2D mode) by using the option --Nby2Dprop.");
+	ps->addHeaderText("Additionally, if the flag --write_2D_TLoss is present on the command line, the 2D TL is saved to file tloss_2d.nm. The user can also choose to propagate in N different directions i.e. (N by 2D mode) by using the option --multiprop.");
 	ps->addBlankHeaderLine();
 	ps->addHeaderText("The options below can be specified in a colon-separated file \"modess.param\" or at the command line. Command-line options override file options.");
 
@@ -96,14 +96,6 @@ void NCPA::configure_modess_parameter_set( NCPA::ParameterSet *ps ) {
 	test->addStringParameter( "rigid" );
 	ps->addParameterDescription( "Optional Parameters [default]", "--ground_impedence_model", "Impedence model to use.  Currently only \"rigid\" is supported. [rigid]" );
 
-/*
-	ps->addParameter( new NCPA::StringParameter( "wind_units", "mpersec" ) );
-	test = ps->addTest( new NCPA::StringSetTest( "wind_units" ) );
-	test->addStringParameter( "mpersec" );
-	test->addStringParameter( "kmpersec" );
-	ps->addParameterDescription( "Optional Parameters [default]", "--wind_units", "Units wind speed is presented in, kmpersec or mpersec [mpersec]" );
-*/
-
 	ps->addParameter( new NCPA::StringParameter( "use_attn_file", "" ) );
 	ps->addParameterDescription( "Optional Parameters [default]", "--use_attn_file", "File name containing attenuation, to override default Sutherland/Bass [n/a]. Columns are #n# Height(km) Attenuation(np/m)" );
 
@@ -120,7 +112,7 @@ void NCPA::configure_modess_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->resetParameterIndent();
 
 	// Modes of operation
-	std::string modes_of_operation[ 2 ] = { "singleprop", "Nby2Dprop" };
+	std::string modes_of_operation[ 2 ] = { "singleprop", "multiprop" };
 	for (unsigned int i = 0; i < 2; i++) {
 		std::string tmpStr( modes_of_operation[ i ] );
 		ps->addParameter( new NCPA::FlagParameter( tmpStr ) );
@@ -139,19 +131,19 @@ void NCPA::configure_modess_parameter_set( NCPA::ParameterSet *ps ) {
 
 	
 	// for multiple propagation, must specify azimuth start, end, and step
-	ps->addParameterDescription( "Modes of Operation", "--Nby2Dprop", "Multiple azimuth propagation.  Requires --azimuth_start, --azimuth_end, and --azimuth_step" );
+	ps->addParameterDescription( "Modes of Operation", "--multiprop", "Multiple azimuth propagation.  Requires --azimuth_start, --azimuth_end, and --azimuth_step" );
 	ps->addParameter( new NCPA::FloatParameter( "azimuth_start" ) );
 	ps->addTest( new NCPA::FloatGreaterThanOrEqualToTest( "azimuth_start", 0.0 ) );
 	ps->addTest( new NCPA::FloatLessThanOrEqualToTest( "azimuth_start", 360.0 ) );
-	ps->addTest( new NCPA::RequiredIfOtherIsPresentTest( "azimuth_start", "Nby2Dprop" ) );
+	ps->addTest( new NCPA::RequiredIfOtherIsPresentTest( "azimuth_start", "multiprop" ) );
 	ps->addParameter( new NCPA::FloatParameter( "azimuth_end" ) );
 	ps->addTest( new NCPA::FloatGreaterThanOrEqualToTest( "azimuth_end", 0.0 ) );
 	ps->addTest( new NCPA::FloatLessThanOrEqualToTest( "azimuth_end", 360.0 ) );
-	ps->addTest( new NCPA::RequiredIfOtherIsPresentTest( "azimuth_end", "Nby2Dprop" ) );
+	ps->addTest( new NCPA::RequiredIfOtherIsPresentTest( "azimuth_end", "multiprop" ) );
 	ps->addParameter( new NCPA::FloatParameter( "azimuth_step" ) );
 	ps->addTest( new NCPA::FloatGreaterThanOrEqualToTest( "azimuth_step", 0.0 ) );
 	ps->addTest( new NCPA::FloatLessThanOrEqualToTest( "azimuth_step", 360.0 ) );
-	ps->addTest( new NCPA::RequiredIfOtherIsPresentTest( "azimuth_step", "Nby2Dprop" ) );
+	ps->addTest( new NCPA::RequiredIfOtherIsPresentTest( "azimuth_step", "multiprop" ) );
 	
 	ps->setParameterIndent( 2 * DEFAULT_PARAMETER_INDENT );
 	ps->addParameterDescription( "Modes of Operation", "--azimuth_start", "Starting azimuth, in degrees CW from North [0,360)" );
@@ -163,7 +155,7 @@ void NCPA::configure_modess_parameter_set( NCPA::ParameterSet *ps ) {
 	// Setup flags
 	//ps->addUsageLine( "Flags:" );
 	ps->addParameter( new NCPA::FlagParameter( "write_2D_TLoss" ) );
-	ps->addParameterDescription( "Flags", "--write_2D_TLoss", "Output 2-D transmission loss to tloss2D.nm" );
+	ps->addParameterDescription( "Flags", "--write_2D_TLoss", "Output 2-D transmission loss to tloss_2d.nm" );
 
 	ps->addParameter( new NCPA::FlagParameter( "write_phase_speeds" ) );
 	ps->addParameterDescription( "Flags", "--write_phase_speeds", "Output phase speeds to phasespeeds.nm" );
@@ -231,14 +223,11 @@ void NCPA::configure_modess_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->setFooterIndent( 4 );
 	ps->setFooterHangingIndent( 4 );
 	ps->setCommandMode( true );
-	//ps->addFooterText("../bin/Modess --singleprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --azimuth 90 --freq 0.1" );
 	ps->addFooterText("../bin/Modess --singleprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --azimuth 90 --freq 0.1" );
 	ps->addBlankFooterLine();
-	//ps->addFooterText("../bin/Modess --singleprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --azimuth 90 --freq 0.1 --write_2D_TLoss" );
 	ps->addFooterText("../bin/Modess --singleprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --azimuth 90 --freq 0.1 --write_2D_TLoss" );
 	ps->addBlankFooterLine();
-	//ps->addFooterText("../bin/Modess --Nby2Dprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp --skiplines 0 --freq 0.1 --azimuth_start 0 --azimuth_end 360 --azimuth_step 1" );
-	ps->addFooterText("../bin/Modess --Nby2Dprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --freq 0.1 --azimuth_start 0 --azimuth_end 360 --azimuth_step 1" );
+	ps->addFooterText("../bin/Modess --multiprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat --freq 0.1 --azimuth_start 0 --azimuth_end 360 --azimuth_step 1" );
 	ps->setFooterHangingIndent( 0 );
 	ps->setCommandMode( false );
 	ps->resetFooterIndent();

@@ -52,7 +52,7 @@ void NCPA::ESSModeSolver::setParams( NCPA::ParameterSet *param, NCPA::Atmosphere
   	dispersion_file     = param->getString( "dispersion_file" );
   	append_dispersion_file
   						= param->getBool( "append_dispersion_file" );
-  	Nby2Dprop 			= param->getBool( "Nby2Dprop" );
+  	Nby2Dprop 			= param->getBool( "multiprop" );
   	turnoff_WKB 		= param->getBool( "turnoff_WKB" );
   	z_min_specified     = param->wasFound( "zground_km" );
 
@@ -217,7 +217,7 @@ void NCPA::ESSModeSolver::printParams() {
 	printf("write_phase_speeds flag : %d\n", write_phase_speeds);
 	printf("      write_speeds flag : %d\n", write_speeds);
 	printf("       write_modes flag : %d\n", write_modes);
-	printf("         Nby2Dprop flag : %d\n", Nby2Dprop);
+	printf("         multiprop flag : %d\n", Nby2Dprop);
 	printf("       turnoff_WKB flag : %d\n", turnoff_WKB);
 	printf("    atmospheric profile : %s\n", atmosfile.c_str());
 	if (!dispersion_file.empty()) {
