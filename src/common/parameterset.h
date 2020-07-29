@@ -655,7 +655,7 @@ namespace NCPA {
 		std::vector< NCPA::ParameterTest * > _tests, _failed_tests;
 		bool _strict, _commandMode;
 		unsigned int headerIndent_, footerIndent_, parameterIndent_, 
-			headerHangingIndent_, footerHangingIndent_, maxWidth_;
+			maxWidth_, headerHangingIndent_, footerHangingIndent_;
 
 		bool isLongOption_( std::string ) const;
 		bool isShortOption_( std::string ) const;

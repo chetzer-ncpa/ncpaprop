@@ -45,7 +45,6 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
 
 	// flags
 	lossless 			= param->wasFound( "lossless" );
-	size_t n_atm_selected = 0;
 	use_atm_1d			= param->wasFound( "atmosfile" );
 	use_atm_2d			= param->wasFound( "atmosfile2d" );
 	use_atm_toy			= param->wasFound( "toy" );
@@ -191,9 +190,7 @@ int NCPA::EPadeSolver::computeTLField() {
 	int i;
 	std::complex<double> I( 0.0, 1.0 );
 	PetscErrorCode ierr;
-	PetscInt Istart, Iend, col[3], *indices;
-	PetscBool      FirstBlock=PETSC_FALSE, LastBlock=PETSC_FALSE;
-	PetscScalar    value[3];  // for populating tridiagonal matrices
+	PetscInt *indices;
 	PetscScalar hank, *contents;
 	Mat B, C;   // , q;
 	Mat *qpowers, *qpowers_starter;
@@ -280,7 +277,7 @@ int NCPA::EPadeSolver::computeTLField() {
 	*/
 
 	// constants for now
-	double omega = 2.0 * PI * freq;
+	//double omega = 2.0 * PI * freq;
 	double dr = r[1] - r[0];
 	//double h = z[1] - z[0];
 	double h = dz;
@@ -347,7 +344,7 @@ int NCPA::EPadeSolver::computeTLField() {
 			//r[ ir ] = rr;
 			double rr = r[ ir ];
 			// check for atmosphere change
-			if (atm_profile_2d->get_profile_index( rr ) != profile_index) {
+			if (((int)(atm_profile_2d->get_profile_index( rr ))) != profile_index) {
 			//if (rr > 20000.0) {
 
 				profile_index = atm_profile_2d->get_profile_index( rr );
@@ -566,10 +563,10 @@ int NCPA::EPadeSolver::make_B_and_C_matrices( Mat *qpowers, int npade, int NZ,
     ierr = MatAssemblyBegin(*C,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
     ierr = MatAssemblyEnd(*C,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
 
-	for (i = 1; i < Q.size(); i++) {
+	for (i = 1; i < (PetscInt)(Q.size()); i++) {
 		ierr = MatAXPY( *C, Q[ i ], qpowers[ i-1 ], DIFFERENT_NONZERO_PATTERN );CHKERRQ(ierr);
 	}
-	for (i = 1; i < P.size(); i++) {
+	for (i = 1; i < (PetscInt)(P.size()); i++) {
 		ierr = MatAXPY( *B, P[ i ], qpowers[ i-1 ], DIFFERENT_NONZERO_PATTERN );CHKERRQ(ierr);
 	}
 	return 1;
@@ -640,7 +637,7 @@ int NCPA::EPadeSolver::make_q_powers( int NZvec, double *zvec, double k0, double
     // calculate powers of q
 	//qpowers = new Mat[ nqp ];
 	ierr = MatConvert( q, MATSAME, MAT_INITIAL_MATRIX, qpowers );CHKERRQ(ierr);
-	for (i = 1; i < nqp; i++) {
+	for (i = 1; i < (PetscInt)nqp; i++) {
 		ierr = MatMatMult( qpowers[i-1], qpowers[0], MAT_INITIAL_MATRIX, PETSC_DEFAULT, 
 			qpowers+i );CHKERRQ(ierr);
 	}
@@ -669,7 +666,7 @@ int NCPA::EPadeSolver::get_starter_gaussian( size_t NZ, double *z, double zs, do
 	ierr = VecSetFromOptions( *psi ); CHKERRQ(ierr);
 	ierr = VecSet( *psi, 0.0 );
 
-	for (PetscInt i = 0; i < NZ; i++) {
+	for (PetscInt i = 0; i < (PetscInt)NZ; i++) {
 		//if (z[i] >= zg) {
 			tempval = -( k0*k0/fac/fac ) * (z[i] - zs) * (z[i] - zs);
 			tempval = sqrt( k0/fac ) * exp( tempval );
@@ -749,10 +746,10 @@ int NCPA::EPadeSolver::get_starter_self( size_t NZ, double *z, double zs, double
     ierr = MatAssemblyBegin(C,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
     ierr = MatAssemblyEnd(C,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
 
-    for (ii = 1; ii < Q.size(); ii++) {
+    for (ii = 1; ii < (PetscInt)(Q.size()); ii++) {
 		ierr = MatAXPY( C, Q[ ii ], qpowers[ ii-1 ], DIFFERENT_NONZERO_PATTERN );CHKERRQ(ierr);
 	}
-	for (ii = 1; ii < P.size(); ii++) {
+	for (ii = 1; ii < (PetscInt)(P.size()); ii++) {
 		ierr = MatAXPY( B, P[ ii ], qpowers[ ii-1 ], DIFFERENT_NONZERO_PATTERN );CHKERRQ(ierr);
 	}
 

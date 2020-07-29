@@ -473,7 +473,7 @@ unsigned int NCPA::ParameterSet::processLongOption_( int argc, char **argv,
 			if (param->needsArgument()) {
 				
 				// see if we can get the next value
-				if (i < (argc-1)) {
+				if ((int)i < (argc-1)) {
 					// there are still arguments to parse out after this one
 					value = argv[ i+1 ];
 
@@ -508,7 +508,7 @@ unsigned int NCPA::ParameterSet::processLongOption_( int argc, char **argv,
 				throw std::invalid_argument( "Unknown option '" + fullarg + "'." );
 			} else {
 				// don't know what to do with it, so let's see if it's got an argument
-				if (i < argc-1) {
+				if ((int)i < argc-1) {
 					value = argv[ i+1 ];
 					if (isLongOption_(value) || isShortOption_(value)) {
 						// next option looks like an option, so treat this one as a flag
