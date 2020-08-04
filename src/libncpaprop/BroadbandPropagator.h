@@ -23,9 +23,11 @@ namespace NCPA {
 		double rho_zsrc, rho_zrcv;
 		double *f_vec, *r_vec;
 		double **re_k, **im_k, **mode_S, **mode_R;
+		std::complex< double > *modal_sum;
 		std::string waveform_out_file, dispersion_input_file, source_type, source_file;
 
 		int read_dispersion_file();
+		void compute_modal_sum( double range );
 		int get_source_spectrum( std::complex<double> *dft_vec, std::complex<double> *pulse_vec, 
 			std::complex<double> *arg_vec );
 		std::complex<double> pulse_spec_fit(double scale, double x);
