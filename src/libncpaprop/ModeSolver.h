@@ -1,6 +1,7 @@
 #ifndef NCPAPROP_MODESOLVER_H_INCLUDED
 #define NCPAPROP_MODESOLVER_H_INCLUDED
 
+#include "AtmosphericTransferFunctionSolver.h"
 #include "parameterset.h"
 #include "Atmosphere1D.h"
 #include <string>
@@ -8,7 +9,7 @@
 
 // @todo Create destructor and handle memory deallocation there
 namespace NCPA {
-	class ModeSolver {
+	class ModeSolver : public AtmosphericTransferFunctionSolver {
 
 	public:           
 
@@ -41,7 +42,7 @@ namespace NCPA {
 		int writeEigenFunctions(int nz, int select_modes, double dz, double **v_s);
 
 		// to be overridden
-		virtual int computeModes() = 0;
+		//virtual int solve() = 0;
 		virtual int doSelect( int nz, int n_modes, double k_min, double k_max, double *k2, double **v, 
 			double *k_s, double **v_s, int *select_modes ) = 0;
 

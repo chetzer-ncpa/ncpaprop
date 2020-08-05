@@ -398,7 +398,7 @@ void NCPA::ESSModeSolver::printParams() {
 
 
 
-int NCPA::ESSModeSolver::computeModes() {
+int NCPA::ESSModeSolver::solve() {
 	//
 	// Declarations related to Slepc computations
 	//

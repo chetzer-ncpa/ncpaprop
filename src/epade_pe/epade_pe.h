@@ -5,18 +5,19 @@
 
 #include "petscksp.h"
 
+#include "AtmosphericTransferFunctionSolver.h"
 #include "Atmosphere1D.h"
 #include "Atmosphere2D.h"
 #include "parameterset.h"
 
 namespace NCPA {
 
-	class EPadeSolver {
+	class EPadeSolver : public AtmosphericTransferFunctionSolver {
 
 	public:
 		EPadeSolver( NCPA::ParameterSet *param );
 		~EPadeSolver();
-		int computeTLField();
+		int solve();
 		void output1DTL( std::string filename, bool append = false );
 		void output2DTL( std::string filename );
 
@@ -43,17 +44,20 @@ namespace NCPA {
 			double &k0, double &c0, double *c_vec, double *a_vec, std::complex<double> *k_vec, 
 			std::complex<double> *n_vec );
 
-		double *z = NULL, *z_abs = NULL, *r = NULL, calc_az;
+		void set1DOutput( bool tf );
+
+		double *z = NULL, *z_abs = NULL, *r = NULL, *f = NULL, calc_az;
 		std::complex< double > **tl;
 		int *zgi_r = NULL;   // ground height index
-		double freq;
+		double freq;         // current active frequency
 		double *azi;
-		int NZ, NR, NAz;
+		int NZ, NR, NAz, NF;
 		double dz;
 		int npade;
 		bool use_atm_1d = false, use_atm_2d = false, use_atm_toy = false, use_topo = false;
 		bool z_ground_specified = false, lossless = false, top_layer = true;
-		bool multiprop = false, write2d = false;
+		bool multiprop = false, write1d = true, write2d = false, calculate_attn = true;
+		bool broadband = false;
 		double r_max;    // range limits
 		double z_max, z_min, z_ground, z_bottom;  // atmosphere profile limits
 		double zs, zr;  // source height, receiver height

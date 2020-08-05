@@ -232,7 +232,7 @@ void NCPA::WModeSolver::printParams() {
 }
 
 
-int NCPA::WModeSolver::computeModes() {
+int NCPA::WModeSolver::solve() {
   //
   // Declarations related to Slepc computations
   // 

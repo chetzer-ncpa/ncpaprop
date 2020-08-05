@@ -161,6 +161,8 @@ void NCPA::configure_epade_pe_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->addParameter( new NCPA::FlagParameter( "topo" ) );
 	ps->addParameterDescription( "Flags", "--topo", "Use topography.  Requires presence of 'Z0' parameter in atmospheric files" );
 	ps->addParameter( new NCPA::FlagParameter( "disable_top_layer" ) );
+	ps->addParameter( new NCPA::FlagParameter( "broadband" ) );
+	//ps->addParameterDescription( "Flags", "--broadband", "Calculate at multiple frequencies" );
 
 
 	// Footer with file formats and sample commands

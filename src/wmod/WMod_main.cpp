@@ -80,7 +80,7 @@ int main( int argc, char **argv ) {
 	//   					 
   // compute modes - main action happens here					 
   //
-  a->computeModes();
+  a->solve();
   a->printParams();
   
   // save atm. profile if requested

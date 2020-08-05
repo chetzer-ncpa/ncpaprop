@@ -3,6 +3,7 @@
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
 
+#include "AtmosphericTransferFunctionSolver.h"
 #include "modes.h"
 #include "Atmosphere1D.h"
 #include "util.h"

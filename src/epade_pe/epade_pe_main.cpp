@@ -64,7 +64,7 @@ int main( int argc, char **argv ) {
 	
 	EPadeSolver *solver = new EPadeSolver( param );
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	solver->computeTLField();
+	solver->solve();
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 	cout << "Elapsed time: " << time_span.count() << " seconds." << endl;

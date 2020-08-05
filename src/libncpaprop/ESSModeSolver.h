@@ -20,7 +20,7 @@ namespace NCPA {
 		void setParams( ParameterSet *param, Atmosphere1D *atm_prof );
 		void printParams();
 
-		int computeModes();
+		int solve();
 		//int doESSSLEPcCalculation( double *diag, double dz, double *k_min, double *k_max, 
 		//	PetscInt *nconv, double *k2, double **v );
 		int doSelect( int nz, int n_modes, double k_min, double k_max, double *k2, double **v, 

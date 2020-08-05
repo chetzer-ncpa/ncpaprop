@@ -18,7 +18,7 @@ namespace NCPA {
 		void setParams( ParameterSet *param, Atmosphere1D *atm_prof );
 		void printParams();
 
-		int computeModes();
+		int solve();
 		int doSelect( int nz, int n_modes, double k_min, double k_max, double *k2, double **v, 
 			double *k_s, double **v_s, int *select_modes );
 		int getModalTrace(int nz, double z_min, double sourceheight, double receiverheight, double dz, Atmosphere1D *p, 
