@@ -242,7 +242,13 @@ int NCPA::EPadeSolver::solve() {
 
 	// truncate multiprop file if needed
 	if (multiprop) {
-		std::ofstream ofs( "tloss_multiprop.pe", std::ofstream::out | std::ofstream::trunc );
+		std::ofstream ofs( NCPAPROP_EPADE_PE_FILENAME_2D, std::ofstream::out | std::ofstream::trunc );
+		ofs.close();
+	}
+
+	// truncate 1-D if necessary
+	if (broadband) {
+		std::ofstream ofs( NCPAPROP_EPADE_PE_FILENAME_1D, std::ofstream::out | std::ofstream::trunc );
 		ofs.close();
 	}
 
@@ -445,17 +451,17 @@ int NCPA::EPadeSolver::solve() {
 
 			if (multiprop) {
 				if (write1d) {
-					std::cout << "Writing 1-D output to tloss_multiprop.pe" << std::endl;
-					output1DTL( "tloss_multiprop.pe", true );
+					std::cout << "Writing 1-D output to " << NCPAPROP_EPADE_PE_FILENAME_MULTIPROP << std::endl;
+					output1DTL( NCPAPROP_EPADE_PE_FILENAME_2D, true );
 				}
 			} else { 
 				if (write1d) {
-					std::cout << "Writing 1-D output to tloss_1d.pe" << std::endl;
-					output1DTL( "tloss_1d.pe", broadband );
+					std::cout << "Writing 1-D output to " << NCPAPROP_EPADE_PE_FILENAME_1D << std::endl;
+					output1DTL( NCPAPROP_EPADE_PE_FILENAME_1D, broadband );
 				}
 				if (write2d) {
-					std::cout << "Writing 2-D output to tloss_2d.pe" << std::endl;
-					output2DTL( "tloss_2d.pe" );
+					std::cout << "Writing 2-D output to " << NCPAPROP_EPADE_PE_FILENAME_2D << std::endl;
+					output2DTL( NCPAPROP_EPADE_PE_FILENAME_2D );
 				}
 			}
 			std::cout << std::endl;

@@ -10,6 +10,10 @@
 #include "Atmosphere2D.h"
 #include "parameterset.h"
 
+#define NCPAPROP_EPADE_PE_FILENAME_1D "tloss_1d.pe"
+#define NCPAPROP_EPADE_PE_FILENAME_2D "tloss_2d.pe"
+#define NCPAPROP_EPADE_PE_FILENAME_MULTIPROP "tloss_multiprop.pe"
+
 namespace NCPA {
 
 	class EPadeSolver : public AtmosphericTransferFunctionSolver {
