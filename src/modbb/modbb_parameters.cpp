@@ -221,11 +221,11 @@ void NCPA::configure_modbb_parameter_set( NCPA::ParameterSet *ps ) {
 	// and others, but apparently can't do it with exceptions b/c clang.  Second-order problem
 	// to solve.
 	ps->addParameter( new NCPA::StringParameter( "modal_starter_file", "" ) );
-	ps->addParameter( new NCPA::FlagParameter( "write_2D_TLoss" ) );
+	ps->addParameter( new NCPA::FlagParameter( "write_2d_tloss" ) );
 	ps->addParameter( new NCPA::FlagParameter( "write_phase_speeds" ) );
 	ps->addParameter( new NCPA::FlagParameter( "write_speeds" ) );
 	ps->addParameter( new NCPA::FlagParameter( "write_modes" ) );
-	ps->addParameter( new NCPA::FlagParameter( "Nby2Dprop" ) );
+	ps->addParameter( new NCPA::FlagParameter( "multiprop" ) );
 	ps->addParameter( new NCPA::FlagParameter( "turnoff_WKB" ) );
 
 	// Footer with file formats and sample commands
@@ -235,8 +235,7 @@ void NCPA::configure_modbb_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->addFooterTextVerbatim("                           freq, (# of modes), rho(z_src),");
 	ps->addFooterTextVerbatim("                           followed for each mode 'i' by quadruples:");
 	ps->addFooterTextVerbatim("                           real(k(i)), imag(k(i)), Mode(i)(z_src), Mode(i)(z_rcv)");
-	ps->addFooterTextVerbatim("  <waveform file>          t  P  (single receiver)" );
-	ps->addFooterTextVerbatim("                           r  t  P  (multiple receivers)" );
+	ps->addFooterTextVerbatim("  <waveform file>          r[km]  t[s]  P" );
 	ps->addFooterText("Examples (run from 'samples' directory):");
 	ps->setFooterIndent( 4 );
 	ps->setFooterHangingIndent( 4 );
