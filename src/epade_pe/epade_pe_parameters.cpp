@@ -56,12 +56,12 @@ void NCPA::configure_epade_pe_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->addTest( new NCPA::FloatGreaterThanTest( "freq", 0.0 ) );
 	ps->addParameterDescription( "Required Parameters", "--freq", "Frequency of analysis (Hz)" );
 
-	ps->addParameter( new NCPA::StringParameter( "starter" ) );
-	ps->addTest( new NCPA::RequiredTest( "starter" ) );
-	test = ps->addTest( new NCPA::StringSetTest( "starter" ) );
-	test->addStringParameter( "self" );
-	test->addStringParameter( "gaussian" );
-	ps->addParameterDescription( "Required Parameters", "--starter", "Starter type: one of { self, gaussian }" );
+	ps->addParameter( new NCPA::StringParameter( "starter", "self" ) );
+	// ps->addTest( new NCPA::RequiredTest( "starter" ) );
+	// test = ps->addTest( new NCPA::StringSetTest( "starter" ) );
+	// test->addStringParameter( "self" );
+	// test->addStringParameter( "gaussian" );
+	// ps->addParameterDescription( "Required Parameters", "--starter", "Starter type: one of { self, gaussian }" );
 
 	ps->addParameter( new NCPA::FloatParameter( "maxrange_km" ) );
 	ps->addTest( new NCPA::RequiredTest( "maxrange_km" ) );
@@ -177,15 +177,20 @@ void NCPA::configure_epade_pe_parameter_set( NCPA::ParameterSet *ps ) {
 	ps->setFooterIndent( 4 );
 	ps->setFooterHangingIndent( 4 );
 	ps->setCommandMode( true );
-	ps->addFooterText("../bin/ePape --singleprop --starter gaussian --toy --freq 0.1 --azimuth 90 --maxrange_km 1000" );
+	// ps->addFooterText("../bin/ePape --singleprop --starter gaussian --toy --freq 0.1 --azimuth 90 --maxrange_km 1000" );
+	ps->addFooterText("../bin/ePape --singleprop --toy --freq 0.1 --azimuth 90 --maxrange_km 1000" );
 	ps->addBlankFooterLine();
-	ps->addFooterText("../bin/ePape --singleprop --starter self --atmosfile NCPA_canonical_profile_trimmed.dat --freq 0.1 --azimuth 90 --maxrange_km 1000" );
+	// ps->addFooterText("../bin/ePape --singleprop --starter self --atmosfile NCPA_canonical_profile_trimmed.dat --freq 0.1 --azimuth 90 --maxrange_km 1000" );
+	ps->addFooterText("../bin/ePape --singleprop --atmosfile NCPA_canonical_profile_trimmed.dat --freq 0.1 --azimuth 90 --maxrange_km 1000" );
 	ps->addBlankFooterLine();
-	ps->addFooterText("../bin/ePape --singleprop --starter self --atmosfile2d atmosphere_2d_summary.dat --freq 0.5 --azimuth 90 --maxrange_km 1000 --lossless" );
+	//ps->addFooterText("../bin/ePape --singleprop --starter self --atmosfile2d atmosphere_2d_summary.dat --freq 0.5 --azimuth 90 --maxrange_km 1000 --lossless" );
+	ps->addFooterText("../bin/ePape --singleprop --atmosfile2d atmosphere_2d_summary.dat --freq 0.5 --azimuth 90 --maxrange_km 1000 --lossless" );
 	ps->addBlankFooterLine();
-	ps->addFooterText("../bin/ePape --singleprop --starter self --atmosfile2d atmosphere_2d_summary.dat --freq 1.0 --azimuth 90 --maxrange_km 500 --topo");
+	// ps->addFooterText("../bin/ePape --singleprop --starter self --atmosfile2d atmosphere_2d_summary.dat --freq 1.0 --azimuth 90 --maxrange_km 500 --topo");
+	ps->addFooterText("../bin/ePape --singleprop --atmosfile2d atmosphere_2d_summary.dat --freq 1.0 --azimuth 90 --maxrange_km 500 --topo");
 	ps->addBlankFooterLine();
-	ps->addFooterText("../bin/ePape --multiprop --starter self --atmosfile NCPA_canonical_profile_trimmed.dat --freq 0.5 --azimuth_start 0 --azimuth_end 360 --azimuth_step 2 --maxrange_km 1000");
+	// ps->addFooterText("../bin/ePape --multiprop --starter self --atmosfile NCPA_canonical_profile_trimmed.dat --freq 0.5 --azimuth_start 0 --azimuth_end 360 --azimuth_step 2 --maxrange_km 1000");
+	ps->addFooterText("../bin/ePape --multiprop --atmosfile NCPA_canonical_profile_trimmed.dat --freq 0.5 --azimuth_start 0 --azimuth_end 360 --azimuth_step 2 --maxrange_km 1000");
 	ps->setFooterHangingIndent( 0 );
 	ps->setCommandMode( false );
 	ps->resetFooterIndent();
