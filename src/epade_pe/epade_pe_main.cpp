@@ -17,7 +17,8 @@
 #include "parameterset.h"
 #include "units.h"
 #include "util.h"
-#include "epade_pe.h"
+//#include "epade_pe.h"
+#include "EPadeSolver.h"
 #include "epade_pe_parameters.h"
 
 using namespace std;

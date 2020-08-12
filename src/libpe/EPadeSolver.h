@@ -48,7 +48,7 @@ namespace NCPA {
 			double &k0, double &c0, double *c_vec, double *a_vec, std::complex<double> *k_vec, 
 			std::complex<double> *n_vec );
 
-		void set1DOutput( bool tf );
+		void set_1d_output( bool tf );
 
 		double *z = NULL, *z_abs = NULL, *r = NULL, *f = NULL, calc_az;
 		std::complex< double > **tl;

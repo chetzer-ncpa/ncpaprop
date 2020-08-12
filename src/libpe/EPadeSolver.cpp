@@ -1,5 +1,5 @@
-#include "epade_pe.h"
-#include "epade_pe_parameters.h"
+#include "EPadeSolver.h"
+//#include "epade_pe_parameters.h"
 
 #include <iostream>
 #include <cmath>
@@ -20,6 +20,7 @@
 #include "ProfileSeriesAtmosphere2D.h"
 #include "units.h"
 #include "util.h"
+#include "parameterset.h"
 
 
 #ifndef PI
@@ -87,6 +88,7 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
 		azi[ i ] = min_az + i * step_az;
 	}
 
+	/* @todo Move this inside freq loop in solve() */
 	double dr;
   	if (NR == 0) {
   		dr = 340.0 / freq;
@@ -329,21 +331,28 @@ int NCPA::EPadeSolver::solve() {
 	std::complex<double> *k = new std::complex<double>[ NZ ];
 	std::complex<double> *n = new std::complex<double>[ NZ ];
 	
-	for (int freqind = 0; freqind < NF; freqind++) {
 
-		freq = f[ freqind ];
-		if (attnfile.length() == 0) {
-			atm_profile_2d->calculate_attenuation( "_ALPHA_", "T", "P", "RHO", freq );
-		}
+	// freq and calc_az hold the current values of azimuth and frequency, respectively
+	// these are used in the output routines, so make sure they get set correctly
+	// whenever you change frequencies and azimuths
+	for (int azind = 0; azind < NAz; azind++) {
+		calc_az = azi[ azind ];
+		std::cout << "Infrasound PE code at f = " << freq << " Hz, azi = " 
+			<< calc_az << " deg" << std::endl;
 
-		for (int azind = 0; azind < NAz; azind++) {
-			std::cout << "Infrasound PE code at f = " << freq << " Hz, azi = " 
-				<< azi[ azind ] << " deg" << std::endl;
+		profile_index = -1;
+		atm_profile_2d->calculate_wind_component( "_WC_", "_WS_", "_WD_", calc_az );
+		atm_profile_2d->calculate_effective_sound_speed( "_CEFF_", "_C0_", "_WC_" );
 
-			profile_index = -1;
-			atm_profile_2d->calculate_wind_component( "_WC_", "_WS_", "_WD_", azi[ azind ] );
-			atm_profile_2d->calculate_effective_sound_speed( "_CEFF_", "_C0_", "_WC_" );
-			calc_az = azi[ azind ];
+		for (int freqind = 0; freqind < NF; freqind++) {
+
+			freq = f[ freqind ];
+			if (attnfile.length() == 0) {
+				atm_profile_2d->calculate_attenuation( "_ALPHA_", "T", "P", "RHO", freq );
+			}
+
+		
+			
 
 			//std::cout << "Using atmosphere index " << profile_index << std::endl;
 			calculate_atmosphere_parameters( atm_profile_2d, NZ, z, 0.0, z_ground, lossless, 
@@ -359,7 +368,6 @@ int NCPA::EPadeSolver::solve() {
 			if (starter == "self") {
 				qpowers_starter = new Mat[ npade+1 ];
 				make_q_powers( NZ, z, k0, h2, n, npade+1, ground_index, qpowers_starter );
-				//get_starter_self( NZ, z, zs, k0, qpowers, npade, &psi_o );
 				get_starter_self( NZ, z, zs, k0, qpowers_starter, npade, &psi_o );
 			} else if (starter == "gaussian") {
 				qpowers_starter = qpowers;
@@ -380,20 +388,14 @@ int NCPA::EPadeSolver::solve() {
 
 			ierr = KSPCreate( PETSC_COMM_SELF, &ksp );CHKERRQ(ierr);
 			ierr = KSPSetOperators( ksp, C, C );CHKERRQ(ierr);
-			// ierr = KSPGetPC( ksp, &pc );CHKERRQ(ierr);
-			// ierr = PCSetType( pc, PCLU );
 			ierr = KSPSetFromOptions( ksp );CHKERRQ(ierr);
 			for (PetscInt ir = 0; ir < (NR-1); ir++) {
 
-				//double rr = ((double)ir+1) * dr;
-				//r[ ir ] = rr;
 				double rr = r[ ir ];
 				// check for atmosphere change
 				if (((int)(atm_profile_2d->get_profile_index( rr ))) != profile_index) {
-				//if (rr > 20000.0) {
-
+				
 					profile_index = atm_profile_2d->get_profile_index( rr );
-					//z_ground = atm_profile_2d->get( rr, "Z0" );
 					calculate_atmosphere_parameters( atm_profile_2d, NZ, z, rr, z_ground, lossless, top_layer, freq, 
 						use_topo, k0, c0, c, a_t, k, n );
 					for (i = 0; i < npade+1; i++) {
@@ -411,14 +413,8 @@ int NCPA::EPadeSolver::solve() {
 
 
 				hank = sqrt( 2.0 / ( PI * k0 * rr ) ) * exp( I * ( k0 * rr - PI/4.0 ) );
-				//ierr = VecCopy( psi_o, psi_temp );CHKERRQ(ierr);
-				//ierr = VecScale( psi_temp, hank );CHKERRQ(ierr);
 				ierr = VecGetValues( psi_o, NZ, indices, contents );
-				// for (i = 0; i < nzplot; i++) {
-				// 	tl[ i ][ ir ] = 20.0 * log10( abs( contents[ zti[i] ] * hank ) );
-				// }
 				for (i = 0; i < NZ; i++) {
-					//tl[ i ][ ir ] = 20.0 * log10( abs( contents[ i ] * hank ) );
 					tl[ i ][ ir ] = contents[ i ] * hank;
 				}
 
@@ -440,19 +436,16 @@ int NCPA::EPadeSolver::solve() {
 
 				ierr = MatMult( B, psi_o, Bpsi_o );CHKERRQ(ierr);
 				ierr = KSPSetOperators( ksp, C, C );CHKERRQ(ierr);  // may not be necessary
-				// ierr = KSPGetPC( ksp, &pc );CHKERRQ(ierr);
-				// ierr = PCSetType( pc, PCLU );
 				ierr = KSPSolve( ksp, Bpsi_o, psi_o );CHKERRQ(ierr);
 			}
 			std::cout << "Stopped at range " << r[ NR-1 ]/1000.0 << " km" << std::endl;
 
-			atm_profile_2d->remove_property( "_CEFF_" );
-			atm_profile_2d->remove_property( "_WC_" );
+			
 
 			if (multiprop) {
 				if (write1d) {
 					std::cout << "Writing 1-D output to " << NCPAPROP_EPADE_PE_FILENAME_MULTIPROP << std::endl;
-					output1DTL( NCPAPROP_EPADE_PE_FILENAME_2D, true );
+					output1DTL( NCPAPROP_EPADE_PE_FILENAME_MULTIPROP, true );
 				}
 			} else { 
 				if (write1d) {
@@ -476,23 +469,20 @@ int NCPA::EPadeSolver::solve() {
 			if (starter == "self") {
 				delete [] qpowers_starter;
 			}
+			if (attnfile.length() == 0) {
+				atm_profile_2d->remove_property( "_ALPHA_" );
+			}
 		}
-
-		if (attnfile.length() == 0) {
-			atm_profile_2d->remove_property( "_ALPHA_" );
-		}
+		
+		atm_profile_2d->remove_property( "_CEFF_" );
+		atm_profile_2d->remove_property( "_WC_" );
 	}
 
-	//ierr = MatDestroy( &q );       CHKERRQ(ierr);
 	ierr = MatDestroy( &B );       CHKERRQ(ierr);
 	ierr = MatDestroy( &C );       CHKERRQ(ierr);
 	ierr = VecDestroy( &psi_o );   CHKERRQ(ierr);
 	ierr = VecDestroy( &Bpsi_o );  CHKERRQ(ierr);
 	ierr = KSPDestroy( &ksp );     CHKERRQ(ierr);
-	// for (i = 0; i < npade+1; i++) {
-	// 	ierr = MatDestroy( qpowers + i );CHKERRQ(ierr);
-	// 	ierr = MatDestroy( qpowers_starter + i );CHKERRQ(ierr);
-	// }
 	
 	delete [] k;
 	delete [] n;
@@ -912,12 +902,6 @@ int NCPA::EPadeSolver::epade( int order, double k0, double dr, std::vector<Petsc
     ierr = MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
     ierr = MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
 
-/*
-    cout << "A Matrix Contents:" << endl;
-    ierr = MatView( A, PETSC_VIEWER_STDOUT_SELF );CHKERRQ(ierr);
-    cout << endl;
-*/
-
 	// setup right-side vector
 	ierr = VecCreate( PETSC_COMM_SELF, &x );CHKERRQ(ierr);
 	ierr = VecSetSizes( x, PETSC_DECIDE, N-1 );CHKERRQ(ierr);
@@ -933,28 +917,15 @@ int NCPA::EPadeSolver::epade( int order, double k0, double dr, std::vector<Petsc
 	ierr = VecAssemblyBegin( y );CHKERRQ(ierr);
 	ierr = VecAssemblyEnd( y );CHKERRQ(ierr);
 
-/*
-	cout << "y Vector contents:" << endl;
-	ierr = VecView( y, PETSC_VIEWER_STDOUT_SELF );CHKERRQ(ierr);
-	cout << endl;
-*/
-
 	ierr = VecSet( x, 0.0 );CHKERRQ(ierr);
 
 	// solve
 	ierr = KSPCreate( PETSC_COMM_WORLD, &ksp );CHKERRQ(ierr);
 	ierr = KSPSetOperators( ksp, A, A );CHKERRQ(ierr);
-	//ierr = KSPGetPC( ksp, &pc );CHKERRQ(ierr);
-	//ierr = PCSetType( pc, PCLU );CHKERRQ(ierr);
 	ierr = KSPSetFromOptions( ksp );CHKERRQ(ierr);
 	ierr = KSPSolve( ksp, y, x );CHKERRQ(ierr);
-/*
-	cout << "x Vector contents:" << endl;
-	ierr = VecView( x, PETSC_VIEWER_STDOUT_SELF );CHKERRQ(ierr);
-	cout << endl;
-*/
 
-	// populate P and Q vectors as complex<double> instead of gsl_complex
+	// populate P and Q vectors 
 	Q->push_back( 1.0 );
 	contents = new PetscScalar[ N-1 ];
 	ierr = VecGetValues( x, N-1, indices, contents );
@@ -1007,6 +978,14 @@ void NCPA::EPadeSolver::output2DTL( std::string filename ) {
 	out_2d.close();
 }
 
-void NCPA::EPadeSolver::set1DOutput( bool tf ) {
+void NCPA::EPadeSolver::set_1d_output( bool tf ) {
 	write1d = tf;
 }
+/*
+void NCPA::EPadeSolver::write_broadband_header( std::string filename, double *az_vec, size_t n_az, 
+	double *r_vec, size_t n_r, double *f_vec, size_t n_f, double precision_factor ) {
+
+	// open the file, truncating it if it exists
+	std::ofstream ofs( filename, std::ofstream::out | std::ofstream::trunc | std::)
+}
+*/
