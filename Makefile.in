@@ -13,7 +13,7 @@
 # SLEPC_INCLUDE_FILE_GENERIC = @SLEPC_INCLUDE_FILE_GENERIC@
 
 #package-parts=common atmosphere raytrace modess modbb modess_rd_1wcm pade_pe wmod cmodess cmodbb wnlrt tdpape
-package-parts=common atmosphere libncpaprop modess wmod modbb epade_pe
+package-parts=common atmosphere libmodes libpe libbroadband modess wmod modbb epade_pe
 
 
 # Build everything
@@ -27,8 +27,14 @@ common:
 atmosphere:
 	$(MAKE) -C src/atmosphere all PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 
-libncpaprop:
-	$(MAKE) -C src/libncpaprop all PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
+libmodes:
+	$(MAKE) -C src/libmodes all PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
+
+libbroadband:
+	$(MAKE) -C src/libbroadband all PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
+
+libpe:
+	$(MAKE) -C src/libpe all PETSC_ARCH=@PETSC_ARCH_COMPLEX@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 
 # ray tracing routines
 #raytrace:
@@ -80,7 +86,9 @@ clean:
 	-$(MAKE) -C src/common clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 	-$(MAKE) -C src/atmosphere clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 #	-$(MAKE) -C src/raytrace clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
-	-$(MAKE) -C src/libncpaprop clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
+	-$(MAKE) -C src/libmodes clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
+	-$(MAKE) -C src/libbroadband clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
+	-$(MAKE) -C src/libpe clean  PETSC_ARCH=@PETSC_ARCH_COMPLEX@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 	-$(MAKE) -C src/modess clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 	-$(MAKE) -C src/modbb clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
 	-$(MAKE) -C src/modess_rd_1wcm clean  PETSC_ARCH=@PETSC_ARCH_REAL@ PETSC_DIR=@PETSC_DIR@ SLEPC_DIR=@SLEPC_DIR@
@@ -102,4 +110,4 @@ test:
 testlong:
 	$(MAKE) -C test testlong
 
-.PHONY:  common atmosphere libncpaprop modess modbb modess_rd_1wcm pade_pe epape_pe wmod cmodess cmodbb modess_rd_2wcm clean test
+.PHONY:  common atmosphere libmodes libpe libbroadband modess modbb modess_rd_1wcm pade_pe epape_pe wmod cmodess cmodbb modess_rd_2wcm clean test

@@ -629,6 +629,9 @@ SLEPC_INCLUDE_FILE_GENERIC
 PETSC_INCLUDE_FILE_GENERIC
 SLEPC_DIR
 PETSC_DIR
+BROADBANDLIBS
+PELIBS
+MODELIBS
 STATICLIBS
 WARNINGFLAGS
 INCLUDEFLAGS
@@ -8814,7 +8817,7 @@ fi
 
 
 # Set output variables to propagate into Makefiles
-INCLUDEFLAGS="-I. -I../common -I../atmosphere -I../libncpaprop -I/usr/local/include -I/usr/include"
+INCLUDEFLAGS="-I. -I../common -I../atmosphere -I../libmodes -I../libpe -I../libbroadband -I/usr/local/include -I/usr/include"
 
 LIBS="-lgsl -lgslcblas -lm -lfftw3"
 
@@ -8823,7 +8826,13 @@ WARNINGFLAGS=${warning_compiler_flags}
 CXXFLAGS="-fpic -c -Wall"
 
 LDFLAGS="${LDFLAGS} -L/usr/lib"
-STATICLIBS="../../lib/libncpaprop.a ../../lib/libatmosphere.a ../../lib/libcommon.a"
+STATICLIBS="../../lib/libatmosphere.a ../../lib/libcommon.a"
+
+MODELIBS="../../lib/libmodes.a"
+
+PELIBS="../../lib/libpe.a"
+
+BROADBANDLIBS="../../lib/libbroadband.a"
 
 LDFLAGS=$LDFLAGS
 
@@ -8842,7 +8851,7 @@ PETSC_ARCH_COMPLEX=$PETSC_ARCH_COMPLEX
 
 
 
-ac_config_files="$ac_config_files Makefile src/common/Makefile src/atmosphere/Makefile src/libncpaprop/Makefile src/raytrace/Makefile src/modess/Makefile src/modbb/Makefile src/modess_rd_1wcm/Makefile src/pade_pe/Makefile src/epade_pe/Makefile src/wmod/Makefile src/cmodess/Makefile src/cmodbb/Makefile src/tdpape/Makefile src/wnlrt/Makefile test/Makefile"
+ac_config_files="$ac_config_files Makefile src/common/Makefile src/atmosphere/Makefile src/libmodes/Makefile src/libpe/Makefile src/libbroadband/Makefile src/raytrace/Makefile src/modess/Makefile src/modbb/Makefile src/modess_rd_1wcm/Makefile src/pade_pe/Makefile src/epade_pe/Makefile src/wmod/Makefile src/cmodess/Makefile src/cmodbb/Makefile src/tdpape/Makefile src/wnlrt/Makefile test/Makefile"
 
 
 
@@ -9554,7 +9563,9 @@ do
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "src/common/Makefile") CONFIG_FILES="$CONFIG_FILES src/common/Makefile" ;;
     "src/atmosphere/Makefile") CONFIG_FILES="$CONFIG_FILES src/atmosphere/Makefile" ;;
-    "src/libncpaprop/Makefile") CONFIG_FILES="$CONFIG_FILES src/libncpaprop/Makefile" ;;
+    "src/libmodes/Makefile") CONFIG_FILES="$CONFIG_FILES src/libmodes/Makefile" ;;
+    "src/libpe/Makefile") CONFIG_FILES="$CONFIG_FILES src/libpe/Makefile" ;;
+    "src/libbroadband/Makefile") CONFIG_FILES="$CONFIG_FILES src/libbroadband/Makefile" ;;
     "src/raytrace/Makefile") CONFIG_FILES="$CONFIG_FILES src/raytrace/Makefile" ;;
     "src/modess/Makefile") CONFIG_FILES="$CONFIG_FILES src/modess/Makefile" ;;
     "src/modbb/Makefile") CONFIG_FILES="$CONFIG_FILES src/modbb/Makefile" ;;

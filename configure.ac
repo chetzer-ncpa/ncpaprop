@@ -641,12 +641,15 @@ AC_CHECK_FILE( ${SLEPC_DIR}/${PETSC_ARCH_COMPLEX}/lib/slepc/conf/slepcvariables,
 
 
 # Set output variables to propagate into Makefiles
-AC_SUBST([INCLUDEFLAGS],"-I. -I../common -I../atmosphere -I../libncpaprop -I/usr/local/include -I/usr/include")
+AC_SUBST([INCLUDEFLAGS],"-I. -I../common -I../atmosphere -I../libmodes -I../libpe -I../libbroadband -I/usr/local/include -I/usr/include")
 AC_SUBST([LIBS],"-lgsl -lgslcblas -lm -lfftw3")
 AC_SUBST([WARNINGFLAGS],${warning_compiler_flags})
 AC_SUBST([CXXFLAGS], "-fpic -c -Wall")
 LDFLAGS="${LDFLAGS} -L/usr/lib"
-AC_SUBST([STATICLIBS],"../../lib/libncpaprop.a ../../lib/libatmosphere.a ../../lib/libcommon.a")
+AC_SUBST([STATICLIBS],"../../lib/libatmosphere.a ../../lib/libcommon.a")
+AC_SUBST([MODELIBS],"../../lib/libmodes.a")
+AC_SUBST([PELIBS],"../../lib/libpe.a")
+AC_SUBST([BROADBANDLIBS],"../../lib/libbroadband.a")
 AC_SUBST([LDFLAGS],$LDFLAGS)
 AC_SUBST([PETSC_DIR],$PETSC_DIR)
 AC_SUBST([SLEPC_DIR],$SLEPC_DIR)
@@ -661,7 +664,9 @@ AC_CONFIG_FILES([
 		Makefile
 		src/common/Makefile
 		src/atmosphere/Makefile
-		src/libncpaprop/Makefile
+		src/libmodes/Makefile
+		src/libpe/Makefile
+		src/libbroadband/Makefile
 		src/raytrace/Makefile
 		src/modess/Makefile
 		src/modbb/Makefile
