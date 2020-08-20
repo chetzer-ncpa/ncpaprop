@@ -25,25 +25,7 @@ To begin installation, select an installation location for the \textbf{ncpaprop}
 \texttt{git clone https://github.com/chetzer-ncpa/ncpaprop.git ncpaprop}
 
 \noindent
-and cd into \texttt{ncpaprop}.  Then run
-
-\texttt{./configure}
-
-\noindent
-to set up the build environment and make sure all prerequisites are met.  Optional flags that can be used by the \texttt{configure} script include:
-
-\begin{description}
-\item[\texttt{--enable-autodependencies}]\hfill \\
-\noindent
-Attempt to download and install missing prerequisites automatically. Use this option only if installation in the default installation locations is satisfactory. The \textbf{ncpaprop} installer currently supports the \textbf{apt-get} and \textbf{yum} package managers on Linux.  MacOS users should install \textbf{FFTW} and \textbf{GSL} using their method of choice.  Use of this option on an unsupported system will result in an error.
-
-\item[\texttt{LDFLAGS="-L/path/to/library"}]\hfill \\
-\noindent
-The user can also specify additional library search paths using this syntax.
-\end{description}
-
-\noindent In addition, the user must specify whether to use an existing \textbf{PETSc}/\textbf{SLEPc} installation (that has had both real and complex architectures built) or to allow the installer to download and build a set of libraries local to the \textbf{ncpaprop} installation.  To link to an existing installation, the user must provide the following, either as environmental variables or as \texttt{key=value} pairs on the \texttt{./configure} command:
-
+and cd into \texttt{ncpaprop}.  Configuration will depend on whether the user has a properly-compiled pre-existing PETSc and SLEPc installation or not.  Properly-compiled, in this context, means compiled with C++ support and for both real and complex data types.  If this is the case, and the user wishes to link to those installations, the following environmental variables should be set:
 \begin{description}
 \item[\texttt{PETSC\_DIR}]\hfill \\
 \noindent
@@ -62,9 +44,22 @@ The architecture name selected for the (default) \texttt{--with-scalar-type=real
 The architecture name selected for the \texttt{--with-scalar-type=complex} \textbf{PETSc} build.  This frequently defaults to \texttt{arch-\$OS-c-complex} or \texttt{arch-\$OS-c-complex} if the user does not specify, where \texttt{\$OS} represents the operating system, and will appear as a subdirectory of \texttt{\$PETSC\_DIR} and \texttt{\$SLEPC\_DIR}.
 \end{description}
 
-\noindent For example:
+The user may then simply issue the command
 
-\noindent \texttt{./configure --enable-autodependencies PETSC\_DIR=/code/petsc SLEPC\_DIR=/code/slepc/slepc-3.12.2 PETSC\_ARCH\_REAL=arch-linux-real PETSC\_ARCH\_COMPLEX=arch-linux-complex}
+\texttt{./configure}
+
+\noindent
+to set up the build environment and make sure all prerequisites are met.  Alternately, the user may request that local instances of PETSc and SLEPc be installed in the \texttt{ncpaprop} directory tree with the \texttt{--with-localpetsc} flag.  Additional flags to control this process include:
+
+\begin{description}
+\item[\texttt{--enable-autodependencies}]\hfill \\
+\noindent
+Attempt to download and install missing prerequisites automatically. Use this option only if installation in the default installation locations is satisfactory. The \textbf{ncpaprop} installer currently supports the \textbf{apt-get} and \textbf{yum} package managers on Linux.  This option is not supported on MacOS and such users should install \textbf{FFTW} and \textbf{GSL} using their method of choice.  Use of this option on an unsupported system will result in an error.
+
+\item[\texttt{LDFLAGS="-L/path/to/library"}]\hfill \\
+\noindent
+The user can also specify additional library search paths using this syntax.
+\end{description}
 
 \noindent To have the installer download and build \textbf{PETSc} and \textbf{SLEPc} local to \textbf{ncpaprop}, use approriate flags and options from the following:
 
@@ -106,7 +101,7 @@ Override the default \textbf{PETSc} complex architecture name (defaults to \text
 Override the default \textbf{SLEPc} version number for determining the download filename.  This will generally be kept up-to-date by the \textbf{ncpaprop} maintainers, but is provided in the event of maintenance lag.
 \end{description}
 
-\noindent The installation process will check the system for the presence of BLAS libraries and MPI executables; whatever is not found will be automatically downloaded and installed locally by the \textbf{PETSc} installer.  This process is independent of the \texttt{--with-autodependencies} flag, which applies only to the direct prerequisites of \textbf{ncpaprop}.  If this is undesirable, \textbf{PETSc} and \textbf{SLEPc} should be installed manually.
+\noindent The installation process will check the system for the presence of BLAS libraries and MPI executables; whatever is not found will be automatically downloaded and installed locally by the \textbf{PETSc} installer.  This process is independent of the \texttt{--with-autodependencies} flag, which applies only to the direct prerequisites of \textbf{ncpaprop}.  If this is undesirable, \textbf{PETSc} and \textbf{SLEPc} should be installed manually.  In general, \textbf{PETSc} and \textbf{SLEPc} are orders of magnitude more complex than \textbf{ncpaprop}, and only limited support for their installation can be provided by the \textbf{ncpaprop} developers.  Complex questions involving incompatibilies with the user's system are best directed to \textbf{PETSc} support.
 
 \subsubsection{Compilation}
 
@@ -114,75 +109,6 @@ Once the configuration script has successfully run, the package can be built sim
 
 \texttt{make}
 
-\subsubsection{Testing}
-
-\noindent TEST SCRIPTS ARE STILL UNDER REVISION AND MAY NOT PROVIDE ACCURATE RESULTS
-
-To check proper functionality, a suite of test scripts have been written to compare the output of the simpler tools with that generated on the development machine.  This allows a sanity check to make sure that identical commands give identical results (within reasonable rounding errors).  To confirm that the compilation has been successful, run
-
-\texttt{make test}
-
-\noindent
-and check the results.  If there are errors, check \texttt{test/testlog.txt} for clues as to why things didn't work properly.  A successful test should print the following output to the screen:
-
-\begin{verbatim}
-$ make test
-make -C test test
-make[1]: Entering directory `/home/claus/ncpaprop/v1.3/test'
-rm testlog.txt
-
-*** Running 2D Ray Theory Routines ***
-/bin/bash run_raytrace.2d_test.bash >> ./testlog.txt
-
-*** Running 3D Ray Theory Routines ***
-/bin/bash run_raytrace.3d_test.bash >> ./testlog.txt
-
-*** Running Effective-Sound-Speed Modal Routines ***
-/bin/bash run_Modess_test.bash >> ./testlog.txt 
-
-*** Running Complex Effective-Sound-Speed Modal Routines ***
-/bin/bash run_CModess_test.bash >> ./testlog.txt 
-
-*** Running One-Way Coupled Modal Routines ***
-/bin/bash run_ModessRD1WCM_test.bash >> ./testlog.txt 
-
-*** Running Wide-Angle Modal Routines ***
-/bin/bash run_WMod_test.bash >> ./testlog.txt 
-
-*** Checking 2D Ray Theory Calculation Results ***
-/usr/bin/perl compare_raytrace.2d_test
-raytrace.2d test OK
-
-*** Checking 3D Ray Theory Calculation Results ***
-/usr/bin/perl compare_raytrace.3d_test
-raytrace.3d test OK
-
-*** Checking Effective-Sound-Speed Modal Calculation Results ***
-/bin/bash compare_Modess_test
-Column 2 of Modess test OK
-Column 3 of Modess test OK
-Column 4 of Modess test OK
-
-*** Checking Complex Effective-Sound-Speed Modal Calculation Results ***
-/bin/bash compare_CModess_test
-Column 2 of CModess test 1 OK
-Column 3 of CModess test 1 OK
-Column 4 of CModess test 1 OK
-Column 5 of CModess test 1 OK
-
-*** Checking One-Way Coupled Modal Calculation Results ***
-/bin/bash compare_ModessRD1WCM_test
-Column 2 of ModessRD1WCM test OK
-Column 3 of ModessRD1WCM test OK
-Column 4 of ModessRD1WCM test OK
-
-*** Checking Wide-Angle Modal Calculation Results ***
-/bin/bash compare_WMod_test
-Column 2 of WMod test OK
-Column 3 of WMod test OK
-Column 4 of WMod test OK
-make[1]: Leaving directory `/home/claus/ncpaprop/v1.3/test'
-\end{verbatim}
 
 \subsection{Typesetting this Manual}
 

@@ -6,9 +6,9 @@ The various program executables are to be run in command mode in the Linux/Unix 
 \begin{verbatim} 
     program_name [--option1 val1] [--option2 val2] [...] [--flag1] [...] 
 \end{verbatim}
-Running \verb"program_name" without any options sends a manual page to the screen listing the available flags and options with explanations. 
+Running \verb"program_name --help" sends a manual page to the screen listing the available flags and options with explanations. 
 
-With some exceptions the order of the options and flags in a command does not matter. The specification of certain options is essential for the unambiguous definition of a run, while others are specified only as needed. If any one of the essential options is absent from the command line, the program will warn the user of the missing option and abort.  If the same option is accidentally present multiple times in the command line the last specification is the one that takes effect. 
+The order of the options and flags in a command generally does not matter. The specification of certain options is essential for the unambiguous definition of a run, while others are specified only as needed. If any one of the essential options is absent from the command line, the program will warn the user of the missing option and abort.  
 
 An alternative way to present options to a program is through an options file \verb"program_name.options".  Each line in this text file contains \verb"option-name : value" pairs separated by a colon. Flags are specified by themselves on separate lines. Note that the command line options take precedence over options supplied  in an \verb".options" file. Examples of such \verb".options" files are provided in the \verb"samples" directory.
 
@@ -16,19 +16,51 @@ The output of the code is typically saved in text files that are column based. T
 
 \subsection{Atmospheric specifications}
 \label{sec: AtmoSpecs}
-Necessary input to all propagation codes in this package is the specification of the state of the atmosphere through which propagation is to be modelled. To provide portability and maximum flexibility to the user the state of the atmosphere is input in column-based text files to be provided by the user. Each such file specifies a stratified atmosphere and contains columns such as pressure, density, temperature and the three wind components u, v and w as a function of altitude. Since the vertical wind component w is not used by most of the algorithms its specification is optional. The column order is indicated to the program with the option \verb"--atmosfileorder" followed by a string of characters specifying the order of the columns in the file. For example the profile file may have 7 columns in the order \verb"zuvwtdp":  
+Necessary input to all propagation codes in this package is the specification of the state of the atmosphere through which propagation is to be modelled. To provide portability and maximum flexibility to the user the state of the atmosphere is input in column-based text files to be provided by the user. Each such file specifies a stratified atmosphere and contains columns such as pressure, density, temperature and the three wind components u, v and w as a function of altitude. The files are self-describing using a formatted header that associates the column with a tag string and an indication of units.  Scalar quantities may also be specified in the header.  Formatted lines and normal (i.e. ignorable) comments may both be used in the header as needed; normal comments are preceded by the \verb"#" character, while formatted lines are preceded with \verb"#%".  Text tags are used to indicate to the modules which columns represent which types of quantities, and are expected to match the following convention:
 \begin{verbatim}
-    z - altitude [ km above Mean Sea Level (MSL) ]
-    u - West-to-East wind speed [ m/s ]
-    v - South-to-North wind speed [ m/s ]
-    w - vertical wind (usually zero) [ m/s ]
-    t - temperature [ Kelvin ]
-    d - density [ g/cm^3 ]
-    p - ambient pressure [ hectoPascals ]
+    Z   - altitude above MSL
+    U   - West-to-East wind speed
+    V   - South-to-North wind speed
+    T   - temperature
+    RHO - density
+    P   - ambient pressure
+    C0  - static sound speed (optional, will be calculated if not provided)
+    Z0  - ground elevation (scalar, optional)
 \end{verbatim}
-Note that the default physical units are NOT all in SI. In particular density is specified in $\text{g/cm}^3$ and pressure in hectoPascals. The default wind unit is m/s; however, for files in which the winds are given in km/s the user should specify  \verb"--wind_units kmpersec" on the command line.
 
-An example of an atmospheric profile file with the above structure is provided in the \verb"samples" directory in file \verb"NCPA_canonical_profile_zuvwtdp.dat". Most tutorial examples included in this or the on-line help are based on this profile. The corresponding sound speed, effective sound speed for azimuth of $90^0$ and wind speed are illustrated in Figure \ref{fig:canonic_sound_speeds}.
+Scalar quantities are required to specify column number \verb"0" and are in the format \verb"0, <tag>, <units>, <value>", while vector quantities use the format \verb"<column>, <tag>, <units>" with values provided in the columns.  Altitude, as the independent quantity, must be provided in column number \verb"1".  An example of a formatted header with units and a scalar quantity demonstrates this:
+\begin{verbatim}
+#% 0, Z0, m, 0.0
+#% 1, Z, km
+#% 2, U, m/s
+#% 3, V, m/s
+#% 4, W, m/s
+#% 5, T, degK
+#% 6, RHO, g/cm3
+#% 7, P, mbar
+\end{verbatim}
+In this example, the static sound speed \verb"C0" will be calculated internally from the pressure and density.
+
+Quantities may be provided in any supported units and will be converted internally as needed.  Additional units may be added by the user as needed by following the directions given in the comment header in \verb"src/common/units.h".  Supported units as of this release may be indicated by any of the following codes, which are case-insensitive:
+\begin{verbatim}
+    temperature: K, DEGK, DEG K, DEGREES K
+                 C, DEGC, DEG C, DEGREES C
+                 F, DEGF, DEG F, DEGREES F
+    distance:    M, METERS
+                 KM, KILOMETERS
+    speed:       M/S, MPS, MPERS, M PER S, METERS PER SECOND
+                 KM/S, KMPS, KMPERS, KM PER S, KILOMETERS PER SECOND
+    pressure:    PA, PASCAL, PASCALS
+                 MBAR, MILLIBAR, MILLIBARS
+    density:     KG/M3, KGPM3, KILOGRAMS PER CUBIC METER
+                 G/CM3, GPCM3, GRAMS PER CUBIC CENTIMETER
+    direction:   DEGREES CLOCKWISE FROM NORTH, DEG CW FROM N, AZIMUTH
+                 DEGREES COUNTERCLOCKWISE FROM EAST, DEG CCW FROM E
+    angle:       DEG, DEGREES
+                 RAD, RADIANS
+\end{verbatim}
+
+An example of an atmospheric profile file with the above structure is provided in the \verb"samples" directory in file \verb"NCPA_canonical_profile_trimmed.dat". Most tutorial examples included in this or the on-line help are based on this profile. The corresponding sound speed, effective sound speed for azimuth of $90^0$ and wind speed are illustrated in Figure \ref{fig:canonic_sound_speeds}.
 
 \begin{figure}
 \begin{center}
@@ -39,4 +71,12 @@ An example of an atmospheric profile file with the above structure is provided i
 \label{fig:canonic_sound_speeds}
 \end{figure}
 
-To model propagation through a stratified medium only a single specification file is required. Range dependent profiles are specified by providing a directory of atmospheric specification files. In addition, the reading of G2S binary files is supported; however, there is no guarantee that the structure of the G2S binary files will remain unchanged. 
+To model propagation through a stratified medium only a single specification file is required. Range dependent profiles for the \verb"ePape" module are specified by providing a summary file that associates a range (in km) with a 1-D atmospheric file in the above format:
+\begin{verbatim}
+0.0   profiles/profile0000.dat
+89.0  profiles/profile0089.dat
+179.0 profiles/profile0179.dat
+269.0 profiles/profile0269.dat
+359.0 profiles/profile0359.dat
+\end{verbatim}
+Additional range-dependent formats are under development.

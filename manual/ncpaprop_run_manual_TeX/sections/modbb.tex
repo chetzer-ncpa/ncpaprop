@@ -82,183 +82,112 @@ To run {\bf ModBB} make sure its executable is in the system's path and enter
 \begin{verbatim} 
     ModBB [--option1 val1] [--option2 val2] [...] [--flag1] [...] 
 \end{verbatim}
-on a command line. Generally, options are followed by values, either numbers, strings or filenames. Flags are not. Entering \verb"ModBB" without any options or flags sends the following help page to the screen: 
+on a command line. Generally, options are followed by values, either numbers, strings or filenames. Flags are not. Entering \verb"ModBB --help" sends the following help page to the screen: 
 \begin{verbatim}
-The options below can be specified in a colon-separated file "ModBB.options"
-or at the command line.  Command-line options override file options.
-Be sure to precede all options with two minuses (--).
- --help -h                Print this message and exit
+One of two algorithms can be used to perform pulse propagation. The first is
+based on the Effective Sound Speed Approximation (as in Modess), the second is
+based on the the Wide_Angle High-Mach solution of the wave equation (as in
+WMod). Modess is faster but is accurate for launch angles less than 30 degrees
+and low wind speeds. WMod extends the validity to higher angles and high Mach
+numbers, but is slower.
+To propagate a pulse, two steps must be completed:
+1. A dispersion file must be calculated using the option --dispersion .
+2. Pulse propagation is calculated for a selected source type:
+  --source impulse : Delta function
+  --source pulse1 : Built-in pulse type 1
+  --source pulse2 : Built-in pulse type 2
+  --source spectrum --source_file <filename> : User-supplied spectrum file
+  Format: Freq Re[ spec(f) ] Im[ spec(f) ]
+  --source waveform --source_file <filename> : User-supplied waveform file
+  Format: Time Amplitude
 
-One of two algorithms can be used to perform pulse propagation.
-The first is based on the Effective Sound Speed Approximation (as in ModESS);
-the second is based on the the Wide_Angle High-Mach solution 
-of the wave equation (see  implementation in WMod).
-ModESS is faster but it is accurate for (launch) angles less than 30 deg and
-low wind speeds. WMod extends the validity to higher angles
-and high Mach numbers but it runs slower.
-Options --use_modess and --use_wmod allow the user to choose
-the desired algorithm when computing the dispersion data (see step 1 below).
+The options below can be specified in a colon-separated file "modbb.param" or at
+the command line. Command-line options override file options.
 
-To propagate a pulse, 2 steps must be completed:
- 1. A dispersion file must be available or computed
-     use option --out_disp_src2rcv_file
- 2. Perform pulse propagation for one of several scenarios:
-    a. source-to-receiver at one range (option --pulse_prop_src2rcv)
-    b. source-to-receiver at several equally spaced ranges 
-       (option --pulse_prop_src2rcv_grid)
-    The source type can be one of the following:
-        delta function              -> see option --get_impulse_resp
-        built-in pulse              -> see option --use_builtin_pulse
-        user-provided spectrum file -> see option --src_spectrum_file
-        user-provided waveform file -> see option --src_waveform_file
+Options Control:
+  --help                 Prints help test
+  --paramfile            Parameter file name [modbb.param]
+  --printparams          Print parameter summary to screen
 
-To compute a dispersion file: the following option is REQUIRED:
- --out_disp_src2rcv_file  <dispersion filename>
-                    Output dispersion curves and modal values for
-                    source-to-receiver propagation to the specified file
-
- Example (run in the 'samples' directory):
-
-   Compute dispersion file that will be used to compute the pressure pulse at 1 receiver. 
-Assume that we want to end up with a pulse having a spectrum
-with a maximum frequency of f_max=0.5 Hz. 
-Also assume that we want the pulse represented on a time record of T=512 seconds. 
-The number of positive frequencies necessary for the calculation is 
-T*f_max = 256 i.e.256 frequencies between 0 and 0.5 Hz. 
-Thus we know f_max=0.5 Hz and f_step=f_max/256=0.001953125 Hz. 
-The corresponding run command is:
-
-    >> ../bin/ModBB --out_disp_src2rcv_file myDispersionFile.dat 
-       --atmosfile NCPA_canonical_profile_zuvwtdp.dat --atmosfileorder zuvwtdp 
-       --skiplines 0 --azimuth 90 --f_step 0.001953125 --f_max 0.5 --use_modess
-
-     Each line in this dispersion file has (4 + 4*n_modes) entries
-     in the following format:
-     freq n_modes rho_src rho_rcv Re(k_pert_m) Im(k_pert_m) V_m(z_src) V_m(z_rcv)
-     where m varies from 1 to n_modes. k_pert_m, and V_m are
-     the m_th wavenumber and mode amplitude respectively.
-     z_src and z_rcv stand for source and receiver height respectively.
-
-
-In addition the following options are REQUIRED:
- --use_modess              Prompts the use of ModESS algorithm.
- --use_wmod                Prompts the use of WMod algorithm.
- Note that --use_modess and --use_wmod are mutually exclusive.
- --atmosfile  <filename>   Uses an ASCII atmosphere file
-                           referenced to Mean Sea Level (MSL).
- --atmosfileorder          The order of the (z,t,u,v,w,p,d) fields in 
-                           the ASCII file (Ex: 'ztuvpd')
- --skiplines               Lines at the beginning of the ASCII file to skip
- --azimuth                 Value in range [0,360), clockwise from North
- --f_step                  The frequency step
- --f_max                   Maximum frequency to propagate
-    Note that in this case the array of frequencies is [f_step:f_step:f_max].
-
-OPTIONAL [defaults]:
- --f_min                   Minimum frequency [f_step Hz] 
- --maxheight_km            Calculation grid height in km above MSL [150 km]
- --zground_km              Height of the ground level above MSL [0 km]
- --Nz_grid                 Number of points on the z-grid from ground to maxheight [20000]
- --sourceheight_km         Source height in km Above Ground Level (AGL) [0]
- --receiverheight_km       Receiver height in km AGL [0]
- --maxrange_km             Maximum horizontal distance from origin to propagate
-                           [1000 km]
- --ground_impedance_model  Name of the ground impedance models to be employed:
-                           [rigid], TBD
- --Lamb_wave_BC            For a rigid ground: if ==1 it sets
-                           admittance= = -1/2*dln(rho)/dz; [ 0 ]
- --wind_units              Use it to specify 'kmpersec' if the winds are given
-                           in km/s [ mpersec ]
- --use_attn_file          Option to specify a file name containing user-provided
-                           attenuation coefficients to be loaded instead of 
-                           the default Sutherland-Bass attenuation. 
-                           The text file should contain two columns: 
-                              height (km AGL) and 
-                              attenuation coefficients in np/m.
-
-FLAGS (no value required after the flag itself):
- --turnoff_WKB             Turn off the WKB least phase speed estimation,
-                           an approximation that speeds-up ground-to-ground
-                           propagation. If either or both the source and 
-                           receiver are not on the ground [height=0] 
-                           the approximation is turned off by default
-                           regardless whether the flag is mentioned
-                           in the command line or not.
- --use_zero_attn            Set attenuation to zero.
-                            Reads the dispersion file and sets the
-                            imaginary part of the wavenumber to zero.
+Modes of Operation:
+  --dispersion           Calculate dispersion at multiple frequencies
+    --method             Calculation method. Currently supported: { modess, wmod
+                         } [required]
+    --dispersion_file    File to write dispersion results to [required]
+    --azimuth            Azimuth of propagation, in degrees CW from North
+                         [0,360) [required]
+    --f_min              Minimum frequency in Hz [required]
+    --f_max              Maximum frequency in Hz [required]
+    --f_step             Frequency interval in Hz [required]
+    --atmosfile          Atmospheric profile filename [required]
+    --maxheight_km       Maximum height of analysis in km [150.0]
+    --zground_km         Ground height [take from Z0 parameter in atmosfile, or
+                         0.0]
+    --Nz_grid            Number of vertical grid points to use [20000]
+    --sourceheight_km    Source height in km [0.0]
+    --receiverheight_km  Receiver height in km [0.0]
+    --maxrange_km        Maximum range in km to use for modeling [1000.0]
+    --Nrng_steps         Number of range steps to use [1000]
+    --ground_impedence_model
+                         Impedence model to use. Currently only "rigid" is
+                         supported. [rigid]
+    --Lamb_wave_BC       Use admittance = -1/2*dln(rho)/dz
+    --write_atm_profile  Output atmospheric profile to atm_profile.nm
+    --use_attn_file      File name containing attenuation, to override default
+                         Sutherland/Bass [n/a]. Columns are
+                         Height(km) Attenuation(np/m)
+    --use_zero_attenuation
+                         Set attenuation to zero.
+    --wvnum_filter       Use wavenumber filter by phase speed. Requires --c_min
+                         and --c_max
+      --c_min            Minimum phase speed to keep
+      --c_max            Maximum phase speed to keep
+  --propagation          Calculate propagated waveform using dispersion results
+    --input_dispersion_file
+                         File to read dispersion results from [required]
+    --output_waveform_file
+                         File to write resultant waveform to [required]
+    --source             Source type. Options include:
+                         {impulse,pulse1,pulse2,spectrum,waveform} [impulse]
+      --source_file      File containing the source spectrum or waveform, if
+                         applicable
+      --f_center         Center frequency for pulse1 or pulse2 options. Must be
+                         <= f_max/5 [f_max/5]
+    --nfft               Number of FFT points [4*f_max/f_step]
+    --max_celerity       Maximum celerity for calculation [340.0]
+    --receiver           Receiver type {single,multiple} [single]
+      --range_km         Propagation range in km for a single receiver
+      --start_range_km   Starting propagation range in km for multiple receivers
+      --end_range_km     Ending propagation range in km for multiple receivers
+      --range_step_km    Propagation range step in km for multiple receivers
 
 
-Options for PULSE PROPAGATION:
- --pulse_prop_src2rcv <dispersion filename> 
-                    Propagate pulse from source to 1 receiver
-                    at a distance specified by option --range_R_km; 
- --range_R_km       Propagate pulse to this range [km]
- --waveform_out_file <waveform filename>   Name of the waveform output file
 
- --pulse_prop_src2rcv_grid <dispersion filename> 
-                    Propagate pulse from source to array of 
-                    horizontally equally-spaced receivers
+OUTPUT Files: Format description (column order):
+  <dispersion file>        Contains one line per frequency with entries:
+                           freq, (# of modes), rho(z_src),
+                           followed for each mode 'i' by quadruples:
+                           real(k(i)), imag(k(i)), Mode(i)(z_src), Mode(i)(z_rcv)
+  <waveform file>          t  P  (single receiver)
+                           r  t  P  (multiple receivers)
+Examples (run from 'samples' directory):
+    ../bin/ModBB --dispersion --dispersion_file myDispersionFile.dat \
+         --atmosfile NCPA_canonical_profile_zuvwtdp.dat --azimuth 90 --f_min \
+         0.001953125 --f_step 0.001953125 --f_max 0.5 --method modess
+ --or--
+    ../bin/ModBB --dispersion --dispersion_file myDispersionFile.dat \
+         --atmosfile NCPA_canonical_profile_zuvwtdp.dat --azimuth 90 --f_min \
+         0.001953125 --f_step 0.001953125 --f_max 0.5 --method wmod
 
- REQUIRED additional options:
- --R_start_km       Propagation from this range to R_end_km in DR_km steps.
- --R_end_km         Pulse is propagated from R_start_km to this range.
- --DR_km            Range step to propagate from R_start_km to R_end_km.
- --waveform_out_file <waveform filename> 
-                    Name of the waveform output file.
+ --then--
+    ../bin/ModBB --propagation --input_dispersion_file myDispersionFile.dat \
+         --range_km 240 --output_waveform_file mywavf.dat --receiver single \
+         --source impulse
 
- OPTIONAL [defaults]:
- --f_center         The center frequency of the pulse; must be <= [f_max/5].
- --max_celerity     Maximum celerity [300 m/s].
- --nfft             Number of points used in the FFT computation. 
-                    Defaults to [4*f_max/f_step].
-
-
-SOURCE TYPE input options: Use one of the following 4 options
-                           to specify the source type:
- --get_impulse_resp       Flag to use a delta function as source and
-                          to output the impulse response.
- --use_builtin_pulse      Flag to request the use of the built-in source pulse.
-                          Note: Use --f_center to request the central frequency
-                          of the pulse. f_center is restricted to a maximum
-                          value of fmax/5 where fmax is the maximum frequency
-                          defined by the dispersion file.
-                          The input waveform and spectrum are also saved for the
-                          user's reference such that:
-                          The built-in source spectrum is outputted in the file.
-                           'source_spectrum_input.dat' with the format.
-                             | Freq (Hz) | Re(S) | Imag(S) |.
-                          The input source waveform is outputted in the file.
-                           'source_waveform_input.dat' with the format.
-                             | Time [s] | Amplitude |.
- --src_spectrum_file      Specify the file name of the source spectrum
-                          at positive frequencies. The file must have 3 columns
-                             | Freq | Real(Spectrum) | Imag(Spectrum) |
- --src_waveform_file      Specify the file name of the user-provided 
-                          source waveform. The file must have 2 columns
-                             |Time | Amplitude |
-   If none of then source type options are specified the delta function source
-   is the default i.e. the output is the impulse response.
-
- Example: Pulse propagation to a point on the ground at range_R_km
-          and output the impulse response:
-
-    ../bin/ModBB --pulse_prop_src2rcv myDispersionFile.dat --range_R_km 240 
-                 --waveform_out_file mywavf.dat --get_impulse_resp
-
- Example: Pulse propagation to a point on the ground at range_R_km
-          and employ the user-provided source spectrum:
-
-   ../bin/ModBB --pulse_prop_src2rcv myDispersionFile.dat --range_R_km 240 
-                --waveform_out_file mywavf.dat --max_celerity 300 
-                --src_spectrum_file source_spectrum_example.dat
-
- Example: Pulse propagation to several points on the ground 20 km apart
-          and employ the user-provided source waveform:
-
-   ../bin/ModBB --pulse_prop_src2rcv_grid myDispersionFile.dat 
-                --R_start_km 240 --DR_km 20 --R_end_km 300 --waveform_out_file mywavf.dat 
-                --src_waveform_file source_waveform_input_example.dat
+    ../bin/ModBB --propagation --input_dispersion_file myDispersionFile.dat \
+         --output_waveform_file mywavf.dat --receiver multiple \
+         --start_range_km 240 --end_range_km 300 --range_step_km 20 --source \
+         waveform --source_file source_waveform_input_example.dat
 
 \end{verbatim}
 
@@ -280,18 +209,18 @@ Finally, the option \verb+--nfft+ sets the size of the FFT to be used in the wav
 As an example consider the following (note that this example is different from the ones that are on the {\bf ModBB} help page). Here a dispersion file is written for eastward propagation in the NCPA toy atmosphere. The bandwidth is chosen to be small, $F=0.5$ Hz, so that the file computes fairly rapidly. $\Delta f$ is chosen to be 0.002 corresponding to a time window, $T$, of 500 seconds. Calculations are done using {\bf Modess}. 
 
 \begin{verbatim} 
-    ../bin/ModBB --out_disp_src2rcv_file myDispersionFile.dat 
-                 --atmosfile NCPA_canonical_profile_zuvwtdp.dat 
-                 --atmosfileorder zuvwtdp --azimuth 90 
+    ../bin/ModBB --dispersion --disperson-file myDispersionFile.dat \
+                 --atmosfile NCPA_canonical_profile_zuvwtdp.dat \
+                 --azimuth 90 --method modess \
                  --f_min 0.002 --f_step 0.002 --f_max 0.5
-                 --use_modess
 \end{verbatim}
 
 The dispersion file created above, \verb+myDispersionFile.dat+, is then used to propagate the built-in pulse to 270 km. \verb+--f_center+ is not set so that the default $F/5$, in this case 0.1 Hz, is used. Note that \verb+--max_celerity+ is set at 320 m/s rather than the default value of 300 m/s for which the resulting time window is not optimal. The waveform and Fourier transform for the built-in pulse is plotted in Figure \ref{fig: modbb ex built-in pulse}. The propagated waveform is plotted in Figure \ref{fig: modbb ex prop to 270 km}. 
 
 \begin{verbatim}
-    ../bin/ModBB --pulse_prop_src2rcv myDispersionFile.dat --range_R_km 270 
-                 --waveform_out_file mywavf.dat --use_builtin_pulse --max_celerity 320
+    ../bin/ModBB --propagation --input_dispersion_file myDispersionFile.dat \
+                 --range_km 270 --output_waveform_file mywavf.dat \
+                 --source pulse1 --max_celerity 320
 \end{verbatim}
 
 \begin{figure}
@@ -313,10 +242,10 @@ The dispersion file created above, \verb+myDispersionFile.dat+, is then used to 
 The example below creates a grid of waveforms using \verb+--pulse_prop_src2rcv_grid+, propagating using the dispersion file created using the example above. Waveforms are written in 20 km increments starting at 220 km and ending at 300 km. Maximum celerity of 320 m/s was used rather than the default value. The results, shifted so that each time window begins at the appropriate $T_0$, are plotted in Figure \ref{fig: modbb ex prop 220 to 300 km}.
 
 \begin{verbatim}
-    ../bin/ModBB --pulse_prop_src2rcv_grid myDispersionFile.dat 
-                 --R_start_km 220 --DR_km 20 --R_end_km 300 
-                 --waveform_out_file mywavf_grid.dat 
-                 --use_builtin_pulse --max_celerity 320
+    ../bin/ModBB --propagation --input_dispersion_file myDispersionFile.dat \
+                 --receiver multiple --output_waveform_file mywavf_grid.dat \
+                 --start_range_km 220 --range_step_km 20 --end_range_km 300 \
+                 --source pulse1 --max_celerity 320
 \end{verbatim}
 
 \begin{figure}

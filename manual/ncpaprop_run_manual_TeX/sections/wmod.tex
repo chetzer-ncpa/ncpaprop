@@ -58,120 +58,99 @@ Making sure that the executable for {\bf Wmod} is in the system's path, it can b
 \begin{verbatim} 
     WMod [--option1 val1] [--option2 val2] [...] [--flag1] [...] 
 \end{verbatim}
-on a command line. Generally, options are followed by values, either numbers, strings or filenames. Flags are not. Entering \verb"WMod" without any options or flags sends the following help page to the screen: 
+on a command line. Generally, options are followed by values, either numbers, strings or filenames. Flags are not. Entering \verb"WMod --help" sends the following help page to the screen: 
 
 \begin{verbatim}
-By default 'WMod' computes the 1D transmission loss (TL)
-at the ground and saves the data to 2 files:
-   file wtloss_1d.nm - considering attenuation in the atmosphere
-   file wtloss_1d.lossless.nm  - no attenuation
-Additionally, if the flag --write_2D_TLoss is present on the command line 
-the 2D TL is saved to file wtloss2d.nm
-The user can also choose to propagate in N different radial directions
-i.e. (N by 2D mode) by using the option --Nby2Dprop .
+By default the program computes the 1D transmission loss (TL) at the ground or
+the specified receiver height and saves the data to 2 files:
+    file wtloss_1d.nm - considering attenuation in the atmosphere
+    file wtloss_1d.lossless.nm - no attenuation
+Additionally, if the flag --write_2d_tloss is present on the command line, the
+2D TL is saved to file wtloss2d.nm. The user can also choose to propagate in N
+different directions i.e. (N by 2D mode) by using the option --multiprop.
 
-The options below can be specified in a colon-separated file "WMod.options"
-or at the command line.  Command-line options override file options.
- --help -h                Print these instructions and exit
+The options below can be specified in a colon-separated file "wmod.param" or at
+the command line. Command-line options override file options.
 
-To use an arbitrary 1-D atmospheric profile in ASCII format
-(space or comma-separated) the following options apply:
+Options Control:
+  -h, --help             Prints help test
+  --paramfile            Parameter file name [modess.param]
+  --printparams          Print parameter summary to screen
 
-REQUIRED (no default values):
- --atmosfile  <filename>  Uses an ASCII atmosphere file
-                          referenced to Mean Sea Level (MSL).
- --atmosfileorder         The order of the (z,t,u,v,w,p,d) fields
-                          in the ASCII file (Ex: 'zuvwtdp')
-                          The units assumed in the ASCII file are
-                          z[km], t [kelvin], d [g/cm^3], p [hectoPa]
-                          The wind speeds are in m/s by default;
-                          however if the winds are given in km/s then use
-                          option --wind_units kmpersec
- --skiplines              Lines at the beginning of the ASCII file to skip [0]
- --azimuth                Degrees in range [0,360), clockwise from North
- --freq                   Frequency [Hz]
+Required Parameters:
+  --atmosfile            Atmospheric profile filename
+  --freq                 Frequency of analysis (Hz)
 
-REQUIRED for propagation in one direction (no default values):
- --azimuth                Degrees in range [0,360], clockwise from North
+Optional Parameters [default]:
+  --maxheight_km         Maximum height of analysis in km [150.0]
+  --zground_km           Ground height [take from Z0 parameter in atmosfile, or
+                         0.0]
+  --Nz_grid              Number of vertical grid points to use [20000]
+  --sourceheight_km      Source height in km [0.0]
+  --receiverheight_km    Receiver height in km [0.0]
+  --maxrange_km          Maximum range in km to use for modeling [1000.0]
+  --Nrng_steps           Number of range steps to use [1000]
+  --ground_impedence_model
+                         Impedence model to use. Currently only "rigid" is
+                         supported. [rigid]
+  --use_attn_file        File name containing attenuation, to override default
+                         Sutherland/Bass [n/a]. Columns are
+                         Height(km) Attenuation(np/m)
+  --dispersion_file      Filename to output the dispersion information
+    --append_dispersion_file
+                         Append results to dispersion file rather than
+                         overwriting
 
-REQUIRED for propagation in N directions i.e. (N by 2D) (no default values):
- --azimuth_start          Start azimuth ([0,360] degrees, clockwise from North)
- --azimuth_end            End azimuth ([0,360] degrees, clockwise from North)
- --azimuth_step           Step by which the azimuth is changed (in degrees)
+Modes of Operation:
+  --singleprop           Single azimuth propagation. Requires --azimuth
+    --azimuth            Azimuth of propagation, in degrees CW from North
+                         [0,360)
+  --multiprop            Multiple azimuth propagation. Requires --azimuth_start,
+                         --azimuth_end, and --azimuth_step
+    --azimuth_start      Starting azimuth, in degrees CW from North [0,360)
+    --azimuth_end        Ending azimuth, in degrees CW from North [0,360)
+    --azimuth_step       Azimuth step, in degrees CW from North [0,360)
 
-OPTIONAL [defaults]:
- --maxheight_km           Calculation grid height in km above MSL [150 km]
- --zground_km             Height of the ground level above MSL [0 km]
- --Nz_grid                Number of points on the z-grid from ground to
-                         maxheight [20000]
- --sourceheight_km        Source height in km Above Ground Level (AGL) [0]
- --receiverheight_km      Receiver height in km AGL [0]
- --maxrange_km            Maximum horizontal propagation distance from origin 
-                          [1000 km]
- --Nrng_steps             Number of range steps to propagate [1000]
- --ground_impedance_model Name of the ground impedance models to be employed:
-                          [rigid], others TBD
- --Lamb_wave_BC           If ==1 it sets admittance = -1/2*dln(rho)/dz; [ 0 ]
- --wind_units             Use it to specify 'kmpersec' if the winds are given 
-                          in km/s [mpersec]
- --use_attn_file          Use it to specify a file name containing user-provided
-                          attenuation coefficients to be loaded instead of 
-                          the default Sutherland-Bass attenuation. 
-                          The text file should contain two columns: 
-                              height (km AGL) and 
-                              attenuation coefficients in np/m.
-
-FLAGS (no value required):
- --write_2D_TLoss         Outputs the 2D transmission loss to
-                          default file: wtloss2D.nm
- --write_phase_speeds     Output the phase speeds to
-                          default file: wphasespeeds.nm
- --write_modes            Output the modes to default files:
-                          wmode_<mode_count>.nm
- --write_dispersion       Output the mode dispersion to
-                          default file: wdispersion_<freq>.nm
- --Nby2Dprop              Flag to perform (N by 2D) propagation i.e.
-                          propagation in N directions specified by
-                          options: azimuth_start, azimuth_end, azimuth_step
-                          The output is saved into default files: " );  
-                              Nby2D_tloss_1d.lossless.nm" );
-                              Nby2D_tloss_1d.nm" );
- 
- --write_atm_profile      Save the interpolated atm. profile to
-                          default file: atm_profile.nm
- --turnoff_WKB            Turn off the WKB least phase speed estimation
-                          an approx. that speeds-up ground-to-ground propag.
-                          It has the value 1 (true) if any of the flags
-                          write_2D_TLoss, write_phase_speeds, write_modes
-                          or write_dispersion are true.
+Flags:
+  --write_2d_tloss       Output 2-D transmission loss to tloss2D.nm
+  --write_phase_speeds   Output phase speeds to phasespeeds.nm
+  --write_modes          Output modes to mode_###.nm. Also implies
+                         --write_speeds
+  --write_atm_profile    Output atmospheric profile to atm_profile.nm
+  --Lamb_wave_BC         Use admittance = -1/2*dln(rho)/dz
+  --turnoff_WKB          Turn off the WKB least phase speed estimation
+  --wvnum_filter         Use wavenumber filter by phase speed. Requires --c_min
+                         and --c_max
+    --c_min              Minimum phase speed to keep
+    --c_max              Maximum phase speed to keep
 
 
-OUTPUT Files -  Format description (column order):
-  wtloss_1d.nm:           r, 4*PI*Re(P), 4*PI*Im(P), (incoherent TL)
+
+OUTPUT Files: Format description (column order):
+  wtloss_1d.nm:                 r, 4*PI*Re(P), 4*PI*Im(P), (incoherent TL)
   wtloss_1d.lossless.nm:
-  wtloss_2d.nm:           r, z, 4*PI*Re(P), 4*PI*Im(P)
-  Nby2D_wtloss_1d.nm:     r, theta, 4*PI*Re(P), 4*PI*Im(P), (incoherent TL)
-  Nby2D_wtloss_1d.lossless.nm:
+  wtloss_2d.nm:                 r, z, 4*PI*Re(P), 4*PI*Im(P)
+  Nby2D_wtloss_1d.nm:
+  Nby2D_wtloss_1d.lossless.nm:  r, theta, 4*PI*Re(P), 4*PI*Im(P), (incoherent TL)
+  wphasespeeds.nm:              Mode#, phase speed [m/s], imag(k)
+  wmode_<mode_count>.nm         z, (Mode amplitude)
+  wdispersion_<freq>.nm         Contains one line with entries:
+                               freq, (# of modes), rho(z_src), rho(z_rcv)
+                               followed for each mode 'i' by quadruples:
+                               real(k(i)), imag(k(i)), Mode(i)(z_src), Mode(i)(z_rcv)
+  atm_profile.nm               z,u,v,w,t,d,p,c,c_eff
 
-  wphasespeeds.nm:         Mode#, phase speed [m/s], imag(k)
-  wmode_<mode_count>.nm    z, (Mode amplitude)
-  wdispersion_<freq>.nm    Contains one line with entries: freq (# of modes)
-                           followed for each mode i by quadruples: 
-                           (real(k(i)) imag(k(i)) Mode(i)(z_src) Mode(i)(z_rcv)
-  atm_profile.nm           z,u,v,w,t,d,p,c,c_eff
+Examples (run from 'samples' directory):
+    ../bin/WMod --singleprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat \
+         --azimuth 90 --freq 0.1
 
- Examples (run from 'samples' directory):
+    ../bin/WMod --singleprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat \
+         --azimuth 90 --freq 0.1 --write_2d_tloss --sourceheight_km 60 \
+         --receiverheight_km 60
 
-    ../bin/WMod --atmosfile NCPA_canonical_profile_zuvwtdp.dat 
-    --atmosfileorder zuvwtdp --skiplines 0 --azimuth 90 --freq 0.1
+    ../bin/WMod --multiprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat \
+         --freq 0.1 --azimuth_start 0 --azimuth_end 360 --azimuth_step 1
 
-    ../bin/WMod --atmosfile NCPA_canonical_profile_zuvwtdp.dat 
-    --atmosfileorder zuvwtdp --skiplines 0 --azimuth 90 --freq 0.1 
-    --write_2D_TLoss --sourceheight_km 60 --receiverheight_km 60
-
-    ../bin/WMod --atmosfile NCPA_canonical_profile_zuvwtdp.dat 
-    --atmosfileorder zuvwtdp --freq 0.1 --Nby2Dprop 
-    --azimuth_start 0 --azimuth_end 360 --azimuth_step 1
 \end{verbatim}
 
 The options and flags for {\bf WMod} are the same as for {\bf Modess}. The reader is referred to the {\bf Modess} documentation above for explanations. The only difference is that the output filenames now have a \verb+w+ preceding \verb+tloss+ in each case. 
@@ -182,8 +161,8 @@ The options and flags for {\bf WMod} are the same as for {\bf Modess}. The reade
 
 The \textbf{WMod} help page ends with three examples. The examples set the frequency to 0.1 Hz to keep run times short. The first is a simple example illustrating the primary input modes for \textbf{WMod}. It is assumed that the user runs it in the \verb+samples+ directory. Note that if the \textbf{ncpaprop} \verb+bin+ directory is in the system's path one may enter \verb+WMod+ rather than \verb+../bin/WMod+. The command line entry for the example is 
 \begin{verbatim} 
-    ../bin/WMod --atmosfile NCPA_canonical_profile_zuvwtdp.dat \ 
-                  --atmosfileorder zuvwtdp --skiplines 0 --azimuth 90 --freq 0.1
+    ../bin/WMod --singleprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat \ 
+                --azimuth 90 --freq 0.1
 \end{verbatim}
 In this example the four required options are set. Otherwise the default settings are used. Ground-to-ground propagation in the NCPA toy atmosphere (see Figure \ref{fig:canonic_sound_speeds}) at 90 degrees azimuth (from North), eastward propagation, at frequency of 0.1 Hz is modelled. By default the signal is propagated out to 1000 km in range with range steps of 1 km. The atmospheric profiles are specified in the column-based text file \verb"NCPA_canonical_profile_zuvwtdp.dat" that is included in the \verb+samples+ directory. In the above example the profile file has 7 columns in the order \verb"zuvwtdp" (refer to section~\ref{sec: AtmoSpecs}  for an explanation of atmospheric specifications).
 
@@ -209,9 +188,8 @@ The output is, by default, the one-dimensional (1D) transmission loss on the gro
 
 In the second example the \verb+--write_2D_Tloss+ flag is appended to the command line entry for the first example: 
 \begin{verbatim} 
-    ../bin/WMod --atmosfile NCPA_canonical_profile_zuvwtdp.dat \ 
-                --atmosfileorder zuvwtdp --skiplines 0 --azimuth 90 \
-                --freq 0.1 --write_2D_TLoss
+    ../bin/WMod --singleprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat \ 
+                --azimuth 90 --freq 0.1 --write_2d_tloss
 \end{verbatim}
 As described above and in section~\ref{sec:running modess}, the output is written to a default file, in this case \verb+wtloss2d.nm+. The 2D transmission loss magnitude that results from eastward propagation in the NCPA toy model is plotted in Figure \ref{fig: wmod 2D tl}. 
 
@@ -224,24 +202,9 @@ As described above and in section~\ref{sec:running modess}, the output is writte
 \label{fig: wmod Nby2D tl}
 \end{figure}
 
-In the third example the \verb+--Nby2Dprop+ flag is appended to the command line entry for the first example. This flag requires that values for the options \verb+--azimuth_start+, \verb+--azimuth_end+, and \verb+--azimuth_step+ be given. 
+In the third example the \verb+--multiprop+ flag is appended to the command line entry for the first example. This flag requires that values for the options \verb+--azimuth_start+, \verb+--azimuth_end+, and \verb+--azimuth_step+ be given. 
 \begin{verbatim} 
-    ../bin/WMod --atmosfile NCPA_canonical_profile_zuvwtdp.dat \
-                  --atmosfileorder zuvwtdp --freq 0.1 --Nby2Dprop \
-                  --azimuth_start 0 --azimuth_end 360 --azimuth_step 1
+    ../bin/WMod --multiprop --atmosfile NCPA_canonical_profile_zuvwtdp.dat \
+                --freq 0.1 --azimuth_start 0 --azimuth_end 360 --azimuth_step 1
 \end{verbatim}
-The output is written to the files \verb+Nby2D_wtloss_1d.nm+ and \verb+Nby2D_wtloss_1d.lossless.nm+ as described above in section~\ref{sec:running wmod}. The lossless transmission losses are also computed and saved as are the incoherent transmission losses. The resulting transmission loss magnitude is plotted in Figure \ref{fig: wmod Nby2D tl}. This example can be run with the command \verb+WMod --Nby2Dprop+ if the \verb+bin+ directory is in the system path and the working directory contains the file \verb+WMod.options+ with the entries 
-\begin{verbatim}
-atmosfile : NCPA_canonical_profile_zuvwtdp.dat
-atmosfileorder : zuvwtdp
-skiplines : 0
-azimuth : 90
-freq : 0.1
-sourceheight_km : 0
-azimuth_start : 0 
-azimuth_end : 360 
-azimuth_step : 1
-\end{verbatim}
-
-
-
+The output is written to the files \verb+Nby2D_wtloss_1d.nm+ and \verb+Nby2D_wtloss_1d.lossless.nm+ as described above in section~\ref{sec:running wmod}. The lossless transmission losses are also computed and saved as are the incoherent transmission losses. The resulting transmission loss magnitude is plotted in Figure \ref{fig: wmod Nby2D tl}. 
