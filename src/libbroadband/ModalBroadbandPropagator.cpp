@@ -25,7 +25,7 @@ NCPA::ModalBroadbandPropagator::ModalBroadbandPropagator( NCPA::ParameterSet *pa
 
 	// read in and store parameters
 	NFFT 					= param->getInteger( "nfft" );
-	waveform_out_file 		= param->getString( "output_waveform_file" );
+	waveform_out_file 		 = param->getString( "output_waveform_file" );
 	dispersion_input_file 	= param->getString( "input_dispersion_file" );
 	source_type 			= param->getString( "source" );
 	source_file 			= param->getString( "source_file" );

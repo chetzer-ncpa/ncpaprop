@@ -13,6 +13,7 @@
 #define NCPAPROP_EPADE_PE_FILENAME_1D "tloss_1d.pe"
 #define NCPAPROP_EPADE_PE_FILENAME_2D "tloss_2d.pe"
 #define NCPAPROP_EPADE_PE_FILENAME_MULTIPROP "tloss_multiprop.pe"
+#define NCPAPROP_EPADE_PE_FILENAME_BROADBAND "tloss_broadband.bin"
 
 namespace NCPA {
 
@@ -49,13 +50,18 @@ namespace NCPA {
 			std::complex<double> *n_vec );
 
 		void set_1d_output( bool tf );
+		void write_broadband_header( std::string filename, double *az_vec, size_t n_az, 
+			double *f_vec, size_t n_f, unsigned int precision_factor );
+		void write_broadband_results( std::string filename, double this_az, double this_f, 
+			double *r_vec, size_t n_r, double *z_vec, size_t n_z, std::complex< double > **tloss_mat, 
+			unsigned int precision_factor );
 
 		double *z = NULL, *z_abs = NULL, *r = NULL, *f = NULL, calc_az;
 		std::complex< double > **tl;
 		int *zgi_r = NULL;   // ground height index
 		double freq;         // current active frequency
 		double *azi;
-		int NZ, NR, NAz, NF;
+		int NZ, NR, NR_requested, NAz, NF;
 		double dz;
 		int npade;
 		bool use_atm_1d = false, use_atm_2d = false, use_atm_toy = false, use_topo = false;

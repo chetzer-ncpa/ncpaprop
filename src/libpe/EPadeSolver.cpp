@@ -10,6 +10,8 @@
 #include <vector>
 #include <cfloat>
 #include <fstream>
+#include <stdexcept>
+#include <cstdint>
 
 #include "petscksp.h"
 
@@ -39,7 +41,7 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
   	z_max	 			= param->getFloat( "maxheight_km" ) * 1000.0;      // @todo fix elsewhere that m is required
   	zs			 		= param->getFloat( "sourceheight_km" ) * 1000.0;
   	zr 					= param->getFloat( "receiverheight_km" ) * 1000.0;
-  	NR 					= param->getInteger( "Nrng_steps" );
+  	NR_requested 		= param->getInteger( "Nrng_steps" );
   	freq 				= param->getFloat( "freq" );
 	npade 				= param->getInteger( "npade" );
 	starter 			= param->getString( "starter" );
@@ -54,7 +56,8 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
 	use_topo			= param->wasFound( "topo" );
 	write2d 			= param->wasFound( "write_2d_tloss" );
 	multiprop 			= param->wasFound( "multiprop" );
-	broadband 			= param->wasFound( "broadband" );
+	//broadband 			= param->wasFound( "broadband" );
+	broadband = false;
 
 	// Handle differences based on single vs multiprop
 	double min_az, max_az, step_az;
@@ -89,21 +92,21 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
 	}
 
 	/* @todo Move this inside freq loop in solve() */
-	double dr;
-  	if (NR == 0) {
-  		dr = 340.0 / freq;
-		NR = (int)ceil( r_max / dr );
-  	} else {
-  		dr = r_max / NR;
-  	}
-  	r = new double[ NR ];
-  	std::memset( r, 0, NR * sizeof(double) );
-  	zgi_r = new int[ NR ];
-  	std::memset( zgi_r, 0, NR * sizeof( int ) );
-  	int i;
-  	for (i = 0; i < NR; i++) {
-  		r[ i ] = ((double)(i+1)) * dr;
-  	}
+	// double dr;
+ //  	if (NR == 0) {
+ //  		dr = 340.0 / freq;
+	// 	NR = (int)ceil( r_max / dr );
+ //  	} else {
+ //  		dr = r_max / NR;
+ //  	}
+ //  	r = new double[ NR ];
+ //  	std::memset( r, 0, NR * sizeof(double) );
+ //  	zgi_r = new int[ NR ];
+ //  	std::memset( zgi_r, 0, NR * sizeof( int ) );
+ //  	int i;
+ //  	for (i = 0; i < NR; i++) {
+ //  		r[ i ] = ((double)(i+1)) * dr;
+ //  	}
 
   	if (broadband) {
   		if (write2d) {
@@ -212,12 +215,12 @@ NCPA::EPadeSolver::EPadeSolver( NCPA::ParameterSet *param ) {
 }
 
 NCPA::EPadeSolver::~EPadeSolver() {
-	delete [] r;
+	// delete [] r;
 	delete [] z;
 	delete [] z_abs;
-	delete [] zgi_r;
+	// delete [] zgi_r;
 	delete [] azi;
-	NCPA::free_cmatrix( tl, NZ, NR-1 );
+	// NCPA::free_cmatrix( tl, NZ, NR-1 );
 	delete atm_profile_2d;
 }
 
@@ -254,6 +257,7 @@ int NCPA::EPadeSolver::solve() {
 		ofs.close();
 	}
 
+	/* @todo move this into constructor as much as possible */
 	if (use_topo) {
 		z_bottom = -5000.0;    // make this eventually depend on frequency
 		z_bottom -= fmod( z_bottom, dz );
@@ -306,7 +310,7 @@ int NCPA::EPadeSolver::solve() {
 		}
 		zs = NCPA::max( zs-z_ground+dz, dz );
 	}
-	tl = NCPA::cmatrix( NZ, NR-1 );
+	// tl = NCPA::cmatrix( NZ, NR-1 );
 	
 	/*
 	int plotz = 10;
@@ -319,10 +323,11 @@ int NCPA::EPadeSolver::solve() {
 
 	// constants for now
 	//double omega = 2.0 * PI * freq;
-	double dr = r[1] - r[0];
+	//double dr = r[1] - r[0];
 	//double h = z[1] - z[0];
 	double h = dz;
 	double h2 = h * h;
+	double dr;
 
 	// set up for source atmosphere
 	double k0 = 0.0, c0 = 0.0;
@@ -330,7 +335,11 @@ int NCPA::EPadeSolver::solve() {
 	double *a_t = new double[ NZ ];
 	std::complex<double> *k = new std::complex<double>[ NZ ];
 	std::complex<double> *n = new std::complex<double>[ NZ ];
-	
+
+	// write broadband header for testing
+	if (broadband) {
+		write_broadband_header( NCPAPROP_EPADE_PE_FILENAME_BROADBAND, azi, NAz, f, NF, 1.0e8 );
+	}
 
 	// freq and calc_az hold the current values of azimuth and frequency, respectively
 	// these are used in the output routines, so make sure they get set correctly
@@ -351,8 +360,22 @@ int NCPA::EPadeSolver::solve() {
 				atm_profile_2d->calculate_attenuation( "_ALPHA_", "T", "P", "RHO", freq );
 			}
 
-		
-			
+			if (NR_requested == 0) {
+		  		dr = 340.0 / freq;
+				NR = (int)ceil( r_max / dr );
+		  	} else {
+		  		NR = NR_requested;
+		  		dr = r_max / NR;
+		  	}
+		  	r = new double[ NR ];
+		  	std::memset( r, 0, NR * sizeof(double) );
+		  	zgi_r = new int[ NR ];
+		  	std::memset( zgi_r, 0, NR * sizeof( int ) );
+		  	int i;
+		  	for (i = 0; i < NR; i++) {
+		  		r[ i ] = ((double)(i+1)) * dr;
+		  	}		
+			tl = NCPA::cmatrix( NZ, NR-1 );
 
 			//std::cout << "Using atmosphere index " << profile_index << std::endl;
 			calculate_atmosphere_parameters( atm_profile_2d, NZ, z, 0.0, z_ground, lossless, 
@@ -457,6 +480,12 @@ int NCPA::EPadeSolver::solve() {
 					output2DTL( NCPAPROP_EPADE_PE_FILENAME_2D );
 				}
 			}
+
+			// write broadband body for testing
+			if (broadband) {
+				write_broadband_results( NCPAPROP_EPADE_PE_FILENAME_BROADBAND, calc_az, freq, r, NR, z_abs, NZ, tl, 1.0e8 );
+			}
+			
 			std::cout << std::endl;
 
 			for (i = 0; i < npade+1; i++) {
@@ -472,6 +501,9 @@ int NCPA::EPadeSolver::solve() {
 			if (attnfile.length() == 0) {
 				atm_profile_2d->remove_property( "_ALPHA_" );
 			}
+			delete [] r;
+			delete [] zgi_r;
+			NCPA::free_cmatrix( tl, NZ, NR-1 );
 		}
 		
 		atm_profile_2d->remove_property( "_CEFF_" );
@@ -981,11 +1013,133 @@ void NCPA::EPadeSolver::output2DTL( std::string filename ) {
 void NCPA::EPadeSolver::set_1d_output( bool tf ) {
 	write1d = tf;
 }
+
 /*
+Broadband internal header format:
+
+uint32_t n_az
+uint32_t n_f
+uint32_t precision_factor
+int64_t  az[ 0 ] * precision_factor
+  ...
+int64_t  az[ n_az-1 ] * precision_factor
+int64_t  f[ 0 ] * precision_factor
+  ...
+int64_t  f[ n_f-1 ] * precision_factor
+[ body ]
+*/
 void NCPA::EPadeSolver::write_broadband_header( std::string filename, double *az_vec, size_t n_az, 
-	double *r_vec, size_t n_r, double *f_vec, size_t n_f, double precision_factor ) {
+	double *f_vec, size_t n_f, unsigned int precision_factor ) {
+
+	size_t i = 0;
 
 	// open the file, truncating it if it exists
-	std::ofstream ofs( filename, std::ofstream::out | std::ofstream::trunc | std::)
+	std::ofstream ofs( filename, std::ofstream::out | std::ofstream::trunc | std::ofstream::binary );
+	if (!ofs.good()) {
+		throw std::runtime_error( "Error opening file to initialize:" + filename );
+	}
+
+	size_t buf_size = n_az;
+	if (n_f > buf_size) {
+		buf_size = n_f;
+	}
+	int64_t *buffer = new int64_t[ buf_size ];
+	std::memset( buffer, 0, buf_size * sizeof( int64_t ) );
+
+	// write header starting with vector sizes and multiplicative factor
+	uint32_t holder = n_az;
+	ofs.write( (char*)(&holder), sizeof( uint32_t ) );
+	holder = n_f;
+	ofs.write( (char*)(&holder), sizeof( uint32_t ) );
+	holder = precision_factor;
+	ofs.write( (char*)(&holder), sizeof( uint32_t ) );
+
+	for (i = 0; i < n_az; i++) {
+		buffer[ i ] = (int64_t)std::lround( az_vec[ i ] * (double)precision_factor );
+	}
+	ofs.write( (char*)buffer, n_az * sizeof( int64_t ) );
+	std::memset( buffer, 0, buf_size * sizeof( int64_t ) );
+	for (i = 0; i < n_f; i++) {
+		buffer[ i ] = (int64_t)std::lround( f_vec[ i ] * (double)precision_factor );
+	}
+	ofs.write( (char*)buffer, n_f * sizeof( int64_t ) );
+	ofs.close();
+
+	delete [] buffer;
 }
+
+/*
+Broadband body format:
+foreach (az)
+  foreach (freq)
+    int64_t  az                       * precision_factor
+    int64_t  freq                     * precision_factor
+    uint32_t n_z
+    uint32_t n_range
+    int64_t  z[ 0 ]                   * precision_factor
+      ...
+    int64_t  z[ n_z-1 ]               * precision_factor
+    int64_t  range[ 0 ]               * precision_factor
+      ...
+    int64_t  range[ n_range-1 ]       * precision_factor
+    int64_t  Re{ TL[ z[0] ][ r[0] ] } * precision_factor
+	int64_t  Im{ TL[ z[0] ][ r[0] ] } * precision_factor
+	int64_t  Re{ TL[ z[0] ][ r[1] ] } * precision_factor
+	int64_t  Im{ TL[ z[0] ][ r[1] ] } * precision_factor
+	  ...
+	int64_t  Re{ TL[ z[0] ][ r[n_range-1] ] } * precision_factor
+	int64_t  Im{ TL[ z[0] ][ r[n_range-1] ] } * precision_factor
+	int64_t  Re{ TL[ z[1] ][ r[0] ] } * precision_factor
+	int64_t  Im{ TL[ z[1] ][ r[0] ] } * precision_factor
+	int64_t  Re{ TL[ z[1] ][ r[1] ] } * precision_factor
+	int64_t  Im{ TL[ z[1] ][ r[1] ] } * precision_factor
+	  ...
 */
+void NCPA::EPadeSolver::write_broadband_results( std::string filename, double this_az, double this_f, 
+	double *r_vec, size_t n_r, double *z_vec, size_t n_z, std::complex< double > **tloss_mat, 
+	unsigned int precision_factor ) {
+
+	n_r--;    // last range step is invalid
+
+	std::ofstream ofs( filename, std::ofstream::out | std::ofstream::app | std::ofstream::binary );
+	if (!ofs.good()) {
+		throw std::runtime_error( "Error opening file to append: " + filename );
+	}
+
+	// write az, freq, n_z, n_range
+	int64_t holder = (int64_t)std::lround( this_az * (double)precision_factor );
+	ofs.write( (char*)(&holder), sizeof( int64_t ) );
+	holder = (int64_t)std::lround( this_f * (double)precision_factor );
+	ofs.write( (char*)(&holder), sizeof( int64_t ) );
+	uint32_t uholder = (uint32_t)n_z;
+	ofs.write( (char*)(&uholder), sizeof( uint32_t ) );
+	uholder = (uint32_t)n_r;
+	ofs.write( (char*)(&uholder), sizeof( uint32_t ) );
+
+	// z and r sizes and vectors
+	size_t buf_size = n_r;
+	if (n_z > buf_size) {
+		buf_size = n_z;
+	}
+	int64_t *buffer = new int64_t[ buf_size ];
+	std::memset( buffer, 0, buf_size * sizeof( int64_t ) );
+	size_t i, j;
+	for (i = 0; i < n_z; i++) {
+		buffer[ i ] = (int64_t)std::lround( z_vec[ i ] * (double)precision_factor );
+	}
+	ofs.write( (char*)buffer, n_z * sizeof( int64_t ) );
+	for (i = 0; i < n_r; i++) {
+		buffer[ i ] = (int64_t)std::lround( r_vec[ i ] * (double)precision_factor );
+	}
+	ofs.write( (char*)buffer, n_r * sizeof( int64_t ) );
+	for (i = 0; i < n_z; i++) {
+		for (j = 0; j < n_r; j++) {
+			holder = (int64_t)std::lround( tloss_mat[ i ][ j ].real() * (double)precision_factor );
+			ofs.write( (char *)(&holder), sizeof( int64_t ) );
+			holder = (int64_t)std::lround( tloss_mat[ i ][ j ].imag() * (double)precision_factor );
+			ofs.write( (char *)(&holder), sizeof( int64_t ) );
+		}
+	}
+	ofs.close();
+	delete [] buffer;
+}
