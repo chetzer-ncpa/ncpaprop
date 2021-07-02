@@ -8019,7 +8019,7 @@ else
 
 				{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no, cloning" >&5
 $as_echo "no, cloning" >&6; }
-				git clone -b maint https://gitlab.com/petsc/petsc.git .
+				git clone -b release https://gitlab.com/petsc/petsc.git .
 
 
 fi

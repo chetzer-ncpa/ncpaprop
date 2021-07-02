@@ -354,7 +354,7 @@ AS_IF(
 			[AC_MSG_RESULT([yes])],
 			[
 				AC_MSG_RESULT([no, cloning])
-				git clone -b maint https://gitlab.com/petsc/petsc.git .
+				git clone -b release https://gitlab.com/petsc/petsc.git .
 			]
 		)
 
