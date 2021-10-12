@@ -1,4 +1,6 @@
-# ANNOUNCEMENT: This version of ncpaprop is now deprecated and will not be updated.  For the latest tested code, please see https://github.com/chetzer-ncpa/ncpaprop-release/
+# ⛔️ DEPRECATED
+
+This version of ncpaprop is now deprecated and will not be updated.  For the latest tested code, please see https://github.com/chetzer-ncpa/ncpaprop-release/
 
 # ncpaprop
 
